@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.16)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+project(plato)
+add_executable("plato")
+set_property(TARGET "plato" PROPERTY CXX_STANDARD 17)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES STREQUAL "Release")
+    target_compile_definitions(plato PUBLIC RELEASE_BUILD)
+endif()
+
+file(GLOB_RECURSE MY_SOURCE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+target_sources("plato" PRIVATE ${MY_SOURCE})
