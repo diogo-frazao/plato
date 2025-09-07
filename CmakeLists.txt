@@ -7,7 +7,9 @@ add_executable("plato")
 set_property(TARGET "plato" PROPERTY CXX_STANDARD 17)
 
 set(SDL_STATIC ON)
+
 add_subdirectory(thirdParty/SDL3-3.2.22 EXCLUDE_FROM_ALL)
+add_subdirectory(thirdParty/imgui-docking)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES STREQUAL "Release")
     target_compile_definitions(plato PUBLIC RELEASE_BUILD)
@@ -16,4 +18,4 @@ endif()
 file(GLOB_RECURSE MY_SOURCE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 target_sources("plato" PRIVATE ${MY_SOURCE})
 
-target_link_libraries(plato PRIVATE SDL3::SDL3-static)
+target_link_libraries("plato" PRIVATE SDL3::SDL3-static imgui)

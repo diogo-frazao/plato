@@ -11,9 +11,8 @@
 // For a multi-platform app consider using e.g. SDL+DirectX on Windows and SDL+OpenGL on Linux/OSX.
 
 #include "imgui.h"
-#include "imguiThemes.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlrenderer3.h"
 #include <stdio.h>
 #include <SDL3/SDL.h>
 
@@ -54,14 +53,13 @@ int main(int, char**)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 
     // Setup Dear ImGui style
-    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
     // Setup scaling
@@ -135,20 +133,6 @@ int main(int, char**)
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-
-        //this color stuff makes the docking space transparent so you can draw stuff there
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, {});
-        ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
-        ImGui::DockSpaceOverViewport();
-        ImGui::PopStyleColor(2);
-
-        //ImGui::StyleColorsDark();				//you can use whatever imgui theme you like!
-        //imguiThemes::yellow();
-        //imguiThemes::gray();
-        imguiThemes::green();
-        //imguiThemes::red();
-        //imguiThemes::gray();
-        //imguiThemes::embraceTheDarkness();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

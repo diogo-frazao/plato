@@ -1,4 +1,4 @@
-// Dear ImGui: standalone example application for SDL3 + SDL_Renderer
+// Dear ImGui: standalone example application for SDL3 + SDL_GPU
 // (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
 
 // Learn about Dear ImGui:
@@ -7,16 +7,18 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-// Important to understand: SDL_Renderer is an _optional_ component of SDL3.
-// For a multi-platform app consider using e.g. SDL+DirectX on Windows and SDL+OpenGL on Linux/OSX.
+// Important note to the reader who wish to integrate imgui_impl_sdlgpu3.cpp/.h in their own engine/app.
+// - Unlike other backends, the user must call the function ImGui_ImplSDLGPU_PrepareDrawData() BEFORE issuing a SDL_GPURenderPass containing ImGui_ImplSDLGPU_RenderDrawData.
+//   Calling the function is MANDATORY, otherwise the ImGui will not upload neither the vertex nor the index buffer for the GPU. See imgui_impl_sdlgpu3.cpp for more info.
 
 #include "imgui.h"
-#include "imguiThemes.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
-#include <stdio.h>
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlgpu3.h"
+#include <stdio.h>          // printf, fprintf
+#include <stdlib.h>         // abort
 #include <SDL3/SDL.h>
 
+// This example doesn't compile with Emscripten yet! Awaiting SDL3 support.
 #ifdef __EMSCRIPTEN__
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
@@ -32,48 +34,70 @@ int main(int, char**)
         return -1;
     }
 
-    // Create window with SDL_Renderer graphics context
+    // Create SDL window graphics context
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL3+SDL_Renderer example", (int)(1280 * main_scale), (int)(720 * main_scale), window_flags);
+    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL3+SDL_GPU example", (int)(1280 * main_scale), (int)(720 * main_scale), window_flags);
     if (window == nullptr)
     {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return -1;
     }
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    SDL_SetRenderVSync(renderer, 1);
-    if (renderer == nullptr)
-    {
-        SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
-        return -1;
-    }
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
+
+    // Create GPU Device
+    SDL_GPUDevice* gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_METALLIB,true,nullptr);
+    if (gpu_device == nullptr)
+    {
+        printf("Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
+        return -1;
+    }
+
+    // Claim window for GPU Device
+    if (!SDL_ClaimWindowForGPUDevice(gpu_device, window))
+    {
+        printf("Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
+        return -1;
+    }
+    SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 
     // Setup Dear ImGui style
-    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
     // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
     style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
-    //io.ConfigDpiScaleFonts = true;        // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
-    //io.ConfigDpiScaleViewports = true;    // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+    io.ConfigDpiScaleFonts = true;          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
+    io.ConfigDpiScaleViewports = true;      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer3_Init(renderer);
+    ImGui_ImplSDL3_InitForSDLGPU(window);
+    ImGui_ImplSDLGPU3_InitInfo init_info = {};
+    init_info.Device = gpu_device;
+    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(gpu_device, window);
+    init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;                      // Only used in multi-viewports mode.
+    init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;  // Only used in multi-viewports mode.
+    init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
+    ImGui_ImplSDLGPU3_Init(&init_info);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -82,7 +106,6 @@ int main(int, char**)
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details. If you like the default font but want it to scale better, consider using the 'ProggyVector' from the same author!
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
     //style.FontSizeBase = 20.0f;
     //io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
@@ -99,14 +122,7 @@ int main(int, char**)
 
     // Main loop
     bool done = false;
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
-#else
     while (!done)
-#endif
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -132,23 +148,9 @@ int main(int, char**)
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplSDLRenderer3_NewFrame();
+        ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-
-        //this color stuff makes the docking space transparent so you can draw stuff there
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, {});
-        ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
-        ImGui::DockSpaceOverViewport();
-        ImGui::PopStyleColor(2);
-
-        //ImGui::StyleColorsDark();				//you can use whatever imgui theme you like!
-        //imguiThemes::yellow();
-        //imguiThemes::gray();
-        imguiThemes::green();
-        //imguiThemes::red();
-        //imguiThemes::gray();
-        //imguiThemes::embraceTheDarkness();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
@@ -189,23 +191,56 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        SDL_SetRenderScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        SDL_SetRenderDrawColorFloat(renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        SDL_RenderClear(renderer);
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
-        SDL_RenderPresent(renderer);
+        ImDrawData* draw_data = ImGui::GetDrawData();
+        const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
+
+        SDL_GPUCommandBuffer* command_buffer = SDL_AcquireGPUCommandBuffer(gpu_device); // Acquire a GPU command buffer
+
+        SDL_GPUTexture* swapchain_texture;
+        SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer, window, &swapchain_texture, nullptr, nullptr); // Acquire a swapchain texture
+
+        if (swapchain_texture != nullptr && !is_minimized)
+        {
+            // This is mandatory: call ImGui_ImplSDLGPU3_PrepareDrawData() to upload the vertex/index buffer!
+            ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
+
+            // Setup and start a render pass
+            SDL_GPUColorTargetInfo target_info = {};
+            target_info.texture = swapchain_texture;
+            target_info.clear_color = SDL_FColor { clear_color.x, clear_color.y, clear_color.z, clear_color.w };
+            target_info.load_op = SDL_GPU_LOADOP_CLEAR;
+            target_info.store_op = SDL_GPU_STOREOP_STORE;
+            target_info.mip_level = 0;
+            target_info.layer_or_depth_plane = 0;
+            target_info.cycle = false;
+            SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(command_buffer, &target_info, 1, nullptr);
+
+            // Render ImGui
+            ImGui_ImplSDLGPU3_RenderDrawData(draw_data, command_buffer, render_pass);
+
+            SDL_EndGPURenderPass(render_pass);
+        }
+
+        // Update and Render additional Platform Windows
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+
+        // Submit the command buffer
+        SDL_SubmitGPUCommandBuffer(command_buffer);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
 
     // Cleanup
     // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppQuit() function]
-    ImGui_ImplSDLRenderer3_Shutdown();
+    SDL_WaitForGPUIdle(gpu_device);
     ImGui_ImplSDL3_Shutdown();
+    ImGui_ImplSDLGPU3_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_DestroyRenderer(renderer);
+    SDL_ReleaseWindowFromGPUDevice(gpu_device, window);
+    SDL_DestroyGPUDevice(gpu_device);
     SDL_DestroyWindow(window);
     SDL_Quit();
 

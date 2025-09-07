@@ -1,5 +1,5 @@
-// Dear ImGui: standalone example application for SDL3 + SDL_Renderer
-// (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
+// Dear ImGui: standalone example application for GLFW + OpenGL2, using legacy fixed pipeline
+// (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
 
 // Learn about Dear ImGui:
 // - FAQ                  https://dearimgui.com/faq
@@ -7,73 +7,71 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-// Important to understand: SDL_Renderer is an _optional_ component of SDL3.
-// For a multi-platform app consider using e.g. SDL+DirectX on Windows and SDL+OpenGL on Linux/OSX.
+// **DO NOT USE THIS CODE IF YOUR CODE/ENGINE IS USING MODERN OPENGL (SHADERS, VBO, VAO, etc.)**
+// **Prefer using the code in the example_glfw_opengl2/ folder**
+// See imgui_impl_glfw.cpp for details.
 
 #include "imgui.h"
-#include "imguiThemes.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl2.h"
 #include <stdio.h>
-#include <SDL3/SDL.h>
-
-#ifdef __EMSCRIPTEN__
-#include "../libs/emscripten/emscripten_mainloop_stub.h"
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
 #endif
+#include <GLFW/glfw3.h>
+
+// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
+// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
+// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
 
 // Main code
 int main(int, char**)
 {
-    // Setup SDL
-    // [If using SDL_MAIN_USE_CALLBACKS: all code below until the main loop starts would likely be your SDL_AppInit() function]
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
-    {
-        printf("Error: SDL_Init(): %s\n", SDL_GetError());
-        return -1;
-    }
+    glfwSetErrorCallback(glfw_error_callback);
+    if (!glfwInit())
+        return 1;
 
-    // Create window with SDL_Renderer graphics context
-    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-    SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL3+SDL_Renderer example", (int)(1280 * main_scale), (int)(720 * main_scale), window_flags);
+    // Create window with graphics context
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL2 example", nullptr, nullptr);
     if (window == nullptr)
-    {
-        printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-        return -1;
-    }
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    SDL_SetRenderVSync(renderer, 1);
-    if (renderer == nullptr)
-    {
-        SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
-        return -1;
-    }
-    SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    SDL_ShowWindow(window);
+        return 1;
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+    //io.ConfigViewportsNoAutoMerge = true;
+    //io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
-    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
-    // Setup scaling
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
-    //io.ConfigDpiScaleFonts = true;        // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
-    //io.ConfigDpiScaleViewports = true;    // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer3_Init(renderer);
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL2_Init();
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -82,7 +80,6 @@ int main(int, char**)
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details. If you like the default font but want it to scale better, consider using the 'ProggyVector' from the same author!
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
     //style.FontSizeBase = 20.0f;
     //io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
@@ -98,57 +95,24 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    bool done = false;
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
-#else
-    while (!done)
-#endif
+    while (!glfwWindowShouldClose(window))
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        // [If using SDL_MAIN_USE_CALLBACKS: call ImGui_ImplSDL3_ProcessEvent() from your SDL_AppEvent() function]
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
+        glfwPollEvents();
+        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
         {
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
-                done = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
-                done = true;
-        }
-
-        // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppIterate() function]
-        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
-        {
-            SDL_Delay(10);
+            ImGui_ImplGlfw_Sleep(10);
             continue;
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplSDLRenderer3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        //this color stuff makes the docking space transparent so you can draw stuff there
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, {});
-        ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
-        ImGui::DockSpaceOverViewport();
-        ImGui::PopStyleColor(2);
-
-        //ImGui::StyleColorsDark();				//you can use whatever imgui theme you like!
-        //imguiThemes::yellow();
-        //imguiThemes::gray();
-        imguiThemes::green();
-        //imguiThemes::red();
-        //imguiThemes::gray();
-        //imguiThemes::embraceTheDarkness();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
@@ -189,25 +153,42 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        SDL_SetRenderScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        SDL_SetRenderDrawColorFloat(renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        SDL_RenderClear(renderer);
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
-        SDL_RenderPresent(renderer);
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // If you are using this code with non-legacy OpenGL header/contexts (which you should not, prefer using imgui_impl_opengl3.cpp!!),
+        // you may need to backup/reset/restore other state, e.g. for current shader using the commented lines below.
+        //GLint last_program;
+        //glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
+        //glUseProgram(0);
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        //glUseProgram(last_program);
+
+        // Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
+        glfwMakeContextCurrent(window);
+        glfwSwapBuffers(window);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
 
     // Cleanup
-    // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppQuit() function]
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
+    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
     return 0;
 }
