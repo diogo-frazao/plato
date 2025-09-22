@@ -8,14 +8,18 @@
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include <stdio.h>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <string>
 
 static constexpr uint16_t k_baseGameWidth = 320;
 static constexpr uint16_t k_baseGameHeight = 180;
 
-static constexpr int32_t k_displayWindowWidth = 1280;
-static constexpr int32_t k_displayWindowHeight = 720;
+static constexpr int32_t k_displayWindowWidth = 960;
+static constexpr int32_t k_displayWindowHeight = 540;
 
 void drawImguiDockingPreview();
+
+SDL_Texture* texture;
 
 void App::run()
 {
@@ -28,6 +32,15 @@ void App::init()
 {
     initSDL();
     initImgui();
+
+    const std::string atlasPath(RESOURCES_PATH "atlas.png");
+    texture = IMG_LoadTexture(_renderer, atlasPath.c_str());
+    if (!texture)
+    {
+        D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());
+    }
+
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
 void App::update()
@@ -71,6 +84,13 @@ void App::render()
     ImGui::Render();
     SDL_SetRenderDrawColorFloat(_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     SDL_RenderClear(_renderer);
+
+    SDL_FRect rect;
+    rect.x = 0.f;
+    rect.y = 0.f;
+    rect.w = 28;
+    rect.h = 28;
+    SDL_RenderTexture(_renderer, texture, nullptr, &rect);
 
     // Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;

@@ -6,13 +6,23 @@ project("plato")
 add_executable("plato")
 set_property(TARGET "plato" PROPERTY CXX_STANDARD 17)
 
-set(SDL_STATIC ON)
+# Disable sdl_image formats we don't care
+set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_TIFF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_VENDORED OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(thirdParty/SDL3-3.2.22 EXCLUDE_FROM_ALL)
+add_subdirectory(thirdParty/SDL3_image-3.2.4 EXCLUDE_FROM_ALL)
 add_subdirectory(thirdParty/imgui-docking)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES STREQUAL "Release")
-    target_compile_definitions(plato PUBLIC RELEASE_BUILD)
+    target_compile_definitions("plato" PUBLIC RELEASE_BUILD)
+    target_compile_definitions("plato" PUBLIC RESOURCES_PATH="./resources")
+else()
+    target_compile_definitions("plato" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+    
 endif()
 
 file(GLOB_RECURSE MY_SOURCE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -20,4 +30,4 @@ target_sources("plato" PRIVATE ${MY_SOURCE})
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/*/")
 
-target_link_libraries("plato" PRIVATE SDL3::SDL3-static imgui)
+target_link_libraries("plato" PRIVATE SDL3::SDL3 SDL3_image::SDL3_image imgui)

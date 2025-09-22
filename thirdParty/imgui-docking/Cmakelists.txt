@@ -12,4 +12,4 @@ target_sources(imgui PRIVATE
 )
 
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
-target_link_libraries(imgui PRIVATE SDL3::SDL3-static)
+target_link_libraries(imgui PRIVATE SDL3::SDL3)
