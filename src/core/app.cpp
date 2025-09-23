@@ -59,6 +59,24 @@ void App::update()
             {
                 return;
             }
+
+            if (event.type == SDL_EVENT_KEY_DOWN)
+            {
+                if (event.key.key == SDLK_0)
+                {
+                    SDL_SetWindowSize(_window, 1280, 720);
+                }
+
+                if (event.key.key == SDLK_1)
+                {
+                    SDL_SetWindowSize(_window, 1920, 1080);
+                }
+
+                if (event.key.key == SDLK_2)
+                {
+                    SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
+                }
+            }
         }
 
         ImGui_ImplSDLRenderer3_NewFrame();
@@ -131,7 +149,7 @@ void App::initSDL()
         return;
     }
 
-    _window = SDL_CreateWindow("plato", k_baseGameWidth, k_baseGameHeight, SDL_WINDOW_RESIZABLE);
+    _window = SDL_CreateWindow("plato", k_baseGameWidth, k_baseGameHeight, 0);
     if (!_window)
     {
         D_ASSERT(false, "SDL_CreateWindow(): %s", SDL_GetError());

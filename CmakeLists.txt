@@ -31,3 +31,18 @@ target_sources("plato" PRIVATE ${MY_SOURCE})
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/*/")
 
 target_link_libraries("plato" PUBLIC SDL3::SDL3 SDL3_image::SDL3_image imgui)
+
+# Copy SDL3 and SDL_image DLLs next to the exe after build
+if(WIN32)
+    # SDL3 DLL
+    add_custom_command(TARGET plato POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3::SDL3>
+            $<TARGET_FILE_DIR:plato>)
+
+    # SDL_image DLL
+    add_custom_command(TARGET plato POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3_image::SDL3_image>
+            $<TARGET_FILE_DIR:plato>)
+endif()
