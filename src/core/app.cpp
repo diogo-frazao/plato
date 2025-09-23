@@ -11,6 +11,8 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
+#include "entityManager.h"
+
 static constexpr uint16_t k_baseGameWidth = 320;
 static constexpr uint16_t k_baseGameHeight = 180;
 
@@ -20,6 +22,8 @@ static constexpr int32_t k_displayWindowHeight = 540;
 void drawImguiDockingPreview();
 
 SDL_Texture* texture;
+
+EntityManager testLevel;
 
 void App::run()
 {
@@ -60,6 +64,7 @@ void App::update()
                 return;
             }
 
+            //TODO: Remove check different resolutions
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 if (event.key.key == SDLK_0)
@@ -75,6 +80,12 @@ void App::update()
                 if (event.key.key == SDLK_2)
                 {
                     SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
+                }
+
+                if (event.key.key == SDLK_3)
+                {
+                    int32_t entityId = testLevel.addEntity();
+                    D_LOG(LOG, "Added entity for id: %i", entityId);
                 }
             }
         }
