@@ -12,6 +12,7 @@
 #include <string>
 
 #include "entityManager.h"
+#include "componentManager.h"
 
 static constexpr uint16_t k_baseGameWidth = 320;
 static constexpr uint16_t k_baseGameHeight = 180;
@@ -23,7 +24,18 @@ void drawImguiDockingPreview();
 
 SDL_Texture* texture;
 
-EntityManager testLevel;
+EntityManager testEntityManager;
+ComponentManager testComponentManager;
+
+struct TestComponent : BaseComponent
+{
+    int velocity = 5;
+};
+
+struct AnotherTestComponent : BaseComponent
+{
+    bool smell = false;
+};
 
 void App::run()
 {
@@ -50,6 +62,8 @@ void App::init()
 void App::update()
 {
     bool showDemoWindow = true;
+
+    Entity enemy = testEntityManager.addEntity();
 
     while (true)
     {
@@ -84,9 +98,65 @@ void App::update()
 
                 if (event.key.key == SDLK_3)
                 {
-                    int32_t entityId = testLevel.addEntity();
-                    D_LOG(LOG, "Added entity for id: %i", entityId);
+                    Entity player = testEntityManager.addEntity();
+                    TestComponent* component = testComponentManager.addComponentToEntity<TestComponent>(player);
+                    if (!component)
+                    {
+                        D_ASSERT(false, "Ups");
+                    }
+                    else
+                    {
+                        component->velocity = 3;
+                        D_LOG(MINI, "%i", component->velocity);
+                    }
+
+                    TestComponent* component2 = testComponentManager.addComponentToEntity<TestComponent>(player);
                 }
+
+                if (event.key.key == SDLK_4)
+                {
+                    TestComponent* component = testComponentManager.addComponentToEntity<TestComponent>(enemy);
+                    AnotherTestComponent* anotherComponent = testComponentManager.addComponentToEntity<AnotherTestComponent>(enemy);
+                    anotherComponent->smell = true;
+                    
+                }
+
+                if (event.key.key == SDLK_5)
+                {
+                    if (testComponentManager.entityHasComponent<TestComponent>(enemy))
+                    {
+                        D_LOG(LOG, "Enemy has Test Component");
+                        if (testComponentManager.entityHasComponent<AnotherTestComponent>(enemy))
+                        {
+                            D_LOG(LOG, "Enemy has Another Component");
+                        }
+                    }
+                    else
+                    {
+                        D_LOG(ERROR, "Enemy doesn't have any components");
+                    }
+                }
+
+                if (event.key.key == SDLK_6)
+                {
+                    testComponentManager.removeComponentFromEntity<AnotherTestComponent>(enemy);
+                    testComponentManager.removeComponentFromEntity<TestComponent>(enemy);
+                    D_LOG(MINI, "Deleted Test component from enemy");
+                }
+
+                if (event.key.key == SDLK_7)
+                {
+                    TestComponent* comp = testComponentManager.getComponentFromEntity<TestComponent>(enemy);
+                    comp->velocity = 16;
+                    D_LOG(MINI, "Velocity: %i", comp->velocity);
+                }
+
+                if (event.key.key == SDLK_8)
+                {
+                    testComponentManager.removeAllComponentsForAllEntities();
+                    D_LOG(MINI, "Deleted all components");
+                }
+
             }
         }
 
