@@ -17,5 +17,4 @@ private:
 	void initImgui();
 
 	SDL_Window* _window;
-	SDL_Renderer* _renderer;
 };

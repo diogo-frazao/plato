@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <array>
-#include "entityManager.h"
 #include "constants.h"
 #include <typeinfo>
 #include <optional>
@@ -61,6 +60,12 @@ public:
 		}
 
 		uint32_t componentIndex = getArrayIndexForComponent<T>();
+		if (componentIndex >= k_maxNumberOfComponents)
+		{
+			D_ASSERT(false, "addComponentToEntity(): There are more components than allowed. Increase k_maxNumberOfComponents");
+			return nullptr;
+		}
+
 		ComponentArray& component = _allComponents[componentIndex];
 
 		if (entityHasComponent<T>(entity))

@@ -20,7 +20,7 @@ public:
 	{
 		if (_lastValidEntityId >= k_maxNumberOfEntities - 1)
 		{
-			D_LOG(ERROR, "addEntity(): Max number of entities reached");
+			D_ASSERT(false, "addEntity(): Max number of entities reached. Increase k_maxNumberOfEntities");
 			return s_invalidEntity;
 		}
 
@@ -42,7 +42,7 @@ public:
 		_entities[entity.id].componentBitmask = 0;
 	}
 
+	std::array<Entity, k_maxNumberOfEntities> _entities;
 private:
 	int32_t _lastValidEntityId = k_invalidId;
-	std::array<Entity, k_maxNumberOfEntities> _entities;
 };

@@ -11,35 +11,20 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
-#include "entityManager.h"
-#include "componentManager.h"
-
-static constexpr uint16_t k_baseGameWidth = 320;
-static constexpr uint16_t k_baseGameHeight = 180;
-
-static constexpr int32_t k_displayWindowWidth = 960;
-static constexpr int32_t k_displayWindowHeight = 540;
+#include "ecsLevel.h"
+//TODO: remove
+#include "../renderingComponents.h"
 
 void drawImguiDockingPreview();
 
 SDL_Texture* texture;
 
-EntityManager testEntityManager;
-ComponentManager testComponentManager;
-
-struct TestComponent : BaseComponent
-{
-    int velocity = 5;
-};
-
-struct AnotherTestComponent : BaseComponent
-{
-    bool smell = false;
-};
+ECSLevel firstLevel;
 
 void App::run()
 {
     init();
+    firstLevel.start();
     update();
     quit();
 }
@@ -48,22 +33,16 @@ void App::init()
 {
     initSDL();
     initImgui();
-
-    const std::string atlasPath(RESOURCES_PATH "atlas.png");
-    texture = IMG_LoadTexture(_renderer, atlasPath.c_str());
-    if (!texture)
-    {
-        D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());
-    }
-
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
 void App::update()
 {
     bool showDemoWindow = true;
 
-    Entity enemy = testEntityManager.addEntity();
+    //TODO: Improve
+    Entity& player = firstLevel.addEntity();
+    SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
+    playerSprite->setupWithOffsetAndSize({ 0, 0 }, { 28, 28 });
 
     while (true)
     {
@@ -77,6 +56,8 @@ void App::update()
             {
                 return;
             }
+
+            firstLevel.update();
 
             //TODO: Remove check different resolutions
             if (event.type == SDL_EVENT_KEY_DOWN)
@@ -96,10 +77,13 @@ void App::update()
                     SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
                 }
 
+
+
+                /*
                 if (event.key.key == SDLK_3)
                 {
-                    Entity player = testEntityManager.addEntity();
-                    TestComponent* component = testComponentManager.addComponentToEntity<TestComponent>(player);
+                    Entity player = firstLevel.addEntity();
+                    TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(player);
                     if (!component)
                     {
                         D_ASSERT(false, "Ups");
@@ -110,23 +94,23 @@ void App::update()
                         D_LOG(MINI, "%i", component->velocity);
                     }
 
-                    TestComponent* component2 = testComponentManager.addComponentToEntity<TestComponent>(player);
+                    TestComponent* component2 = firstLevel.addComponentToEntity<TestComponent>(player);
                 }
 
                 if (event.key.key == SDLK_4)
                 {
-                    TestComponent* component = testComponentManager.addComponentToEntity<TestComponent>(enemy);
-                    AnotherTestComponent* anotherComponent = testComponentManager.addComponentToEntity<AnotherTestComponent>(enemy);
+                    TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(enemy);
+                    AnotherTestComponent* anotherComponent = firstLevel.addComponentToEntity<AnotherTestComponent>(enemy);
                     anotherComponent->smell = true;
                     
                 }
 
                 if (event.key.key == SDLK_5)
                 {
-                    if (testComponentManager.entityHasComponent<TestComponent>(enemy))
+                    if (firstLevel.entityHasComponent<TestComponent>(enemy))
                     {
                         D_LOG(LOG, "Enemy has Test Component");
-                        if (testComponentManager.entityHasComponent<AnotherTestComponent>(enemy))
+                        if (firstLevel.entityHasComponent<AnotherTestComponent>(enemy))
                         {
                             D_LOG(LOG, "Enemy has Another Component");
                         }
@@ -139,23 +123,24 @@ void App::update()
 
                 if (event.key.key == SDLK_6)
                 {
-                    testComponentManager.removeComponentFromEntity<AnotherTestComponent>(enemy);
-                    testComponentManager.removeComponentFromEntity<TestComponent>(enemy);
+                    firstLevel.removeComponentFromEntity<AnotherTestComponent>(enemy);
+                    firstLevel.removeComponentFromEntity<TestComponent>(enemy);
                     D_LOG(MINI, "Deleted Test component from enemy");
                 }
 
                 if (event.key.key == SDLK_7)
                 {
-                    TestComponent* comp = testComponentManager.getComponentFromEntity<TestComponent>(enemy);
+                    TestComponent* comp = firstLevel.getComponentFromEntity<TestComponent>(enemy);
                     comp->velocity = 16;
                     D_LOG(MINI, "Velocity: %i", comp->velocity);
                 }
 
                 if (event.key.key == SDLK_8)
                 {
-                    testComponentManager.removeAllComponentsForAllEntities();
+                    firstLevel.removeAllComponentsForAllEntities();
                     D_LOG(MINI, "Deleted all components");
                 }
+                */
 
             }
         }
@@ -181,26 +166,21 @@ void App::render()
     static constexpr ImVec4 backgroundColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     ImGui::Render();
-    SDL_SetRenderDrawColorFloat(_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
-    SDL_RenderClear(_renderer);
+    SDL_SetRenderDrawColorFloat(s_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+    SDL_RenderClear(s_renderer);
 
-    SDL_FRect rect;
-    rect.x = 0.f;
-    rect.y = 0.f;
-    rect.w = 28;
-    rect.h = 28;
-    SDL_RenderTexture(_renderer, texture, nullptr, &rect);
+    firstLevel.render();
 
     // Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;
     int windowHeight = 0;
     SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
-    SDL_SetRenderLogicalPresentation(_renderer, windowWidth, windowHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
-    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), _renderer);
+    SDL_SetRenderLogicalPresentation(s_renderer, windowWidth, windowHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), s_renderer);
 
     // Restore logical size for game rendering
-    SDL_SetRenderLogicalPresentation(_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
-    SDL_RenderPresent(_renderer);
+    SDL_SetRenderLogicalPresentation(s_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+    SDL_RenderPresent(s_renderer);
 }
 
 void App::quit()
@@ -209,7 +189,7 @@ void App::quit()
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyRenderer(s_renderer);
     SDL_DestroyWindow(_window);
     SDL_Quit();
 }
@@ -237,16 +217,16 @@ void App::initSDL()
         return;
     }
 
-    _renderer = SDL_CreateRenderer(_window, nullptr);
-    if (!_renderer)
+    s_renderer = SDL_CreateRenderer(_window, nullptr);
+    if (!s_renderer)
     {
         D_ASSERT(false, "SDL_CreateRenderer(): %s", SDL_GetError());
         return;
     }
 
-    SDL_SetRenderVSync(_renderer, true);
+    SDL_SetRenderVSync(s_renderer, true);
 
-    SDL_SetRenderLogicalPresentation(_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+    SDL_SetRenderLogicalPresentation(s_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
     // Change window size after we set the render size to the original 320x180
     // Only the mouse input needs to be adjusted taking into account the current window size.
     // Everything else adapts to the window size as if the size was still 320x180
@@ -258,8 +238,8 @@ void App::initImgui()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui_ImplSDL3_InitForSDLRenderer(_window, _renderer);
-    ImGui_ImplSDLRenderer3_Init(_renderer);
+    ImGui_ImplSDL3_InitForSDLRenderer(_window, s_renderer);
+    ImGui_ImplSDLRenderer3_Init(s_renderer);
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
