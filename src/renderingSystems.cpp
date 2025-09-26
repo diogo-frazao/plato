@@ -53,8 +53,8 @@ void DrawSpriteSystem::render(ECSLevel* currentLevel, float renderAlpha)
 		src.w = spriteComponent->size.x;
 		src.h = spriteComponent->size.y;
 
-		target.x = (int)interpolatedPosition.x;
-		target.y = (int)interpolatedPosition.y;
+		target.x = interpolatedPosition.x;
+		target.y = interpolatedPosition.y;
 		target.w = spriteComponent->size.x;
 		target.h = spriteComponent->size.y;
 
