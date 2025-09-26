@@ -15,19 +15,19 @@ public:
 		}
 	}
 
-	inline void update()
+	inline void update(float deltaTime)
 	{
 		for (auto& system : _systemManager._systems)
 		{
-			system->update(this);
+			system->update(this, deltaTime);
 		}
 	}
 	
-	inline void render()
+	inline void render(float renderAlpha)
 	{
 		for (auto& system : _systemManager._systems)
 		{
-			system->render(this);
+			system->render(this, renderAlpha);
 		}
 	}
 

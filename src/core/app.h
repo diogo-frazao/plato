@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 struct SDL_Window;
 struct SDL_Renderer;
 
@@ -10,7 +12,7 @@ public:
 private:
 	void init();
 	void update();
-	void render();
+	void render(float alpha);
 	void quit();
 
 	void initSDL();

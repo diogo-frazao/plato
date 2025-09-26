@@ -11,22 +11,29 @@ class BaseSystem
 {
 public:
 	virtual void start(ECSLevel* currentLevel) {};
-	virtual void update(ECSLevel* currentLevel) {};
-	virtual void render(ECSLevel* currentLevel) {};
+	virtual void update(ECSLevel* currentLevel, float deltaTime) {};
+	virtual void render(ECSLevel* currentLevel, float renderAlpha) {};
 };
 
 #pragma region Systems
 
+// This needs to be the very first system to run, to ensure positions are saved for rendering interpolation
+// For more information, read Gaffer Fix Your Timestep
+class SavePreviousPositionSystem : public BaseSystem
+{
+	void update(ECSLevel* currentLevel, float deltaTime) override;
+};
+
 class DrawSpriteSystem : public BaseSystem
 {
 public:
-	void render(ECSLevel* currentLevel) override;
+	void render(ECSLevel* currentLevel, float renderAlpha) override;
 };
 
 class InputMovementSystem : public BaseSystem
 {
 public:
-	void update(ECSLevel* currentLevel) override;
+	void update(ECSLevel* currentLevel, float deltaTime) override;
 };
 
 #pragma endregion
@@ -44,6 +51,6 @@ public:
 	}
 
 	// For now, all levels have the same systems
-	std::array<BaseSystem*, 2> _systems = 
-	{ new DrawSpriteSystem(), new InputMovementSystem()};
+	std::array<BaseSystem*, 3> _systems = 
+	{ new SavePreviousPositionSystem(), new DrawSpriteSystem(), new InputMovementSystem() };
 };

@@ -10,6 +10,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <string>
+#include <stdint.h>
 
 #include "ecsLevel.h"
 //TODO: remove
@@ -45,11 +46,26 @@ void App::update()
     firstLevel.addComponentToEntity<TransformComponent>(player);
     SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
-    movementComponent->velocity = 1.f;
+    movementComponent->velocity = 5.f;
     playerSprite->setupWithOffsetAndSize({ 0, 0 }, { 28, 28 });
+
+    // milliseconds / target frame rate for physics
+    constexpr double targetMillisecondsBetweenFrames = 1000.f / 60.f;
+    // Delta time in seconds, convert from ms to s
+    constexpr float deltaTime = targetMillisecondsBetweenFrames / 1000.f;
+
+    uint64_t lastFrameTimestamp = SDL_GetTicks();
+    double accumulator = 0.0;
 
     while (true)
     {
+        uint64_t currentFrameTimeStamp = SDL_GetTicks();
+        uint64_t millisecondsSinceLastFrame = currentFrameTimeStamp - lastFrameTimestamp;
+        millisecondsSinceLastFrame = max(millisecondsSinceLastFrame, 250);
+        accumulator += millisecondsSinceLastFrame;
+
+        lastFrameTimestamp = currentFrameTimeStamp;
+
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -63,8 +79,11 @@ void App::update()
 
             handleKeyboardInput(event);
             handleMouseInput(event);
+        }
 
-            firstLevel.update();
+        while (accumulator >= targetMillisecondsBetweenFrames)
+        {
+            firstLevel.update(deltaTime);
 
             //TODO: Remove test different res
             {
@@ -83,7 +102,7 @@ void App::update()
                     SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
                 }
             }
-           
+
             //TODO: Remove test ECS
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
@@ -110,7 +129,7 @@ void App::update()
                     TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(enemy);
                     AnotherTestComponent* anotherComponent = firstLevel.addComponentToEntity<AnotherTestComponent>(enemy);
                     anotherComponent->smell = true;
-                    
+
                 }
 
                 if (event.key.key == SDLK_5)
@@ -151,7 +170,12 @@ void App::update()
                 */
 
             }
+
+            resetKeyboardAndMouseInput();
+            accumulator -= targetMillisecondsBetweenFrames;
         }
+
+        float renderAlpha = accumulator / targetMillisecondsBetweenFrames;
 
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -165,12 +189,16 @@ void App::update()
             ImGui::ShowDemoWindow(&showDemoWindow);
         }
 
-        render();
-        resetKeyboardAndMouseInput();
+        ImGui::Begin("Player");
+        auto* movement = firstLevel.getComponentFromEntity<MovementComponent>(player);
+        ImGui::SliderFloat("Player Velocity", &(movement->velocity), 5, 1000);
+        ImGui::End();
+
+        render(renderAlpha);
     }
 }
 
-void App::render()
+void App::render(float renderAlpha)
 {
     static constexpr ImVec4 backgroundColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -178,7 +206,7 @@ void App::render()
     SDL_SetRenderDrawColorFloat(s_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     SDL_RenderClear(s_renderer);
 
-    firstLevel.render();
+    firstLevel.render(renderAlpha);
 
     // Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;

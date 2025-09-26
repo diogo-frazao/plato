@@ -23,7 +23,7 @@ SDL_Texture* loadAtlasTexture()
 	return texture;
 }
 
-void DrawSpriteSystem::render(ECSLevel* currentLevel)
+void DrawSpriteSystem::render(ECSLevel* currentLevel, float renderAlpha)
 {
 	static SDL_FRect src;
 	static SDL_FRect target;
@@ -46,13 +46,15 @@ void DrawSpriteSystem::render(ECSLevel* currentLevel)
 		SpriteComponent* spriteComponent = currentLevel->getComponentFromEntity<SpriteComponent>(entity);
 		TransformComponent* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 
+		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
+
 		src.x = spriteComponent->offset.x;
 		src.y = spriteComponent->offset.y;
 		src.w = spriteComponent->size.x;
 		src.h = spriteComponent->size.y;
 
-		target.x = transformComponent->position.x;
-		target.y = transformComponent->position.y;
+		target.x = (int)interpolatedPosition.x;
+		target.y = (int)interpolatedPosition.y;
 		target.w = spriteComponent->size.x;
 		target.h = spriteComponent->size.y;
 
@@ -60,7 +62,26 @@ void DrawSpriteSystem::render(ECSLevel* currentLevel)
 	}
 }
 
-void InputMovementSystem::update(ECSLevel* currentLevel)
+void SavePreviousPositionSystem::update(ECSLevel* currentLevel, float deltaTime)
+{
+	for (Entity& entity : currentLevel->getAllEntities())
+	{
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (!currentLevel->entityHasComponent<TransformComponent>(entity))
+		{
+			continue;
+		}
+
+		auto* transform = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+		transform->previousPosition = transform->position;
+	}
+}
+
+void InputMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 {
 	for (Entity& entity : currentLevel->getAllEntities())
 	{
@@ -78,14 +99,14 @@ void InputMovementSystem::update(ECSLevel* currentLevel)
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
 			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
-			transformComponent->position.x += movementComponent->velocity;
+			transformComponent->position.x += movementComponent->velocity * deltaTime;
 		}
 
 		if (isKeyDown(SDL_SCANCODE_A))
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
 			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
-			transformComponent->position.x -= movementComponent->velocity;
+			transformComponent->position.x -= movementComponent->velocity * deltaTime;
 		}
 	}
 }

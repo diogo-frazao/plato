@@ -7,6 +7,7 @@
 struct TransformComponent : BaseComponent
 {
 	Vec2 position;
+	Vec2 previousPosition;
 };
 
 struct SpriteComponent : BaseComponent
