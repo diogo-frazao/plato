@@ -1,12 +1,12 @@
 #pragma once
 
 #include "core/componentManager.h"
+#include "core/lib.h"
 #include <stdint.h>
 
-struct IVec2
+struct TransformComponent : BaseComponent
 {
-	int32_t x;
-	int32_t y;
+	Vec2 position;
 };
 
 struct SpriteComponent : BaseComponent
@@ -17,7 +17,11 @@ struct SpriteComponent : BaseComponent
 		this->size = size;
 	}
 
-	const char* spriteName = k_atlasFilePath;
 	IVec2 offset;
 	IVec2 size;
+};
+
+struct MovementComponent : BaseComponent
+{
+	float velocity = 0.f;
 };

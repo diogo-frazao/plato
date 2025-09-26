@@ -49,7 +49,6 @@ public:
 		return doesEntityHaveComponent;
 	}
 
-	//TODO: Pass args
 	template<typename T>
 	T* addComponentToEntity(Entity& entity)
 	{

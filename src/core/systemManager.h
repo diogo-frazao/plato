@@ -23,6 +23,12 @@ public:
 	void render(ECSLevel* currentLevel) override;
 };
 
+class InputMovementSystem : public BaseSystem
+{
+public:
+	void update(ECSLevel* currentLevel) override;
+};
+
 #pragma endregion
 
 class SystemManager
@@ -38,6 +44,6 @@ public:
 	}
 
 	// For now, all levels have the same systems
-	std::array<BaseSystem*, 1> _systems = 
-	{ new DrawSpriteSystem()};
+	std::array<BaseSystem*, 2> _systems = 
+	{ new DrawSpriteSystem(), new InputMovementSystem()};
 };

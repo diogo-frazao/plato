@@ -15,6 +15,8 @@
 //TODO: remove
 #include "../renderingComponents.h"
 
+#include "input.h"
+
 void drawImguiDockingPreview();
 
 SDL_Texture* texture;
@@ -39,9 +41,11 @@ void App::update()
 {
     bool showDemoWindow = true;
 
-    //TODO: Improve
     Entity& player = firstLevel.addEntity();
+    firstLevel.addComponentToEntity<TransformComponent>(player);
     SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
+    auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
+    movementComponent->velocity = 1.f;
     playerSprite->setupWithOffsetAndSize({ 0, 0 }, { 28, 28 });
 
     while (true)
@@ -57,28 +61,32 @@ void App::update()
                 return;
             }
 
+            handleKeyboardInput(event);
+            handleMouseInput(event);
+
             firstLevel.update();
 
-            //TODO: Remove check different resolutions
-            if (event.type == SDL_EVENT_KEY_DOWN)
+            //TODO: Remove test different res
             {
-                if (event.key.key == SDLK_0)
+                if (wasKeyPressedThisFrame(SDL_SCANCODE_0))
                 {
                     SDL_SetWindowSize(_window, 1280, 720);
                 }
 
-                if (event.key.key == SDLK_1)
+                if (wasKeyPressedThisFrame(SDL_SCANCODE_1))
                 {
                     SDL_SetWindowSize(_window, 1920, 1080);
                 }
 
-                if (event.key.key == SDLK_2)
+                if (wasKeyPressedThisFrame(SDL_SCANCODE_2))
                 {
                     SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
                 }
-
-
-
+            }
+           
+            //TODO: Remove test ECS
+            if (event.type == SDL_EVENT_KEY_DOWN)
+            {
                 /*
                 if (event.key.key == SDLK_3)
                 {
@@ -158,6 +166,7 @@ void App::update()
         }
 
         render();
+        resetKeyboardAndMouseInput();
     }
 }
 

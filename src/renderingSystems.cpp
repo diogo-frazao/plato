@@ -1,12 +1,66 @@
 #include "core/systemManager.h"
 #include "core/ecsLevel.h"
 #include "renderingComponents.h"
+#include "core/constants.h"
+#include "core/input.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
+SDL_Texture* loadAtlasTexture()
+{
+	const std::string atlasPath = RESOURCES_PATH + k_atlasFilePath;
+
+	SDL_Texture* texture = IMG_LoadTexture(s_renderer, atlasPath.c_str());
+	if (!texture)
+	{
+		D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());
+		return nullptr;
+	}
+
+	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+	return texture;
+}
+
 void DrawSpriteSystem::render(ECSLevel* currentLevel)
+{
+	static SDL_FRect src;
+	static SDL_FRect target;
+
+	for (Entity& entity : currentLevel->getAllEntities())
+	{
+		//TODO: Consider moving this somewhere else since it's needed for every system
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (!currentLevel->entityHasComponent<SpriteComponent>(entity) || 
+			!currentLevel->entityHasComponent<TransformComponent>(entity))
+		{
+			continue;
+		}
+
+		static SDL_Texture* atlasTexture = loadAtlasTexture();
+		SpriteComponent* spriteComponent = currentLevel->getComponentFromEntity<SpriteComponent>(entity);
+		TransformComponent* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+
+		src.x = spriteComponent->offset.x;
+		src.y = spriteComponent->offset.y;
+		src.w = spriteComponent->size.x;
+		src.h = spriteComponent->size.y;
+
+		target.x = transformComponent->position.x;
+		target.y = transformComponent->position.y;
+		target.w = spriteComponent->size.x;
+		target.h = spriteComponent->size.y;
+
+		SDL_RenderTexture(s_renderer, atlasTexture, &src, &target);
+	}
+}
+
+void InputMovementSystem::update(ECSLevel* currentLevel)
 {
 	for (Entity& entity : currentLevel->getAllEntities())
 	{
@@ -15,26 +69,23 @@ void DrawSpriteSystem::render(ECSLevel* currentLevel)
 			continue;
 		}
 
-		if (!currentLevel->entityHasComponent<SpriteComponent>(entity))
+		if (!currentLevel->entityHasComponent<MovementComponent>(entity) || !currentLevel->entityHasComponent<TransformComponent>(entity))
 		{
 			continue;
 		}
 
-		//TODO: improve
-		static const std::string atlasPath(RESOURCES_PATH "atlas.png");
-		static SDL_Texture* texture = IMG_LoadTexture(s_renderer, atlasPath.c_str());
-		if (!texture)
+		if (isKeyDown(SDL_SCANCODE_D))
 		{
-			D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());
+			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
+			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+			transformComponent->position.x += movementComponent->velocity;
 		}
-		SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
-		SpriteComponent* spriteComponent = currentLevel->getComponentFromEntity<SpriteComponent>(entity);
-		SDL_FRect rect;
-		rect.x = k_baseGameWidth / 2;
-		rect.y = k_baseGameHeight / 2;
-		rect.w = spriteComponent->size.x;
-		rect.h = spriteComponent->size.y;
-		SDL_RenderTexture(s_renderer, texture, nullptr, &rect);
+		if (isKeyDown(SDL_SCANCODE_A))
+		{
+			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
+			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+			transformComponent->position.x -= movementComponent->velocity;
+		}
 	}
 }
