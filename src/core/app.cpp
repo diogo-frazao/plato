@@ -49,21 +49,16 @@ void App::update()
     movementComponent->velocity = 5.f;
     playerSprite->setupWithOffsetAndSize({ 0, 0 }, { 28, 28 });
 
-    // milliseconds / target frame rate for physics
-    constexpr double targetMillisecondsBetweenFrames = 1000.f / 60.f;
-    // Delta time in seconds, convert from ms to s
-    constexpr float deltaTime = targetMillisecondsBetweenFrames / 1000.f;
-
     uint64_t lastFrameTimestamp = SDL_GetTicks();
-    double accumulator = 0.0;
+    float accumulator = 0.0f;
 
     while (true)
     {
         uint64_t currentFrameTimeStamp = SDL_GetTicks();
         uint64_t millisecondsSinceLastFrame = currentFrameTimeStamp - lastFrameTimestamp;
-        millisecondsSinceLastFrame = max(millisecondsSinceLastFrame, 250);
-        accumulator += millisecondsSinceLastFrame;
+        millisecondsSinceLastFrame = max(millisecondsSinceLastFrame, k_maxFrameTimeAllowed);
 
+        accumulator += millisecondsSinceLastFrame;
         lastFrameTimestamp = currentFrameTimeStamp;
 
         SDL_Event event;
@@ -81,9 +76,9 @@ void App::update()
             handleMouseInput(event);
         }
 
-        while (accumulator >= targetMillisecondsBetweenFrames)
+        while (accumulator >= k_targetMillisecondsBetweenFrames)
         {
-            firstLevel.update(deltaTime);
+            firstLevel.update(k_deltaTime);
 
             //TODO: Remove test different res
             {
@@ -172,10 +167,10 @@ void App::update()
             }
 
             resetKeyboardAndMouseInput();
-            accumulator -= targetMillisecondsBetweenFrames;
+            accumulator -= k_targetMillisecondsBetweenFrames;
         }
 
-        float renderAlpha = accumulator / targetMillisecondsBetweenFrames;
+        float renderAlpha = accumulator / k_targetMillisecondsBetweenFrames;
 
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
