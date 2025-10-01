@@ -24,6 +24,16 @@ SDL_Texture* texture;
 
 ECSLevel firstLevel;
 
+struct TestComponent
+{
+    int velocity = 5.f;
+};
+
+struct AnotherTestComponent
+{
+    bool smell;
+};
+
 void App::run()
 {
     init();
@@ -51,6 +61,8 @@ void App::update()
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
+
+    Entity& enemy = firstLevel.addEntity();
 
     while (true)
     {
@@ -99,72 +111,60 @@ void App::update()
             }
 
             //TODO: Remove test ECS
-            if (event.type == SDL_EVENT_KEY_DOWN)
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
             {
-                /*
-                if (event.key.key == SDLK_3)
+                Entity player = firstLevel.addEntity();
+                TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(player);
+                if (!component)
                 {
-                    Entity player = firstLevel.addEntity();
-                    TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(player);
-                    if (!component)
-                    {
-                        D_ASSERT(false, "Ups");
-                    }
-                    else
-                    {
-                        component->velocity = 3;
-                        D_LOG(MINI, "%i", component->velocity);
-                    }
-
-                    TestComponent* component2 = firstLevel.addComponentToEntity<TestComponent>(player);
+                    D_ASSERT(false, "Ups");
+                }
+                else
+                {
+                    component->velocity = 3;
+                    D_LOG(MINI, "%i", component->velocity);
                 }
 
-                if (event.key.key == SDLK_4)
-                {
-                    TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(enemy);
-                    AnotherTestComponent* anotherComponent = firstLevel.addComponentToEntity<AnotherTestComponent>(enemy);
-                    anotherComponent->smell = true;
+                TestComponent* component2 = firstLevel.addComponentToEntity<TestComponent>(player);
+            }
 
-                }
-
-                if (event.key.key == SDLK_5)
-                {
-                    if (firstLevel.entityHasComponent<TestComponent>(enemy))
-                    {
-                        D_LOG(LOG, "Enemy has Test Component");
-                        if (firstLevel.entityHasComponent<AnotherTestComponent>(enemy))
-                        {
-                            D_LOG(LOG, "Enemy has Another Component");
-                        }
-                    }
-                    else
-                    {
-                        D_LOG(ERROR, "Enemy doesn't have any components");
-                    }
-                }
-
-                if (event.key.key == SDLK_6)
-                {
-                    firstLevel.removeComponentFromEntity<AnotherTestComponent>(enemy);
-                    firstLevel.removeComponentFromEntity<TestComponent>(enemy);
-                    D_LOG(MINI, "Deleted Test component from enemy");
-                }
-
-                if (event.key.key == SDLK_7)
-                {
-                    TestComponent* comp = firstLevel.getComponentFromEntity<TestComponent>(enemy);
-                    comp->velocity = 16;
-                    D_LOG(MINI, "Velocity: %i", comp->velocity);
-                }
-
-                if (event.key.key == SDLK_8)
-                {
-                    firstLevel.removeAllComponentsForAllEntities();
-                    D_LOG(MINI, "Deleted all components");
-                }
-                */
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_4))
+            {
+                TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(enemy);
+                AnotherTestComponent* anotherComponent = firstLevel.addComponentToEntity<AnotherTestComponent>(enemy);
+                anotherComponent->smell = true;
 
             }
+
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_5))
+            {
+                if (firstLevel.entityHasComponent<TestComponent>(enemy))
+                {
+                    D_LOG(LOG, "Enemy has Test Component");
+                    if (firstLevel.entityHasComponent<AnotherTestComponent>(enemy))
+                    {
+                        D_LOG(LOG, "Enemy has Another Component");
+                    }
+                }
+                else
+                {
+                    D_LOG(ERROR, "Enemy doesn't have any components");
+                }
+            }
+
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_6))
+            {
+                firstLevel.removeComponentFromEntity<AnotherTestComponent>(enemy);
+                firstLevel.removeComponentFromEntity<TestComponent>(enemy);
+                D_LOG(MINI, "Deleted Test component from enemy");
+            }
+
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_7))
+            {
+                TestComponent* comp = firstLevel.getComponentFromEntity<TestComponent>(enemy);
+                comp->velocity = 16;
+                D_LOG(MINI, "Velocity: %i", comp->velocity);
+            }                
 
             resetKeyboardAndMouseInput();
             accumulator -= k_targetMillisecondsBetweenFrames;

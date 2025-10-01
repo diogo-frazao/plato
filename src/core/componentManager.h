@@ -15,20 +15,34 @@ inline uint32_t getUniqueIndex()
 	return index++;
 }
 
-// Each component has its own implementation
+// Each component has its own unique Id
 template<typename T>
-uint32_t getArrayIndexForComponent()
+uint32_t getUniqueIdForComponent()
 {
 	static uint32_t componentIndex = getUniqueIndex();
 	return componentIndex;
 }
 
-struct BaseComponent
+template<typename T>
+struct ComponentArray
 {
-	virtual ~BaseComponent() = default;
+	std::array<T, k_maxNumberOfEntities> _array;
+	uint32_t _uniqueId;
 };
 
-using ComponentArray = std::array<BaseComponent*, k_maxNumberOfEntities>;
+// Called every time we want to access a component.
+// If it's the first time, it will allocate an array for maxEntities and calculate its unique id
+// It it's not the first time, it just returns a reference to the initially created.
+template<typename T>
+ComponentArray<T>& getUniqueComponentArrayForComponent()
+{
+	static ComponentArray<T> componentArray;
+	uint32_t uniqueId = getUniqueIdForComponent<T>();
+	componentArray._uniqueId = uniqueId;
+	return componentArray;
+}
+
+//TODO: Think about the lifetime of this between levels. If everything is static and lazy loaded, it will leave as long as the app is running
 
 class ComponentManager
 {
@@ -43,9 +57,9 @@ public:
 			return false;
 		}
 
-		uint32_t componentIndex = getArrayIndexForComponent<T>();
+		uint32_t componentId = getUniqueIdForComponent<T>();
 
-		bool doesEntityHaveComponent = entity.componentBitmask & BITSHIFT(componentIndex);
+		bool doesEntityHaveComponent = entity.componentBitmask & BITSHIFT(componentId);
 		return doesEntityHaveComponent;
 	}
 
@@ -58,25 +72,15 @@ public:
 			return nullptr;
 		}
 
-		uint32_t componentIndex = getArrayIndexForComponent<T>();
-		if (componentIndex >= k_maxNumberOfComponents)
-		{
-			D_ASSERT(false, "addComponentToEntity(): There are more components than allowed. Increase k_maxNumberOfComponents");
-			return nullptr;
-		}
-
-		ComponentArray& component = _allComponents[componentIndex];
-
+		ComponentArray<T>& componentArray = getUniqueComponentArrayForComponent<T>();
 		if (entityHasComponent<T>(entity))
 		{
 			D_LOG(WARNING, "addComponentToEntity(): Skipped since entity %i already has component %s", entity.id, typeid(T).name());
-			return static_cast<T*>(component[entity.id]);
+			return static_cast<T*>(&(componentArray._array[entity.id]));
 		}
 
-		entity.componentBitmask |= BITSHIFT(componentIndex);
-
-		component[entity.id] = new T();
-		return static_cast<T*>(component[entity.id]);
+		entity.componentBitmask |= BITSHIFT(componentArray._uniqueId);
+		return static_cast<T*>(&(componentArray._array[entity.id]));
 	}
 
 	template<typename T>
@@ -94,16 +98,11 @@ public:
 			return;
 		}
 
-		uint32_t componentIndex = getArrayIndexForComponent<T>();
-		ComponentArray& component = _allComponents[componentIndex];
-		
-		entity.componentBitmask &= ~(BITSHIFT(componentIndex));
-
-		delete component[entity.id];
-		component[entity.id] = nullptr;
+		uint32_t componentUniqueId = getUniqueIdForComponent<T>();
+		entity.componentBitmask &= ~(BITSHIFT(componentUniqueId));
 	}
 
-	// For performance reasons, this must be called only if the entity has the component!
+	// Tthis must be called only if the entity has the component! Otherwise will lead to UB
 	template<typename T>
 	T* getComponentFromEntity(Entity& entity)
 	{
@@ -113,32 +112,7 @@ public:
 			return nullptr;
 		}
 
-		uint32_t componentIndex = getArrayIndexForComponent<T>();
-		ComponentArray& component = _allComponents[componentIndex];
-		return static_cast<T*>(component[entity.id]);
+		ComponentArray<T>& componentArray = getUniqueComponentArrayForComponent<T>();
+		return static_cast<T*>(&(componentArray._array[entity.id]));
 	}
-
-	//TODO: When we create the level class, we need to update the bitmask for all entities when we do this
-	inline void removeAllComponentsForAllEntities()
-	{
-		for (ComponentArray& componentArray : _allComponents)
-		{
-			for (int32_t i = componentArray.size() -1; i >= 0; --i)
-			{
-				if (componentArray[i])
-				{
-					delete componentArray[i];
-					componentArray[i] = nullptr;
-				}
-			}
-		}
-	}
-
-	~ComponentManager()
-	{
-		removeAllComponentsForAllEntities();
-	}
-
-private:
-std::array<ComponentArray, k_maxNumberOfComponents> _allComponents;
 };

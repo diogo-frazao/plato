@@ -4,13 +4,13 @@
 #include "core/lib.h"
 #include <stdint.h>
 
-struct TransformComponent : BaseComponent
+struct TransformComponent
 {
 	Vec2 position;
 	Vec2 previousPosition;
 };
 
-struct SpriteComponent : BaseComponent
+struct SpriteComponent
 {
 	void setupWithOffsetAndSize(IVec2 offset, IVec2 size)
 	{
@@ -22,7 +22,7 @@ struct SpriteComponent : BaseComponent
 	IVec2 size;
 };
 
-struct MovementComponent : BaseComponent
+struct MovementComponent
 {
 	float velocity = 0.f;
 };
