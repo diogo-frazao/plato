@@ -52,12 +52,17 @@ void App::update()
 {
     bool showDemoWindow = true;
 
+    Entity& bg = firstLevel.addEntity();
+    firstLevel.addComponentToEntity<TransformComponent>(bg);
+    auto* bgSprite = firstLevel.addComponentToEntity<SpriteComponent>(bg);
+    bgSprite->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
+
     Entity& player = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(player);
     SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
-    movementComponent->velocity = 5.f;
-    playerSprite->setupWithOffsetAndSize({ 0, 0 }, { 28, 28 });
+    movementComponent->velocity = 50.f;
+    playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
@@ -107,6 +112,11 @@ void App::update()
                 if (wasKeyPressedThisFrame(SDL_SCANCODE_2))
                 {
                     SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
+                }
+
+                if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
+                {
+                    SDL_SetWindowFullscreen(_window, true);
                 }
             }
 
@@ -202,6 +212,7 @@ void App::render(float renderAlpha)
     SDL_RenderClear(s_renderer);
 
     firstLevel.render(renderAlpha);
+
 
     // Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;

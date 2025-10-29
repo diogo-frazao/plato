@@ -108,5 +108,19 @@ void InputMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 			transformComponent->position.x -= movementComponent->velocity * deltaTime;
 		}
+
+		if (isKeyDown(SDL_SCANCODE_W))
+		{
+			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
+			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+			transformComponent->position.y -= movementComponent->velocity * deltaTime;
+		}
+
+		if (isKeyDown(SDL_SCANCODE_S))
+		{
+			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
+			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+			transformComponent->position.y += movementComponent->velocity * deltaTime;
+		}
 	}
 }
