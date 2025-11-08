@@ -28,15 +28,6 @@ public:
 class DebugCollidersSystem
 {
 public:
-	struct DTO
-	{
-		RectCollider a;
-		RectCollider b;
-		SDL_Color color;
-	};
-
 	void render(ECSLevel* currentLevel, float renderAlpha);
-	void debugCollisionBetweenRects(const DTO& dto);
-	void debugRect(RectCollider a, SDL_Color color);
-	DTO _collidersToDebug[10];
+	void debugRect(Vec2 position, RectCollider collider, SDL_Color color);
 };

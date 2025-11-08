@@ -58,11 +58,6 @@ public:
 		return _entityManager._entities;
 	}
 
-	inline void debugCollisionBetweenRects(const DebugCollidersSystem::DTO& dto)
-	{
-		_debugCollidersSystem.debugCollisionBetweenRects(dto);
-	}
-
 private:
 	EntityManager _entityManager;
 	ComponentManager _componentManager;

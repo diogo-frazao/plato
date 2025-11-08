@@ -48,7 +48,7 @@ void App::update()
     auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
     movementComponent->velocity = 60;
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
-    firstLevel.addComponentToEntity<RectColliderComponent>(player);
+    firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 0, 0 }, { 14, 14 });
 
     Entity& block = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(block);
@@ -56,7 +56,7 @@ void App::update()
     blockSprite->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
     firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { 48,48 };
     firstLevel.addComponentToEntity<RectColliderComponent>(block);
-    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->collider = RectCollider({ 48, 48 }, { 8, 8 });
+    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
@@ -121,6 +121,11 @@ void App::update()
         ImGui::Text("Player Y: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.y);
 
         ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
+
+        ImGui::DragInt("Player Hitbox Offset X", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.x), 1.f, 0, 18);
+        ImGui::DragInt("Player Hitbox Offset Y", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.y), 1.f, 0, 18);
+        ImGui::DragInt("Player Hitbox size X", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.x), 1.f, 1, 18);
+        ImGui::DragInt("Player Hitbox size Y", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.y), 1.f, 1, 18);
 
         ImGui::End();
 
