@@ -43,6 +43,8 @@ ComponentArray<T>& getUniqueComponentArrayForComponent()
 }
 
 //TODO: Think about the lifetime of this between levels. If everything is static and lazy loaded, it will leave as long as the app is running
+// It's important to mention that maybe this is not that bad. We just allocate components as we need them, and through levels we just clear the data of the arrays, 
+// without destroying/recreating them
 
 class ComponentManager
 {

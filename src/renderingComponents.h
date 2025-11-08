@@ -22,7 +22,12 @@ struct SpriteComponent
 	IVec2 size;
 };
 
+struct RectColliderComponent
+{
+	RectCollider collider;
+};
+
 struct MovementComponent
 {
-	float velocity = 0.f;
+	int velocity = 0;
 };

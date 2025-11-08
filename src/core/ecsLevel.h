@@ -9,26 +9,19 @@ class ECSLevel
 public:
 	inline void start()
 	{
-		for (auto& system : _systemManager._systems)
-		{
-			system->start(this);
-		}
+		
 	}
 
 	inline void update(float deltaTime)
 	{
-		for (auto& system : _systemManager._systems)
-		{
-			system->update(this, deltaTime);
-		}
+		_savePositionSystem.update(this, deltaTime);
+		_characterMovementSystem.update(this, deltaTime);
 	}
 	
 	inline void render(float renderAlpha)
 	{
-		for (auto& system : _systemManager._systems)
-		{
-			system->render(this, renderAlpha);
-		}
+		_drawSpriteSystem.render(this, renderAlpha);
+		_debugCollidersSystem.render(this, renderAlpha);
 	}
 
 	inline Entity& addEntity()
@@ -65,8 +58,17 @@ public:
 		return _entityManager._entities;
 	}
 
+	inline void debugCollisionBetweenRects(const DebugCollidersSystem::DTO& dto)
+	{
+		_debugCollidersSystem.debugCollisionBetweenRects(dto);
+	}
+
 private:
 	EntityManager _entityManager;
 	ComponentManager _componentManager;
-	SystemManager _systemManager;
+
+	SavePreviousPositionSystem _savePositionSystem;
+	DrawSpriteSystem _drawSpriteSystem;
+	CharacterMovementSystem _characterMovementSystem;
+	DebugCollidersSystem _debugCollidersSystem;
 };

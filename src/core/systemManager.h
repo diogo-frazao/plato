@@ -1,56 +1,42 @@
 #pragma once
 
-#include "constants.h"
-#include <array>
-#include <stdint.h>
-#include "entityManager.h"
+#include "lib.h"
+#include "SDL3/SDL_pixels.h"
 
 class ECSLevel;
 
-class BaseSystem
-{
-public:
-	virtual void start(ECSLevel* currentLevel) {};
-	virtual void update(ECSLevel* currentLevel, float deltaTime) {};
-	virtual void render(ECSLevel* currentLevel, float renderAlpha) {};
-};
-
-#pragma region Systems
-
 // This needs to be the very first system to run, to ensure positions are saved for rendering interpolation
 // For more information, read Gaffer Fix Your Timestep
-class SavePreviousPositionSystem : public BaseSystem
-{
-	void update(ECSLevel* currentLevel, float deltaTime) override;
-};
-
-class DrawSpriteSystem : public BaseSystem
+class SavePreviousPositionSystem
 {
 public:
-	void render(ECSLevel* currentLevel, float renderAlpha) override;
+	void update(ECSLevel* currentLevel, float deltaTime);
 };
 
-class InputMovementSystem : public BaseSystem
+class DrawSpriteSystem
 {
 public:
-	void update(ECSLevel* currentLevel, float deltaTime) override;
+	void render(ECSLevel* currentLevel, float renderAlpha);
 };
 
-#pragma endregion
-
-class SystemManager
+class CharacterMovementSystem
 {
 public:
-	~SystemManager()
+	void update(ECSLevel* currentLevel, float deltaTime);
+};
+
+class DebugCollidersSystem
+{
+public:
+	struct DTO
 	{
-		for (int32_t i = _systems.size() - 1; i >= 0; --i)
-		{
-			delete _systems[i];
-			_systems[i] = nullptr;
-		}
-	}
+		RectCollider a;
+		RectCollider b;
+		SDL_Color color;
+	};
 
-	// For now, all levels have the same systems
-	std::array<BaseSystem*, 3> _systems = 
-	{ new SavePreviousPositionSystem(), new DrawSpriteSystem(), new InputMovementSystem() };
+	void render(ECSLevel* currentLevel, float renderAlpha);
+	void debugCollisionBetweenRects(const DTO& dto);
+	void debugRect(RectCollider a, SDL_Color color);
+	DTO _collidersToDebug[10];
 };

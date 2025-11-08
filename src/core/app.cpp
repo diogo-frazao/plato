@@ -19,20 +19,10 @@
 #include "input.h"
 
 void drawImguiDockingPreview();
-
-SDL_Texture* texture;
+void testResolutions(SDL_Window* window);
 
 ECSLevel firstLevel;
-
-struct TestComponent
-{
-    int velocity = 5.f;
-};
-
-struct AnotherTestComponent
-{
-    bool smell;
-};
+static bool s_isWindowFullscreen = false;
 
 void App::run()
 {
@@ -52,17 +42,21 @@ void App::update()
 {
     bool showDemoWindow = true;
 
-    Entity& bg = firstLevel.addEntity();
-    firstLevel.addComponentToEntity<TransformComponent>(bg);
-    auto* bgSprite = firstLevel.addComponentToEntity<SpriteComponent>(bg);
-    bgSprite->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
-
     Entity& player = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(player);
     SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
-    movementComponent->velocity = 50.f;
+    movementComponent->velocity = 60;
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
+    firstLevel.addComponentToEntity<RectColliderComponent>(player);
+
+    Entity& block = firstLevel.addEntity();
+    firstLevel.addComponentToEntity<TransformComponent>(block);
+    SpriteComponent* blockSprite = firstLevel.addComponentToEntity<SpriteComponent>(block);
+    blockSprite->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
+    firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { 48,48 };
+    firstLevel.addComponentToEntity<RectColliderComponent>(block);
+    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->collider = RectCollider({ 48, 48 }, { 8, 8 });
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
@@ -73,7 +67,7 @@ void App::update()
     {
         uint64_t currentFrameTimeStamp = SDL_GetTicks();
         uint64_t millisecondsSinceLastFrame = currentFrameTimeStamp - lastFrameTimestamp;
-        millisecondsSinceLastFrame = max(millisecondsSinceLastFrame, k_maxFrameTimeAllowed);
+        millisecondsSinceLastFrame = min(millisecondsSinceLastFrame, k_maxFrameTimeAllowed);
 
         accumulator += millisecondsSinceLastFrame;
         lastFrameTimestamp = currentFrameTimeStamp;
@@ -97,84 +91,9 @@ void App::update()
         {
             firstLevel.update(k_deltaTime);
 
-            //TODO: Remove test different res
-            {
-                if (wasKeyPressedThisFrame(SDL_SCANCODE_0))
-                {
-                    SDL_SetWindowSize(_window, 1280, 720);
-                }
-
-                if (wasKeyPressedThisFrame(SDL_SCANCODE_1))
-                {
-                    SDL_SetWindowSize(_window, 1920, 1080);
-                }
-
-                if (wasKeyPressedThisFrame(SDL_SCANCODE_2))
-                {
-                    SDL_SetWindowSize(_window, k_displayWindowWidth, k_displayWindowHeight);
-                }
-
-                if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
-                {
-                    SDL_SetWindowFullscreen(_window, true);
-                }
-            }
-
-            //TODO: Remove test ECS
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
-            {
-                Entity player = firstLevel.addEntity();
-                TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(player);
-                if (!component)
-                {
-                    D_ASSERT(false, "Ups");
-                }
-                else
-                {
-                    component->velocity = 3;
-                    D_LOG(MINI, "%i", component->velocity);
-                }
-
-                TestComponent* component2 = firstLevel.addComponentToEntity<TestComponent>(player);
-            }
-
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_4))
-            {
-                TestComponent* component = firstLevel.addComponentToEntity<TestComponent>(enemy);
-                AnotherTestComponent* anotherComponent = firstLevel.addComponentToEntity<AnotherTestComponent>(enemy);
-                anotherComponent->smell = true;
-
-            }
-
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_5))
-            {
-                if (firstLevel.entityHasComponent<TestComponent>(enemy))
-                {
-                    D_LOG(LOG, "Enemy has Test Component");
-                    if (firstLevel.entityHasComponent<AnotherTestComponent>(enemy))
-                    {
-                        D_LOG(LOG, "Enemy has Another Component");
-                    }
-                }
-                else
-                {
-                    D_LOG(ERROR, "Enemy doesn't have any components");
-                }
-            }
-
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_6))
-            {
-                firstLevel.removeComponentFromEntity<AnotherTestComponent>(enemy);
-                firstLevel.removeComponentFromEntity<TestComponent>(enemy);
-                D_LOG(MINI, "Deleted Test component from enemy");
-            }
-
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_7))
-            {
-                TestComponent* comp = firstLevel.getComponentFromEntity<TestComponent>(enemy);
-                comp->velocity = 16;
-                D_LOG(MINI, "Velocity: %i", comp->velocity);
-            }                
+#ifndef RELEASE_BUILD
+            testResolutions(_window);
+#endif // !RELEASE_BUILD
 
             resetKeyboardAndMouseInput();
             accumulator -= k_targetMillisecondsBetweenFrames;
@@ -196,7 +115,13 @@ void App::update()
 
         ImGui::Begin("Player");
         auto* movement = firstLevel.getComponentFromEntity<MovementComponent>(player);
-        ImGui::SliderFloat("Player Velocity", &(movement->velocity), 5, 1000);
+        ImGui::SliderInt("Player Velocity", &(movement->velocity), 5, 1000);
+
+        ImGui::Text("Player X: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.x);
+        ImGui::Text("Player Y: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.y);
+
+        ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
+
         ImGui::End();
 
         render(renderAlpha);
@@ -213,8 +138,7 @@ void App::render(float renderAlpha)
 
     firstLevel.render(renderAlpha);
 
-
-    // Disable logical size for ImGui rendering at native resolution
+    // TODO: improve this Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;
     int windowHeight = 0;
     SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
@@ -235,14 +159,6 @@ void App::quit()
     SDL_DestroyRenderer(s_renderer);
     SDL_DestroyWindow(_window);
     SDL_Quit();
-}
-
-void drawImguiDockingPreview()
-{
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, {});
-    ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
-    ImGui::DockSpaceOverViewport();
-    ImGui::PopStyleColor(2);
 }
 
 void App::initSDL()
@@ -288,4 +204,36 @@ void App::initImgui()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.DisplaySize = ImVec2(static_cast<float>(k_displayWindowWidth), static_cast<float>(k_displayWindowHeight));
+}
+
+void drawImguiDockingPreview()
+{
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, {});
+    ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
+    ImGui::DockSpaceOverViewport();
+    ImGui::PopStyleColor(2);
+}
+
+void testResolutions(SDL_Window* window)
+{
+    if (wasKeyPressedThisFrame(SDL_SCANCODE_1))
+    {
+        SDL_SetWindowSize(window, 960, 540);
+    }
+
+    if (wasKeyPressedThisFrame(SDL_SCANCODE_2))
+    {
+        SDL_SetWindowSize(window, k_displayWindowWidth, k_displayWindowHeight);
+    }
+
+    if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
+    {
+        SDL_SetWindowSize(window, 1920, 1080);
+    }
+
+    if (wasKeyPressedThisFrame(SDL_SCANCODE_4))
+    {
+        s_isWindowFullscreen = !s_isWindowFullscreen;
+        SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
+    }
 }

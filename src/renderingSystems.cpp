@@ -81,7 +81,7 @@ void SavePreviousPositionSystem::update(ECSLevel* currentLevel, float deltaTime)
 	}
 }
 
-void InputMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
+void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 {
 	for (Entity& entity : currentLevel->getAllEntities())
 	{
@@ -95,32 +95,112 @@ void InputMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 			continue;
 		}
 
+		Entity& character = entity;
+		auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+
+		if (wasKeyPressedThisFrame(SDL_SCANCODE_R))
+		{
+			transformComponent->position.x += 0.5f;
+		}
+
 		if (isKeyDown(SDL_SCANCODE_D))
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 			transformComponent->position.x += movementComponent->velocity * deltaTime;
 		}
 
 		if (isKeyDown(SDL_SCANCODE_A))
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 			transformComponent->position.x -= movementComponent->velocity * deltaTime;
 		}
 
 		if (isKeyDown(SDL_SCANCODE_W))
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 			transformComponent->position.y -= movementComponent->velocity * deltaTime;
 		}
 
 		if (isKeyDown(SDL_SCANCODE_S))
 		{
 			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
 			transformComponent->position.y += movementComponent->velocity * deltaTime;
 		}
+
+		//TODO: Create definition of solids and moveable. Solids have their rectcolliders define when they are created. 
+		// Moveable are set on update to match transform, ALWAYS after the movement code.
+		RectCollider playerCollider;
+		playerCollider.topLeftPoint = IVec2(static_cast<int32_t>(transformComponent->position.x), static_cast<int32_t>(transformComponent->position.y));
+		playerCollider.size = { 14, 14 };
+
+		for (Entity& collider : currentLevel->getAllEntities())
+		{
+			if (collider.id == k_invalidId)
+			{
+				continue;
+			}
+
+			if (character.id == collider.id)
+			{
+				continue;
+			}
+
+			if (!currentLevel->entityHasComponent<RectColliderComponent>(collider))
+			{
+				continue;
+			}
+
+			auto* rectCollider = currentLevel->getComponentFromEntity<RectColliderComponent>(collider);
+			DebugCollidersSystem::DTO dto{ playerCollider, rectCollider->collider, {255, 255, 0, 255} };
+			currentLevel->debugCollisionBetweenRects(dto);
+			if (aabb(playerCollider, rectCollider->collider))
+			{
+				D_LOG(MINI, "Inside");
+			}
+			else
+			{
+				D_LOG(MINI, "Outside");
+			}
+		}
 	}
+}
+
+void DebugCollidersSystem::debugCollisionBetweenRects(const DebugCollidersSystem::DTO& dto)
+{
+#ifndef RELEASE_BUILD
+	_collidersToDebug[0] = dto;
+#endif // RELEASE_BUILD
+}
+
+void DebugCollidersSystem::render(ECSLevel* currentLevel, float renderAlpha)
+{
+#ifndef RELEASE_BUILD
+	if (!s_debugCollidersEnabled)
+	{
+		return;
+	}
+
+	static constexpr SDL_Color k_collidingColor = { 0, 255, 0, 255 };
+	for (DTO& dto : _collidersToDebug)
+	{
+		if (aabb(dto.a, dto.b))
+		{
+			debugRect(dto.a, k_collidingColor);
+			debugRect(dto.b, k_collidingColor);
+		}
+		else
+		{
+			debugRect(dto.a, dto.color);
+			debugRect(dto.b, dto.color);
+		}
+	}
+#endif // RELEASE_BUILD
+}
+
+void DebugCollidersSystem::debugRect(RectCollider a, SDL_Color color)
+{
+	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
+	SDL_FRect debugRect{ (float)a.topLeftPoint.x, (float)a.topLeftPoint.y, (float)a.size.x, (float)a.size.y };
+	SDL_RenderRect(s_renderer, &debugRect);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 1);
 }

@@ -5,6 +5,7 @@
 
 // ECS Related
 inline constexpr int32_t k_maxNumberOfEntities = 5;
+inline constexpr uint16_t k_maxNumberOfSystems = 10;
 
 inline constexpr int32_t k_invalidId = -1;
 inline const std::string k_atlasFilePath = "art/atlas.png";
@@ -20,7 +21,8 @@ constexpr uint16_t k_maxFrameTimeAllowed = 250;
 // Window Related
 inline constexpr uint16_t k_baseGameWidth = 320;
 inline constexpr uint16_t k_baseGameHeight = 180;
-inline constexpr int32_t k_displayWindowWidth = 960;
-inline constexpr int32_t k_displayWindowHeight = 540;
+inline constexpr int32_t k_displayWindowWidth = 1280;
+inline constexpr int32_t k_displayWindowHeight = 720;
 
 inline struct SDL_Renderer* s_renderer = nullptr;
+inline bool s_debugCollidersEnabled = true;
