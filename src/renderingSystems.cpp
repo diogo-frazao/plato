@@ -137,23 +137,24 @@ void DebugCollidersSystem::render(ECSLevel* currentLevel, float renderAlpha)
 		return;
 	}
 
-	for (Entity& entity : currentLevel->getAllEntities())
+	for (Entity& player : currentLevel->getAllEntities())
 	{
-		if (entity.id == k_invalidId)
+		if (player.id == k_invalidId)
 		{
 			continue;
 		}
 
-		if (!currentLevel->entityHasComponent<RectColliderComponent>(entity) || 
-			!currentLevel->entityHasComponent<TransformComponent>(entity))
+		if (!currentLevel->entityHasComponent<MovementComponent>(player))
 		{
 			continue;
 		}
 
-		//TODO: Optimize
+		bool foundCollisionWithWorld = false;
+
+		//TODO: Expand later, since this only debugs player vs world collisions
 		for (Entity& possibleCollider : currentLevel->getAllEntities())
 		{
-			if (possibleCollider.id == k_invalidId || entity.id == possibleCollider.id)
+			if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
 			{
 				continue;
 			}
@@ -164,20 +165,25 @@ void DebugCollidersSystem::render(ECSLevel* currentLevel, float renderAlpha)
 				continue;
 			}
 
-			RectCollider& rectColliderA = currentLevel->getComponentFromEntity<RectColliderComponent>(entity)->collider;
+			RectCollider& playerRectCollider = currentLevel->getComponentFromEntity<RectColliderComponent>(player)->collider;
 			RectCollider& rectColliderB = currentLevel->getComponentFromEntity<RectColliderComponent>(possibleCollider)->collider;
 
-			Vec2& positionA = currentLevel->getComponentFromEntity<TransformComponent>(entity)->position;
+			Vec2& playerPosition = currentLevel->getComponentFromEntity<TransformComponent>(player)->position;
 			Vec2& positionB = currentLevel->getComponentFromEntity<TransformComponent>(possibleCollider)->position;
 
-			if (aabb(positionA, positionB, rectColliderA, rectColliderB))
+
+			if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
 			{
-				debugRect(positionA, rectColliderA, { 0, 255, 0, 255 });
+				debugRect(playerPosition, playerRectCollider, { 0, 255, 0, 255 });
 				debugRect(positionB, rectColliderB, { 0, 255, 0, 255 });
+				foundCollisionWithWorld = true;
 			}
 			else
 			{
-				debugRect(positionA, rectColliderA, { 255, 255, 0, 255 });
+				if (!foundCollisionWithWorld)
+				{
+					debugRect(playerPosition, playerRectCollider, { 255, 255, 0, 255 });
+				}
 				debugRect(positionB, rectColliderB, { 255, 255, 0, 255 });
 			}
 		}

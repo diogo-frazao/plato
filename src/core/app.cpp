@@ -38,6 +38,16 @@ void App::init()
     initImgui();
 }
 
+void createBlockAtPosition(IVec2 position)
+{
+    Entity& block = firstLevel.addEntity();
+    firstLevel.addComponentToEntity<TransformComponent>(block);
+    firstLevel.addComponentToEntity<SpriteComponent>(block)->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
+    firstLevel.getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
+    firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y};
+    firstLevel.addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
+}
+
 void App::update()
 {
     bool showDemoWindow = true;
@@ -50,13 +60,7 @@ void App::update()
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
     firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 0, 0 }, { 14, 14 });
 
-    Entity& block = firstLevel.addEntity();
-    firstLevel.addComponentToEntity<TransformComponent>(block);
-    SpriteComponent* blockSprite = firstLevel.addComponentToEntity<SpriteComponent>(block);
-    blockSprite->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
-    firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { 48,48 };
-    firstLevel.addComponentToEntity<RectColliderComponent>(block);
-    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
+    createBlockAtPosition({ 48, 48 });
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
@@ -90,6 +94,14 @@ void App::update()
         while (accumulator >= k_targetMillisecondsBetweenFrames)
         {
             firstLevel.update(k_deltaTime);
+
+            // TODO: remove, placeholder to place tiles
+            if (wasMouseButtonPressedThisFrame(LEFT))
+            {
+                IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
+                IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
+                createBlockAtPosition(gridWorldPosition);
+            }
 
 #ifndef RELEASE_BUILD
             testResolutions(_window);
