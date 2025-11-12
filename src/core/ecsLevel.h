@@ -12,10 +12,10 @@ public:
 		
 	}
 
-	inline void update(float deltaTime)
+	inline void update()
 	{
-		_savePositionSystem.update(this, deltaTime);
-		_characterMovementSystem.update(this, deltaTime);
+		_savePositionSystem.update(this);
+		_characterMovementSystem.update(this);
 	}
 	
 	inline void render(float renderAlpha)

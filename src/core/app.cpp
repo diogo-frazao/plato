@@ -106,7 +106,7 @@ void App::update()
 
         while (accumulator >= k_targetMillisecondsBetweenFrames)
         {
-            firstLevel.update(k_deltaTime);
+            firstLevel.update();
 
             // TODO: remove, placeholder to place tiles
             if (wasMouseButtonPressedThisFrame(LEFT))

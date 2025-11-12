@@ -62,7 +62,7 @@ void DrawSpriteSystem::render(ECSLevel* currentLevel, float renderAlpha)
 	}
 }
 
-void SavePreviousPositionSystem::update(ECSLevel* currentLevel, float deltaTime)
+void SavePreviousPositionSystem::update(ECSLevel* currentLevel)
 {
 	for (Entity& entity : currentLevel->getAllEntities())
 	{
@@ -81,7 +81,7 @@ void SavePreviousPositionSystem::update(ECSLevel* currentLevel, float deltaTime)
 	}
 }
 
-void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
+void CharacterMovementSystem::update(ECSLevel* currentLevel)
 {
 	for (Entity& entity : currentLevel->getAllEntities())
 	{
@@ -128,18 +128,18 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 		if (isKeyDown(SDL_SCANCODE_D))
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
-				movementComponent->runAcceleration * horizontalSpeedMultiplier * deltaTime);
+				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
 		}
 
 		if (isKeyDown(SDL_SCANCODE_A))
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
-				movementComponent->runAcceleration * horizontalSpeedMultiplier * deltaTime);
+				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
 		}
 
 		if (!isMovingHorizontally)
 		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * deltaTime);
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
 		}
 
 		if (isKeyDown(SDL_SCANCODE_SPACE) && movementComponent->isGrounded)
@@ -150,7 +150,7 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 
 		if (!movementComponent->isGrounded)
 		{
-			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * deltaTime);
+			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
 		}
 
 		processHorizontalMovement(currentLevel, &character);
