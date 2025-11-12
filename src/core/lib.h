@@ -54,6 +54,36 @@ inline Vec2 getColliderPosition(const Vec2 position, const RectCollider collider
 	return { position.x + collider.topLeftPointOffset.x, position.y + collider.topLeftPointOffset.y };
 }
 
+inline float max(float a, float b)
+{
+	if (a > b)
+	{
+		return a;
+	}
+
+	return b;
+}
+
+inline float min(float a, float b)
+{
+	if (a < b)
+	{
+		return a;
+	}
+
+	return b;
+}
+
+inline float approach(float current, float target, float increase)
+{
+	if (current < target)
+	{
+		return min(current + increase, target);
+	}
+
+	return max(current - increase, target);
+}
+
 inline bool aabb(Vec2 positionA, Vec2 positionB, const RectCollider a, const RectCollider b)
 {
 	Vec2 aTopLeftWithOffset = getColliderPosition(positionA, a);
@@ -63,4 +93,9 @@ inline bool aabb(Vec2 positionA, Vec2 positionB, const RectCollider a, const Rec
 		aTopLeftWithOffset.x + a.size.x > bTopLeftWithOffset.x &&		// Collision on Right of a and left of b
 		aTopLeftWithOffset.y < bTopLeftWithOffset.y + b.size.y &&		// Collision on Top of a and Bottom of b
 		aTopLeftWithOffset.y + a.size.y > bTopLeftWithOffset.y;			// Collision on Bottom of a and Top of b
+}
+
+inline int8_t sign(int32_t amount)
+{
+	return (amount >= 0) ? 1 : -1;
 }

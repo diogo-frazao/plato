@@ -25,4 +25,4 @@ inline constexpr int32_t k_displayWindowWidth = 1280;
 inline constexpr int32_t k_displayWindowHeight = 720;
 
 inline struct SDL_Renderer* s_renderer = nullptr;
-inline bool s_debugCollidersEnabled = true;
+inline bool s_debugCollidersEnabled = false;

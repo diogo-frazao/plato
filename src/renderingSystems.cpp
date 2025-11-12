@@ -96,37 +96,115 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 		}
 
 		Entity& character = entity;
-		auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(entity);
+		auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(character);
+		auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(character);
 
-		if (wasKeyPressedThisFrame(SDL_SCANCODE_R))
+		bool isGrounded = true;
+		bool isMoving = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
+		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
+									  (isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
+		
+		float horizontalSpeedMultiplier = 1.f;
+
+		if (!isGrounded)
 		{
-			transformComponent->position.x += 0.5f;
+			horizontalSpeedMultiplier = 0.65f;
+		}
+		else
+		{
+			if (wantsToChangeDirection)
+			{
+				horizontalSpeedMultiplier = 3.f;
+			}
 		}
 
 		if (isKeyDown(SDL_SCANCODE_D))
 		{
-			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			transformComponent->position.x += movementComponent->velocity * deltaTime;
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
+				movementComponent->runAcceleration * horizontalSpeedMultiplier * deltaTime);
 		}
 
 		if (isKeyDown(SDL_SCANCODE_A))
 		{
-			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			transformComponent->position.x -= movementComponent->velocity * deltaTime;
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
+				movementComponent->runAcceleration * horizontalSpeedMultiplier * deltaTime);
 		}
 
-		if (isKeyDown(SDL_SCANCODE_W))
+		if (!isMoving)
 		{
-			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			transformComponent->position.y -= movementComponent->velocity * deltaTime;
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * deltaTime);
 		}
 
-		if (isKeyDown(SDL_SCANCODE_S))
+		processHorizontalMovement(currentLevel, &character);
+	}
+}
+
+void CharacterMovementSystem::processHorizontalMovement(ECSLevel* currentLevel, Entity* self)
+{
+	auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(*self);
+	auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(*self);
+
+	movementComponent->remainder.x += movementComponent->currentSpeed.x;
+	int32_t pixelsToMove = round(movementComponent->remainder.x);
+
+	if (pixelsToMove == 0)
+	{
+		return;
+	}
+
+	movementComponent->remainder.x -= pixelsToMove;
+	int8_t movementDirection = sign(pixelsToMove);
+
+	while (pixelsToMove != 0)
+	{
+		// We need to check collision one pixel in front before actually moving
+		Vec2 positionToCheck = { transformComponent->position.x + movementDirection, transformComponent->position.y };
+
+		if (!willCollideWithSolidAtPosition(currentLevel, self, positionToCheck))
 		{
-			auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(entity);
-			transformComponent->position.y += movementComponent->velocity * deltaTime;
+			transformComponent->position.x += movementDirection;
+			pixelsToMove -= movementDirection;
+		}
+		else
+		{
+			movementComponent->currentSpeed.x = 0;
+			return;
 		}
 	}
+}
+
+bool CharacterMovementSystem::willCollideWithSolidAtPosition(ECSLevel* currentLevel, Entity* self, const Vec2 positionToCheck)
+{
+	RectCollider& selfRectCollider = currentLevel->getComponentFromEntity<RectColliderComponent>(*self)->collider;
+
+	for (Entity& entity : currentLevel->getAllEntities())
+	{
+		if (entity.id == k_invalidId || entity.id == self->id)
+		{
+			continue;
+		}
+
+		if (!currentLevel->entityHasComponent<RectColliderComponent>(entity) || 
+			!currentLevel->entityHasComponent<TransformComponent>(entity))
+		{
+			continue;
+		}
+
+		if (!currentLevel->getComponentFromEntity<RectColliderComponent>(entity)->isSolid)
+		{
+			continue;
+		}
+
+		Vec2& levelGeometryPosition = currentLevel->getComponentFromEntity<TransformComponent>(entity)->position;
+		RectCollider& levelGeometryCollider = currentLevel->getComponentFromEntity<RectColliderComponent>(entity)->collider;
+
+		if (aabb(positionToCheck, levelGeometryPosition, selfRectCollider, levelGeometryCollider))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void DebugCollidersSystem::render(ECSLevel* currentLevel, float renderAlpha)

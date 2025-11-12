@@ -25,9 +25,20 @@ struct SpriteComponent
 struct RectColliderComponent
 {
 	RectCollider collider;
+	// This is what actors will check collision against when moving
+	bool isSolid = false;
 };
 
 struct MovementComponent
 {
-	int velocity = 0;
+	// Max horizontal speed while moving
+	float maxHorizontalSpeed;
+	// How fast the character reaches maxHorizontalSpeed while moving
+	float runAcceleration;
+	// How fast the character will come to stop when not moving
+	float friction;
+
+	Vec2 currentSpeed;
+	// How much is left from one frame to the other. We only move when it's whole pixels
+	Vec2 remainder;
 };

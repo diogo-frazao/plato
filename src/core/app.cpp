@@ -46,17 +46,27 @@ void createBlockAtPosition(IVec2 position)
     firstLevel.getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
     firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y};
     firstLevel.addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
+    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->isSolid = true;
 }
 
 void App::update()
 {
     bool showDemoWindow = true;
 
+    
+    Entity& bg = firstLevel.addEntity();
+    firstLevel.addComponentToEntity<TransformComponent>(bg);
+    firstLevel.addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
+    
+
     Entity& player = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(player);
     SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
-    movementComponent->velocity = 60;
+    movementComponent->maxHorizontalSpeed = 1.5f;
+    movementComponent->runAcceleration = 9.185f;
+    movementComponent->friction = 10.f;
+
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
     firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 0, 0 }, { 14, 14 });
 
@@ -127,8 +137,11 @@ void App::update()
 
         ImGui::Begin("Player");
         auto* movement = firstLevel.getComponentFromEntity<MovementComponent>(player);
-        ImGui::SliderInt("Player Velocity", &(movement->velocity), 5, 1000);
+        ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
+        ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 10);
+        ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
 
+        ImGui::Text("Player Speed X: %f", firstLevel.getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
         ImGui::Text("Player X: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.x);
         ImGui::Text("Player Y: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.y);
 
