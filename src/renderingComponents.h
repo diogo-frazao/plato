@@ -38,7 +38,16 @@ struct MovementComponent
 	// How fast the character will come to stop when not moving
 	float friction;
 
+	// Max vertical speed while falling
+	float maxVerticalSpeed;
+	// How fast the character reaches maxVerticalSpeed while falling
+	float gravity;
+	// How high the character jumps
+	float jumpSpeed;
+
 	Vec2 currentSpeed;
 	// How much is left from one frame to the other. We only move when it's whole pixels
 	Vec2 remainder;
+
+	bool isGrounded = false;
 };

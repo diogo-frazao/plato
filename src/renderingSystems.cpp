@@ -99,16 +99,15 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 		auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(character);
 		auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(character);
 
-		bool isGrounded = true;
-		bool isMoving = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
+		bool isMovingHorizontally = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
 		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
 									  (isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
 		
 		float horizontalSpeedMultiplier = 1.f;
 
-		if (!isGrounded)
+		if (!movementComponent->isGrounded)
 		{
-			horizontalSpeedMultiplier = 0.65f;
+			horizontalSpeedMultiplier = 0.75f;
 		}
 		else
 		{
@@ -116,6 +115,14 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 			{
 				horizontalSpeedMultiplier = 3.f;
 			}
+		}
+
+		if (isKeyDown(SDL_SCANCODE_Q))
+		{
+			transformComponent->previousPosition = Vec2(0, 0);
+			transformComponent->position = Vec2(0, 0);
+			movementComponent->currentSpeed.x = 0;
+			movementComponent->currentSpeed.y = 0;
 		}
 
 		if (isKeyDown(SDL_SCANCODE_D))
@@ -130,12 +137,74 @@ void CharacterMovementSystem::update(ECSLevel* currentLevel, float deltaTime)
 				movementComponent->runAcceleration * horizontalSpeedMultiplier * deltaTime);
 		}
 
-		if (!isMoving)
+		if (!isMovingHorizontally)
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * deltaTime);
 		}
 
+		if (isKeyDown(SDL_SCANCODE_SPACE) && movementComponent->isGrounded)
+		{
+			movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
+			movementComponent->isGrounded = false;
+		}
+
+		if (!movementComponent->isGrounded)
+		{
+			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * deltaTime);
+		}
+
 		processHorizontalMovement(currentLevel, &character);
+		processVerticalMovement(currentLevel, &character);
+	}
+}
+
+void CharacterMovementSystem::processVerticalMovement(ECSLevel* currentLevel, Entity* self)
+{
+	auto* transformComponent = currentLevel->getComponentFromEntity<TransformComponent>(*self);
+	auto* movementComponent = currentLevel->getComponentFromEntity<MovementComponent>(*self);
+
+	movementComponent->remainder.y += movementComponent->currentSpeed.y;
+	int32_t pixelsToMove = round(movementComponent->remainder.y);
+
+	if (pixelsToMove == 0)
+	{
+		// Even if we're not moving, check if we're grounded
+		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + 1 };
+		if (willCollideWithSolidAtPosition(currentLevel, self, positionToCheck))
+		{
+			movementComponent->isGrounded = true;
+		}
+		else
+		{
+			movementComponent->isGrounded = false;
+		}
+
+		return;
+	}
+
+	movementComponent->remainder.y -= pixelsToMove;
+	int8_t movementDirection = sign(pixelsToMove);
+
+	while (pixelsToMove != 0)
+	{
+		// We need to check collision one pixel below/above before actually moving
+		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection};
+		if (!willCollideWithSolidAtPosition(currentLevel, self, positionToCheck))
+		{
+			transformComponent->position.y += movementDirection;
+			pixelsToMove -= movementDirection;
+		}
+		else
+		{
+			bool isFalling = movementComponent->currentSpeed.y > 0.f;
+			if (isFalling)
+			{
+				movementComponent->isGrounded = true;
+			}
+
+			movementComponent->currentSpeed.y = 0;
+			return;
+		}
 	}
 }
 

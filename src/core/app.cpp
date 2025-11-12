@@ -66,9 +66,12 @@ void App::update()
     movementComponent->maxHorizontalSpeed = 1.5f;
     movementComponent->runAcceleration = 9.185f;
     movementComponent->friction = 10.f;
+    movementComponent->maxVerticalSpeed = 3.6f;
+    movementComponent->gravity = 13.f;
+    movementComponent->jumpSpeed = 3.f;
 
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
-    firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 0, 0 }, { 14, 14 });
+    firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
 
     createBlockAtPosition({ 48, 48 });
 

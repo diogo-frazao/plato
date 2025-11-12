@@ -4,7 +4,7 @@
 #include <string>
 
 // ECS Related
-inline constexpr int32_t k_maxNumberOfEntities = 50;
+inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
 
 inline constexpr int32_t k_invalidId = -1;

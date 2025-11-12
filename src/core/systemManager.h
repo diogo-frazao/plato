@@ -27,6 +27,7 @@ class CharacterMovementSystem
 public:
 	void update(ECSLevel* currentLevel, float deltaTime);
 	void processHorizontalMovement(ECSLevel* currentLevel, Entity* self);
+	void processVerticalMovement(ECSLevel* currentLevel, Entity* self);
 	bool willCollideWithSolidAtPosition(ECSLevel* currentLevel, Entity* self, const Vec2 positionToCheck);
 };
 
