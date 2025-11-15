@@ -2,6 +2,7 @@
 
 #include "lib.h"
 #include "SDL3/SDL_pixels.h"
+#include <stdint.h>
 
 class ECSLevel;
 class MovementComponent;
@@ -20,6 +21,12 @@ class DrawSpriteSystem
 {
 public:
 	void render(float renderAlpha);
+};
+
+class LightingSystem
+{
+public:
+	void render(SDL_Color s_ambientColor);
 };
 
 class CharacterMovementSystem

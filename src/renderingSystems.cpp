@@ -8,6 +8,8 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
+static SDL_Texture* s_baseGameBuffer;
+
 SDL_Texture* loadAtlasTexture()
 {
 	const std::string atlasPath = RESOURCES_PATH + k_atlasFilePath;
@@ -25,6 +27,21 @@ SDL_Texture* loadAtlasTexture()
 
 void DrawSpriteSystem::render(float renderAlpha)
 {
+	if (!s_baseGameBuffer)
+	{
+		s_baseGameBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
+		SDL_SetTextureScaleMode(s_baseGameBuffer, SDL_SCALEMODE_NEAREST);
+	}
+
+	if (!s_baseGameBuffer)
+	{
+		D_ASSERT(false, "Game buffer doesnt' exist, can't display sprites: %s", SDL_GetError());
+		return;
+	}
+
+	SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(s_renderer, s_baseGameBuffer);
+
 	static SDL_FRect src;
 	static SDL_FRect target;
 
@@ -61,6 +78,129 @@ void DrawSpriteSystem::render(float renderAlpha)
 		SDL_RenderTexture(s_renderer, atlasTexture, &src, &target);
 	}
 }
+
+void LightingSystem::render(SDL_Color s_ambientColor)
+{
+	static SDL_Texture* lightsBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
+	if (!lightsBuffer)
+	{
+		D_ASSERT(false, "Lights buffer doesnt' exist, can't apply lighting: %s", SDL_GetError());
+		return;
+	}
+
+	// Draw lights in additive mode, so that we add the base game colors + light color based on the lights on the scene
+	SDL_SetRenderTarget(s_renderer, lightsBuffer);
+	SDL_SetTextureBlendMode(lightsBuffer, SDL_BLENDMODE_ADD);
+	SDL_SetRenderDrawColor(s_renderer, s_ambientColor.r, s_ambientColor.g, s_ambientColor.b, s_ambientColor.a);
+	SDL_SetTextureAlphaMod(lightsBuffer, s_ambientColor.a);
+	SDL_RenderClear(s_renderer);
+
+	// TODO: iterate and draw lights to the lights buffer
+	static SDL_Texture* atlasTexture = loadAtlasTexture();
+	SDL_SetTextureBlendMode(atlasTexture, SDL_BLENDMODE_ADD);
+	SDL_SetTextureColorMod(atlasTexture, 255, 0, 0);
+
+	SDL_FRect src;
+	src.x = 0;
+	src.y = 180;
+	src.w = 94;
+	src.h = 123;
+
+	SDL_FRect dest;
+	dest.x = 150;
+	dest.y = 80;
+	dest.w = 94;
+	dest.h = 123;
+
+	SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
+	SDL_SetTextureColorMod(atlasTexture, 255, 255, 255);
+
+	// Now start drawing to the window
+	SDL_SetRenderTarget(s_renderer, nullptr);
+	SDL_RenderClear(s_renderer);
+
+	// Render base game normally
+	SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
+	SDL_RenderTexture(s_renderer, s_baseGameBuffer, nullptr, nullptr);
+
+	// Render lgihts on top with multiply, 
+	SDL_SetTextureBlendMode(lightsBuffer, SDL_BLENDMODE_MOD);
+	SDL_RenderTexture(s_renderer, lightsBuffer, nullptr, nullptr);
+}
+
+void DebugCollidersSystem::render()
+{
+#ifndef RELEASE_BUILD
+	if (!s_debugCollidersEnabled)
+	{
+		return;
+	}
+
+	for (Entity& player : getAllEntities())
+	{
+		if (player.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (!entityHasComponent<MovementComponent>(player))
+		{
+			continue;
+		}
+
+		bool foundCollisionWithWorld = false;
+
+		//TODO: Expand later, since this only debugs player vs world collisions
+		for (Entity& possibleCollider : getAllEntities())
+		{
+			if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
+			{
+				continue;
+			}
+
+			if (!entityHasComponent<RectColliderComponent>(possibleCollider) ||
+				!entityHasComponent<TransformComponent>(possibleCollider))
+			{
+				continue;
+			}
+
+			RectCollider& playerRectCollider = getComponentFromEntity<RectColliderComponent>(player)->collider;
+			RectCollider& rectColliderB = getComponentFromEntity<RectColliderComponent>(possibleCollider)->collider;
+
+			Vec2& playerPosition = getComponentFromEntity<TransformComponent>(player)->position;
+			Vec2& positionB = getComponentFromEntity<TransformComponent>(possibleCollider)->position;
+
+
+			if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
+			{
+				debugRect(playerPosition, playerRectCollider, { 0, 255, 0, 255 });
+				debugRect(positionB, rectColliderB, { 0, 255, 0, 255 });
+				foundCollisionWithWorld = true;
+			}
+			else
+			{
+				if (!foundCollisionWithWorld)
+				{
+					debugRect(playerPosition, playerRectCollider, { 255, 255, 0, 255 });
+				}
+				debugRect(positionB, rectColliderB, { 255, 255, 0, 255 });
+			}
+		}
+	}
+
+#endif // RELEASE_BUILD
+}
+
+void DebugCollidersSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color color)
+{
+	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
+	Vec2 colliderPosition = getColliderPosition(position, collider);
+	SDL_FRect debugRect{ colliderPosition.x, colliderPosition.y, (float)collider.size.x, (float)collider.size.y };
+	SDL_RenderRect(s_renderer, &debugRect);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 1);
+}
+
+#pragma region Movement Systems
 
 void SavePreviousPositionSystem::update()
 {
@@ -101,8 +241,8 @@ void CharacterMovementSystem::update()
 
 		bool isMovingHorizontally = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
 		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
-									  (isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
-		
+			(isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
+
 		float horizontalSpeedMultiplier = 1.f;
 
 		if (!movementComponent->isGrounded)
@@ -188,7 +328,7 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 	while (pixelsToMove != 0)
 	{
 		// We need to check collision one pixel below/above before actually moving
-		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection};
+		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection };
 		if (!willCollideWithSolidAtPosition(self, positionToCheck))
 		{
 			transformComponent->position.y += movementDirection;
@@ -253,7 +393,7 @@ bool CharacterMovementSystem::willCollideWithSolidAtPosition(Entity* self, const
 			continue;
 		}
 
-		if (!entityHasComponent<RectColliderComponent>(entity) || 
+		if (!entityHasComponent<RectColliderComponent>(entity) ||
 			!entityHasComponent<TransformComponent>(entity))
 		{
 			continue;
@@ -276,74 +416,4 @@ bool CharacterMovementSystem::willCollideWithSolidAtPosition(Entity* self, const
 	return false;
 }
 
-void DebugCollidersSystem::render()
-{
-#ifndef RELEASE_BUILD
-	if (!s_debugCollidersEnabled)
-	{
-		return;
-	}
-
-	for (Entity& player : getAllEntities())
-	{
-		if (player.id == k_invalidId)
-		{
-			continue;
-		}
-
-		if (!entityHasComponent<MovementComponent>(player))
-		{
-			continue;
-		}
-
-		bool foundCollisionWithWorld = false;
-
-		//TODO: Expand later, since this only debugs player vs world collisions
-		for (Entity& possibleCollider : getAllEntities())
-		{
-			if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
-			{
-				continue;
-			}
-
-			if (!entityHasComponent<RectColliderComponent>(possibleCollider) ||
-				!entityHasComponent<TransformComponent>(possibleCollider))
-			{
-				continue;
-			}
-
-			RectCollider& playerRectCollider = getComponentFromEntity<RectColliderComponent>(player)->collider;
-			RectCollider& rectColliderB = getComponentFromEntity<RectColliderComponent>(possibleCollider)->collider;
-
-			Vec2& playerPosition = getComponentFromEntity<TransformComponent>(player)->position;
-			Vec2& positionB = getComponentFromEntity<TransformComponent>(possibleCollider)->position;
-
-
-			if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
-			{
-				debugRect(playerPosition, playerRectCollider, { 0, 255, 0, 255 });
-				debugRect(positionB, rectColliderB, { 0, 255, 0, 255 });
-				foundCollisionWithWorld = true;
-			}
-			else
-			{
-				if (!foundCollisionWithWorld)
-				{
-					debugRect(playerPosition, playerRectCollider, { 255, 255, 0, 255 });
-				}
-				debugRect(positionB, rectColliderB, { 255, 255, 0, 255 });
-			}
-		}
-	}
-
-#endif // RELEASE_BUILD
-}
-
-void DebugCollidersSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color color)
-{
-	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
-	Vec2 colliderPosition = getColliderPosition(position, collider);
-	SDL_FRect debugRect{ colliderPosition.x, colliderPosition.y, collider.size.x, collider.size.y };
-	SDL_RenderRect(s_renderer, &debugRect);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 1);
-}
+#pragma endregion

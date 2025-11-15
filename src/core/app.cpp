@@ -25,6 +25,8 @@ ECSLevel firstLevel;
 static bool s_isWindowFullscreen = false;
 static bool s_vsyncEnabled = true;
 
+float s_ambientColor[4] = { 1, 1, 1, 1 };
+
 void App::run()
 {
     init();
@@ -151,10 +153,11 @@ void App::update()
 
         ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
 
-        ImGui::DragInt("Player Hitbox Offset X", &(getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.x), 1.f, 0, 18);
-        ImGui::DragInt("Player Hitbox Offset Y", &(getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.y), 1.f, 0, 18);
-        ImGui::DragInt("Player Hitbox size X", &(getComponentFromEntity<RectColliderComponent>(player)->collider.size.x), 1.f, 1, 18);
-        ImGui::DragInt("Player Hitbox size Y", &(getComponentFromEntity<RectColliderComponent>(player)->collider.size.y), 1.f, 1, 18);
+        ImGui::ColorEdit4("Ambient Color", s_ambientColor, ImGuiColorEditFlags_NoInputs);
+        firstLevel._levelAmbientColor.r = (uint8_t)(s_ambientColor[0] * 255);
+        firstLevel._levelAmbientColor.g = (uint8_t)(s_ambientColor[1] * 255);
+        firstLevel._levelAmbientColor.b = (uint8_t)(s_ambientColor[2] * 255);
+        firstLevel._levelAmbientColor.a = (uint8_t)(s_ambientColor[3] * 255);
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Average %.1f FPS", io.Framerate);
