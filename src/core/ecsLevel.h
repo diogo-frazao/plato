@@ -14,51 +14,16 @@ public:
 
 	inline void update()
 	{
-		_savePositionSystem.update(this);
-		_characterMovementSystem.update(this);
+		_savePositionSystem.update();
+		_characterMovementSystem.update();
 	}
 	
 	inline void render(float renderAlpha)
 	{
-		_drawSpriteSystem.render(this, renderAlpha);
-		_debugCollidersSystem.render(this, renderAlpha);
+		_drawSpriteSystem.render(renderAlpha);
+		_debugCollidersSystem.render();
 	}
 
-	inline Entity& addEntity()
-	{
-		return _entityManager.addEntity();
-	}
-
-	template<typename T>
-	bool entityHasComponent(Entity& entity)
-	{
-		return _componentManager.entityHasComponent<T>(entity);
-	}
-
-	template<typename T>
-	T* addComponentToEntity(Entity& entity)
-	{
-		return _componentManager.addComponentToEntity<T>(entity);
-	}
-
-	template<typename T>
-	void removeComponentFromEntity(Entity& entity)
-	{
-		return _componentManager.removeComponentFromEntity<T>(entity);
-	}
-
-	template<typename T>
-	T* getComponentFromEntity(Entity& entity)
-	{
-		return _componentManager.getComponentFromEntity<T>(entity);
-	}
-
-	inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
-	{
-		return _entityManager._entities;
-	}
-
-private:
 	EntityManager _entityManager;
 	ComponentManager _componentManager;
 
@@ -67,3 +32,43 @@ private:
 	CharacterMovementSystem _characterMovementSystem;
 	DebugCollidersSystem _debugCollidersSystem;
 };
+
+class LevelManager
+{
+public:
+	inline static ECSLevel* s_currentLevel = nullptr;
+};
+
+inline Entity& addEntity()
+{
+	return LevelManager::s_currentLevel->_entityManager.addEntity();
+}
+
+template<typename T>
+bool entityHasComponent(Entity& entity)
+{
+	return LevelManager::s_currentLevel->_componentManager.entityHasComponent<T>(entity);
+}
+
+template<typename T>
+T* addComponentToEntity(Entity& entity)
+{
+	return LevelManager::s_currentLevel->_componentManager.addComponentToEntity<T>(entity);
+}
+
+template<typename T>
+void removeComponentFromEntity(Entity& entity)
+{
+	return LevelManager::s_currentLevel->_componentManager.removeComponentFromEntity<T>(entity);
+}
+
+template<typename T>
+T* getComponentFromEntity(Entity& entity)
+{
+	return LevelManager::s_currentLevel->_componentManager.getComponentFromEntity<T>(entity);
+}
+
+inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
+{
+	return LevelManager::s_currentLevel->_entityManager._entities;
+}

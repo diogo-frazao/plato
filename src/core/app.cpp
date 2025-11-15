@@ -41,27 +41,29 @@ void App::init()
 
 void createBlockAtPosition(IVec2 position)
 {
-    Entity& block = firstLevel.addEntity();
-    firstLevel.addComponentToEntity<TransformComponent>(block);
-    firstLevel.addComponentToEntity<SpriteComponent>(block)->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
-    firstLevel.getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
-    firstLevel.getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y};
-    firstLevel.addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
-    firstLevel.getComponentFromEntity<RectColliderComponent>(block)->isSolid = true;
+    Entity& block = addEntity();
+    addComponentToEntity<TransformComponent>(block);
+    addComponentToEntity<SpriteComponent>(block)->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
+    getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
+    getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y};
+    addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
+    getComponentFromEntity<RectColliderComponent>(block)->isSolid = true;
 }
 
 void App::update()
 {
     bool showDemoWindow = true;
-    
-    Entity& bg = firstLevel.addEntity();
-    firstLevel.addComponentToEntity<TransformComponent>(bg);
-    firstLevel.addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
 
-    Entity& player = firstLevel.addEntity();
-    firstLevel.addComponentToEntity<TransformComponent>(player);
-    SpriteComponent* playerSprite = firstLevel.addComponentToEntity<SpriteComponent>(player);
-    auto* movementComponent = firstLevel.addComponentToEntity<MovementComponent>(player);
+    LevelManager::s_currentLevel = &firstLevel;
+    
+    Entity& bg = addEntity();
+    addComponentToEntity<TransformComponent>(bg);
+    addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
+
+    Entity& player = addEntity();
+    addComponentToEntity<TransformComponent>(player);
+    SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
+    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     movementComponent->maxHorizontalSpeed = 1.5f;
     movementComponent->runAcceleration = 9.185f;
     movementComponent->friction = 10.f;
@@ -70,14 +72,14 @@ void App::update()
     movementComponent->jumpSpeed = 3.f;
 
     playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
-    firstLevel.addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
+    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
 
     createBlockAtPosition({ 48, 48 });
 
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
 
-    Entity& enemy = firstLevel.addEntity();
+    Entity& enemy = addEntity();
 
     while (true)
     {
@@ -138,21 +140,21 @@ void App::update()
         }
 
         ImGui::Begin("Player");
-        auto* movement = firstLevel.getComponentFromEntity<MovementComponent>(player);
+        auto* movement = getComponentFromEntity<MovementComponent>(player);
         ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
         ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 10);
         ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
 
-        ImGui::Text("Player Speed X: %f", firstLevel.getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
-        ImGui::Text("Player X: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.x);
-        ImGui::Text("Player Y: %f", firstLevel.getComponentFromEntity<TransformComponent>(player)->position.y);
+        ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
+        ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
+        ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 
         ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
 
-        ImGui::DragInt("Player Hitbox Offset X", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.x), 1.f, 0, 18);
-        ImGui::DragInt("Player Hitbox Offset Y", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.y), 1.f, 0, 18);
-        ImGui::DragInt("Player Hitbox size X", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.x), 1.f, 1, 18);
-        ImGui::DragInt("Player Hitbox size Y", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.y), 1.f, 1, 18);
+        ImGui::DragInt("Player Hitbox Offset X", &(getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.x), 1.f, 0, 18);
+        ImGui::DragInt("Player Hitbox Offset Y", &(getComponentFromEntity<RectColliderComponent>(player)->collider.topLeftPointOffset.y), 1.f, 0, 18);
+        ImGui::DragInt("Player Hitbox size X", &(getComponentFromEntity<RectColliderComponent>(player)->collider.size.x), 1.f, 1, 18);
+        ImGui::DragInt("Player Hitbox size Y", &(getComponentFromEntity<RectColliderComponent>(player)->collider.size.y), 1.f, 1, 18);
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Average %.1f FPS", io.Framerate);

@@ -13,27 +13,27 @@ class Entity;
 class SavePreviousPositionSystem
 {
 public:
-	void update(ECSLevel* currentLevel);
+	void update();
 };
 
 class DrawSpriteSystem
 {
 public:
-	void render(ECSLevel* currentLevel, float renderAlpha);
+	void render(float renderAlpha);
 };
 
 class CharacterMovementSystem
 {
 public:
-	void update(ECSLevel* currentLevel);
-	void processHorizontalMovement(ECSLevel* currentLevel, Entity* self);
-	void processVerticalMovement(ECSLevel* currentLevel, Entity* self);
-	bool willCollideWithSolidAtPosition(ECSLevel* currentLevel, Entity* self, const Vec2 positionToCheck);
+	void update();
+	void processHorizontalMovement(Entity* self);
+	void processVerticalMovement(Entity* self);
+	bool willCollideWithSolidAtPosition(Entity* self, const Vec2 positionToCheck);
 };
 
 class DebugCollidersSystem
 {
 public:
-	void render(ECSLevel* currentLevel, float renderAlpha);
+	void render();
 	void debugRect(Vec2 position, RectCollider collider, SDL_Color color);
 };
