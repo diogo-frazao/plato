@@ -23,6 +23,7 @@ void testResolutions(SDL_Window* window);
 
 ECSLevel firstLevel;
 static bool s_isWindowFullscreen = false;
+static bool s_vsyncEnabled = true;
 
 void App::run()
 {
@@ -52,12 +53,10 @@ void createBlockAtPosition(IVec2 position)
 void App::update()
 {
     bool showDemoWindow = true;
-
     
     Entity& bg = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(bg);
     firstLevel.addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
-    
 
     Entity& player = firstLevel.addEntity();
     firstLevel.addComponentToEntity<TransformComponent>(player);
@@ -155,6 +154,10 @@ void App::update()
         ImGui::DragInt("Player Hitbox size X", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.x), 1.f, 1, 18);
         ImGui::DragInt("Player Hitbox size Y", &(firstLevel.getComponentFromEntity<RectColliderComponent>(player)->collider.size.y), 1.f, 1, 18);
 
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Average %.1f FPS", io.Framerate);
+        ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+
         ImGui::End();
 
         render(renderAlpha);
@@ -216,7 +219,7 @@ void App::initSDL()
         return;
     }
 
-    SDL_SetRenderVSync(s_renderer, true);
+    SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
 
     SDL_SetRenderLogicalPresentation(s_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
     // Change window size after we set the render size to the original 320x180
@@ -268,5 +271,13 @@ void testResolutions(SDL_Window* window)
     {
         s_isWindowFullscreen = !s_isWindowFullscreen;
         SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
+    }
+
+    if (wasKeyPressedThisFrame(SDL_SCANCODE_5))
+    {
+        s_vsyncEnabled = !s_vsyncEnabled;
+        SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
+
+        D_LOG(LOG, "VSync is %s", s_vsyncEnabled ? "enabled" : "disabled");
     }
 }
