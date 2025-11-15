@@ -1,10 +1,15 @@
-cmake_minimum_required(VERSION 3.16)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+cmake_minimum_required(VERSION 3.25)
 
-project("plato")
-add_executable("plato")
-set_property(TARGET "plato" PROPERTY CXX_STANDARD 17)
+project("plato" LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Use runtime lib, enable multi processor compilation, enable hot reloading compilation
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_compile_options(/MP)
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "EditAndContinue")
+endif()
 
 # Disable sdl_image formats we don't care
 set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
@@ -13,10 +18,14 @@ set(SDLIMAGE_TIFF OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_VENDORED OFF CACHE BOOL "" FORCE)
 
+# Look for thirdParty libs
 add_subdirectory(thirdParty/SDL3-3.2.22 EXCLUDE_FROM_ALL)
 add_subdirectory(thirdParty/SDL3_image-3.2.4 EXCLUDE_FROM_ALL)
 add_subdirectory(thirdParty/imgui-docking)
 
+add_executable("plato")
+
+# Create RESOURCES_PATH macro and RELEASE_BUILD
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES STREQUAL "Release")
     target_compile_definitions("plato" PUBLIC RELEASE_BUILD)
     target_compile_definitions("plato" PUBLIC RESOURCES_PATH="./resources")
@@ -24,11 +33,17 @@ else()
     target_compile_definitions("plato" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
 endif()
 
-file(GLOB_RECURSE MY_SOURCE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-target_sources("plato" PRIVATE ${MY_SOURCE})
 
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/*/")
+file(GLOB_RECURSE PLATO_SOURCE CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE PLATO_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+target_sources("plato" PRIVATE ${PLATO_SOURCE} ${PLATO_HEADERS})
 
+target_include_directories(plato PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+# Create Visual Studio filters inside project to match folder structure
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${PLATO_SOURCE} ${PLATO_HEADERS})
+
+# Link libs
 target_link_libraries("plato" PUBLIC SDL3::SDL3 SDL3_image::SDL3_image imgui)
 
 # Copy SDL3 and SDL_image DLLs next to the exe after build
