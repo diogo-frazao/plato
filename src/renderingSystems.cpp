@@ -30,6 +30,7 @@ void DrawSpriteSystem::render(float renderAlpha)
 	if (!s_baseGameBuffer)
 	{
 		s_baseGameBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
+		SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
 		SDL_SetTextureScaleMode(s_baseGameBuffer, SDL_SCALEMODE_NEAREST);
 	}
 
@@ -79,7 +80,7 @@ void DrawSpriteSystem::render(float renderAlpha)
 	}
 }
 
-void LightingSystem::render(SDL_Color s_ambientColor)
+void LightingSystem::render()
 {
 	static SDL_Texture* lightsBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
 	if (!lightsBuffer)
@@ -88,16 +89,14 @@ void LightingSystem::render(SDL_Color s_ambientColor)
 		return;
 	}
 
-	// Draw lights in additive mode, so that we add the base game colors + light color based on the lights on the scene
+	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
 	SDL_SetRenderTarget(s_renderer, lightsBuffer);
 	SDL_SetTextureBlendMode(lightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_SetRenderDrawColor(s_renderer, s_ambientColor.r, s_ambientColor.g, s_ambientColor.b, s_ambientColor.a);
-	SDL_SetTextureAlphaMod(lightsBuffer, s_ambientColor.a);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
 	SDL_RenderClear(s_renderer);
 
-	// TODO: iterate and draw lights to the lights buffer
+	// Draw each light
 	static SDL_Texture* atlasTexture = loadAtlasTexture();
-	SDL_SetTextureBlendMode(atlasTexture, SDL_BLENDMODE_ADD);
 	SDL_SetTextureColorMod(atlasTexture, 255, 0, 0);
 
 	SDL_FRect src;
@@ -120,11 +119,9 @@ void LightingSystem::render(SDL_Color s_ambientColor)
 	SDL_RenderClear(s_renderer);
 
 	// Render base game normally
-	SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
 	SDL_RenderTexture(s_renderer, s_baseGameBuffer, nullptr, nullptr);
 
-	// Render lgihts on top with multiply, 
-	SDL_SetTextureBlendMode(lightsBuffer, SDL_BLENDMODE_MOD);
+	// Render lights on top
 	SDL_RenderTexture(s_renderer, lightsBuffer, nullptr, nullptr);
 }
 

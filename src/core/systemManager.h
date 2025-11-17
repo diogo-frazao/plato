@@ -26,7 +26,7 @@ public:
 class LightingSystem
 {
 public:
-	void render(SDL_Color s_ambientColor);
+	void render();
 };
 
 class CharacterMovementSystem

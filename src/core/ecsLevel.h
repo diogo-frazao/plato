@@ -21,7 +21,7 @@ public:
 	inline void render(float renderAlpha)
 	{
 		_drawSpriteSystem.render(renderAlpha);
-		_lightingSystem.render(_levelAmbientColor);
+		_lightingSystem.render();
 		_debugCollidersSystem.render();
 	}
 
@@ -33,8 +33,6 @@ public:
 	CharacterMovementSystem _characterMovementSystem;
 	DebugCollidersSystem _debugCollidersSystem;
 	LightingSystem _lightingSystem;
-
-	SDL_Color _levelAmbientColor;
 };
 
 class LevelManager

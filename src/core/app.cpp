@@ -25,8 +25,6 @@ ECSLevel firstLevel;
 static bool s_isWindowFullscreen = false;
 static bool s_vsyncEnabled = true;
 
-float s_ambientColor[4] = { 1, 1, 1, 1 };
-
 void App::run()
 {
     init();
@@ -152,12 +150,6 @@ void App::update()
         ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 
         ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
-
-        ImGui::ColorEdit4("Ambient Color", s_ambientColor, ImGuiColorEditFlags_NoInputs);
-        firstLevel._levelAmbientColor.r = (uint8_t)(s_ambientColor[0] * 255);
-        firstLevel._levelAmbientColor.g = (uint8_t)(s_ambientColor[1] * 255);
-        firstLevel._levelAmbientColor.b = (uint8_t)(s_ambientColor[2] * 255);
-        firstLevel._levelAmbientColor.a = (uint8_t)(s_ambientColor[3] * 255);
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Average %.1f FPS", io.Framerate);
