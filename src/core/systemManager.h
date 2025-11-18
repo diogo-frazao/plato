@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lib.h"
+#include "constants.h"
 #include "SDL3/SDL_pixels.h"
 #include <stdint.h>
 
@@ -8,6 +9,7 @@ class ECSLevel;
 class MovementComponent;
 class TransformComponent;
 class Entity;
+class SDL_Texture;
 
 // This needs to be the very first system to run, to ensure positions are saved for rendering interpolation
 // For more information, read Gaffer Fix Your Timestep
@@ -17,16 +19,16 @@ public:
 	void update();
 };
 
-class DrawSpriteSystem
+class RenderingSystem
 {
 public:
+	void createLightsBuffers();
 	void render(float renderAlpha);
-};
-
-class LightingSystem
-{
-public:
-	void render();
+private:
+	SDL_Texture* loadAtlas(AtlasType type);
+	SDL_Texture* _loadedAtlasFiles[k_maxAtlasFiles]{ nullptr, nullptr };
+	SDL_Texture* _backLightsBuffer = nullptr;
+	SDL_Texture* _frontLightsBuffer = nullptr;
 };
 
 class CharacterMovementSystem

@@ -20,6 +20,7 @@ struct SpriteComponent
 
 	IVec2 offset;
 	IVec2 size;
+	AtlasType atlas = GAME;
 };
 
 struct RectColliderComponent

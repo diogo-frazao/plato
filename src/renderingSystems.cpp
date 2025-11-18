@@ -8,43 +8,116 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
-static SDL_Texture* s_baseGameBuffer;
-
-SDL_Texture* loadAtlasTexture()
+SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
-	const std::string atlasPath = RESOURCES_PATH + k_atlasFilePath;
+	SDL_Texture* atlas = _loadedAtlasFiles[type];
+	if (atlas)
+	{
+		return atlas;
+	}
 
-	SDL_Texture* texture = IMG_LoadTexture(s_renderer, atlasPath.c_str());
+	static const std::string artPath = "art/";
+	std::string atlasFilePath = RESOURCES_PATH + artPath;
+	SDL_ScaleMode scaleMode = SDL_SCALEMODE_NEAREST;
+
+	switch (type)
+	{
+		case GAME:
+			atlasFilePath += "atlas.png";
+			break;
+		case LIGHTS:
+			atlasFilePath += "lights_atlas.png";
+			scaleMode = SDL_SCALEMODE_LINEAR;
+			break;
+		default:
+			D_ASSERT(false, "Unknown atlas type to load");
+			return nullptr;
+	}
+
+	SDL_Texture* texture = IMG_LoadTexture(s_renderer, atlasFilePath.c_str());
 	if (!texture)
 	{
 		D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());
 		return nullptr;
 	}
 
-	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+	SDL_SetTextureScaleMode(texture, scaleMode);
+	_loadedAtlasFiles[type] = texture;
+
 	return texture;
 }
 
-void DrawSpriteSystem::render(float renderAlpha)
+void RenderingSystem::createLightsBuffers()
 {
-	if (!s_baseGameBuffer)
+	if (!_backLightsBuffer)
 	{
-		s_baseGameBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
-		SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
-		SDL_SetTextureScaleMode(s_baseGameBuffer, SDL_SCALEMODE_NEAREST);
+		_backLightsBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
 	}
 
-	if (!s_baseGameBuffer)
+	if (!_backLightsBuffer)
 	{
-		D_ASSERT(false, "Game buffer doesnt' exist, can't display sprites: %s", SDL_GetError());
+		D_ASSERT(false, "Lights buffer doesnt' exist, can't apply lighting: %s", SDL_GetError());
 		return;
 	}
 
-	SDL_SetTextureBlendMode(s_baseGameBuffer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderTarget(s_renderer, s_baseGameBuffer);
+	if (!_frontLightsBuffer)
+	{
+		_frontLightsBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
+	}
 
+	if (!_frontLightsBuffer)
+	{
+		D_ASSERT(false, "Lights buffer doesnt' exist, can't apply lighting: %s", SDL_GetError());
+		return;
+	}
+}
+
+void RenderingSystem::render(float renderAlpha)
+{
 	static SDL_FRect src;
-	static SDL_FRect target;
+	static SDL_FRect dest;
+
+	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
+	SDL_SetRenderTarget(s_renderer, _backLightsBuffer);
+	SDL_SetTextureBlendMode(_backLightsBuffer, SDL_BLENDMODE_ADD);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(s_renderer);
+
+	// Draw each light
+	SDL_Texture* lightsTexture = loadAtlas(LIGHTS);
+	SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
+
+	src.x = 45;
+	src.y = 0;
+	src.w = 93;
+	src.h = 90;
+
+	dest.x = 50;
+	dest.y = 50;
+	dest.w = 93;
+	dest.h = 90;
+
+	SDL_RenderTexture(s_renderer, lightsTexture, &src, &dest);
+	SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
+
+	SDL_SetRenderTarget(s_renderer, _frontLightsBuffer);
+	SDL_SetTextureBlendMode(_frontLightsBuffer, SDL_BLENDMODE_ADD);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(s_renderer);
+
+	src.x = 0;
+	src.y = 0;
+	src.w = 45;
+	src.h = 67;
+
+	dest.x = 0;
+	dest.y = 0;
+	dest.w = 45;
+	dest.h = 67;
+
+	SDL_RenderTexture(s_renderer, lightsTexture, &src, &dest);
+
+	SDL_SetRenderTarget(s_renderer, nullptr);
 
 	for (Entity& entity : getAllEntities())
 	{
@@ -55,12 +128,12 @@ void DrawSpriteSystem::render(float renderAlpha)
 		}
 
 		if (!entityHasComponent<SpriteComponent>(entity) || 
-			!entityHasComponent<TransformComponent>(entity))
+			!entityHasComponent<TransformComponent>(entity) || entity.id == 1)
 		{
 			continue;
 		}
 
-		static SDL_Texture* atlasTexture = loadAtlasTexture();
+		SDL_Texture* atlasTexture = loadAtlas(GAME);
 		SpriteComponent* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
 		TransformComponent* transformComponent = getComponentFromEntity<TransformComponent>(entity);
 
@@ -71,58 +144,52 @@ void DrawSpriteSystem::render(float renderAlpha)
 		src.w = spriteComponent->size.x;
 		src.h = spriteComponent->size.y;
 
-		target.x = interpolatedPosition.x;
-		target.y = interpolatedPosition.y;
-		target.w = spriteComponent->size.x;
-		target.h = spriteComponent->size.y;
+		dest.x = interpolatedPosition.x;
+		dest.y = interpolatedPosition.y;
+		dest.w = spriteComponent->size.x;
+		dest.h = spriteComponent->size.y;
 
-		SDL_RenderTexture(s_renderer, atlasTexture, &src, &target);
+		SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
 	}
-}
 
-void LightingSystem::render()
-{
-	static SDL_Texture* lightsBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
-	if (!lightsBuffer)
+	SDL_SetTextureBlendMode(_backLightsBuffer, SDL_BLENDMODE_ADD);
+	SDL_RenderTexture(s_renderer, _backLightsBuffer, nullptr, nullptr);
+
+	for (Entity& entity : getAllEntities())
 	{
-		D_ASSERT(false, "Lights buffer doesnt' exist, can't apply lighting: %s", SDL_GetError());
-		return;
+		//TODO: Consider moving this somewhere else since it's needed for every system
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (!entityHasComponent<SpriteComponent>(entity) ||
+			!entityHasComponent<TransformComponent>(entity) || entity.id != 1)
+		{
+			continue;
+		}
+
+		SDL_Texture* atlasTexture = loadAtlas(GAME);
+		SpriteComponent* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
+		TransformComponent* transformComponent = getComponentFromEntity<TransformComponent>(entity);
+
+		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
+
+		src.x = spriteComponent->offset.x;
+		src.y = spriteComponent->offset.y;
+		src.w = spriteComponent->size.x;
+		src.h = spriteComponent->size.y;
+
+		dest.x = interpolatedPosition.x;
+		dest.y = interpolatedPosition.y;
+		dest.w = spriteComponent->size.x;
+		dest.h = spriteComponent->size.y;
+
+		SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
 	}
 
-	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
-	SDL_SetRenderTarget(s_renderer, lightsBuffer);
-	SDL_SetTextureBlendMode(lightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(s_renderer);
-
-	// Draw each light
-	static SDL_Texture* atlasTexture = loadAtlasTexture();
-	SDL_SetTextureColorMod(atlasTexture, 255, 0, 0);
-
-	SDL_FRect src;
-	src.x = 0;
-	src.y = 180;
-	src.w = 94;
-	src.h = 123;
-
-	SDL_FRect dest;
-	dest.x = 150;
-	dest.y = 80;
-	dest.w = 94;
-	dest.h = 123;
-
-	SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
-	SDL_SetTextureColorMod(atlasTexture, 255, 255, 255);
-
-	// Now start drawing to the window
-	SDL_SetRenderTarget(s_renderer, nullptr);
-	SDL_RenderClear(s_renderer);
-
-	// Render base game normally
-	SDL_RenderTexture(s_renderer, s_baseGameBuffer, nullptr, nullptr);
-
-	// Render lights on top
-	SDL_RenderTexture(s_renderer, lightsBuffer, nullptr, nullptr);
+	SDL_SetTextureBlendMode(_frontLightsBuffer, SDL_BLENDMODE_ADD);
+	SDL_RenderTexture(s_renderer, _frontLightsBuffer, nullptr, nullptr);
 }
 
 void DebugCollidersSystem::render()

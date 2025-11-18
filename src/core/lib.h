@@ -2,6 +2,12 @@
 
 #include <stdint.h>
 
+enum AtlasType
+{
+	GAME,
+	LIGHTS
+};
+
 struct IVec2
 {
 	IVec2() = default;

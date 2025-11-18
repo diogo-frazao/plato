@@ -9,7 +9,7 @@ class ECSLevel
 public:
 	inline void start()
 	{
-		
+		_renderingSystem.createLightsBuffers();
 	}
 
 	inline void update()
@@ -20,8 +20,7 @@ public:
 	
 	inline void render(float renderAlpha)
 	{
-		_drawSpriteSystem.render(renderAlpha);
-		_lightingSystem.render();
+		_renderingSystem.render(renderAlpha);
 		_debugCollidersSystem.render();
 	}
 
@@ -29,10 +28,9 @@ public:
 	ComponentManager _componentManager;
 
 	SavePreviousPositionSystem _savePositionSystem;
-	DrawSpriteSystem _drawSpriteSystem;
+	RenderingSystem _renderingSystem;
 	CharacterMovementSystem _characterMovementSystem;
 	DebugCollidersSystem _debugCollidersSystem;
-	LightingSystem _lightingSystem;
 };
 
 class LevelManager

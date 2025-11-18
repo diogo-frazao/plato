@@ -7,8 +7,9 @@
 inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
 
+// General
 inline constexpr int32_t k_invalidId = -1;
-inline const std::string k_atlasFilePath = "art/atlas.png";
+inline constexpr uint16_t k_maxAtlasFiles = 2;
 
 // Frame rate related
 // Milliseconds divided by target frame rate for physics/game logic
