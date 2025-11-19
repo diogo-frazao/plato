@@ -10,6 +10,7 @@ inline constexpr uint16_t k_maxNumberOfSystems = 10;
 // General
 inline constexpr int32_t k_invalidId = -1;
 inline constexpr uint16_t k_maxAtlasFiles = 2;
+inline constexpr uint16_t k_maxLevels = 1;
 
 // Frame rate related
 // Milliseconds divided by target frame rate for physics/game logic
@@ -26,4 +27,5 @@ inline constexpr int32_t k_displayWindowWidth = 1280;
 inline constexpr int32_t k_displayWindowHeight = 720;
 
 inline struct SDL_Renderer* s_renderer = nullptr;
+inline bool s_vsyncEnabled = true;
 inline bool s_debugCollidersEnabled = false;

@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+
 enum AtlasType
 {
 	GAME,

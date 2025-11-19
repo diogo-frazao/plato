@@ -12,23 +12,18 @@
 #include <string>
 #include <stdint.h>
 
-#include "ecsLevel.h"
-//TODO: remove
-#include "../renderingComponents.h"
-
+#include "level.h"
 #include "input.h"
 
 void drawImguiDockingPreview();
 void testResolutions(SDL_Window* window);
 
-ECSLevel firstLevel;
 static bool s_isWindowFullscreen = false;
-static bool s_vsyncEnabled = true;
 
 void App::run()
 {
     init();
-    firstLevel.start();
+    LevelManager::getCurrentLevel()->start();
     update();
     quit();
 }
@@ -39,47 +34,12 @@ void App::init()
     initImgui();
 }
 
-void createBlockAtPosition(IVec2 position)
-{
-    Entity& block = addEntity();
-    addComponentToEntity<TransformComponent>(block);
-    addComponentToEntity<SpriteComponent>(block)->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
-    getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
-    getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y};
-    addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
-    getComponentFromEntity<RectColliderComponent>(block)->isSolid = true;
-}
-
 void App::update()
 {
     bool showDemoWindow = true;
 
-    LevelManager::s_currentLevel = &firstLevel;
-    
-    Entity& bg = addEntity();
-    addComponentToEntity<TransformComponent>(bg);
-    addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
-
-    Entity& player = addEntity();
-    addComponentToEntity<TransformComponent>(player);
-    SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
-    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
-    movementComponent->maxHorizontalSpeed = 1.5f;
-    movementComponent->runAcceleration = 9.185f;
-    movementComponent->friction = 10.f;
-    movementComponent->maxVerticalSpeed = 3.6f;
-    movementComponent->gravity = 13.f;
-    movementComponent->jumpSpeed = 3.f;
-
-    playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
-    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
-
-    createBlockAtPosition({ 48, 48 });
-
     uint64_t lastFrameTimestamp = SDL_GetTicks();
     float accumulator = 0.0f;
-
-    Entity& enemy = addEntity();
 
     while (true)
     {
@@ -107,15 +67,7 @@ void App::update()
 
         while (accumulator >= k_targetMillisecondsBetweenFrames)
         {
-            firstLevel.update();
-
-            // TODO: remove, placeholder to place tiles
-            if (wasMouseButtonPressedThisFrame(LEFT))
-            {
-                IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
-                IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
-                createBlockAtPosition(gridWorldPosition);
-            }
+            LevelManager::getCurrentLevel()->update();
 
 #ifndef RELEASE_BUILD
             testResolutions(_window);
@@ -139,23 +91,7 @@ void App::update()
             ImGui::ShowDemoWindow(&showDemoWindow);
         }
 
-        ImGui::Begin("Player");
-        auto* movement = getComponentFromEntity<MovementComponent>(player);
-        ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
-        ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 10);
-        ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
-
-        ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
-        ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
-        ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
-
-        ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
-
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Average %.1f FPS", io.Framerate);
-        ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
-
-        ImGui::End();
+        LevelManager::getCurrentLevel()->imguiRender();
 
         render(renderAlpha);
     }
@@ -169,7 +105,7 @@ void App::render(float renderAlpha)
     SDL_SetRenderDrawColorFloat(s_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     SDL_RenderClear(s_renderer);
 
-    firstLevel.render(renderAlpha);
+    LevelManager::getCurrentLevel()->render(renderAlpha);
 
     // TODO: improve this Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;
