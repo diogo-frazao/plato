@@ -178,6 +178,7 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 
 		SDL_Texture* lightsTexture = loadAtlas(spriteComponent->atlas);
 		SDL_SetTextureColorMod(lightsTexture, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
+		SDL_SetTextureAlphaMod(lightsTexture, spriteComponent->color.a);
 
 		_src.x = spriteComponent->offset.x;
 		_src.y = spriteComponent->offset.y;
@@ -191,6 +192,7 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 
 		SDL_RenderTexture(s_renderer, lightsTexture, &_src, &_dest);
 		SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
+		SDL_SetTextureAlphaMod(lightsTexture, 255);
 	}
 }
 

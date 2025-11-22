@@ -47,19 +47,19 @@ void ECSLevel::start()
     addComponentToEntity<SpriteComponent>(darwinLettersLight)->setup({ 45, 0 }, { 95, 86 }, FRONT_LIGHTS, LIGHTS);
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->position = { 220, 55 };
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->scale = { 1.5f, 0.4f };
-    getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 };
+    getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 , 255};
 
     Entity& darwinLettersSmallGlow = addEntity();
     addComponentToEntity<SpriteComponent>(darwinLettersSmallGlow)->setup({ 45, 0 }, { 95, 86 }, FRONT_LIGHTS, LIGHTS);
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->position = { 225, 20 };
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->scale = { 1.35f, 2.f };
-    getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 };
+    getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 , 255};
 
     Entity& streetLampLight = addEntity();
     addComponentToEntity<SpriteComponent>(streetLampLight)->setup({ 0, 0 }, { 44, 86 }, FRONT_LIGHTS, LIGHTS);
     getComponentFromEntity<TransformComponent>(streetLampLight)->position = { 24, 86 };
     getComponentFromEntity<TransformComponent>(streetLampLight)->scale = { 1.f, 1.f };
-    getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 };
+    getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255};
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
