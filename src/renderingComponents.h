@@ -13,18 +13,62 @@ struct TransformComponent
 
 struct SpriteComponent
 {
-	void setup(IVec2 offset, IVec2 size, LayerType layer, AtlasType atlas = GAME)
+	void setSpriteData(SpriteType sprite)
 	{
-		this->offset = offset;
-		this->size = size;
-		this->atlas = atlas;
+		switch (sprite)
+		{
+		case TODO_REMOVE_BG_SPRITE:
+			offset = { 0, 0 };
+			size = { 320, 180 };
+			atlas = GAME_ATLAS;
+			break;
+		case CHARACTER_SPRITE:
+			offset = { 320, 0 };
+			size = { 14, 19 };
+			atlas = GAME_ATLAS;
+			break;
+		case TODO_REMOVE_FG_SPRITE:
+			offset = { 0, 225 };
+			size = { 320, 23 };
+			atlas = GAME_ATLAS;
+			break;
+		case ROUND_LIGHT_SPRITE:
+			offset = { 45, 0 };
+			size = { 95, 86 };
+			atlas = LIGHTS_ATLAS;
+			break;
+		case STREET_LAMP_LIGHT_SPRITE:
+			offset = { 0, 0 };
+			size = { 46, 86 };
+			atlas = LIGHTS_ATLAS;
+			break;
+		case TODO_REMOVE_LEVEL_GEOMETRY_SPRITE:
+			offset = { 0, 180 };
+			size = { 320, 45 };
+			atlas = GAME_ATLAS;
+			break;
+		case TODO_TEMOVE_INVISIBLE_SPRITE:
+			offset = { 336, 0 };
+			size = { 8, 8 };
+			atlas = GAME_ATLAS;
+			break;
+		default:
+			D_ASSERT(false, "Unkown sprite type");
+			return;
+		}
+	}
+
+	void setupTypeForLayer(SpriteType sprite, LayerType layer)
+	{
+		setSpriteData(sprite);
 		this->layer = layer;
 	}
 
 	IVec2 offset;
 	IVec2 size;
-	AtlasType atlas = GAME;
-	LayerType layer = BEHIND_CHAR;
+	AtlasType atlas = GAME_ATLAS;
+	SpriteType sprite = CHARACTER_SPRITE;
+	LayerType layer = BEHIND_CHAR_LAYER;
 	SDL_Color color = { 255, 255, 255, 255 };
 };
 

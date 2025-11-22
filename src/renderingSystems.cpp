@@ -22,10 +22,10 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 
 	switch (type)
 	{
-		case GAME:
+		case GAME_ATLAS:
 			atlasFilePath += "atlas.png";
 			break;
-		case LIGHTS:
+		case LIGHTS_ATLAS:
 			atlasFilePath += "lights_atlas.png";
 			scaleMode = SDL_SCALEMODE_LINEAR;
 			break;
@@ -74,15 +74,15 @@ void RenderingSystem::createLightsBuffers()
 
 void RenderingSystem::render(float renderAlpha)
 {
-	computeLightsAtLayer(BACK_LIGHTS);
-	computeLightsAtLayer(FRONT_LIGHTS);
+	computeLightsAtLayer(BACK_LIGHTS_LAYER);
+	computeLightsAtLayer(FRONT_LIGHTS_LAYER);
 
-	renderSpritesAtLayer(BEHIND_CHAR, renderAlpha);
-	renderLightsAtLayer(BACK_LIGHTS);
-	renderSpritesAtLayer(CHARACTER, renderAlpha);
-	renderSpritesAtLayer(IN_FRONT_CHAR, renderAlpha);
-	renderLightsAtLayer(FRONT_LIGHTS);
-	renderSpritesAtLayer(LEVEL_GEOMETRY, renderAlpha);
+	renderSpritesAtLayer(BEHIND_CHAR_LAYER, renderAlpha);
+	renderLightsAtLayer(BACK_LIGHTS_LAYER);
+	renderSpritesAtLayer(CHARACTER_LAYER, renderAlpha);
+	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
+	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
+	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
 }
 
 void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
@@ -128,10 +128,10 @@ SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
 	SDL_Texture* targetBuffer = nullptr;
 	switch (layer)
 	{
-	case BACK_LIGHTS:
+	case BACK_LIGHTS_LAYER:
 		targetBuffer = _backLightsBuffer;
 		break;
-	case FRONT_LIGHTS:
+	case FRONT_LIGHTS_LAYER:
 		targetBuffer = _frontLightsBuffer;
 		break;
 	default:

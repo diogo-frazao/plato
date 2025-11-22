@@ -9,7 +9,7 @@ int playerEntityId;
 void createBlockAtPosition(IVec2 position)
 {
     Entity& block = addEntity();
-    addComponentToEntity<SpriteComponent>(block)->setup({ 336, 0 }, { 8,8 }, LEVEL_GEOMETRY);
+    addComponentToEntity<SpriteComponent>(block)->setupTypeForLayer(TODO_TEMOVE_INVISIBLE_SPRITE, LEVEL_GEOMETRY_LAYER);
     getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
     getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y };
     addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
@@ -21,7 +21,7 @@ void ECSLevel::start()
 	_renderingSystem.createLightsBuffers();
 
     Entity& bg = addEntity();
-    addComponentToEntity<SpriteComponent>(bg)->setup({ 0,0 }, { 320, 180 }, BEHIND_CHAR);
+    addComponentToEntity<SpriteComponent>(bg)->setupTypeForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
 
     Entity& player = addEntity();
     playerEntityId = player.id;
@@ -34,29 +34,29 @@ void ECSLevel::start()
     movementComponent->gravity = 13.f;
     movementComponent->jumpSpeed = 3.f;
 
-    playerSprite->setup({ 321, 0 }, { 14, 19 }, CHARACTER);
+    playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
 
     Entity& geometry = addEntity({0, 135});
-    addComponentToEntity<SpriteComponent>(geometry)->setup({ 0, 180 }, {320, 45}, LEVEL_GEOMETRY);
+    addComponentToEntity<SpriteComponent>(geometry)->setupTypeForLayer(TODO_REMOVE_LEVEL_GEOMETRY_SPRITE, LEVEL_GEOMETRY_LAYER);
 
     Entity& fg = addEntity({34, 129});
-    addComponentToEntity<SpriteComponent>(fg)->setup({ 0, 225 }, { 320, 23 }, IN_FRONT_CHAR);
+    addComponentToEntity<SpriteComponent>(fg)->setupTypeForLayer(TODO_REMOVE_FG_SPRITE, IN_FRONT_CHAR_LAYER);
 
     Entity& darwinLettersLight = addEntity();
-    addComponentToEntity<SpriteComponent>(darwinLettersLight)->setup({ 45, 0 }, { 95, 86 }, FRONT_LIGHTS, LIGHTS);
+    addComponentToEntity<SpriteComponent>(darwinLettersLight)->setupTypeForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->position = { 220, 55 };
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->scale = { 1.5f, 0.4f };
     getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 , 255};
 
     Entity& darwinLettersSmallGlow = addEntity();
-    addComponentToEntity<SpriteComponent>(darwinLettersSmallGlow)->setup({ 45, 0 }, { 95, 86 }, FRONT_LIGHTS, LIGHTS);
+    addComponentToEntity<SpriteComponent>(darwinLettersSmallGlow)->setupTypeForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->position = { 225, 20 };
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->scale = { 1.35f, 2.f };
     getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 , 255};
 
     Entity& streetLampLight = addEntity();
-    addComponentToEntity<SpriteComponent>(streetLampLight)->setup({ 0, 0 }, { 44, 86 }, FRONT_LIGHTS, LIGHTS);
+    addComponentToEntity<SpriteComponent>(streetLampLight)->setupTypeForLayer(STREET_LAMP_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(streetLampLight)->position = { 24, 86 };
     getComponentFromEntity<TransformComponent>(streetLampLight)->scale = { 1.f, 1.f };
     getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255};
