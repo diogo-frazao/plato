@@ -116,8 +116,8 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 
 		_dest.x = interpolatedPosition.x;
 		_dest.y = interpolatedPosition.y;
-		_dest.w = spriteComponent->size.x;
-		_dest.h = spriteComponent->size.y;
+		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
+		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
 
 		SDL_RenderTexture(s_renderer, loadAtlas(spriteComponent->atlas), &_src, &_dest);
 	}
@@ -186,8 +186,8 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 
 		_dest.x = transformComponent->position.x;
 		_dest.y = transformComponent->position.y;
-		_dest.w = spriteComponent->size.x;
-		_dest.h = spriteComponent->size.y;
+		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
+		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
 
 		SDL_RenderTexture(s_renderer, lightsTexture, &_src, &_dest);
 		SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
@@ -197,20 +197,17 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 void DebugSystem::render()
 {
 #ifndef RELEASE_BUILD
-	if (!s_debugGridEnabled)
+	if (s_debugGridEnabled)
 	{
-		return;
-	}
-
-	for (float x = 0; x < k_baseGameWidth; x += 8.f)
-	{
-		for (float y = 0; y < k_baseGameHeight; y += 8.f)
+		for (float x = 0; x < k_baseGameWidth; x += 8.f)
 		{
-			debugLine({ x, 0 }, {x, k_baseGameHeight }, {255, 0, 255, 255});
-			debugLine({ 0, y }, { k_baseGameWidth, y}, { 255, 0, 255, 255 });
+			for (float y = 0; y < k_baseGameHeight; y += 8.f)
+			{
+				debugLine({ x, 0 }, { x, k_baseGameHeight }, { 255, 0, 255, 255 });
+				debugLine({ 0, y }, { k_baseGameWidth, y }, { 255, 0, 255, 255 });
+			}
 		}
 	}
-
 
 	if (!s_debugCollidersEnabled)
 	{

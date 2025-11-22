@@ -8,6 +8,7 @@ struct TransformComponent
 {
 	Vec2 position;
 	Vec2 previousPosition;
+	Vec2 scale = { 1.f, 1.f };
 };
 
 struct SpriteComponent

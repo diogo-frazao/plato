@@ -4,6 +4,8 @@
 #include "core/componentManager.h"
 #include "core/systemManager.h"
 
+#include "renderingComponents.h"
+
 class ECSLevel
 {
 public:
@@ -33,11 +35,6 @@ struct LevelManager
 };
 
 
-inline Entity& addEntity()
-{
-	return LevelManager::getCurrentLevel()->_entityManager.addEntity();
-}
-
 template<typename T>
 bool entityHasComponent(Entity& entity)
 {
@@ -60,6 +57,13 @@ template<typename T>
 T* getComponentFromEntity(Entity& entity)
 {
 	return LevelManager::getCurrentLevel()->_componentManager.getComponentFromEntity<T>(entity);
+}
+
+inline Entity& addEntity(Vec2 position = Vec2())
+{
+	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
+	addComponentToEntity<TransformComponent>(entity)->position = position;
+	return entity;
 }
 
 inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
