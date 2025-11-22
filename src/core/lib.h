@@ -2,6 +2,15 @@
 
 #include <stdint.h>
 
+enum LayerType
+{
+	BEHIND_CHAR,
+	BACK_LIGHTS,
+	CHARACTER,
+	IN_FRONT_CHAR,
+	FRONT_LIGHTS,
+	LEVEL_GEOMETRY,
+};
 
 enum AtlasType
 {

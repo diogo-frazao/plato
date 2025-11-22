@@ -74,127 +74,144 @@ void RenderingSystem::createLightsBuffers()
 
 void RenderingSystem::render(float renderAlpha)
 {
-	static SDL_FRect src;
-	static SDL_FRect dest;
+	computeLightsAtLayer(BACK_LIGHTS);
+	computeLightsAtLayer(FRONT_LIGHTS);
 
-	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
-	SDL_SetRenderTarget(s_renderer, _backLightsBuffer);
-	SDL_SetTextureBlendMode(_backLightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(s_renderer);
+	renderSpritesAtLayer(BEHIND_CHAR, renderAlpha);
+	renderLightsAtLayer(BACK_LIGHTS);
+	renderSpritesAtLayer(CHARACTER, renderAlpha);
+	renderSpritesAtLayer(IN_FRONT_CHAR, renderAlpha);
+	renderLightsAtLayer(FRONT_LIGHTS);
+	renderSpritesAtLayer(LEVEL_GEOMETRY, renderAlpha);
+}
 
-	// Draw each light
-	SDL_Texture* lightsTexture = loadAtlas(LIGHTS);
-	SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
-
-	src.x = 45;
-	src.y = 0;
-	src.w = 93;
-	src.h = 90;
-
-	dest.x = 50;
-	dest.y = 50;
-	dest.w = 93;
-	dest.h = 90;
-
-	SDL_RenderTexture(s_renderer, lightsTexture, &src, &dest);
-	SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
-
-	SDL_SetRenderTarget(s_renderer, _frontLightsBuffer);
-	SDL_SetTextureBlendMode(_frontLightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(s_renderer);
-
-	src.x = 0;
-	src.y = 0;
-	src.w = 45;
-	src.h = 67;
-
-	dest.x = 0;
-	dest.y = 0;
-	dest.w = 45;
-	dest.h = 67;
-
-	SDL_RenderTexture(s_renderer, lightsTexture, &src, &dest);
-
+void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
+{
+	// Render directly to the window
 	SDL_SetRenderTarget(s_renderer, nullptr);
 
 	for (Entity& entity : getAllEntities())
 	{
-		//TODO: Consider moving this somewhere else since it's needed for every system
-		if (entity.id == k_invalidId)
-		{
-			continue;
-		}
-
-		if (!entityHasComponent<SpriteComponent>(entity) || 
-			!entityHasComponent<TransformComponent>(entity) || entity.id == 1)
-		{
-			continue;
-		}
-
-		SDL_Texture* atlasTexture = loadAtlas(GAME);
-		SpriteComponent* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
-		TransformComponent* transformComponent = getComponentFromEntity<TransformComponent>(entity);
-
-		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
-
-		src.x = spriteComponent->offset.x;
-		src.y = spriteComponent->offset.y;
-		src.w = spriteComponent->size.x;
-		src.h = spriteComponent->size.y;
-
-		dest.x = interpolatedPosition.x;
-		dest.y = interpolatedPosition.y;
-		dest.w = spriteComponent->size.x;
-		dest.h = spriteComponent->size.y;
-
-		SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
-	}
-
-	SDL_SetTextureBlendMode(_backLightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_RenderTexture(s_renderer, _backLightsBuffer, nullptr, nullptr);
-
-	for (Entity& entity : getAllEntities())
-	{
-		//TODO: Consider moving this somewhere else since it's needed for every system
 		if (entity.id == k_invalidId)
 		{
 			continue;
 		}
 
 		if (!entityHasComponent<SpriteComponent>(entity) ||
-			!entityHasComponent<TransformComponent>(entity) || entity.id != 1)
+			(getComponentFromEntity<SpriteComponent>(entity)->layer != layer) ||
+			!entityHasComponent<TransformComponent>(entity))
 		{
 			continue;
 		}
 
-		SDL_Texture* atlasTexture = loadAtlas(GAME);
 		SpriteComponent* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
 		TransformComponent* transformComponent = getComponentFromEntity<TransformComponent>(entity);
 
 		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
 
-		src.x = spriteComponent->offset.x;
-		src.y = spriteComponent->offset.y;
-		src.w = spriteComponent->size.x;
-		src.h = spriteComponent->size.y;
+		_src.x = spriteComponent->offset.x;
+		_src.y = spriteComponent->offset.y;
+		_src.w = spriteComponent->size.x;
+		_src.h = spriteComponent->size.y;
 
-		dest.x = interpolatedPosition.x;
-		dest.y = interpolatedPosition.y;
-		dest.w = spriteComponent->size.x;
-		dest.h = spriteComponent->size.y;
+		_dest.x = interpolatedPosition.x;
+		_dest.y = interpolatedPosition.y;
+		_dest.w = spriteComponent->size.x;
+		_dest.h = spriteComponent->size.y;
 
-		SDL_RenderTexture(s_renderer, atlasTexture, &src, &dest);
+		SDL_RenderTexture(s_renderer, loadAtlas(spriteComponent->atlas), &_src, &_dest);
 	}
-
-	SDL_SetTextureBlendMode(_frontLightsBuffer, SDL_BLENDMODE_ADD);
-	SDL_RenderTexture(s_renderer, _frontLightsBuffer, nullptr, nullptr);
 }
 
-void DebugCollidersSystem::render()
+SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
+{
+	SDL_Texture* targetBuffer = nullptr;
+	switch (layer)
+	{
+	case BACK_LIGHTS:
+		targetBuffer = _backLightsBuffer;
+		break;
+	case FRONT_LIGHTS:
+		targetBuffer = _frontLightsBuffer;
+		break;
+	default:
+		D_ASSERT(false, "Invalid light layer to compute");
+		return nullptr;
+	}
+
+	return targetBuffer;
+}
+
+void RenderingSystem::renderLightsAtLayer(LayerType layer)
+{
+	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
+	SDL_RenderTexture(s_renderer, targetBuffer, nullptr, nullptr);
+}
+
+void RenderingSystem::computeLightsAtLayer(LayerType layer)
+{
+	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
+
+	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
+	SDL_SetRenderTarget(s_renderer, targetBuffer);
+	SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_ADD);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(s_renderer);
+
+	// Draw each light
+	for (Entity& entity : getAllEntities())
+	{
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (!entityHasComponent<SpriteComponent>(entity) ||
+			(getComponentFromEntity<SpriteComponent>(entity)->layer != layer) ||
+			!entityHasComponent<TransformComponent>(entity))
+		{
+			continue;
+		}
+
+		auto* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
+		auto* transformComponent = getComponentFromEntity<TransformComponent>(entity);
+
+		SDL_Texture* lightsTexture = loadAtlas(spriteComponent->atlas);
+		SDL_SetTextureColorMod(lightsTexture, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
+
+		_src.x = spriteComponent->offset.x;
+		_src.y = spriteComponent->offset.y;
+		_src.w = spriteComponent->size.x;
+		_src.h = spriteComponent->size.y;
+
+		_dest.x = transformComponent->position.x;
+		_dest.y = transformComponent->position.y;
+		_dest.w = spriteComponent->size.x;
+		_dest.h = spriteComponent->size.y;
+
+		SDL_RenderTexture(s_renderer, lightsTexture, &_src, &_dest);
+		SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
+	}
+}
+
+void DebugSystem::render()
 {
 #ifndef RELEASE_BUILD
+	if (!s_debugGridEnabled)
+	{
+		return;
+	}
+
+	for (float x = 0; x < k_baseGameWidth; x += 8.f)
+	{
+		for (float y = 0; y < k_baseGameHeight; y += 8.f)
+		{
+			debugLine({ x, 0 }, {x, k_baseGameHeight }, {255, 0, 255, 255});
+			debugLine({ 0, y }, { k_baseGameWidth, y}, { 255, 0, 255, 255 });
+		}
+	}
+
+
 	if (!s_debugCollidersEnabled)
 	{
 		return;
@@ -255,13 +272,20 @@ void DebugCollidersSystem::render()
 #endif // RELEASE_BUILD
 }
 
-void DebugCollidersSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color color)
+void DebugSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
 	Vec2 colliderPosition = getColliderPosition(position, collider);
 	SDL_FRect debugRect{ colliderPosition.x, colliderPosition.y, (float)collider.size.x, (float)collider.size.y };
 	SDL_RenderRect(s_renderer, &debugRect);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 1);
+	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
+}
+
+void DebugSystem::debugLine(Vec2 start, Vec2 end, SDL_Color color)
+{
+	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderLine(s_renderer, start.x, start.y, end.x, end.y);
+	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
 }
 
 #pragma region Movement Systems
@@ -463,7 +487,7 @@ bool CharacterMovementSystem::willCollideWithSolidAtPosition(Entity* self, const
 			continue;
 		}
 
-		if (!getComponentFromEntity<RectColliderComponent>(entity)->isSolid)
+		if (!getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
 		{
 			continue;
 		}

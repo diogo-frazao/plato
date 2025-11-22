@@ -12,22 +12,26 @@ struct TransformComponent
 
 struct SpriteComponent
 {
-	void setupWithOffsetAndSize(IVec2 offset, IVec2 size)
+	void setup(IVec2 offset, IVec2 size, LayerType layer, AtlasType atlas = GAME)
 	{
 		this->offset = offset;
 		this->size = size;
+		this->atlas = atlas;
+		this->layer = layer;
 	}
 
 	IVec2 offset;
 	IVec2 size;
 	AtlasType atlas = GAME;
+	LayerType layer = BEHIND_CHAR;
+	SDL_Color color = { 255, 255, 255, 255 };
 };
 
 struct RectColliderComponent
 {
 	RectCollider collider;
 	// This is what actors will check collision against when moving
-	bool isSolid = false;
+	bool isLevelGeometry = false;
 };
 
 struct MovementComponent

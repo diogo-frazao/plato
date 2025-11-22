@@ -10,11 +10,11 @@ void createBlockAtPosition(IVec2 position)
 {
     Entity& block = addEntity();
     addComponentToEntity<TransformComponent>(block);
-    addComponentToEntity<SpriteComponent>(block)->setupWithOffsetAndSize({ 336, 0 }, { 8,8 });
+    addComponentToEntity<SpriteComponent>(block)->setup({ 336, 0 }, { 8,8 }, LEVEL_GEOMETRY);
     getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
     getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y };
     addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { 8, 8 });
-    getComponentFromEntity<RectColliderComponent>(block)->isSolid = true;
+    getComponentFromEntity<RectColliderComponent>(block)->isLevelGeometry = true;
 }
 
 void ECSLevel::start()
@@ -23,7 +23,7 @@ void ECSLevel::start()
 
     Entity& bg = addEntity();
     addComponentToEntity<TransformComponent>(bg);
-    addComponentToEntity<SpriteComponent>(bg)->setupWithOffsetAndSize({ 0,0 }, { 320, 180 });
+    addComponentToEntity<SpriteComponent>(bg)->setup({ 0,0 }, { 320, 180 }, BEHIND_CHAR);
 
     Entity& player = addEntity();
     playerEntityId = player.id;
@@ -37,10 +37,20 @@ void ECSLevel::start()
     movementComponent->gravity = 13.f;
     movementComponent->jumpSpeed = 3.f;
 
-    playerSprite->setupWithOffsetAndSize({ 321, 0 }, { 14, 19 });
+    playerSprite->setup({ 321, 0 }, { 14, 19 }, CHARACTER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
 
-    createBlockAtPosition({ 48, 48 });
+    Entity& geometry = addEntity();
+    addComponentToEntity<TransformComponent>(geometry)->position = { 0, 135 };
+    addComponentToEntity<SpriteComponent>(geometry)->setup({ 0, 180 }, {320, 45}, LEVEL_GEOMETRY);
+
+    Entity& fg = addEntity();
+    addComponentToEntity<TransformComponent>(fg)->position = { 34, 129 };
+    addComponentToEntity<SpriteComponent>(fg)->setup({ 0, 225 }, { 320, 23 }, IN_FRONT_CHAR);
+
+    Entity& letterLight = addEntity();
+    addComponentToEntity<TransformComponent>(letterLight)->position = { 0,0 };
+    addComponentToEntity<SpriteComponent>(letterLight)->setup({ 139, 0 }, { 130, 130 }, FRONT_LIGHTS, LIGHTS);
 }
 
 void ECSLevel::update()
@@ -73,6 +83,10 @@ void ECSLevel::imguiRender()
     ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
+    ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
+
+    ImGui::Text("Mouse X: %i", (int)s_mousePositionThisFrame.x);
+    ImGui::Text("Mouse Y: %i", (int)s_mousePositionThisFrame.y);
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Average %.1f FPS", io.Framerate);

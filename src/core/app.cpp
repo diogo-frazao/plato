@@ -99,10 +99,8 @@ void App::update()
 
 void App::render(float renderAlpha)
 {
-    static constexpr ImVec4 backgroundColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
     ImGui::Render();
-    SDL_SetRenderDrawColorFloat(s_renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+    SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
     SDL_RenderClear(s_renderer);
 
     LevelManager::getCurrentLevel()->render(renderAlpha);

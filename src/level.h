@@ -18,7 +18,7 @@ public:
 	SavePreviousPositionSystem _savePositionSystem;
 	RenderingSystem _renderingSystem;
 	CharacterMovementSystem _characterMovementSystem;
-	DebugCollidersSystem _debugCollidersSystem;
+	DebugSystem _debugCollidersSystem;
 };
 
 struct LevelManager
