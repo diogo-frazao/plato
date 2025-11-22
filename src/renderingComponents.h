@@ -42,6 +42,11 @@ struct SpriteComponent
 			size = { 46, 86 };
 			atlas = LIGHTS_ATLAS;
 			break;
+		case ROUND_SOFT_LIGHT_SPRITE:
+			offset = { 139, 0 };
+			size = { 133, 129 };
+			atlas = LIGHTS_ATLAS;
+			break;
 		case TODO_REMOVE_LEVEL_GEOMETRY_SPRITE:
 			offset = { 0, 180 };
 			size = { 320, 45 };

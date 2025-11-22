@@ -5,6 +5,7 @@
 #include "imgui.h"
 
 int playerEntityId;
+int lightThatFollowsPlayerEntityId;
 
 void createBlockAtPosition(IVec2 position)
 {
@@ -60,6 +61,19 @@ void ECSLevel::start()
     getComponentFromEntity<TransformComponent>(streetLampLight)->position = { 24, 86 };
     getComponentFromEntity<TransformComponent>(streetLampLight)->scale = { 1.f, 1.f };
     getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255};
+
+    Entity& streetLampGlow = addEntity();
+    addComponentToEntity<SpriteComponent>(streetLampGlow)->setupTypeForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    getComponentFromEntity<TransformComponent>(streetLampGlow)->position = { 36, 88 };
+    getComponentFromEntity<TransformComponent>(streetLampGlow)->scale = { 0.2f, 0.2f };
+    getComponentFromEntity<SpriteComponent>(streetLampGlow)->color = { 125, 50, 0 , 200 };
+
+    Entity& lightThatFollowsPlayer = addEntity();
+    addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupTypeForLayer(ROUND_SOFT_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
+    getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = { 36, 88 };
+    getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
+    getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
+    lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -140,6 +154,17 @@ void ECSLevel::update()
             }
         }
     }
+
+    Entity& player = getEntityById(playerEntityId);
+    Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
+
+    TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
+    SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
+    auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
+
+    Vec2 targetPos = { playerTransform->position.x - 25,
+                       playerTransform->position.y - 25};
+    getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
 
 	_savePositionSystem.update();
 	_characterMovementSystem.update();
