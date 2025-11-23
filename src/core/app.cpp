@@ -77,7 +77,8 @@ void App::update()
             accumulator -= k_targetMillisecondsBetweenFrames;
         }
 
-        float renderAlpha = accumulator / k_targetMillisecondsBetweenFrames;
+        //TODO: Fix. Hacky fix for now for jittery movement. Force renderALpha to be 0.4 since it looks smooth
+        float renderAlpha = 0.4f;
 
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
