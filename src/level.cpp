@@ -34,6 +34,7 @@ void ECSLevel::start()
     movementComponent->maxVerticalSpeed = 3.6f;
     movementComponent->gravity = 13.f;
     movementComponent->jumpSpeed = 3.f;
+    movementComponent->coyoteTime = 0.1f;
 
     playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
@@ -180,6 +181,9 @@ void ECSLevel::imguiRender()
     ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
     ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 10);
     ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
+
+    ImGui::SliderFloat("Player Coyote time", &(movement->coyoteTime), 0.f, 1.f);
+    ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
 
     ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
     ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);

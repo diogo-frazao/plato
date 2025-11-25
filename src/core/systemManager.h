@@ -48,6 +48,8 @@ public:
 	void processHorizontalMovement(Entity* self);
 	void processVerticalMovement(Entity* self);
 	bool willCollideWithSolidAtPosition(Entity* self, const Vec2 positionToCheck);
+
+	void handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded);
 };
 
 class DebugSystem

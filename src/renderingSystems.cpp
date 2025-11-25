@@ -308,6 +308,27 @@ void SavePreviousPositionSystem::update()
 	}
 }
 
+float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
+{
+	float horizontalSpeedMultiplier = 1.f;
+
+	if (!movementComponent->isGrounded)
+	{
+		horizontalSpeedMultiplier = 0.75f;
+	}
+	else
+	{
+		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
+									  (isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
+		if (wantsToChangeDirection)
+		{
+			horizontalSpeedMultiplier = 3.f;
+		}
+	}
+
+	return horizontalSpeedMultiplier;
+}
+
 void CharacterMovementSystem::update()
 {
 	for (Entity& entity : getAllEntities())
@@ -326,24 +347,7 @@ void CharacterMovementSystem::update()
 		auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
 		auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
 
-		bool isMovingHorizontally = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
-		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
-			(isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
-
-		float horizontalSpeedMultiplier = 1.f;
-
-		if (!movementComponent->isGrounded)
-		{
-			horizontalSpeedMultiplier = 0.75f;
-		}
-		else
-		{
-			if (wantsToChangeDirection)
-			{
-				horizontalSpeedMultiplier = 3.f;
-			}
-		}
-
+		//TODO: remove debug to reset player pos
 		if (isKeyDown(SDL_SCANCODE_Q))
 		{
 			transformComponent->previousPosition = Vec2(0, 0);
@@ -352,29 +356,41 @@ void CharacterMovementSystem::update()
 			movementComponent->currentSpeed.y = 0;
 		}
 
+		bool wasGrounded = movementComponent->isGrounded;
+		float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
+
+		// Right movement
 		if (isKeyDown(SDL_SCANCODE_D))
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
 				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
 		}
 
+		// Left Movement
 		if (isKeyDown(SDL_SCANCODE_A))
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
 				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
 		}
 
+		// Jump
+		bool canCoyoteJump = (movementComponent->timeSinceLeftPlatform > k_invalidId && movementComponent->timeSinceLeftPlatform <= movementComponent->coyoteTime);
+		bool canJump = movementComponent->isGrounded || (canCoyoteJump);
+		if (wasKeyPressedThisFrame(SDL_SCANCODE_SPACE) && canJump)
+		{
+			movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
+			movementComponent->isGrounded = false;
+			movementComponent->timeSinceLeftPlatform = k_invalidId;
+		}
+
+		// Friction
+		bool isMovingHorizontally = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
 		if (!isMovingHorizontally)
 		{
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
 		}
 
-		if (isKeyDown(SDL_SCANCODE_SPACE) && movementComponent->isGrounded)
-		{
-			movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
-			movementComponent->isGrounded = false;
-		}
-
+		// Gravity
 		if (!movementComponent->isGrounded)
 		{
 			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
@@ -382,6 +398,9 @@ void CharacterMovementSystem::update()
 
 		processHorizontalMovement(&character);
 		processVerticalMovement(&character);
+
+		// After vertical movement was processed and isGrounded was updated, check coyoteTime
+		handleCoyoteTime(movementComponent, wasGrounded);
 	}
 }
 
@@ -466,6 +485,30 @@ void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 			movementComponent->currentSpeed.x = 0;
 			return;
 		}
+	}
+}
+
+void CharacterMovementSystem::handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded)
+{
+	bool leftPlatformOnThisFrame = (wasGrounded && !movementComponent->isGrounded) && !wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
+	if (leftPlatformOnThisFrame)
+	{
+		movementComponent->timeSinceLeftPlatform = 0.f;
+	}
+
+	bool isCoyoteTimerActive = movementComponent->timeSinceLeftPlatform > k_invalidId;
+	if (!isCoyoteTimerActive)
+	{
+		return;
+	}
+
+	if (!movementComponent->isGrounded)
+	{
+		movementComponent->timeSinceLeftPlatform += k_deltaTime;
+	}
+	else
+	{
+		movementComponent->timeSinceLeftPlatform = k_invalidId;
 	}
 }
 

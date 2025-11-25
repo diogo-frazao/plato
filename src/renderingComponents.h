@@ -104,5 +104,11 @@ struct MovementComponent
 	// How much is left from one frame to the other. We only move when it's whole pixels
 	Vec2 remainder;
 
+	// How many seconds we can still jump after leaving a platform
+	float coyoteTime;
+
 	bool isGrounded = false;
+
+	// How many seconds have passed since we walked off a platform. Jumping doesn't count.
+	float timeSinceLeftPlatform = k_invalidId;
 };
