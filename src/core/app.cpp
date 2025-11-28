@@ -78,7 +78,7 @@ void App::update()
         }
 
         //TODO: Fix. Hacky fix for now for jittery movement. Force renderALpha to be 0.4 since it looks smooth
-        float renderAlpha = 0.4f;
+        float renderAlpha = 0.5f;
 
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();

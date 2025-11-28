@@ -34,7 +34,7 @@ void ECSLevel::start()
     movementComponent->maxVerticalSpeed = 3.6f;
     movementComponent->gravity = 13.f;
     movementComponent->jumpSpeed = 3.f;
-    movementComponent->coyoteTime = 0.1f;
+    movementComponent->coyoteTime = 0.12f;
 
     playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
@@ -160,6 +160,7 @@ void ECSLevel::update()
     Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
 
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
+    auto* playerSprite = getComponentFromEntity<SpriteComponent>(player);
     SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
     auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
 
@@ -169,6 +170,14 @@ void ECSLevel::update()
 
 	_savePositionSystem.update();
 	_characterMovementSystem.update();
+
+    // After all systems, update camera
+    _levelCamera.minX = -320;
+    _levelCamera.maxX = 0;
+    _levelCamera.followTargetRatio = 0.06f;
+    _levelCamera.targetPosition = { playerTransform->position.x - (k_baseGameWidth / 2), 0};
+    _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+    _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
 }
 
 void ECSLevel::imguiRender()

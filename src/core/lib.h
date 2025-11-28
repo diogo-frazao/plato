@@ -57,6 +57,21 @@ struct RectCollider
 	IVec2 size;
 };
 
+inline int32_t clamp(int32_t value, int32_t min, int32_t max)
+{
+	if (value < min)
+	{
+		min;
+	}
+
+	if (value > max)
+	{
+		return max;
+	}
+
+	return value;
+}
+
 inline uint64_t min(uint64_t value, uint64_t max)
 {
 	if (value > max)

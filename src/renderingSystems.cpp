@@ -109,12 +109,14 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 
 		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
 
+		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+
 		_src.x = spriteComponent->offset.x;
 		_src.y = spriteComponent->offset.y;
 		_src.w = spriteComponent->size.x;
 		_src.h = spriteComponent->size.y;
 
-		_dest.x = interpolatedPosition.x;
+		_dest.x = interpolatedPosition.x - cameraPosition.x;
 		_dest.y = interpolatedPosition.y;
 		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
 		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
@@ -180,12 +182,14 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 		SDL_SetTextureColorMod(lightsTexture, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
 		SDL_SetTextureAlphaMod(lightsTexture, spriteComponent->color.a);
 
+		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+
 		_src.x = spriteComponent->offset.x;
 		_src.y = spriteComponent->offset.y;
 		_src.w = spriteComponent->size.x;
 		_src.h = spriteComponent->size.y;
 
-		_dest.x = transformComponent->position.x;
+		_dest.x = transformComponent->position.x - cameraPosition.x;
 		_dest.y = transformComponent->position.y;
 		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
 		_dest.h = spriteComponent->size.y * transformComponent->scale.y;

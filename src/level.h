@@ -5,6 +5,17 @@
 #include "core/systemManager.h"
 
 #include "renderingComponents.h"
+#include "core/lib.h"
+
+struct Camera
+{
+	// 0 = will never move, 1 = exactly at target pos
+	float followTargetRatio = 0.f;
+	int32_t minX = 0;
+	int32_t maxX = 0;
+	Vec2 targetPosition;
+	Vec2 position;
+};
 
 class ECSLevel
 {
@@ -13,6 +24,8 @@ public:
 	void update();
 	void imguiRender();
 	void render(float renderAlpha);
+
+	Camera _levelCamera;
 
 	EntityManager _entityManager;
 	ComponentManager _componentManager;
