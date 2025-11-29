@@ -322,8 +322,8 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 	}
 	else
 	{
-		bool wantsToChangeDirection = (isKeyDown(SDL_SCANCODE_D) && movementComponent->currentSpeed.x < 0.f) ||
-									  (isKeyDown(SDL_SCANCODE_A) && movementComponent->currentSpeed.x > 0.f);
+		bool wantsToChangeDirection = (isKeyDown(s_moveRightKey) && movementComponent->currentSpeed.x < 0.f) ||
+									  (isKeyDown(s_moveLeftKey) && movementComponent->currentSpeed.x > 0.f);
 		if (wantsToChangeDirection)
 		{
 			horizontalSpeedMultiplier = 3.f;
@@ -335,77 +335,74 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 
 void CharacterMovementSystem::update()
 {
-	for (Entity& entity : getAllEntities())
+	Entity& character = getEntityById(k_playerEntityId);
+
+	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
+	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
+
+	//TODO: remove debug to reset player pos
+	if (isKeyDown(SDL_SCANCODE_Q))
 	{
-		if (entity.id == k_invalidId)
-		{
-			continue;
-		}
-
-		if (!entityHasComponent<MovementComponent>(entity) || !entityHasComponent<TransformComponent>(entity))
-		{
-			continue;
-		}
-
-		Entity& character = entity;
-		auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
-		auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
-
-		//TODO: remove debug to reset player pos
-		if (isKeyDown(SDL_SCANCODE_Q))
-		{
-			transformComponent->previousPosition = Vec2(0, 0);
-			transformComponent->position = Vec2(0, 0);
-			movementComponent->currentSpeed.x = 0;
-			movementComponent->currentSpeed.y = 0;
-		}
-
-		bool wasGrounded = movementComponent->isGrounded;
-		float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
-
-		// Right movement
-		if (isKeyDown(SDL_SCANCODE_D))
-		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
-				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
-		}
-
-		// Left Movement
-		if (isKeyDown(SDL_SCANCODE_A))
-		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
-				movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
-		}
-
-		// Jump
-		bool canCoyoteJump = (movementComponent->timeSinceLeftPlatform > k_invalidId && movementComponent->timeSinceLeftPlatform <= movementComponent->coyoteTime);
-		bool canJump = movementComponent->isGrounded || (canCoyoteJump);
-		if (wasKeyPressedThisFrame(SDL_SCANCODE_SPACE) && canJump)
-		{
-			movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
-			movementComponent->isGrounded = false;
-			movementComponent->timeSinceLeftPlatform = k_invalidId;
-		}
-
-		// Friction
-		bool isMovingHorizontally = isKeyDown(SDL_SCANCODE_D) || isKeyDown(SDL_SCANCODE_A);
-		if (!isMovingHorizontally)
-		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
-		}
-
-		// Gravity
-		if (!movementComponent->isGrounded)
-		{
-			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
-		}
-
-		processHorizontalMovement(&character);
-		processVerticalMovement(&character);
-
-		// After vertical movement was processed and isGrounded was updated, check coyoteTime
-		handleCoyoteTime(movementComponent, wasGrounded);
+		transformComponent->previousPosition = Vec2(0, 0);
+		transformComponent->position = Vec2(0, 0);
+		movementComponent->currentSpeed.x = 0;
+		movementComponent->currentSpeed.y = 0;
 	}
+
+	bool wasGrounded = movementComponent->isGrounded;
+	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
+
+	bool isMovingRight = isKeyDown(s_moveRightKey) && !isKeyDown(s_moveLeftKey);
+	bool isMovingLeft = isKeyDown(s_moveLeftKey) && !isKeyDown(s_moveRightKey);
+
+	// Right movement
+	if (isMovingRight)
+	{
+		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
+			movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
+	}
+
+	// Left Movement
+	if (isMovingLeft)
+	{
+		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
+			movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
+	}
+
+	// Jump
+	bool canCoyoteJump = (movementComponent->timeSinceLeftPlatform > k_invalidId && movementComponent->timeSinceLeftPlatform <= movementComponent->coyoteTime);
+	bool canJump = movementComponent->isGrounded || (canCoyoteJump);
+	if (wasKeyPressedThisFrame(s_jumpKey) && canJump)
+	{
+		movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
+		movementComponent->isGrounded = false;
+		movementComponent->timeSinceLeftPlatform = k_invalidId;
+	}
+
+	if (wasKeyReleasedThisFrame(s_jumpKey))
+	{
+		//movementComponent->currentSpeed.y *= 0.5f;
+		//movementComponent->gravity *= 0.95f;
+	}
+
+	// Friction
+	bool isMovingHorizontally = isMovingRight || isMovingLeft;
+	if (!isMovingHorizontally)
+	{
+		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
+	}
+
+	// Gravity
+	if (!movementComponent->isGrounded)
+	{
+		movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
+	}
+
+	processHorizontalMovement(&character);
+	processVerticalMovement(&character);
+
+	// After vertical movement was processed and isGrounded was updated, check coyoteTime
+	handleCoyoteTime(movementComponent, wasGrounded);
 }
 
 void CharacterMovementSystem::processVerticalMovement(Entity* self)
@@ -441,9 +438,9 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection };
 		if (!willCollideWithSolidAtPosition(self, positionToCheck))
 		{
-			transformComponent->position.y += movementDirection;
-			pixelsToMove -= movementDirection;
-		}
+				transformComponent->position.y += movementDirection;
+				pixelsToMove -= movementDirection;
+			}
 		else
 		{
 			bool isFalling = movementComponent->currentSpeed.y > 0.f;
@@ -494,7 +491,7 @@ void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 
 void CharacterMovementSystem::handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded)
 {
-	bool leftPlatformOnThisFrame = (wasGrounded && !movementComponent->isGrounded) && !wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
+	bool leftPlatformOnThisFrame = (wasGrounded && !movementComponent->isGrounded) && !wasKeyPressedThisFrame(s_jumpKey);
 	if (leftPlatformOnThisFrame)
 	{
 		movementComponent->timeSinceLeftPlatform = 0.f;

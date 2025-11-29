@@ -61,7 +61,7 @@ inline int32_t clamp(int32_t value, int32_t min, int32_t max)
 {
 	if (value < min)
 	{
-		min;
+		return min;
 	}
 
 	if (value > max)

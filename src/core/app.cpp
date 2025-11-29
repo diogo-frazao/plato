@@ -63,6 +63,12 @@ void App::update()
 
             handleKeyboardInput(event);
             handleMouseInput(event);
+
+            //TODO: Remove press esc to close game
+            if (wasKeyPressedThisFrame(SDL_SCANCODE_ESCAPE))
+            {
+                return;
+            }
         }
 
         while (accumulator >= k_targetMillisecondsBetweenFrames)

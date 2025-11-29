@@ -6,6 +6,10 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
 
+inline SDL_Scancode s_jumpKey = SDL_SCANCODE_W;
+inline SDL_Scancode s_moveRightKey = SDL_SCANCODE_D;
+inline SDL_Scancode s_moveLeftKey = SDL_SCANCODE_A;
+
 struct KeyState
 {
 	bool isDown = false;

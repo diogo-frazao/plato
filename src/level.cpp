@@ -4,7 +4,6 @@
 #include "renderingComponents.h"
 #include "imgui.h"
 
-int playerEntityId;
 int lightThatFollowsPlayerEntityId;
 
 void createBlockAtPosition(IVec2 position)
@@ -21,23 +20,22 @@ void ECSLevel::start()
 {
 	_renderingSystem.createLightsBuffers();
 
-    Entity& bg = addEntity();
-    addComponentToEntity<SpriteComponent>(bg)->setupTypeForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
-
     Entity& player = addEntity();
-    playerEntityId = player.id;
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     movementComponent->maxHorizontalSpeed = 1.5f;
     movementComponent->runAcceleration = 9.185f;
     movementComponent->friction = 10.f;
     movementComponent->maxVerticalSpeed = 3.6f;
-    movementComponent->gravity = 13.f;
-    movementComponent->jumpSpeed = 3.f;
+    movementComponent->gravity = 12.2f;
+    movementComponent->jumpSpeed = 4.f;
     movementComponent->coyoteTime = 0.12f;
 
     playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
+
+    Entity& bg = addEntity();
+    addComponentToEntity<SpriteComponent>(bg)->setupTypeForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
 
     Entity& geometry = addEntity({0, 135});
     addComponentToEntity<SpriteComponent>(geometry)->setupTypeForLayer(TODO_REMOVE_LEVEL_GEOMETRY_SPRITE, LEVEL_GEOMETRY_LAYER);
@@ -156,7 +154,7 @@ void ECSLevel::update()
         }
     }
 
-    Entity& player = getEntityById(playerEntityId);
+    Entity& player = getEntityById(k_playerEntityId);
     Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
 
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
@@ -184,17 +182,22 @@ void ECSLevel::imguiRender()
 {
     ImGui::Begin("Player");
 
-    Entity& player = getEntityById(playerEntityId);
+    Entity& player = getEntityById(k_playerEntityId);
 
     auto* movement = getComponentFromEntity<MovementComponent>(player);
     ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
-    ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 10);
+    ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 20.f);
     ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
 
     ImGui::SliderFloat("Player Coyote time", &(movement->coyoteTime), 0.f, 1.f);
     ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
 
+    ImGui::SliderFloat("Player Max V Speed", &(movement->maxVerticalSpeed), 0.1f, 5.f);
+    ImGui::SliderFloat("Player Jump Speed", &(movement->jumpSpeed), 0.1f, 5.f);
+    ImGui::SliderFloat("Player Gravity", &(movement->gravity), 5.f, 20.f);
+
     ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
+    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
     ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
     ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 
