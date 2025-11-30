@@ -318,7 +318,7 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 
 	if (!movementComponent->isGrounded)
 	{
-		horizontalSpeedMultiplier = 0.75f;
+		horizontalSpeedMultiplier = 1.f;
 	}
 	else
 	{
@@ -326,7 +326,7 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 									  (isKeyDown(s_moveLeftKey) && movementComponent->currentSpeed.x > 0.f);
 		if (wantsToChangeDirection)
 		{
-			horizontalSpeedMultiplier = 3.f;
+			horizontalSpeedMultiplier = 4.f;
 		}
 	}
 
@@ -377,19 +377,36 @@ void CharacterMovementSystem::update()
 		movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
 		movementComponent->isGrounded = false;
 		movementComponent->timeSinceLeftPlatform = k_invalidId;
+
+		if (isMovingRight)
+		{
+			movementComponent->currentSpeed.x = movementComponent->maxHorizontalSpeed;
+		}
+
+		if (isMovingLeft)
+		{
+			movementComponent->currentSpeed.x = -movementComponent->maxHorizontalSpeed;
+		}
 	}
 
+	//TODO: Improve since this will reduce also when free falling
 	if (wasKeyReleasedThisFrame(s_jumpKey))
 	{
-		//movementComponent->currentSpeed.y *= 0.5f;
-		//movementComponent->gravity *= 0.95f;
+		movementComponent->currentSpeed.y *= 0.5f;
 	}
 
 	// Friction
 	bool isMovingHorizontally = isMovingRight || isMovingLeft;
 	if (!isMovingHorizontally)
 	{
-		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
+		if (movementComponent->isGrounded)
+		{
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
+		}
+		else
+		{
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, 2.f * k_deltaTime);
+		}
 	}
 
 	// Gravity
@@ -438,9 +455,9 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection };
 		if (!willCollideWithSolidAtPosition(self, positionToCheck))
 		{
-				transformComponent->position.y += movementDirection;
-				pixelsToMove -= movementDirection;
-			}
+			transformComponent->position.y += movementDirection;
+			pixelsToMove -= movementDirection;
+		}
 		else
 		{
 			bool isFalling = movementComponent->currentSpeed.y > 0.f;
