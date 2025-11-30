@@ -30,6 +30,7 @@ void ECSLevel::start()
     movementComponent->gravity = 8.68f;
     movementComponent->jumpSpeed = 3.3f;
     movementComponent->coyoteTime = 0.12f;
+    movementComponent->airFriction = 2.f;
 
     playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
@@ -198,6 +199,7 @@ void ECSLevel::imguiRender()
     ImGui::SliderFloat("Player Max V Speed", &(movement->maxVerticalSpeed), 0.1f, 5.f);
     ImGui::SliderFloat("Player Jump Speed", &(movement->jumpSpeed), 0.1f, 5.f);
     ImGui::SliderFloat("Player Gravity", &(movement->gravity), 5.f, 20.f);
+    ImGui::SliderFloat("Air friction", &(movement->airFriction), 1.f, 5.f);
 
     ImGui::SeparatorText("Misc");
 

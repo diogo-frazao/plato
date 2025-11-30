@@ -47,7 +47,7 @@ public:
 	void update();
 	void processHorizontalMovement(Entity* self);
 	void processVerticalMovement(Entity* self);
-	bool willCollideWithSolidAtPosition(Entity* self, const Vec2 positionToCheck);
+	bool willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck);
 
 	void handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded);
 };
@@ -58,4 +58,5 @@ public:
 	void render();
 	void debugRect(Vec2 position, RectCollider collider, SDL_Color color);
 	void debugLine(Vec2 start, Vec2 end, SDL_Color color);
+	void debugPoint(Vec2 position, SDL_Color color);
 };

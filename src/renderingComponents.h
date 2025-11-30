@@ -93,6 +93,9 @@ struct MovementComponent
 	// How fast the character will come to stop when not moving
 	float friction;
 
+	// How fast the character will come to stop when not moving and in the air
+	float airFriction;
+
 	// Max vertical speed while falling
 	float maxVerticalSpeed;
 	// How fast the character reaches maxVerticalSpeed while falling

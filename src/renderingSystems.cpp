@@ -291,6 +291,13 @@ void DebugSystem::debugLine(Vec2 start, Vec2 end, SDL_Color color)
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
 }
 
+void DebugSystem::debugPoint(Vec2 position, SDL_Color color)
+{
+	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderPoint(s_renderer, position.x, position.y);
+	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
+}
+
 #pragma region Movement Systems
 
 void SavePreviousPositionSystem::update()
@@ -339,6 +346,7 @@ void CharacterMovementSystem::update()
 
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
 	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
+	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
 
 	//TODO: remove debug to reset player pos
 	if (isKeyDown(SDL_SCANCODE_Q))
@@ -369,24 +377,26 @@ void CharacterMovementSystem::update()
 			movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
 	}
 
+	// Fake jump if we're 2 pixels away from floor or less
+	bool canJumpWithoutTouchingFloor = false;
+	Vec2 checkGroundBelowPosition { transformComponent->position.x, transformComponent->position.y + 2 };
+	if (wasKeyPressedThisFrame(s_jumpKey) && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&character, checkGroundBelowPosition)))
+	{
+		canJumpWithoutTouchingFloor = true;
+	}
+
 	// Jump
 	bool canCoyoteJump = (movementComponent->timeSinceLeftPlatform > k_invalidId && movementComponent->timeSinceLeftPlatform <= movementComponent->coyoteTime);
-	bool canJump = movementComponent->isGrounded || (canCoyoteJump);
+	bool canJump = movementComponent->isGrounded || canCoyoteJump || canJumpWithoutTouchingFloor;
 	if (wasKeyPressedThisFrame(s_jumpKey) && canJump)
 	{
 		movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
 		movementComponent->isGrounded = false;
 		movementComponent->timeSinceLeftPlatform = k_invalidId;
 
-		if (isMovingRight)
-		{
-			movementComponent->currentSpeed.x = movementComponent->maxHorizontalSpeed;
-		}
-
-		if (isMovingLeft)
-		{
-			movementComponent->currentSpeed.x = -movementComponent->maxHorizontalSpeed;
-		}
+		// Set horizontal speed to max if we jump while holding the left or right buttons
+		if (isMovingRight) { movementComponent->currentSpeed.x = movementComponent->maxHorizontalSpeed; }
+		if (isMovingLeft) { movementComponent->currentSpeed.x = -movementComponent->maxHorizontalSpeed; };
 	}
 
 	//TODO: Improve since this will reduce also when free falling
@@ -399,14 +409,8 @@ void CharacterMovementSystem::update()
 	bool isMovingHorizontally = isMovingRight || isMovingLeft;
 	if (!isMovingHorizontally)
 	{
-		if (movementComponent->isGrounded)
-		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, movementComponent->friction * k_deltaTime);
-		}
-		else
-		{
-			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, 2.f * k_deltaTime);
-		}
+		float friction = movementComponent->isGrounded ? movementComponent->friction : movementComponent->airFriction;
+		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, friction * k_deltaTime);
 	}
 
 	// Gravity
@@ -434,7 +438,7 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 	{
 		// Even if we're not moving, check if we're grounded
 		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + 1 };
-		if (willCollideWithSolidAtPosition(self, positionToCheck))
+		if (willCollideWithLevelGeometryAtPosition(self, positionToCheck))
 		{
 			movementComponent->isGrounded = true;
 		}
@@ -453,7 +457,7 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 	{
 		// We need to check collision one pixel below/above before actually moving
 		Vec2 positionToCheck = { transformComponent->position.x, transformComponent->position.y + movementDirection };
-		if (!willCollideWithSolidAtPosition(self, positionToCheck))
+		if (!willCollideWithLevelGeometryAtPosition(self, positionToCheck))
 		{
 			transformComponent->position.y += movementDirection;
 			pixelsToMove -= movementDirection;
@@ -493,7 +497,7 @@ void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 		// We need to check collision one pixel in front before actually moving
 		Vec2 positionToCheck = { transformComponent->position.x + movementDirection, transformComponent->position.y };
 
-		if (!willCollideWithSolidAtPosition(self, positionToCheck))
+		if (!willCollideWithLevelGeometryAtPosition(self, positionToCheck))
 		{
 			transformComponent->position.x += movementDirection;
 			pixelsToMove -= movementDirection;
@@ -530,7 +534,7 @@ void CharacterMovementSystem::handleCoyoteTime(MovementComponent* movementCompon
 	}
 }
 
-bool CharacterMovementSystem::willCollideWithSolidAtPosition(Entity* self, const Vec2 positionToCheck)
+bool CharacterMovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck)
 {
 	RectCollider& selfRectCollider = getComponentFromEntity<RectColliderComponent>(*self)->collider;
 
