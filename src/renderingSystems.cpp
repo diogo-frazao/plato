@@ -111,14 +111,23 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 
 		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
 
-		_src.x = spriteComponent->offset.x;
-		_src.y = spriteComponent->offset.y;
-		_src.w = spriteComponent->size.x;
+		int32_t currentOffsetX = 0;
+		int32_t frameSizeX = spriteComponent->size.x;
+		bool isAnimatedSprite = spriteComponent->numberOfFrames > 0;
+		if (isAnimatedSprite)
+		{
+			frameSizeX = (spriteComponent->size.x / spriteComponent->numberOfFrames);
+			currentOffsetX = spriteComponent->currentFrame * frameSizeX;
+		}
+
+		_src.x = spriteComponent->atlasOffset.x + currentOffsetX;
+		_src.y = spriteComponent->atlasOffset.y;
+		_src.w = frameSizeX;
 		_src.h = spriteComponent->size.y;
 
 		_dest.x = interpolatedPosition.x - cameraPosition.x;
 		_dest.y = interpolatedPosition.y;
-		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
+		_dest.w = frameSizeX * transformComponent->scale.x;
 		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
 
 		SDL_RenderTexture(s_renderer, loadAtlas(spriteComponent->atlas), &_src, &_dest);
@@ -184,8 +193,8 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 
 		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
 
-		_src.x = spriteComponent->offset.x;
-		_src.y = spriteComponent->offset.y;
+		_src.x = spriteComponent->atlasOffset.x;
+		_src.y = spriteComponent->atlasOffset.y;
 		_src.w = spriteComponent->size.x;
 		_src.h = spriteComponent->size.y;
 
@@ -340,6 +349,40 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 	return horizontalSpeedMultiplier;
 }
 
+//TODO: Improve. millisecondsSinceLastFrame is never reset, we set spriteData every time. we should also create another method to handle a random loop time,
+// since the idle for example should loop given a random interval
+
+// We use milliseconds to match what aseprite uses and make it easier to replicate the same animation & speed in game
+void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop = false, uint32_t millisecondsToChangeToNextFrame = 70)
+{
+	auto* sprite = getComponentFromEntity<SpriteComponent>(entityToAnimate);
+	sprite->setSpriteData(targetAnimation);
+
+	if (sprite->currentFrame == 0)
+	{
+		millisecondsToChangeToNextFrame = 800;
+	}
+
+	if (sprite->millisecondsSinceLastFrame >= millisecondsToChangeToNextFrame)
+	{
+		int32_t lastFrame = sprite->numberOfFrames - 1;
+		if (sprite->currentFrame == lastFrame)
+		{
+			sprite->currentFrame = loop ? 0 : lastFrame;
+		}
+		else
+		{
+			sprite->currentFrame = min(sprite->currentFrame + 1, lastFrame);
+		}
+
+		sprite->millisecondsSinceLastFrame = 0.f;
+	}
+	else
+	{
+		sprite->millisecondsSinceLastFrame += k_targetMillisecondsBetweenFrames;
+	}
+}
+
 void CharacterMovementSystem::update()
 {
 	Entity& character = getEntityById(k_playerEntityId);
@@ -424,6 +467,11 @@ void CharacterMovementSystem::update()
 
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
+
+	if (!isMovingHorizontally && movementComponent->isGrounded)
+	{
+		animateSprite(CHARACTER_IDLE, character, true);
+	}
 }
 
 void CharacterMovementSystem::processVerticalMovement(Entity* self)

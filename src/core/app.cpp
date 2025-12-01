@@ -45,7 +45,7 @@ void App::update()
     {
         uint64_t currentFrameTimeStamp = SDL_GetTicks();
         uint64_t millisecondsSinceLastFrame = currentFrameTimeStamp - lastFrameTimestamp;
-        millisecondsSinceLastFrame = min(millisecondsSinceLastFrame, k_maxFrameTimeAllowed);
+        millisecondsSinceLastFrame = min(millisecondsSinceLastFrame, (uint64_t)k_maxFrameTimeAllowed);
 
         accumulator += millisecondsSinceLastFrame;
         lastFrameTimestamp = currentFrameTimeStamp;

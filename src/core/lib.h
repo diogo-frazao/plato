@@ -11,7 +11,8 @@ enum SpriteType
 	STREET_LAMP_LIGHT_SPRITE,
 	ROUND_SOFT_LIGHT_SPRITE,
 	TODO_REMOVE_LEVEL_GEOMETRY_SPRITE,
-	TODO_TEMOVE_INVISIBLE_SPRITE
+	TODO_TEMOVE_INVISIBLE_SPRITE,
+	CHARACTER_IDLE
 };
 
 enum LayerType
@@ -70,6 +71,16 @@ inline int32_t clamp(int32_t value, int32_t min, int32_t max)
 	}
 
 	return value;
+}
+
+inline int32_t min(int32_t a, int32_t b)
+{
+	if (a > b)
+	{
+		return b;
+	}
+
+	return a;
 }
 
 inline uint64_t min(uint64_t value, uint64_t max)
