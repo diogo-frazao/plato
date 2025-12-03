@@ -349,18 +349,20 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 	return horizontalSpeedMultiplier;
 }
 
-//TODO: Improve. millisecondsSinceLastFrame is never reset, we set spriteData every time. we should also create another method to handle a random loop time,
-// since the idle for example should loop given a random interval
-
-// We use milliseconds to match what aseprite uses and make it easier to replicate the same animation & speed in game
-void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop = false, uint32_t millisecondsToChangeToNextFrame = 70)
+void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
 {
 	auto* sprite = getComponentFromEntity<SpriteComponent>(entityToAnimate);
-	sprite->setSpriteData(targetAnimation);
 
-	if (sprite->currentFrame == 0)
+	if (sprite->sprite != targetAnimation)
 	{
-		millisecondsToChangeToNextFrame = 800;
+		sprite->setSpriteData(targetAnimation);
+		sprite->millisecondsSinceLastFrame = 0;
+		sprite->currentFrame = 0;
+	}
+
+	if (sprite->currentFrame == 0 && loop)
+	{
+		millisecondsToChangeToNextFrame = millisecondsToLoop;
 	}
 
 	if (sprite->millisecondsSinceLastFrame >= millisecondsToChangeToNextFrame)
@@ -381,6 +383,12 @@ void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loo
 	{
 		sprite->millisecondsSinceLastFrame += k_targetMillisecondsBetweenFrames;
 	}
+}
+
+// We use milliseconds to match what aseprite uses and make it easier to replicate the same animation & speed in game
+void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop = false, uint32_t millisecondsToChangeToNextFrame = 70)
+{
+	animateSprite(targetAnimation, entityToAnimate, loop, millisecondsToChangeToNextFrame, millisecondsToChangeToNextFrame);
 }
 
 void CharacterMovementSystem::update()
@@ -470,7 +478,12 @@ void CharacterMovementSystem::update()
 
 	if (!isMovingHorizontally && movementComponent->isGrounded)
 	{
-		animateSprite(CHARACTER_IDLE, character, true);
+		animateSprite(CHARACTER_IDLE, character, true, 70, 600);
+	}
+
+	if (isMovingHorizontally && movementComponent->isGrounded)
+	{
+		animateSprite(CHARACTER_RUN, character, true, 55);
 	}
 }
 

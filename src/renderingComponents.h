@@ -59,14 +59,21 @@ struct SpriteComponent
 			break;
 		case CHARACTER_IDLE:
 			atlasOffset = { 0, 255 };
-			size = { 180, 20 };
+			size = { 120, 21 };
 			atlas = GAME_ATLAS;
-			numberOfFrames = 12;
+			numberOfFrames = 8;
+			break;
+		case CHARACTER_RUN:
+			atlasOffset = { 0, 276 };
+			size = { 120, 21 };
+			numberOfFrames = 8;
 			break;
 		default:
 			D_ASSERT(false, "Unkown sprite type");
 			return;
 		}
+
+		this->sprite = sprite;
 	}
 
 	void setupTypeForLayer(SpriteType sprite, LayerType layer)

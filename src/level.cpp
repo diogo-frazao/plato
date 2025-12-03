@@ -33,7 +33,7 @@ void ECSLevel::start()
     movementComponent->airFriction = 2.f;
 
     playerSprite->setupTypeForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
-    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 2, 2 }, { 9, 17 });
+    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 3, 3 }, { 9, 17 });
 
     Entity& bg = addEntity();
     addComponentToEntity<SpriteComponent>(bg)->setupTypeForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
