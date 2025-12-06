@@ -198,4 +198,14 @@ bool isMoveLeftKeyDown()
 	return _isKeyDown(s_moveLeftKey) || _isKeyDown(s_alternateMoveLeftKey);
 }
 
+bool wasMoveRightPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(s_moveRightKey) || _wasKeyPressedThisFrame(s_alternateMoveRightKey);
+}
+
+bool wasMoveLeftPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(s_moveLeftKey) || _wasKeyPressedThisFrame(s_alternateMoveLeftKey);
+}
+
 

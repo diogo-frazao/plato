@@ -112,7 +112,10 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
 
 		int32_t currentOffsetX = 0;
+
 		int32_t frameSizeX = spriteComponent->size.x;
+		int32_t frameSizeY = spriteComponent->size.y;
+
 		bool isAnimatedSprite = spriteComponent->numberOfFrames > 0;
 		if (isAnimatedSprite)
 		{
@@ -123,12 +126,18 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		_src.x = spriteComponent->atlasOffset.x + currentOffsetX;
 		_src.y = spriteComponent->atlasOffset.y;
 		_src.w = frameSizeX;
-		_src.h = spriteComponent->size.y;
+		_src.h = frameSizeY;
 
-		_dest.x = interpolatedPosition.x - cameraPosition.x;
-		_dest.y = interpolatedPosition.y;
-		_dest.w = frameSizeX * transformComponent->scale.x;
-		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
+		float scaledWidth = frameSizeX * transformComponent->scale.x;
+		float scaledHeight = frameSizeY * transformComponent->scale.y;
+
+		float scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
+		float scaleOffsetY = (frameSizeY - scaledHeight) * 0.5f;
+
+		_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
+		_dest.y = interpolatedPosition.y + scaleOffsetY;
+		_dest.w = scaledWidth;
+		_dest.h = scaledHeight;
 
 		SDL_RenderTextureRotated(s_renderer, loadAtlas(spriteComponent->atlas), &_src, &_dest, 0, nullptr, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	}
@@ -349,7 +358,7 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 	return horizontalSpeedMultiplier;
 }
 
-void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
+bool animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
 {
 	auto* sprite = getComponentFromEntity<SpriteComponent>(entityToAnimate);
 
@@ -378,17 +387,27 @@ void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loo
 		}
 
 		sprite->millisecondsSinceLastFrame = 0.f;
+		if (sprite->currentFrame == lastFrame && !loop)
+		{
+			return true;
+		}
 	}
 	else
 	{
 		sprite->millisecondsSinceLastFrame += k_targetMillisecondsBetweenFrames;
 	}
+
+	return false;
 }
 
-// We use milliseconds to match what aseprite uses and make it easier to replicate the same animation & speed in game
 void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop = false, uint32_t millisecondsToChangeToNextFrame = 70)
 {
 	animateSprite(targetAnimation, entityToAnimate, loop, millisecondsToChangeToNextFrame, millisecondsToChangeToNextFrame);
+}
+
+bool animateSpriteAndReturnOnEnd(SpriteType targetAnimation, Entity& entityToAnimate, uint32_t millisecondsToChangeToNextFrame = 70)
+{
+	return animateSprite(targetAnimation, entityToAnimate, false, millisecondsToChangeToNextFrame, millisecondsToChangeToNextFrame);
 }
 
 void CharacterMovementSystem::update()
@@ -398,6 +417,8 @@ void CharacterMovementSystem::update()
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
 	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
+
+	static bool finishedPlayingTakeoffAnimation = false;
 
 	//TODO: remove debug to reset player pos
 	if (_isKeyDown(SDL_SCANCODE_Q))
@@ -481,11 +502,27 @@ void CharacterMovementSystem::update()
 	if (!isMovingHorizontally && movementComponent->isGrounded)
 	{
 		animateSprite(CHARACTER_IDLE, character, true, 70, 600);
+		finishedPlayingTakeoffAnimation = false;
 	}
+
+	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, 1.f);
 
 	if (isMovingHorizontally && movementComponent->isGrounded)
 	{
-		animateSprite(CHARACTER_RUN_2, character, true, 60);
+		if (finishedPlayingTakeoffAnimation)
+		{
+			animateSprite(CHARACTER_RUN_2, character, true, 60);
+		}
+		else
+		{
+			if (wasMoveRightPressedThisFrame() || wasMoveLeftPressedThisFrame())
+			{
+				transformComponent->scale.x = 1.3f;
+			}
+
+			bool finished = animateSpriteAndReturnOnEnd(CHARACTER_RUN_2, character, 40);
+			if (finished) { finishedPlayingTakeoffAnimation = true; }
+		}
 	}
 }
 

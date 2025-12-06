@@ -54,3 +54,5 @@ bool wasJumpKeyPressedThisFrame();
 bool wasJumpKeyReleasedThisFrame();
 bool isMoveRightKeyDown();
 bool isMoveLeftKeyDown();
+bool wasMoveRightPressedThisFrame();
+bool wasMoveLeftPressedThisFrame();
