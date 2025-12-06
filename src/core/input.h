@@ -6,10 +6,6 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
 
-inline SDL_Scancode s_jumpKey = SDL_SCANCODE_W;
-inline SDL_Scancode s_moveRightKey = SDL_SCANCODE_D;
-inline SDL_Scancode s_moveLeftKey = SDL_SCANCODE_A;
-
 struct KeyState
 {
 	bool isDown = false;
@@ -32,20 +28,29 @@ enum MouseButton
 	RIGHT
 };
 
-void handleKeyboardInput(SDL_Event& ev);
-void handleMouseInput(SDL_Event& ev);
-void resetKeyboardAndMouseInput();
+// Don't call these directly, use the game functions instead
 
-bool isKeyDown(SDL_Scancode index);
-bool wasKeyPressedThisFrame(SDL_Scancode index);
-bool wasKeyReleasedThisFrame(SDL_Scancode index);
+void _handleKeyboardInput(SDL_Event& ev);
+void _handleMouseInput(SDL_Event& ev);
+void _resetKeyboardAndMouseInput();
 
-bool isMouseButtonDown(MouseButton mouseButtonIndex);
-bool wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex);
-bool wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex);
-Vec2 getMousePosition();
+bool _isKeyDown(SDL_Scancode index);
+bool _wasKeyPressedThisFrame(SDL_Scancode index);
+bool _wasKeyReleasedThisFrame(SDL_Scancode index);
+
+bool _isMouseButtonDown(MouseButton mouseButtonIndex);
+bool _wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex);
+bool _wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex);
+Vec2 _getMousePosition();
 
 inline Vec2 s_mousePositionThisFrame;
 
 static MouseState s_mouseInputState;
 static std::array<KeyState, 290> s_keyboardInputState;
+
+
+// Game related
+bool wasJumpKeyPressedThisFrame();
+bool wasJumpKeyReleasedThisFrame();
+bool isMoveRightKeyDown();
+bool isMoveLeftKeyDown();

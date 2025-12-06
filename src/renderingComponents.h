@@ -64,9 +64,16 @@ struct SpriteComponent
 			numberOfFrames = 8;
 			break;
 		case CHARACTER_RUN:
+			atlas = GAME_ATLAS;
 			atlasOffset = { 0, 276 };
-			size = { 120, 21 };
-			numberOfFrames = 8;
+			size = { 60, 21 };
+			numberOfFrames = 4;
+			break;
+		case CHARACTER_RUN_2:
+			atlas = GAME_ATLAS;
+			atlasOffset = { 0, 297 };
+			size = { 90, 21 };
+			numberOfFrames = 6;
 			break;
 		default:
 			D_ASSERT(false, "Unkown sprite type");
@@ -102,6 +109,8 @@ struct SpriteComponent
 	int32_t currentFrame = 0;
 	// Time in seconds since the lat frame started. Used to change between animation frames
 	float millisecondsSinceLastFrame = 0.f;
+
+	bool flipX = false;
 };
 
 struct RectColliderComponent

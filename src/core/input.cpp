@@ -4,12 +4,12 @@
 #include "constants.h"
 #include <SDL3/SDL_Render.h>
 
-void calculateMousePositionThisFrame()
+void _calculateMousePositionThisFrame()
 {
-	s_mousePositionThisFrame = getMousePosition();
+	s_mousePositionThisFrame = _getMousePosition();
 }
 
-Vec2 getMousePosition()
+Vec2 _getMousePosition()
 {
 	float windowMouseX;
 	float windowMouseY;
@@ -22,7 +22,7 @@ Vec2 getMousePosition()
 	return Vec2(logicalMouseX, logicalMouseY);
 }
 
-void handleKeyboardInput(SDL_Event& ev)
+void _handleKeyboardInput(SDL_Event& ev)
 {
 	if (ev.type != SDL_EVENT_KEY_DOWN && ev.type != SDL_EVENT_KEY_UP)
 	{
@@ -52,9 +52,9 @@ void handleKeyboardInput(SDL_Event& ev)
 	}
 }
 
-void handleMouseInput(SDL_Event& ev)
+void _handleMouseInput(SDL_Event& ev)
 {
-	calculateMousePositionThisFrame();
+	_calculateMousePositionThisFrame();
 
 	if (ev.type == SDL_EVENT_MOUSE_WHEEL)
 	{
@@ -83,7 +83,7 @@ void handleMouseInput(SDL_Event& ev)
 	}
 }
 
-void resetKeyboardAndMouseInput()
+void _resetKeyboardAndMouseInput()
 {
 	// Reset was just press / was just release keys
 	for (KeyState& keyState : s_keyboardInputState)
@@ -101,7 +101,7 @@ void resetKeyboardAndMouseInput()
 	s_mouseInputState.mouseWheelScroll = 0;
 }
 
-bool isKeyDown(SDL_Scancode index)
+bool _isKeyDown(SDL_Scancode index)
 {
 	if (index < 0 || index > s_keyboardInputState.size() - 1)
 	{
@@ -112,7 +112,7 @@ bool isKeyDown(SDL_Scancode index)
 	return s_keyboardInputState[index].isDown;
 }
 
-bool wasKeyPressedThisFrame(SDL_Scancode index)
+bool _wasKeyPressedThisFrame(SDL_Scancode index)
 {
 	if (index < 0 || index > s_keyboardInputState.size() - 1)
 	{
@@ -123,7 +123,7 @@ bool wasKeyPressedThisFrame(SDL_Scancode index)
 	return s_keyboardInputState[index].justPressed;
 }
 
-bool wasKeyReleasedThisFrame(SDL_Scancode index)
+bool _wasKeyReleasedThisFrame(SDL_Scancode index)
 {
 	if (index < 0 || index > s_keyboardInputState.size() - 1)
 	{
@@ -134,7 +134,7 @@ bool wasKeyReleasedThisFrame(SDL_Scancode index)
 	return s_keyboardInputState[index].justReleased;
 }
 
-bool isMouseButtonDown(MouseButton mouseButtonIndex)
+bool _isMouseButtonDown(MouseButton mouseButtonIndex)
 {
 	if (mouseButtonIndex < 0 || mouseButtonIndex > s_mouseInputState.mouseButtonsState.size() - 1)
 	{
@@ -145,7 +145,7 @@ bool isMouseButtonDown(MouseButton mouseButtonIndex)
 	return s_mouseInputState.mouseButtonsState[mouseButtonIndex].isDown;
 }
 
-bool wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex)
+bool _wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex)
 {
 	if (mouseButtonIndex < 0 || mouseButtonIndex > s_mouseInputState.mouseButtonsState.size() - 1)
 	{
@@ -156,7 +156,7 @@ bool wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex)
 	return s_mouseInputState.mouseButtonsState[mouseButtonIndex].justPressed;
 }
 
-bool wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex)
+bool _wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex)
 {
 	if (mouseButtonIndex < 0 || mouseButtonIndex > s_mouseInputState.mouseButtonsState.size() - 1)
 	{
@@ -165,6 +165,37 @@ bool wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex)
 	}
 
 	return s_mouseInputState.mouseButtonsState[mouseButtonIndex].justReleased;
+}
+
+// Game related
+// TODO: Expand to allow gamepad support
+
+static SDL_Scancode s_jumpKey = SDL_SCANCODE_W;
+static SDL_Scancode s_alternateJumpKey = SDL_SCANCODE_UP;
+
+static SDL_Scancode s_moveRightKey = SDL_SCANCODE_D;
+static SDL_Scancode s_alternateMoveRightKey = SDL_SCANCODE_RIGHT;
+static SDL_Scancode s_moveLeftKey = SDL_SCANCODE_A;
+static SDL_Scancode s_alternateMoveLeftKey = SDL_SCANCODE_LEFT;
+
+bool wasJumpKeyPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(s_jumpKey) || _wasKeyPressedThisFrame(s_alternateJumpKey);
+}
+
+bool wasJumpKeyReleasedThisFrame()
+{
+	return _wasKeyReleasedThisFrame(s_jumpKey) || _wasKeyReleasedThisFrame(s_alternateJumpKey);
+}
+
+bool isMoveRightKeyDown()
+{
+	return _isKeyDown(s_moveRightKey) || _isKeyDown(s_alternateMoveRightKey);
+}
+
+bool isMoveLeftKeyDown()
+{
+	return _isKeyDown(s_moveLeftKey) || _isKeyDown(s_alternateMoveLeftKey);
 }
 
 

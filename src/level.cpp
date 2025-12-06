@@ -137,7 +137,7 @@ void ECSLevel::update()
     }
     */
 
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_O))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
     {
         D_LOG(LOG, "--------------");
         for (Entity& entity : getAllEntities())

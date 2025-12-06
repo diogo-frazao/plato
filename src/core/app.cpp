@@ -61,11 +61,11 @@ void App::update()
                 return;
             }
 
-            handleKeyboardInput(event);
-            handleMouseInput(event);
+            _handleKeyboardInput(event);
+            _handleMouseInput(event);
 
             //TODO: Remove press esc to close game
-            if (wasKeyPressedThisFrame(SDL_SCANCODE_ESCAPE))
+            if (_wasKeyPressedThisFrame(SDL_SCANCODE_ESCAPE))
             {
                 return;
             }
@@ -79,7 +79,7 @@ void App::update()
             testResolutions(_window);
 #endif // !RELEASE_BUILD
 
-            resetKeyboardAndMouseInput();
+            _resetKeyboardAndMouseInput();
             accumulator -= k_targetMillisecondsBetweenFrames;
         }
 
@@ -190,28 +190,28 @@ void drawImguiDockingPreview()
 
 void testResolutions(SDL_Window* window)
 {
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_1))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_1))
     {
         SDL_SetWindowSize(window, 960, 540);
     }
 
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_2))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_2))
     {
         SDL_SetWindowSize(window, k_displayWindowWidth, k_displayWindowHeight);
     }
 
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_3))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_3))
     {
         SDL_SetWindowSize(window, 1920, 1080);
     }
 
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_4))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_4))
     {
         s_isWindowFullscreen = !s_isWindowFullscreen;
         SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
     }
 
-    if (wasKeyPressedThisFrame(SDL_SCANCODE_5))
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_5))
     {
         s_vsyncEnabled = !s_vsyncEnabled;
         SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
