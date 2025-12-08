@@ -3,6 +3,7 @@
 #include "core/componentManager.h"
 #include "core/lib.h"
 #include <stdint.h>
+#include "SDL3/SDL_pixels.h"
 
 struct TransformComponent
 {
@@ -11,82 +12,52 @@ struct TransformComponent
 	Vec2 scale = { 1.f, 1.f };
 };
 
+struct AnimationData
+{
+	uint32_t millisecondsToChangeToNextFrame = 70;
+	uint32_t millisecondsToLoop = 70;
+	bool loopAnimation = false;
+
+#pragma region Changed by Animation System at runtime
+
+	// If the current animation playing has finished
+	bool finishedPlayingAnimation = false;
+	// For animated sprites, this changes based on the current frame
+	int32_t currentFrame = 0;
+	// Time in milliseconds since the lat frame started. Used to change between animation frames
+	float millisecondsSinceLastFrame = 0.f;
+
+#pragma endregion
+};
+
 struct SpriteComponent
 {
-	void setSpriteData(SpriteType sprite)
-	{
-		switch (sprite)
-		{
-		case TODO_REMOVE_BG_SPRITE:
-			atlasOffset = { 0, 0 };
-			size = { 320, 180 };
-			atlas = GAME_ATLAS;
-			break;
-		case CHARACTER_SPRITE:
-			atlasOffset = { 320, 0 };
-			size = { 14, 19 };
-			atlas = GAME_ATLAS;
-			break;
-		case TODO_REMOVE_FG_SPRITE:
-			atlasOffset = { 0, 225 };
-			size = { 320, 23 };
-			atlas = GAME_ATLAS;
-			break;
-		case ROUND_LIGHT_SPRITE:
-			atlasOffset = { 45, 0 };
-			size = { 95, 86 };
-			atlas = LIGHTS_ATLAS;
-			break;
-		case STREET_LAMP_LIGHT_SPRITE:
-			atlasOffset = { 0, 0 };
-			size = { 46, 86 };
-			atlas = LIGHTS_ATLAS;
-			break;
-		case ROUND_SOFT_LIGHT_SPRITE:
-			atlasOffset = { 139, 0 };
-			size = { 133, 129 };
-			atlas = LIGHTS_ATLAS;
-			break;
-		case TODO_REMOVE_LEVEL_GEOMETRY_SPRITE:
-			atlasOffset = { 0, 180 };
-			size = { 320, 45 };
-			atlas = GAME_ATLAS;
-			break;
-		case TODO_TEMOVE_INVISIBLE_SPRITE:
-			atlasOffset = { 336, 0 };
-			size = { 8, 8 };
-			atlas = GAME_ATLAS;
-			break;
-		case CHARACTER_IDLE:
-			atlasOffset = { 0, 255 };
-			size = { 120, 21 };
-			atlas = GAME_ATLAS;
-			numberOfFrames = 8;
-			break;
-		case CHARACTER_RUN:
-			atlas = GAME_ATLAS;
-			atlasOffset = { 0, 276 };
-			size = { 60, 21 };
-			numberOfFrames = 4;
-			break;
-		case CHARACTER_RUN_2:
-			atlas = GAME_ATLAS;
-			atlasOffset = { 0, 297 };
-			size = { 90, 21 };
-			numberOfFrames = 6;
-			break;
-		default:
-			D_ASSERT(false, "Unkown sprite type");
-			return;
-		}
-
-		this->sprite = sprite;
-	}
-
-	void setupTypeForLayer(SpriteType sprite, LayerType layer)
+	void setSpriteData(SpriteType sprite);
+	void setupSpriteForLayer(SpriteType sprite, LayerType layer)
 	{
 		setSpriteData(sprite);
 		this->layer = layer;
+	}
+
+	void setupAnimationForLayer(SpriteType sprite, LayerType layer, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
+	{
+		setAnimationToPlayIfNotPlaying(sprite, loop, millisecondsToChangeToNextFrame, millisecondsToLoop);
+		this->layer = layer;
+	}
+
+	void setAnimationToPlayIfNotPlaying(SpriteType targetAnimation, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
+	{
+		if (this->sprite != targetAnimation)
+		{
+			this->setSpriteData(targetAnimation);
+
+			this->animationData.millisecondsSinceLastFrame = 0;
+			this->animationData.currentFrame = 0;
+			this->animationData.finishedPlayingAnimation = false;
+			this->animationData.millisecondsToChangeToNextFrame = millisecondsToChangeToNextFrame;
+			this->animationData.millisecondsToLoop = millisecondsToLoop;
+			this->animationData.loopAnimation = loop;
+		}
 	}
 
 	// TODO: Improve if needed. Currently all animated sprites are expected to be on a single row
@@ -98,17 +69,16 @@ struct SpriteComponent
 	// Atlas the sprite(s) belong to
 	AtlasType atlas = GAME_ATLAS;
 	// Sprite type
-	SpriteType sprite = CHARACTER_SPRITE;
+	SpriteType sprite = INVALID;
 	// The layer where this sprite is rendered on
 	LayerType layer = BEHIND_CHAR_LAYER;
 	// Color used to render this sprite
 	SDL_Color color = { 255, 255, 255, 255 };
 	// 0 for non animated sprites, X for the number of animations
 	int32_t numberOfFrames = 0;
-	// For animated sprites, this changes based on the current frame
-	int32_t currentFrame = 0;
-	// Time in seconds since the lat frame started. Used to change between animation frames
-	float millisecondsSinceLastFrame = 0.f;
+
+	// Container for the animation data of this sprite (speed, should loop, etc)
+	AnimationData animationData;
 
 	bool flipX = false;
 };
@@ -118,6 +88,14 @@ struct RectColliderComponent
 	RectCollider collider;
 	// This is what actors will check collision against when moving
 	bool isLevelGeometry = false;
+};
+
+enum MovementState
+{
+	IDLE_STATE,
+	TAKE_OFF_STATE,
+	RUNNING_STATE,
+	SLOWDOWN_STATE
 };
 
 struct MovementComponent
@@ -150,4 +128,6 @@ struct MovementComponent
 
 	// How many seconds have passed since we walked off a platform. Jumping doesn't count.
 	float timeSinceLeftPlatform = k_invalidId;
+
+	MovementState movementState;
 };

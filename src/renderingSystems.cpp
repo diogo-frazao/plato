@@ -120,7 +120,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		if (isAnimatedSprite)
 		{
 			frameSizeX = (spriteComponent->size.x / spriteComponent->numberOfFrames);
-			currentOffsetX = spriteComponent->currentFrame * frameSizeX;
+			currentOffsetX = spriteComponent->animationData.currentFrame * frameSizeX;
 		}
 
 		_src.x = spriteComponent->atlasOffset.x + currentOffsetX;
@@ -139,7 +139,11 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		_dest.w = scaledWidth;
 		_dest.h = scaledHeight;
 
-		SDL_RenderTextureRotated(s_renderer, loadAtlas(spriteComponent->atlas), &_src, &_dest, 0, nullptr, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+		SDL_Texture* atlas = loadAtlas(spriteComponent->atlas);
+		SDL_SetTextureColorMod(atlas, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
+		SDL_SetTextureAlphaMod(atlas, spriteComponent->color.a);
+
+		SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, 0, nullptr, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	}
 }
 
@@ -358,56 +362,61 @@ float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 	return horizontalSpeedMultiplier;
 }
 
-bool animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop, uint32_t millisecondsToChangeToNextFrame, uint32_t millisecondsToLoop)
+void AnimationSystem::update()
 {
-	auto* sprite = getComponentFromEntity<SpriteComponent>(entityToAnimate);
-
-	if (sprite->sprite != targetAnimation)
+	for (Entity& entity : getAllEntities())
 	{
-		sprite->setSpriteData(targetAnimation);
-		sprite->millisecondsSinceLastFrame = 0;
-		sprite->currentFrame = 0;
-	}
-
-	if (sprite->currentFrame == 0 && loop)
-	{
-		millisecondsToChangeToNextFrame = millisecondsToLoop;
-	}
-
-	if (sprite->millisecondsSinceLastFrame >= millisecondsToChangeToNextFrame)
-	{
-		int32_t lastFrame = sprite->numberOfFrames - 1;
-		if (sprite->currentFrame == lastFrame)
+		if (entity.id == k_invalidId)
 		{
-			sprite->currentFrame = loop ? 0 : lastFrame;
+			continue;
+		}
+
+		if (!entityHasComponent<SpriteComponent>(entity))
+		{
+			continue;
+		}
+
+		auto* sprite = getComponentFromEntity<SpriteComponent>(entity);
+		if (sprite->numberOfFrames == 0)
+		{
+			continue;
+		}
+
+		uint32_t milliseondsToChangeToNextFrame = sprite->animationData.millisecondsToChangeToNextFrame;
+
+		bool canChangeLoopSpeed = (sprite->animationData.currentFrame == 0 && sprite->animationData.loopAnimation);
+		if (canChangeLoopSpeed)
+		{
+			milliseondsToChangeToNextFrame = sprite->animationData.millisecondsToLoop;
+		}
+
+		if (sprite->animationData.millisecondsSinceLastFrame < milliseondsToChangeToNextFrame)
+		{
+			sprite->animationData.millisecondsSinceLastFrame += k_targetMillisecondsBetweenFrames;
+			continue;
+		}
+
+		// If we get here, it's time to move to the next frame
+		int32_t lastFrame = sprite->numberOfFrames - 1;
+
+		if (sprite->animationData.currentFrame == lastFrame)
+		{
+			sprite->animationData.currentFrame = sprite->animationData.loopAnimation ? 0 : lastFrame;
 		}
 		else
 		{
-			sprite->currentFrame = min(sprite->currentFrame + 1, lastFrame);
+			sprite->animationData.currentFrame++;
+			sprite->animationData.currentFrame = min(sprite->animationData.currentFrame, lastFrame);
 		}
 
-		sprite->millisecondsSinceLastFrame = 0.f;
-		if (sprite->currentFrame == lastFrame && !loop)
+		sprite->animationData.millisecondsSinceLastFrame = 0.f;
+
+		bool finishedPlayingAnimation = (sprite->animationData.currentFrame == lastFrame && !sprite->animationData.loopAnimation);
+		if (finishedPlayingAnimation)
 		{
-			return true;
+			sprite->animationData.finishedPlayingAnimation = true;
 		}
 	}
-	else
-	{
-		sprite->millisecondsSinceLastFrame += k_targetMillisecondsBetweenFrames;
-	}
-
-	return false;
-}
-
-void animateSprite(SpriteType targetAnimation, Entity& entityToAnimate, bool loop = false, uint32_t millisecondsToChangeToNextFrame = 70)
-{
-	animateSprite(targetAnimation, entityToAnimate, loop, millisecondsToChangeToNextFrame, millisecondsToChangeToNextFrame);
-}
-
-bool animateSpriteAndReturnOnEnd(SpriteType targetAnimation, Entity& entityToAnimate, uint32_t millisecondsToChangeToNextFrame = 70)
-{
-	return animateSprite(targetAnimation, entityToAnimate, false, millisecondsToChangeToNextFrame, millisecondsToChangeToNextFrame);
 }
 
 void CharacterMovementSystem::update()
@@ -417,8 +426,6 @@ void CharacterMovementSystem::update()
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
 	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
-
-	static bool finishedPlayingTakeoffAnimation = false;
 
 	//TODO: remove debug to reset player pos
 	if (_isKeyDown(SDL_SCANCODE_Q))
@@ -499,30 +506,68 @@ void CharacterMovementSystem::update()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	if (!isMovingHorizontally && movementComponent->isGrounded)
-	{
-		animateSprite(CHARACTER_IDLE, character, true, 70, 600);
-		finishedPlayingTakeoffAnimation = false;
-	}
-
 	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, 1.f);
 
-	if (isMovingHorizontally && movementComponent->isGrounded)
+	if (!isMovingHorizontally && movementComponent->isGrounded)
 	{
-		if (finishedPlayingTakeoffAnimation)
+		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
-			animateSprite(CHARACTER_RUN_2, character, true, 60);
+			movementComponent->movementState = IDLE_STATE;
 		}
 		else
 		{
-			if (wasMoveRightPressedThisFrame() || wasMoveLeftPressedThisFrame())
-			{
-				transformComponent->scale.x = 1.3f;
-			}
-
-			bool finished = animateSpriteAndReturnOnEnd(CHARACTER_RUN_2, character, 40);
-			if (finished) { finishedPlayingTakeoffAnimation = true; }
+			movementComponent->movementState = SLOWDOWN_STATE;
 		}
+	}
+
+	bool isMovingOnFloor = isMovingHorizontally && movementComponent->isGrounded;
+	bool canChangeToTakeOffState = (movementComponent->movementState == IDLE_STATE);
+	if (isMovingOnFloor && canChangeToTakeOffState)
+	{
+		movementComponent->movementState = TAKE_OFF_STATE;
+		transformComponent->scale.x = 1.3f;
+
+		Entity& takeoffParticle = addEntity({ transformComponent->position.x - 13, transformComponent->position.y + 10 });
+		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
+		particleTransform->previousPosition = particleTransform->position;
+		particleTransform->scale = { 0.6f, 0.6f };
+		addComponentToEntity<SpriteComponent>(takeoffParticle)->setupAnimationForLayer(TAKEOFF_PARTICLE_SPRITE, BEHIND_CHAR_LAYER, false, 70, 70);
+		getComponentFromEntity<SpriteComponent>(takeoffParticle)->color = { 255, 255, 255, 200 };
+	}
+
+	bool canChangeFromTakeOffToRunningState = ((movementComponent->movementState == TAKE_OFF_STATE) && 
+											  spriteComponent->animationData.finishedPlayingAnimation);
+	if (canChangeFromTakeOffToRunningState)
+	{
+		movementComponent->movementState = RUNNING_STATE;
+	}
+
+	bool changedDirectionThisFrame = (wasMoveRightPressedThisFrame() && movementComponent->currentSpeed.x < 0.f) ||
+									 (wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
+	if (changedDirectionThisFrame)
+	{
+		Entity& turnParticle = addEntity({ transformComponent->position.x, transformComponent->position.y + 11 });
+		auto* particleTransform = getComponentFromEntity<TransformComponent>(turnParticle);
+		particleTransform->previousPosition = particleTransform->position;
+		particleTransform->scale = { 0.7f, 0.7f };
+		addComponentToEntity<SpriteComponent>(turnParticle)->setupAnimationForLayer(TURN_PARTICLE_SPRITE, BEHIND_CHAR_LAYER, false, 70, 70);
+		getComponentFromEntity<SpriteComponent>(turnParticle)->color = { 255, 255, 255, 200 };
+	}
+
+	// TODO: Create slowdown state to not have particles for takeoff and turn overlapping.
+	switch (movementComponent->movementState)
+	{
+	case IDLE_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 600);
+		break;
+	case TAKE_OFF_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_TAKEOFF_SPRITE, false, 40, 40);
+
+		break;
+	case RUNNING_STATE:
+	case SLOWDOWN_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_RUN_SPRITE, true, 60, 60);
+		break;
 	}
 }
 

@@ -32,6 +32,7 @@ public:
 
 	SavePreviousPositionSystem _savePositionSystem;
 	RenderingSystem _renderingSystem;
+	AnimationSystem _animationSystem;
 	CharacterMovementSystem _characterMovementSystem;
 	DebugSystem _debugCollidersSystem;
 };

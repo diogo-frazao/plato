@@ -41,6 +41,12 @@ private:
 	SDL_Texture* _frontLightsBuffer = nullptr;
 };
 
+class AnimationSystem
+{
+public:
+	void update();
+};
+
 class CharacterMovementSystem
 {
 public:
