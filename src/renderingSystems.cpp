@@ -132,7 +132,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		float scaledHeight = frameSizeY * transformComponent->scale.y;
 
 		float scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
-		float scaleOffsetY = (frameSizeY - scaledHeight) * 0.5f;
+		float scaleOffsetY = (frameSizeY - scaledHeight);
 
 		_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
 		_dest.y = interpolatedPosition.y + scaleOffsetY;
@@ -442,6 +442,8 @@ void CharacterMovementSystem::update()
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown();
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown();
 
+	bool performedJumpThisFrame = false;
+
 	// Right movement
 	if (isMovingRight)
 	{
@@ -475,6 +477,8 @@ void CharacterMovementSystem::update()
 		movementComponent->isGrounded = false;
 		movementComponent->timeSinceLeftPlatform = k_invalidId;
 
+		performedJumpThisFrame = true;
+
 		// Set horizontal speed to max if we jump while holding the left or right buttons
 		if (isMovingRight) { movementComponent->currentSpeed.x = movementComponent->maxHorizontalSpeed; }
 		if (isMovingLeft) { movementComponent->currentSpeed.x = -movementComponent->maxHorizontalSpeed; };
@@ -506,7 +510,9 @@ void CharacterMovementSystem::update()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, 1.f);
+	static float resetScaleLerp = 1.f;
+	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, resetScaleLerp);
+	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
 
 	if (!isMovingHorizontally && movementComponent->isGrounded)
 	{
@@ -526,6 +532,7 @@ void CharacterMovementSystem::update()
 	{
 		movementComponent->movementState = TAKE_OFF_STATE;
 		transformComponent->scale.x = 1.3f;
+		resetScaleLerp = 1.f;
 
 		Entity& takeoffParticle = addEntity({ transformComponent->position.x - 13, transformComponent->position.y + 10 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
@@ -542,6 +549,12 @@ void CharacterMovementSystem::update()
 		movementComponent->movementState = RUNNING_STATE;
 	}
 
+	bool canChangeFromFallingToRunState = (movementComponent->movementState == FALLING_STATE) && movementComponent->isGrounded && isMovingHorizontally;
+	if (canChangeFromFallingToRunState)
+	{
+		movementComponent->movementState = RUNNING_STATE;
+	}
+
 	bool changedDirectionThisFrame = (wasMoveRightPressedThisFrame() && movementComponent->currentSpeed.x < 0.f) ||
 									 (wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
 	if (changedDirectionThisFrame)
@@ -554,19 +567,43 @@ void CharacterMovementSystem::update()
 		getComponentFromEntity<SpriteComponent>(turnParticle)->color = { 255, 255, 255, 200 };
 	}
 
-	// TODO: Create slowdown state to not have particles for takeoff and turn overlapping.
+	if (performedJumpThisFrame)
+	{
+		movementComponent->movementState = JUMPING_STATE;
+		transformComponent->scale = Vec2(0.8f, 1.5f);
+		resetScaleLerp = 0.1f;
+	}
+
+	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f;
+	if (canChangeToFallingState)
+	{
+		movementComponent->movementState = FALLING_STATE;
+	}
+
+	if (!wasGrounded && movementComponent->isGrounded)
+	{
+		transformComponent->scale = Vec2(1.4f, 0.6f);
+		resetScaleLerp = 0.3f;
+	}
+
 	switch (movementComponent->movementState)
 	{
 	case IDLE_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_TAKEOFF_SPRITE, false, 40, 40);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_TAKEOFF_SPRITE, false, 60, 60);
 
 		break;
 	case RUNNING_STATE:
 	case SLOWDOWN_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_RUN_SPRITE, true, 60, 60);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_RUN_SPRITE, true, 70, 70);
+		break;
+	case JUMPING_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_JUMP, true, 70, 70);
+		break;
+	case FALLING_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_FALL, false, 70, 70);
 		break;
 	}
 }

@@ -95,7 +95,9 @@ enum MovementState
 	IDLE_STATE,
 	TAKE_OFF_STATE,
 	RUNNING_STATE,
-	SLOWDOWN_STATE
+	SLOWDOWN_STATE,
+	JUMPING_STATE,
+	FALLING_STATE
 };
 
 struct MovementComponent
