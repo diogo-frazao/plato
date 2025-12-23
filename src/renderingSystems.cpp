@@ -301,7 +301,10 @@ void DebugSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color colo
 {
 	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
 	Vec2 colliderPosition = getColliderPosition(position, collider);
-	SDL_FRect debugRect{ colliderPosition.x, colliderPosition.y, (float)collider.size.x, (float)collider.size.y };
+
+	Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+	SDL_FRect debugRect{ colliderPosition.x - cameraPosition.x, colliderPosition.y, (float)collider.size.x, (float)collider.size.y };
+
 	SDL_RenderRect(s_renderer, &debugRect);
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
 }
