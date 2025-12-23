@@ -204,7 +204,7 @@ void ECSLevel::imguiRender()
 
     ImGui::SeparatorText("Misc");
 
-    ImGui::Text("Character state: %i", movement->movementState);
+    ImGui::Text("Character state: %s", movement->getMovementStateAsString());
 
     ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
     ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);

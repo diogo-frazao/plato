@@ -132,4 +132,23 @@ struct MovementComponent
 	float timeSinceLeftPlatform = k_invalidId;
 
 	MovementState movementState;
+
+	const char* getMovementStateAsString()
+	{
+		switch (movementState)
+		{
+		case IDLE_STATE:
+			return "Idle";
+		case TAKE_OFF_STATE:
+			return "Takeoff";
+		case RUNNING_STATE:
+			return "Running";
+		case SLOWDOWN_STATE:
+			return "Slowdown";
+		case JUMPING_STATE:
+			return "Jumping";
+		case FALLING_STATE:
+			return "Falling";
+		}
+	}
 };

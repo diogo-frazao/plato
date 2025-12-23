@@ -514,7 +514,8 @@ void CharacterMovementSystem::update()
 	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, resetScaleLerp);
 	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
 
-	if (!isMovingHorizontally && movementComponent->isGrounded)
+	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
+	if (isGroundedAndNotMoving)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
@@ -522,12 +523,17 @@ void CharacterMovementSystem::update()
 		}
 		else
 		{
+			if (movementComponent->movementState != SLOWDOWN_STATE)
+			{
+				transformComponent->scale.x = 1.15f;
+				resetScaleLerp = 0.05f;
+			}
 			movementComponent->movementState = SLOWDOWN_STATE;
 		}
 	}
 
 	bool isMovingOnFloor = isMovingHorizontally && movementComponent->isGrounded;
-	bool canChangeToTakeOffState = (movementComponent->movementState == IDLE_STATE);
+	bool canChangeToTakeOffState = (movementComponent->movementState == IDLE_STATE || movementComponent->movementState == SLOWDOWN_STATE);
 	if (isMovingOnFloor && canChangeToTakeOffState)
 	{
 		movementComponent->movementState = TAKE_OFF_STATE;
@@ -589,21 +595,22 @@ void CharacterMovementSystem::update()
 	switch (movementComponent->movementState)
 	{
 	case IDLE_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 600);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_IDLE_SPRITE, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_TAKEOFF_SPRITE, false, 60, 60);
-
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE, false, 60, 60);
 		break;
 	case RUNNING_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_RUN_SPRITE, true, 70, 70);
+		break;
 	case SLOWDOWN_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_RUN_SPRITE, true, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE, false, 70, 70);
 		break;
 	case JUMPING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_JUMP, true, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_JUMP_SPRITE, true, 70, 70);
 		break;
 	case FALLING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_FALL, false, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_FALL_SPRITE, false, 70, 70);
 		break;
 	}
 }
