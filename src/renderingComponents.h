@@ -80,6 +80,10 @@ struct SpriteComponent
 	// Container for the animation data of this sprite (speed, should loop, etc)
 	AnimationData animationData;
 
+	// To have more control per sprite basis, allow having a collider offset override.
+	// This will override the RectColliderComponent collider.topLeftPointOffset of the entity
+	IVec2 collidertopLeftPointOffset = {0,0};
+
 	bool flipX = false;
 };
 

@@ -592,25 +592,32 @@ void CharacterMovementSystem::update()
 		resetScaleLerp = 0.3f;
 	}
 
+	//TODO: remove later
+	static bool hasGolf = false;
+	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
+	{
+		hasGolf = !hasGolf;
+	}
+
 	switch (movementComponent->movementState)
 	{
 	case IDLE_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_IDLE_SPRITE, true, 70, 600);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_IDLE_SPRITE : CHARACTER_IDLE_SPRITE, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE, false, 60, 60);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE : CHARACTER_TAKEOFF_SPRITE, false, 60, 60);
 		break;
 	case RUNNING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_RUN_SPRITE, true, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_RUN_SPRITE : CHARACTER_RUN_SPRITE, true, 70, 70);
 		break;
 	case SLOWDOWN_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE, false, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE : CHARACTER_RUN_SPRITE, false, 70, 70);
 		break;
 	case JUMPING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_JUMP_SPRITE, true, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_JUMP_SPRITE : CHARACTER_JUMP_SPRITE, true, 70, 70);
 		break;
 	case FALLING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_FALL_SPRITE, false, 70, 70);
+		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
 		break;
 	}
 }

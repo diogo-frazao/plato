@@ -16,6 +16,29 @@ void createBlockAtPosition(IVec2 position)
     getComponentFromEntity<RectColliderComponent>(block)->isLevelGeometry = true;
 }
 
+void overrideColliderOffsetsBasedOnCurrentSprite()
+{
+    static const IVec2 k_emptyIVec = { 0,0 };
+
+    for (Entity& entity : getAllEntities())
+    {
+        if (entity.id == k_invalidId)
+        {
+            continue;
+        }
+
+        if (!entityHasComponent<SpriteComponent>(entity) ||
+            !(getComponentFromEntity<SpriteComponent>(entity)->collidertopLeftPointOffset.x > 0) ||
+            !(getComponentFromEntity<SpriteComponent>(entity)->collidertopLeftPointOffset.y > 0) ||
+            !entityHasComponent<RectColliderComponent>(entity))
+        {
+            continue;
+        }
+
+        getComponentFromEntity<RectColliderComponent>(entity)->collider.topLeftPointOffset = getComponentFromEntity<SpriteComponent>(entity)->collidertopLeftPointOffset;
+    }
+}
+
 void ECSLevel::start()
 {
 	_renderingSystem.createLightsBuffers();
@@ -33,7 +56,7 @@ void ECSLevel::start()
     movementComponent->airFriction = 2.f;
 
     playerSprite->setupSpriteForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
-    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 3, 3 }, { 9, 17 });
+    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
     Entity& bg = addEntity();
     addComponentToEntity<SpriteComponent>(bg)->setupSpriteForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
@@ -168,6 +191,7 @@ void ECSLevel::update()
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
 
 	_savePositionSystem.update();
+    overrideColliderOffsetsBasedOnCurrentSprite();
 	_characterMovementSystem.update();
     _animationSystem.update();
 
@@ -187,6 +211,7 @@ void ECSLevel::imguiRender()
     Entity& player = getEntityById(k_playerEntityId);
 
     auto* movement = getComponentFromEntity<MovementComponent>(player);
+    auto* collider = getComponentFromEntity<RectColliderComponent>(player);
 
     ImGui::SeparatorText("Horizontal");
 
@@ -206,6 +231,9 @@ void ECSLevel::imguiRender()
 
     ImGui::Text("Character state: %s", movement->getMovementStateAsString());
 
+    ImGui::Text("Player Collider X Offset: %i", collider->collider.topLeftPointOffset.x);
+    ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
+
     ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
     ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
     ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
@@ -214,9 +242,6 @@ void ECSLevel::imguiRender()
 
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
     ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
-
-    ImGui::Text("Mouse X: %i", (int)s_mousePositionThisFrame.x);
-    ImGui::Text("Mouse Y: %i", (int)s_mousePositionThisFrame.y);
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Average %.1f FPS", io.Framerate);
