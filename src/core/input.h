@@ -48,7 +48,6 @@ inline Vec2 s_mousePositionThisFrame;
 static MouseState s_mouseInputState;
 static std::array<KeyState, 290> s_keyboardInputState;
 
-
 // Game related
 bool wasJumpKeyPressedThisFrame();
 bool wasJumpKeyReleasedThisFrame();
@@ -56,3 +55,4 @@ bool isMoveRightKeyDown();
 bool isMoveLeftKeyDown();
 bool wasMoveRightPressedThisFrame();
 bool wasMoveLeftPressedThisFrame();
+bool wasAttackKeyPressedThisFrame();

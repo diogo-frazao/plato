@@ -7,6 +7,7 @@
 
 struct TransformComponent
 {
+	// This may not correspond to where an entity is drawn. Ex: The player sprite has padding on all sides.
 	Vec2 position;
 	Vec2 previousPosition;
 	Vec2 scale = { 1.f, 1.f };
@@ -101,7 +102,9 @@ enum MovementState
 	RUNNING_STATE,
 	SLOWDOWN_STATE,
 	JUMPING_STATE,
-	FALLING_STATE
+	FALLING_STATE,
+	//TODO REMOVE
+	REMOVE_ATTACKING_STATE
 };
 
 struct MovementComponent
@@ -154,5 +157,7 @@ struct MovementComponent
 		case FALLING_STATE:
 			return "Falling";
 		}
+
+		return "INVALID";
 	}
 };

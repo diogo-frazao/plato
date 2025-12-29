@@ -208,4 +208,8 @@ bool wasMoveLeftPressedThisFrame()
 	return _wasKeyPressedThisFrame(s_moveLeftKey) || _wasKeyPressedThisFrame(s_alternateMoveLeftKey);
 }
 
+bool wasAttackKeyPressedThisFrame()
+{
+	return _wasMouseButtonPressedThisFrame(LEFT);
+}
 

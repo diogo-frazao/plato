@@ -123,16 +123,28 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			currentOffsetX = spriteComponent->animationData.currentFrame * frameSizeX;
 		}
 
-		_src.x = spriteComponent->atlasOffset.x + currentOffsetX;
-		_src.y = spriteComponent->atlasOffset.y;
+		_src.x = ceil(spriteComponent->atlasOffset.x + currentOffsetX);
+		_src.y = ceil(spriteComponent->atlasOffset.y);
 		_src.w = frameSizeX;
 		_src.h = frameSizeY;
 
 		float scaledWidth = frameSizeX * transformComponent->scale.x;
 		float scaledHeight = frameSizeY * transformComponent->scale.y;
 
-		float scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
-		float scaleOffsetY = (frameSizeY - scaledHeight);
+		float scaleOffsetX;
+		float scaleOffsetY;
+
+		// TODO: Improve. Due to the character's sprite padding, we're hardcoding the Y scale offset
+		if (entity.id == k_playerEntityId)
+		{
+			scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
+			scaleOffsetY = (frameSizeY - scaledHeight) * 0.8f;
+		}
+		else
+		{
+			scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
+			scaleOffsetY = (frameSizeY - scaledHeight);
+		}
 
 		_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
 		_dest.y = interpolatedPosition.y + scaleOffsetY;
@@ -507,6 +519,15 @@ void CharacterMovementSystem::update()
 		movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
 	}
 
+	//TODO: Improve
+	bool attackedThisFrame = false;
+	if (wasAttackKeyPressedThisFrame() && movementComponent->isGrounded)
+	{
+		attackedThisFrame = true;
+		//movementComponent->currentSpeed.x += 1.f;
+		//movementComponent->currentSpeed.y = -1.f;
+	}
+
 	processHorizontalMovement(&character);
 	processVerticalMovement(&character);
 
@@ -516,9 +537,11 @@ void CharacterMovementSystem::update()
 	static float resetScaleLerp = 1.f;
 	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, resetScaleLerp);
 	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
-
+	
+	//TODO REMOVE:
+	bool isNotAttacking = movementComponent->movementState != REMOVE_ATTACKING_STATE;
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
-	if (isGroundedAndNotMoving)
+	if (isGroundedAndNotMoving && isNotAttacking)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
@@ -543,7 +566,7 @@ void CharacterMovementSystem::update()
 		transformComponent->scale.x = 1.3f;
 		resetScaleLerp = 1.f;
 
-		Entity& takeoffParticle = addEntity({ transformComponent->position.x - 13, transformComponent->position.y + 10 });
+		Entity& takeoffParticle = addEntity({ transformComponent->position.x + 10, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.6f, 0.6f };
@@ -568,7 +591,7 @@ void CharacterMovementSystem::update()
 									 (wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
 	if (changedDirectionThisFrame)
 	{
-		Entity& turnParticle = addEntity({ transformComponent->position.x, transformComponent->position.y + 11 });
+		Entity& turnParticle = addEntity({ transformComponent->position.x + 12, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(turnParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.7f, 0.7f };
@@ -596,10 +619,20 @@ void CharacterMovementSystem::update()
 	}
 
 	//TODO: remove later
-	static bool hasGolf = false;
+	static bool hasGolf = true;
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
 	{
 		hasGolf = !hasGolf;
+	}
+
+	if (attackedThisFrame)
+	{
+		movementComponent->movementState = REMOVE_ATTACKING_STATE;
+	}
+
+	if (movementComponent->movementState == REMOVE_ATTACKING_STATE && spriteComponent->animationData.finishedPlayingAnimation)
+	{
+		//movementComponent->movementState = SLOWDOWN_STATE;
 	}
 
 	switch (movementComponent->movementState)
@@ -621,6 +654,9 @@ void CharacterMovementSystem::update()
 		break;
 	case FALLING_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
+		break;
+	case REMOVE_ATTACKING_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
 		break;
 	}
 }

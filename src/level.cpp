@@ -55,7 +55,7 @@ void ECSLevel::start()
     movementComponent->coyoteTime = 0.12f;
     movementComponent->airFriction = 2.f;
 
-    playerSprite->setupSpriteForLayer(CHARACTER_SPRITE, CHARACTER_LAYER);
+    playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
     Entity& bg = addEntity();
@@ -186,8 +186,8 @@ void ECSLevel::update()
     SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
     auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
 
-    Vec2 targetPos = { playerTransform->position.x - 25,
-                       playerTransform->position.y - 25};
+    Vec2 targetPos = { playerTransform->position.x - 5,
+                       playerTransform->position.y - 15};
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
 
 	_savePositionSystem.update();
