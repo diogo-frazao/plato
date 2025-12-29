@@ -231,6 +231,8 @@ void ECSLevel::imguiRender()
 
     ImGui::Text("Character state: %s", movement->getMovementStateAsString());
 
+    ImGui::Text("Player is %s grounded", movement->isGrounded ? "" : "not");
+
     ImGui::Text("Player Collider X Offset: %i", collider->collider.topLeftPointOffset.x);
     ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
 

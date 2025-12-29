@@ -524,8 +524,8 @@ void CharacterMovementSystem::update()
 	if (wasAttackKeyPressedThisFrame() && movementComponent->isGrounded)
 	{
 		attackedThisFrame = true;
-		//movementComponent->currentSpeed.x += 1.f;
-		//movementComponent->currentSpeed.y = -1.f;
+		float attackForwardBoost = spriteComponent->flipX ? -1.f : 1.f;
+		movementComponent->currentSpeed.x += attackForwardBoost;
 	}
 
 	processHorizontalMovement(&character);
@@ -696,6 +696,7 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 		{
 			transformComponent->position.y += movementDirection;
 			pixelsToMove -= movementDirection;
+			movementComponent->isGrounded = false;
 		}
 		else
 		{
