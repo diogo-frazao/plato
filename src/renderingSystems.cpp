@@ -123,8 +123,8 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			currentOffsetX = spriteComponent->animationData.currentFrame * frameSizeX;
 		}
 
-		_src.x = ceil(spriteComponent->atlasOffset.x + currentOffsetX);
-		_src.y = ceil(spriteComponent->atlasOffset.y);
+		_src.x = spriteComponent->atlasOffset.x + currentOffsetX;
+		_src.y = spriteComponent->atlasOffset.y;
 		_src.w = frameSizeX;
 		_src.h = frameSizeY;
 
@@ -261,7 +261,7 @@ void DebugSystem::render()
 			continue;
 		}
 
-		if (!entityHasComponent<MovementComponent>(player))
+		if (!entityHasComponent<MainCharacterMovementComponent>(player))
 		{
 			continue;
 		}
@@ -356,7 +356,7 @@ void SavePreviousPositionSystem::update()
 	}
 }
 
-float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
+float calculateHorizontalSpeedMultiplier(MainCharacterMovementComponent* movementComponent)
 {
 	float horizontalSpeedMultiplier = 1.f;
 
@@ -439,7 +439,7 @@ void CharacterMovementSystem::update()
 	Entity& character = getEntityById(k_playerEntityId);
 
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
-	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
+	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(character);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
 
 	//TODO: remove debug to reset player pos
@@ -454,8 +454,10 @@ void CharacterMovementSystem::update()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown();
-	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown();
+	bool isAttacking = movementComponent->movementState == REMOVE_ATTACKING_STATE;
+
+	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && !isAttacking;
+	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && !isAttacking;
 
 	bool performedJumpThisFrame = false;
 
@@ -524,8 +526,12 @@ void CharacterMovementSystem::update()
 	if (wasAttackKeyPressedThisFrame() && movementComponent->isGrounded)
 	{
 		attackedThisFrame = true;
-		float attackForwardBoost = spriteComponent->flipX ? -1.f : 1.f;
-		movementComponent->currentSpeed.x += attackForwardBoost;
+
+		if (!isMovingHorizontally || isMovingHorizontally)
+		{
+			float attackForwardBoost = spriteComponent->flipX ? -2.f : 2.f;
+			movementComponent->currentSpeed.x = attackForwardBoost;
+		}
 	}
 
 	processHorizontalMovement(&character);
@@ -632,7 +638,7 @@ void CharacterMovementSystem::update()
 
 	if (movementComponent->movementState == REMOVE_ATTACKING_STATE && spriteComponent->animationData.finishedPlayingAnimation)
 	{
-		//movementComponent->movementState = SLOWDOWN_STATE;
+		movementComponent->movementState = isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
 	}
 
 	switch (movementComponent->movementState)
@@ -664,7 +670,7 @@ void CharacterMovementSystem::update()
 void CharacterMovementSystem::processVerticalMovement(Entity* self)
 {
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(*self);
-	auto* movementComponent = getComponentFromEntity<MovementComponent>(*self);
+	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(*self);
 
 	movementComponent->remainder.y += movementComponent->currentSpeed.y;
 	int32_t pixelsToMove = round(movementComponent->remainder.y);
@@ -715,7 +721,7 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 {
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(*self);
-	auto* movementComponent = getComponentFromEntity<MovementComponent>(*self);
+	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(*self);
 
 	movementComponent->remainder.x += movementComponent->currentSpeed.x;
 	int32_t pixelsToMove = round(movementComponent->remainder.x);
@@ -746,7 +752,7 @@ void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 	}
 }
 
-void CharacterMovementSystem::handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded)
+void CharacterMovementSystem::handleCoyoteTime(MainCharacterMovementComponent* movementComponent, bool wasGrounded)
 {
 	bool leftPlatformOnThisFrame = (wasGrounded && !movementComponent->isGrounded) && !wasJumpKeyReleasedThisFrame();
 	if (leftPlatformOnThisFrame)

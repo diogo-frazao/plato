@@ -107,7 +107,7 @@ enum MovementState
 	REMOVE_ATTACKING_STATE
 };
 
-struct MovementComponent
+struct MainCharacterMovementComponent
 {
 	// Max horizontal speed while moving
 	float maxHorizontalSpeed;
@@ -156,6 +156,8 @@ struct MovementComponent
 			return "Jumping";
 		case FALLING_STATE:
 			return "Falling";
+		case REMOVE_ATTACKING_STATE:
+			return "Attacking";
 		}
 
 		return "INVALID";

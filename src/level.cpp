@@ -45,7 +45,7 @@ void ECSLevel::start()
 
     Entity& player = addEntity();
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
-    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
+    auto* movementComponent = addComponentToEntity<MainCharacterMovementComponent>(player);
     movementComponent->maxHorizontalSpeed = 1.5f;
     movementComponent->runAcceleration = 8.f;
     movementComponent->friction = 10.f;
@@ -97,6 +97,9 @@ void ECSLevel::start()
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
+
+    Entity& dummyEnemy = addEntity();
+    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -195,6 +198,10 @@ void ECSLevel::update()
 	_characterMovementSystem.update();
     _animationSystem.update();
 
+    Entity& dummyEnemy = getEntityById(9);
+    getComponentFromEntity<TransformComponent>(dummyEnemy)->position = { 200, 117 };
+    getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
+
     // After all systems, update camera
     _levelCamera.minX = -320;
     _levelCamera.maxX = 0;
@@ -210,7 +217,7 @@ void ECSLevel::imguiRender()
 
     Entity& player = getEntityById(k_playerEntityId);
 
-    auto* movement = getComponentFromEntity<MovementComponent>(player);
+    auto* movement = getComponentFromEntity<MainCharacterMovementComponent>(player);
     auto* collider = getComponentFromEntity<RectColliderComponent>(player);
 
     ImGui::SeparatorText("Horizontal");
@@ -237,8 +244,8 @@ void ECSLevel::imguiRender()
     ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
 
     ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
-    ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
-    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
+    ImGui::Text("Player Speed X: %f", getComponentFromEntity<MainCharacterMovementComponent>(player)->currentSpeed.x);
+    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MainCharacterMovementComponent>(player)->currentSpeed.y);
     ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
     ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 

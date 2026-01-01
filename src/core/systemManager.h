@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 class ECSLevel;
-class MovementComponent;
+class MainCharacterMovementComponent;
 class TransformComponent;
 class Entity;
 class SDL_Texture;
@@ -55,7 +55,7 @@ public:
 	void processVerticalMovement(Entity* self);
 	bool willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck);
 
-	void handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded);
+	void handleCoyoteTime(MainCharacterMovementComponent* movementComponent, bool wasGrounded);
 };
 
 class DebugSystem
