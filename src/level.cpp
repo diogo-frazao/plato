@@ -45,15 +45,7 @@ void ECSLevel::start()
 
     Entity& player = addEntity();
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
-    auto* movementComponent = addComponentToEntity<MainCharacterMovementComponent>(player);
-    movementComponent->maxHorizontalSpeed = 1.5f;
-    movementComponent->runAcceleration = 8.f;
-    movementComponent->friction = 10.f;
-    movementComponent->maxVerticalSpeed = 3.7f;
-    movementComponent->gravity = 8.68f;
-    movementComponent->jumpSpeed = 3.3f;
-    movementComponent->coyoteTime = 0.12f;
-    movementComponent->airFriction = 2.f;
+    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
 
     playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
@@ -98,8 +90,11 @@ void ECSLevel::start()
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
-    Entity& dummyEnemy = addEntity();
+    Entity& dummyEnemy = addEntity({ 50, 0 });
     addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
+    addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+    getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
+    auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -198,10 +193,6 @@ void ECSLevel::update()
 	_characterMovementSystem.update();
     _animationSystem.update();
 
-    Entity& dummyEnemy = getEntityById(9);
-    getComponentFromEntity<TransformComponent>(dummyEnemy)->position = { 200, 117 };
-    getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
-
     // After all systems, update camera
     _levelCamera.minX = -320;
     _levelCamera.maxX = 0;
@@ -217,7 +208,7 @@ void ECSLevel::imguiRender()
 
     Entity& player = getEntityById(k_playerEntityId);
 
-    auto* movement = getComponentFromEntity<MainCharacterMovementComponent>(player);
+    auto* movement = getComponentFromEntity<MovementComponent>(player);
     auto* collider = getComponentFromEntity<RectColliderComponent>(player);
 
     ImGui::SeparatorText("Horizontal");
@@ -244,8 +235,8 @@ void ECSLevel::imguiRender()
     ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
 
     ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
-    ImGui::Text("Player Speed X: %f", getComponentFromEntity<MainCharacterMovementComponent>(player)->currentSpeed.x);
-    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MainCharacterMovementComponent>(player)->currentSpeed.y);
+    ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
+    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
     ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
     ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
 
@@ -255,6 +246,12 @@ void ECSLevel::imguiRender()
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+
+    if (ImGui::Button("Launch dummy enemy"))
+    {
+        Entity& dummyEnemy = getEntityById(9);
+        getComponentFromEntity<MovementComponent>(dummyEnemy)->currentSpeed = { 3.f, -2.f };
+    }
 
     ImGui::End();
 }

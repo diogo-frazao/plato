@@ -107,31 +107,31 @@ enum MovementState
 	REMOVE_ATTACKING_STATE
 };
 
-struct MainCharacterMovementComponent
+struct MovementComponent
 {
 	// Max horizontal speed while moving
-	float maxHorizontalSpeed;
+	float maxHorizontalSpeed = 1.5f;
 	// How fast the character reaches maxHorizontalSpeed while moving
-	float runAcceleration;
+	float runAcceleration = 8.f;
 	// How fast the character will come to stop when not moving
-	float friction;
+	float friction = 10.f;
 
 	// How fast the character will come to stop when not moving and in the air
-	float airFriction;
+	float airFriction = 2.f;
 
 	// Max vertical speed while falling
-	float maxVerticalSpeed;
+	float maxVerticalSpeed = 3.7f;
 	// How fast the character reaches maxVerticalSpeed while falling
-	float gravity;
+	float gravity = 8.68f;
 	// How high the character jumps
-	float jumpSpeed;
+	float jumpSpeed = 3.3f;
 
 	Vec2 currentSpeed;
 	// How much is left from one frame to the other. We only move when it's whole pixels
 	Vec2 remainder;
 
 	// How many seconds we can still jump after leaving a platform
-	float coyoteTime;
+	float coyoteTime = 0.12f;
 
 	bool isGrounded = false;
 

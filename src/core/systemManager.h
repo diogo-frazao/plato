@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 class ECSLevel;
-class MainCharacterMovementComponent;
+class MovementComponent;
 class TransformComponent;
 class Entity;
 class SDL_Texture;
@@ -47,15 +47,19 @@ public:
 	void update();
 };
 
-class CharacterMovementSystem
+class MovementSystem
 {
 public:
 	void update();
+
+	// General functions
 	void processHorizontalMovement(Entity* self);
 	void processVerticalMovement(Entity* self);
 	bool willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck);
 
-	void handleCoyoteTime(MainCharacterMovementComponent* movementComponent, bool wasGrounded);
+	// Main character specific
+	void processMainCharacterMovement();
+	void handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded);
 };
 
 class DebugSystem

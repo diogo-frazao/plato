@@ -261,7 +261,7 @@ void DebugSystem::render()
 			continue;
 		}
 
-		if (!entityHasComponent<MainCharacterMovementComponent>(player))
+		if (!entityHasComponent<MovementComponent>(player))
 		{
 			continue;
 		}
@@ -356,7 +356,7 @@ void SavePreviousPositionSystem::update()
 	}
 }
 
-float calculateHorizontalSpeedMultiplier(MainCharacterMovementComponent* movementComponent)
+float calculateHorizontalSpeedMultiplier(MovementComponent* movementComponent)
 {
 	float horizontalSpeedMultiplier = 1.f;
 
@@ -434,12 +434,12 @@ void AnimationSystem::update()
 	}
 }
 
-void CharacterMovementSystem::update()
+void MovementSystem::processMainCharacterMovement()
 {
 	Entity& character = getEntityById(k_playerEntityId);
 
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
-	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(character);
+	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
 
 	//TODO: remove debug to reset player pos
@@ -479,7 +479,7 @@ void CharacterMovementSystem::update()
 
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
-	Vec2 checkGroundBelowPosition { transformComponent->position.x, transformComponent->position.y + 2 };
+	Vec2 checkGroundBelowPosition{ transformComponent->position.x, transformComponent->position.y + 2 };
 	if (wasJumpKeyPressedThisFrame() && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&character, checkGroundBelowPosition)))
 	{
 		canJumpWithoutTouchingFloor = true;
@@ -543,7 +543,7 @@ void CharacterMovementSystem::update()
 	static float resetScaleLerp = 1.f;
 	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, resetScaleLerp);
 	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
-	
+
 	//TODO REMOVE:
 	bool isNotAttacking = movementComponent->movementState != REMOVE_ATTACKING_STATE;
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
@@ -580,8 +580,8 @@ void CharacterMovementSystem::update()
 		getComponentFromEntity<SpriteComponent>(takeoffParticle)->color = { 255, 255, 255, 200 };
 	}
 
-	bool canChangeFromTakeOffToRunningState = ((movementComponent->movementState == TAKE_OFF_STATE) && 
-											  spriteComponent->animationData.finishedPlayingAnimation);
+	bool canChangeFromTakeOffToRunningState = ((movementComponent->movementState == TAKE_OFF_STATE) &&
+		spriteComponent->animationData.finishedPlayingAnimation);
 	if (canChangeFromTakeOffToRunningState)
 	{
 		movementComponent->movementState = RUNNING_STATE;
@@ -594,7 +594,7 @@ void CharacterMovementSystem::update()
 	}
 
 	bool changedDirectionThisFrame = (wasMoveRightPressedThisFrame() && movementComponent->currentSpeed.x < 0.f) ||
-									 (wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
+		(wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
 	if (changedDirectionThisFrame)
 	{
 		Entity& turnParticle = addEntity({ transformComponent->position.x + 12, transformComponent->position.y + 15 });
@@ -667,10 +667,50 @@ void CharacterMovementSystem::update()
 	}
 }
 
-void CharacterMovementSystem::processVerticalMovement(Entity* self)
+void MovementSystem::update()
+{
+	for (Entity& entity : getAllEntities())
+	{
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (entity.id == k_playerEntityId)
+		{
+			processMainCharacterMovement();
+			continue;
+		}
+
+		if (!entityHasComponent<MovementComponent>(entity))
+		{
+			continue;
+		}
+
+		auto* movementComponent = getComponentFromEntity<MovementComponent>(entity);
+
+		// Gravity
+		if (!movementComponent->isGrounded)
+		{
+			movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
+		}
+
+		// Friction
+		{
+			float friction = movementComponent->isGrounded ? movementComponent->friction : movementComponent->airFriction;
+			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, friction * k_deltaTime);
+		}
+
+		processHorizontalMovement(&entity);
+		processVerticalMovement(&entity);
+	}
+	
+}
+
+void MovementSystem::processVerticalMovement(Entity* self)
 {
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(*self);
-	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(*self);
+	auto* movementComponent = getComponentFromEntity<MovementComponent>(*self);
 
 	movementComponent->remainder.y += movementComponent->currentSpeed.y;
 	int32_t pixelsToMove = round(movementComponent->remainder.y);
@@ -718,10 +758,10 @@ void CharacterMovementSystem::processVerticalMovement(Entity* self)
 	}
 }
 
-void CharacterMovementSystem::processHorizontalMovement(Entity* self)
+void MovementSystem::processHorizontalMovement(Entity* self)
 {
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(*self);
-	auto* movementComponent = getComponentFromEntity<MainCharacterMovementComponent>(*self);
+	auto* movementComponent = getComponentFromEntity<MovementComponent>(*self);
 
 	movementComponent->remainder.x += movementComponent->currentSpeed.x;
 	int32_t pixelsToMove = round(movementComponent->remainder.x);
@@ -752,7 +792,7 @@ void CharacterMovementSystem::processHorizontalMovement(Entity* self)
 	}
 }
 
-void CharacterMovementSystem::handleCoyoteTime(MainCharacterMovementComponent* movementComponent, bool wasGrounded)
+void MovementSystem::handleCoyoteTime(MovementComponent* movementComponent, bool wasGrounded)
 {
 	bool leftPlatformOnThisFrame = (wasGrounded && !movementComponent->isGrounded) && !wasJumpKeyReleasedThisFrame();
 	if (leftPlatformOnThisFrame)
@@ -776,7 +816,7 @@ void CharacterMovementSystem::handleCoyoteTime(MainCharacterMovementComponent* m
 	}
 }
 
-bool CharacterMovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck)
+bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const Vec2 positionToCheck)
 {
 	RectCollider& selfRectCollider = getComponentFromEntity<RectColliderComponent>(*self)->collider;
 
