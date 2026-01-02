@@ -8,6 +8,8 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
+static bool hasAttacked = false;
+
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
 	SDL_Texture* atlas = _loadedAtlasFiles[type];
@@ -74,6 +76,7 @@ void RenderingSystem::createLightsBuffers()
 
 void RenderingSystem::render(float renderAlpha)
 {
+	//TODO: If needed improve performance, since every function interates over every entity
 	computeLightsAtLayer(BACK_LIGHTS_LAYER);
 	computeLightsAtLayer(FRONT_LIGHTS_LAYER);
 
@@ -83,6 +86,7 @@ void RenderingSystem::render(float renderAlpha)
 	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
+	renderSpritesAtLayer(CROSSHAIR_LAYER, renderAlpha);
 }
 
 void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
@@ -146,7 +150,15 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			scaleOffsetY = (frameSizeY - scaledHeight);
 		}
 
-		_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
+		if (spriteComponent->drawnAtScreenSpace)
+		{
+			_dest.x = interpolatedPosition.x + scaleOffsetX;
+		}
+		else
+		{
+			_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
+		}
+
 		_dest.y = interpolatedPosition.y + scaleOffsetY;
 		_dest.w = scaledWidth;
 		_dest.h = scaledHeight;
@@ -266,9 +278,9 @@ void DebugSystem::render()
 			continue;
 		}
 
-		bool foundCollisionWithWorld = false;
+		bool foundCollision = false;
 
-		//TODO: Expand later, since this only debugs player vs world collisions
+		//TODO: Expand later, since this only debugs player vs rest
 		for (Entity& possibleCollider : getAllEntities())
 		{
 			if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
@@ -288,16 +300,15 @@ void DebugSystem::render()
 			Vec2& playerPosition = getComponentFromEntity<TransformComponent>(player)->position;
 			Vec2& positionB = getComponentFromEntity<TransformComponent>(possibleCollider)->position;
 
-
 			if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
 			{
 				debugRect(playerPosition, playerRectCollider, { 0, 255, 0, 255 });
 				debugRect(positionB, rectColliderB, { 0, 255, 0, 255 });
-				foundCollisionWithWorld = true;
+				foundCollision = true;
 			}
 			else
 			{
-				if (!foundCollisionWithWorld)
+				if (!foundCollision)
 				{
 					debugRect(playerPosition, playerRectCollider, { 255, 255, 0, 255 });
 				}
@@ -392,7 +403,7 @@ void AnimationSystem::update()
 		}
 
 		auto* sprite = getComponentFromEntity<SpriteComponent>(entity);
-		if (sprite->numberOfFrames == 0)
+		if (sprite->numberOfFrames < 1)
 		{
 			continue;
 		}
@@ -449,6 +460,13 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->position = Vec2(0, 0);
 		movementComponent->currentSpeed.x = 0;
 		movementComponent->currentSpeed.y = 0;
+
+		Entity& enemy = getEntityById(9);
+		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(200, 0);
+		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
+		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
+		getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 70);
+		hasAttacked = false;
 	}
 
 	bool wasGrounded = movementComponent->isGrounded;
@@ -624,6 +642,8 @@ void MovementSystem::processMainCharacterMovement()
 		resetScaleLerp = 0.3f;
 	}
 
+	//TODO: Implement random x scale while running, almost like a wave effect
+
 	//TODO: remove later
 	static bool hasGolf = true;
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
@@ -662,7 +682,26 @@ void MovementSystem::processMainCharacterMovement()
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
 		break;
 	case REMOVE_ATTACKING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
+		if (spriteComponent->animationData.currentFrame == 2)
+		{
+			spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 140, 70);
+		}
+		else
+		{
+			spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
+		}
+
+		//TODO: Improve, attack enemy
+		if (spriteComponent->animationData.currentFrame >= 0 && !hasAttacked)
+		{
+			transformComponent->scale = Vec2(1.2f, 0.9f);
+			resetScaleLerp = 0.05f;
+			Entity& enemy = getEntityById(9);
+			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = { 2.5f, -2.f };
+			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT, false, 70, 70);
+			hasAttacked = true;
+		}
+
 		break;
 	}
 }

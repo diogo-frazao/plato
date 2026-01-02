@@ -90,11 +90,15 @@ void ECSLevel::start()
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
-    Entity& dummyEnemy = addEntity({ 50, 0 });
+    Entity& dummyEnemy = addEntity({ 200, 0 });
     addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
+
+    Entity& crosshair = addEntity();
+    addComponentToEntity<SpriteComponent>(crosshair)->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON, CROSSHAIR_LAYER);
+    getComponentFromEntity<SpriteComponent>(crosshair)->drawnAtScreenSpace = true;
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -177,16 +181,20 @@ void ECSLevel::update()
     }
 
     Entity& player = getEntityById(k_playerEntityId);
-    Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
-
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
-    auto* playerSprite = getComponentFromEntity<SpriteComponent>(player);
-    SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
-    auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
 
-    Vec2 targetPos = { playerTransform->position.x - 5,
-                       playerTransform->position.y - 15};
-    getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
+    // Light that follows player
+    {
+        Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
+
+        auto* playerSprite = getComponentFromEntity<SpriteComponent>(player);
+        SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
+        auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
+
+        Vec2 targetPos = { playerTransform->position.x - 5,
+                           playerTransform->position.y - 15 };
+        getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
+    }
 
 	_savePositionSystem.update();
     overrideColliderOffsetsBasedOnCurrentSprite();
@@ -200,11 +208,24 @@ void ECSLevel::update()
     _levelCamera.targetPosition = { playerTransform->position.x - (k_baseGameWidth / 2), 0};
     _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
     _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+
+    // Crosshair
+    {
+        SDL_HideCursor();
+        Entity& crosshair = getEntityById(10);
+        auto* t = getComponentFromEntity<TransformComponent>(crosshair);
+        Vec2 targetPosition = { s_mousePositionThisFrame.x - 3.5f, s_mousePositionThisFrame.y - 4 };
+        t->position = lerp(t->position, targetPosition, 1.f);
+    }
 }
 
 void ECSLevel::imguiRender()
 {
+    ImGuiIO& io = ImGui::GetIO();
+
     ImGui::Begin("Player");
+
+    ImGui::SetMouseCursor( ImGui::IsWindowHovered() ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 
     Entity& player = getEntityById(k_playerEntityId);
 
@@ -243,7 +264,6 @@ void ECSLevel::imguiRender()
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
     ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
 
-    ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 

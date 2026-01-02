@@ -55,10 +55,12 @@ struct SpriteComponent
 			this->animationData.millisecondsSinceLastFrame = 0;
 			this->animationData.currentFrame = 0;
 			this->animationData.finishedPlayingAnimation = false;
-			this->animationData.millisecondsToChangeToNextFrame = millisecondsToChangeToNextFrame;
 			this->animationData.millisecondsToLoop = millisecondsToLoop;
 			this->animationData.loopAnimation = loop;
 		}
+
+		// Allow changing animation speed at runtime
+		this->animationData.millisecondsToChangeToNextFrame = millisecondsToChangeToNextFrame;
 	}
 
 	// TODO: Improve if needed. Currently all animated sprites are expected to be on a single row
@@ -85,7 +87,11 @@ struct SpriteComponent
 	// This will override the RectColliderComponent collider.topLeftPointOffset of the entity
 	IVec2 collidertopLeftPointOffset = {0,0};
 
+	// Whether the sprite is horizontally flipped or not.
 	bool flipX = false;
+
+	// If true, ignores the camera position. (Ex: 0,0 will always be drawn at top left. Usually used for UI)
+	bool drawnAtScreenSpace = false;
 };
 
 struct RectColliderComponent
