@@ -71,6 +71,13 @@ public:
 	void debugPoint(Vec2 position, SDL_Color color);
 };
 
+struct CrossHairSmear
+{
+	Entity* entity = nullptr;
+	Vec2 directionToMove = { 0,0 };
+	float moveSpeed = 4.f;
+};
+
 class CrosshairSystem
 {
 public:
@@ -79,4 +86,6 @@ public:
 
 	inline static float _resetSpritetimer = k_invalidTime;
 	static void crosshairMeleeHitFeedback(Vec2 hitLocation);
+
+	inline static CrossHairSmear _crosshairSmear;
 };

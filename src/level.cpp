@@ -95,7 +95,7 @@ void ECSLevel::start()
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
-    Entity& dummyEnemy = addEntity({ 200, 0 });
+    Entity& dummyEnemy = addEntity({ 20, 0 });
     addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
