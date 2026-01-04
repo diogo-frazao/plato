@@ -70,3 +70,13 @@ public:
 	void debugLine(Vec2 start, Vec2 end, SDL_Color color);
 	void debugPoint(Vec2 position, SDL_Color color);
 };
+
+class CrosshairSystem
+{
+public:
+	void update();
+	void render();
+
+	inline static float _resetSpritetimer = k_invalidTime;
+	static void crosshairMeleeHitFeedback(Vec2 hitLocation);
+};

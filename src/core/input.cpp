@@ -6,7 +6,7 @@
 
 void _calculateMousePositionThisFrame()
 {
-	s_mousePositionThisFrame = _getMousePosition();
+	s_mousePositionThisFrameInScreenSpace = _getMousePosition();
 }
 
 Vec2 _getMousePosition()

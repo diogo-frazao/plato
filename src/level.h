@@ -6,6 +6,7 @@
 
 #include "renderingComponents.h"
 #include "core/lib.h"
+#include "core/input.h"
 
 struct Camera
 {
@@ -14,7 +15,7 @@ struct Camera
 	int32_t minX = 0;
 	int32_t maxX = 0;
 	Vec2 targetPosition;
-	Vec2 position;
+	Vec2 position = { 0,0 };
 };
 
 class ECSLevel
@@ -35,6 +36,7 @@ public:
 	AnimationSystem _animationSystem;
 	MovementSystem _characterMovementSystem;
 	DebugSystem _debugCollidersSystem;
+	CrosshairSystem _crosshairSystem;
 };
 
 struct LevelManager
@@ -77,6 +79,7 @@ inline Entity& addEntity(Vec2 position = Vec2())
 {
 	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
 	addComponentToEntity<TransformComponent>(entity)->position = position;
+	getComponentFromEntity<TransformComponent>(entity)->previousPosition = position;
 	return entity;
 }
 
@@ -88,4 +91,17 @@ inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
 inline Entity& getEntityById(uint32_t id)
 {
 	return LevelManager::getCurrentLevel()->_entityManager._entities[id];
+}
+
+inline Vec2 convertScreenToWorldPosition(Vec2 posInScreenSpace)
+{
+	if (posInScreenSpace.x > k_baseGameWidth || posInScreenSpace.y > k_baseGameHeight)
+	{
+		D_ASSERT(false, "convertScreenToWorldPosition(): The position passed is not in screen space");
+	}
+
+	Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+
+	return { posInScreenSpace.x + cameraPosition.x,
+			 posInScreenSpace.y + cameraPosition.y};
 }

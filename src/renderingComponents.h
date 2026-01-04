@@ -92,6 +92,12 @@ struct SpriteComponent
 
 	// If true, ignores the camera position. (Ex: 0,0 will always be drawn at top left. Usually used for UI)
 	bool drawnAtScreenSpace = false;
+
+	// Rotation of the sprite in degrees
+	float rotation = 0.f;
+
+	// Point where the sprite rotates around
+	RotationPivot rotationPivotType = DEFAULT_CENTER_ROTATION;
 };
 
 struct RectColliderComponent

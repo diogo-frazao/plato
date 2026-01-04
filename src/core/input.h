@@ -43,7 +43,7 @@ bool _wasMouseButtonPressedThisFrame(MouseButton mouseButtonIndex);
 bool _wasMouseButtonReleasedThisFrame(MouseButton mouseButtonIndex);
 Vec2 _getMousePosition();
 
-inline Vec2 s_mousePositionThisFrame;
+inline Vec2 s_mousePositionThisFrameInScreenSpace;
 
 static MouseState s_mouseInputState;
 static std::array<KeyState, 290> s_keyboardInputState;

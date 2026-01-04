@@ -112,6 +112,7 @@ public:
 		if (entity.id == k_invalidId)
 		{
 			D_LOG(ERROR, "getComponentFromEntity(): Skipped %s since entity has invalid id", typeid(T).name());
+			return nullptr;
 		}
 
 		if (!entityHasComponent<T>(entity))

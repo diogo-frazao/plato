@@ -167,7 +167,20 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		SDL_SetTextureColorMod(atlas, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
 		SDL_SetTextureAlphaMod(atlas, spriteComponent->color.a);
 
-		SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, 0, nullptr, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+		SDL_FPoint rotationPoint;
+		switch (spriteComponent->rotationPivotType)
+		{
+		case DEFAULT_CENTER_ROTATION:
+			rotationPoint.x = _dest.w / 2;
+			rotationPoint.y = _dest.h / 2;
+			break;
+		case TOP_LEFT_ROTATION:
+			rotationPoint.x = 0;
+			rotationPoint.y = 0;
+			break;
+		}
+
+		SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, spriteComponent->rotation, &rotationPoint, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	}
 }
 
@@ -346,6 +359,64 @@ void DebugSystem::debugPoint(Vec2 position, SDL_Color color)
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
 }
 
+void CrosshairSystem::update()
+{
+	Entity& crosshair = getEntityById(k_crosshairEntityId);
+	auto* s = getComponentFromEntity<SpriteComponent>(crosshair);
+
+	// Follow mouse
+	{
+		SDL_HideCursor();
+		auto* t = getComponentFromEntity<TransformComponent>(crosshair);
+		Vec2 targetPosition = { s_mousePositionThisFrameInScreenSpace.x - 3.5f, s_mousePositionThisFrameInScreenSpace.y - 4 };
+		t->position = lerp(t->position, targetPosition, 1.f);
+	}
+
+	// Reset crosshair sprite
+	{
+		if (!isTimerOngoing(_resetSpritetimer))
+		{
+			return;
+		}
+
+		_resetSpritetimer += k_deltaTime;
+		if (_resetSpritetimer >= 0.2f)
+		{
+			s->setSpriteData(CROSSHAIR_MELEE_WEAPON_SPRITE);
+			invalidateTimer(_resetSpritetimer);
+		}
+	}
+}
+
+void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
+{
+	// Crosshair hit sprite
+	{
+		Entity& crosshair = getEntityById(k_crosshairEntityId);
+		auto* s = getComponentFromEntity<SpriteComponent>(crosshair);
+		s->setSpriteData(CROSSHAIR_MELEE_WEAPON_HIT_SPRITE);
+
+		startTimer(_resetSpritetimer);
+	}
+
+	// Smear
+	{
+		Entity& smear = addEntity(hitLocation);
+		auto* s = addComponentToEntity<SpriteComponent>(smear);
+		s->setupSpriteForLayer(SMEAR_MELEE_ATTACK_SPRITE, BEHIND_CHAR_LAYER);
+		s->rotationPivotType = TOP_LEFT_ROTATION;
+
+		Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+
+		float angleToMouse = getAngleBetweenTwoPoints(hitLocation, mouseWorldPosition);
+		s->rotation = angleToMouse;
+	}
+}
+
+void CrosshairSystem::render()
+{
+}
+
 #pragma region Movement Systems
 
 void SavePreviousPositionSystem::update()
@@ -461,7 +532,7 @@ void MovementSystem::processMainCharacterMovement()
 		movementComponent->currentSpeed.x = 0;
 		movementComponent->currentSpeed.y = 0;
 
-		Entity& enemy = getEntityById(9);
+		Entity& enemy = getEntityById(10);
 		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(200, 0);
 		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
 		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
@@ -696,9 +767,10 @@ void MovementSystem::processMainCharacterMovement()
 		{
 			transformComponent->scale = Vec2(1.2f, 0.9f);
 			resetScaleLerp = 0.05f;
-			Entity& enemy = getEntityById(9);
+			Entity& enemy = getEntityById(10);
 			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = { 2.5f, -2.f };
-			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT, false, 70, 70);
+			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
+			CrosshairSystem::crosshairMeleeHitFeedback({transformComponent->position.x + 50, transformComponent->position.y + 16});
 			hasAttacked = true;
 		}
 

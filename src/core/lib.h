@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <cmath>
 
 enum SpriteType
 {
@@ -30,13 +31,22 @@ enum SpriteType
 	CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE,
 
 	// Dummy Enemy
-	DUMMY_ENEMY_HURT,
+	DUMMY_ENEMY_HURT_SPRITE,
 
 	// Crosshairs
-	CROSSHAIR_MELEE_WEAPON,
+	CROSSHAIR_MELEE_WEAPON_SPRITE,
+	CROSSHAIR_MELEE_WEAPON_HIT_SPRITE,
 
+	//FX
+	SMEAR_MELEE_ATTACK_SPRITE,
 	TURN_PARTICLE_SPRITE,
 	TAKEOFF_PARTICLE_SPRITE
+};
+
+enum RotationPivot
+{
+	DEFAULT_CENTER_ROTATION,
+	TOP_LEFT_ROTATION
 };
 
 enum LayerType
@@ -82,6 +92,33 @@ struct RectCollider
 	IVec2 topLeftPointOffset;
 	IVec2 size;
 };
+
+// In degrees
+inline float getAngleBetweenTwoPoints(Vec2 a, Vec2 b)
+{
+	static constexpr float PI = 3.1415f;
+
+	float deltaY = b.y - a.y;
+	float deltaX = b.x - a.x;
+
+	float angleInRadians = atan2(deltaY, deltaX);
+	return angleInRadians * 180 / PI;
+}
+
+inline bool isTimerOngoing(float timer)
+{
+	return timer >= 0.f;
+}
+
+inline void startTimer(float& timer)
+{
+	timer = 0.f;
+}
+
+inline void invalidateTimer(float& timer)
+{
+	timer = -1;
+}
 
 inline int32_t clamp(int32_t value, int32_t min, int32_t max)
 {

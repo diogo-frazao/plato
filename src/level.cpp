@@ -47,6 +47,11 @@ void ECSLevel::start()
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
 
+    Entity& crosshair = addEntity();
+    auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
+    crosshairSprite->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON_SPRITE, CROSSHAIR_LAYER);
+    crosshairSprite->drawnAtScreenSpace = true;
+
     playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
@@ -95,10 +100,6 @@ void ECSLevel::start()
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
-
-    Entity& crosshair = addEntity();
-    addComponentToEntity<SpriteComponent>(crosshair)->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON, CROSSHAIR_LAYER);
-    getComponentFromEntity<SpriteComponent>(crosshair)->drawnAtScreenSpace = true;
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -200,22 +201,16 @@ void ECSLevel::update()
     overrideColliderOffsetsBasedOnCurrentSprite();
 	_characterMovementSystem.update();
     _animationSystem.update();
+    _crosshairSystem.update();
 
     // After all systems, update camera
-    _levelCamera.minX = -320;
-    _levelCamera.maxX = 0;
-    _levelCamera.followTargetRatio = 0.06f;
-    _levelCamera.targetPosition = { playerTransform->position.x - (k_baseGameWidth / 2), 0};
-    _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
-    _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
-
-    // Crosshair
     {
-        SDL_HideCursor();
-        Entity& crosshair = getEntityById(10);
-        auto* t = getComponentFromEntity<TransformComponent>(crosshair);
-        Vec2 targetPosition = { s_mousePositionThisFrame.x - 3.5f, s_mousePositionThisFrame.y - 4 };
-        t->position = lerp(t->position, targetPosition, 1.f);
+        _levelCamera.minX = -320;
+        _levelCamera.maxX = 0;
+        _levelCamera.followTargetRatio = 0.06f;
+        _levelCamera.targetPosition = { playerTransform->position.x - (k_baseGameWidth / 2), 0 };
+        _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+        _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
     }
 }
 
@@ -279,5 +274,6 @@ void ECSLevel::imguiRender()
 void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
+    _crosshairSystem.render();
 	_debugCollidersSystem.render();
 }
