@@ -47,6 +47,7 @@ void ECSLevel::start()
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
+    getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
 
     Entity& crosshair = addEntity();
     auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
@@ -102,6 +103,7 @@ void ECSLevel::start()
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
     addComponentToEntity<AttackingComponent>(dummyEnemy);
+    getComponentFromEntity<TransformComponent>(dummyEnemy)->useDynamicScale = true;
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });

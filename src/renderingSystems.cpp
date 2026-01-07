@@ -447,6 +447,12 @@ void SavePreviousPositionSystem::update()
 
 		auto* transform = getComponentFromEntity<TransformComponent>(entity);
 		transform->previousPosition = transform->position;
+
+		if (transform->useDynamicScale)
+		{
+			transform->scale.x = lerp(transform->scale.x, 1.f, transform->resetScaleLerp);
+			transform->scale.y = lerp(transform->scale.y, 1.f, transform->resetScaleLerp);
+		}
 	}
 }
 
@@ -555,10 +561,10 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isAttacking = player.entityState == ATTACKING_STATE;
+	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE;
 
-	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && !isAttacking;
-	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && !isAttacking;
+	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
+	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
 
 	bool performedJumpThisFrame = false;
 
@@ -628,14 +634,9 @@ void MovementSystem::processMainCharacterMovement()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	static float resetScaleLerp = 1.f;
-	transformComponent->scale.x = lerp(transformComponent->scale.x, 1.f, resetScaleLerp);
-	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
-
-	//TODO REMOVE:
-	bool isNotAttacking = player.entityState != ATTACKING_STATE;
+	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE;
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
-	if (isGroundedAndNotMoving && isNotAttacking)
+	if (isGroundedAndNotMoving && canChangeFromCurrentStateToIdle)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
@@ -646,19 +647,19 @@ void MovementSystem::processMainCharacterMovement()
 			if (player.entityState != SLOWDOWN_STATE)
 			{
 				transformComponent->scale.x = 1.15f;
-				resetScaleLerp = 0.05f;
+				transformComponent->resetScaleLerp = 0.05f;
 			}
 			player.entityState = SLOWDOWN_STATE;
 		}
 	}
 
-	bool isMovingOnFloor = isMovingHorizontally && movementComponent->isGrounded;
+	movementComponent->isMovingOnFloor = isMovingHorizontally && movementComponent->isGrounded;
 	bool canChangeToTakeOffState = (player.entityState == IDLE_STATE || player.entityState == SLOWDOWN_STATE);
-	if (isMovingOnFloor && canChangeToTakeOffState)
+	if (movementComponent->isMovingOnFloor && canChangeToTakeOffState)
 	{
 		player.entityState = TAKE_OFF_STATE;
 		transformComponent->scale.x = 1.3f;
-		resetScaleLerp = 1.f;
+		transformComponent->resetScaleLerp = 1.f;
 
 		Entity& takeoffParticle = addEntity({ transformComponent->position.x + 10, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
@@ -697,7 +698,7 @@ void MovementSystem::processMainCharacterMovement()
 	{
 		player.entityState = JUMPING_STATE;
 		transformComponent->scale = Vec2(0.8f, 1.5f);
-		resetScaleLerp = 0.1f;
+		transformComponent->resetScaleLerp = 0.1f;
 	}
 
 	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f;
@@ -709,7 +710,7 @@ void MovementSystem::processMainCharacterMovement()
 	if (!wasGrounded && movementComponent->isGrounded)
 	{
 		transformComponent->scale = Vec2(1.4f, 0.6f);
-		resetScaleLerp = 0.3f;
+		transformComponent->resetScaleLerp = 0.3f;
 	}
 
 	//TODO: Implement random x scale while running, almost like a wave effect
@@ -722,11 +723,7 @@ void MovementSystem::processMainCharacterMovement()
 		getComponentFromEntity<AttackingComponent>(player)->weaponInHand = hasGolf ? GOLF_WEAPON_TYPE : NO_WEAPON_TYPE;
 	}
 
-	if (player.entityState == ATTACKING_STATE && spriteComponent->animationData.finishedPlayingAnimation)
-	{
-		player.entityState = isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
-	}
-
+	// Handle movement animations
 	switch (player.entityState)
 	{
 	case IDLE_STATE:
@@ -746,31 +743,6 @@ void MovementSystem::processMainCharacterMovement()
 		break;
 	case FALLING_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
-		break;
-	case ATTACKING_STATE:
-		if (spriteComponent->animationData.currentFrame == 2)
-		{
-			spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 140, 70);
-		}
-		else
-		{
-			spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
-		}
-
-		//TODO: Improve, attack enemy
-		if (spriteComponent->animationData.currentFrame >= 0 && !hasAttacked)
-		{
-			transformComponent->scale = Vec2(1.2f, 0.9f);
-			resetScaleLerp = 0.05f;
-			Entity& enemy = getEntityById(10);
-			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = { 2.5f, -2.f };
-			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
-
-			Vec2 smearOffset = spriteComponent->flipX ? Vec2{10, 18} : Vec2{50, 18};
-			CrosshairSystem::crosshairMeleeHitFeedback({transformComponent->position.x + smearOffset.x, transformComponent->position.y + smearOffset.y});
-			hasAttacked = true;
-		}
-
 		break;
 	}
 }
@@ -997,24 +969,58 @@ void AttackingSystem::handleMainCharacterAttack()
 		case NO_WEAPON_TYPE:
 			break;
 		case GOLF_WEAPON_TYPE:
+
 			// Attack to the side the mouse is facing
-			Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
-			Vec2 characterColliderPosition = getColliderPosition(t->position, getComponentFromEntity<RectColliderComponent>(player)->collider);
-
-			bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
-				(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
-
-			if (shouldAttackInAnotherDirection)
 			{
-				s->flipX = !s->flipX;
+				Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+				Vec2 characterColliderPosition = getColliderPosition(t->position, getComponentFromEntity<RectColliderComponent>(player)->collider);
+
+				bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
+					(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
+
+				if (shouldAttackInAnotherDirection)
+				{
+					s->flipX = !s->flipX;
+				}
+
+				float attackForwardBoost = s->flipX ? -2.f : 2.f;
+				move->currentSpeed.x = attackForwardBoost;
 			}
 
-			float attackForwardBoost = s->flipX ? -2.f : 2.f;
-			move->currentSpeed.x = attackForwardBoost;
-
 			player.entityState = ATTACKING_STATE;
-
 			break;
+		}
+	}
+
+	if (player.entityState == ATTACKING_STATE && s->animationData.finishedPlayingAnimation)
+	{
+		player.entityState = move->isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
+	}
+
+	// Handle attack animations
+	if (player.entityState == ATTACKING_STATE)
+	{
+		if (s->animationData.currentFrame == 2)
+		{
+			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 140, 70);
+		}
+		else
+		{
+			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
+		}
+
+		//TODO: Improve, make aab check and debug collision
+		if (s->animationData.currentFrame >= 0 && !hasAttacked)
+		{
+			t->scale = Vec2(1.2f, 0.9f);
+			t->resetScaleLerp = 0.05f;
+			Entity& enemy = getEntityById(10);
+			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = { 2.5f, -2.f };
+			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
+
+			//Vec2 smearOffset = spriteComponent->flipX ? Vec2{ 10, 18 } : Vec2{ 50, 18 };
+			//CrosshairSystem::crosshairMeleeHitFeedback({ transformComponent->position.x + smearOffset.x, transformComponent->position.y + smearOffset.y });
+			hasAttacked = true;
 		}
 	}
 }

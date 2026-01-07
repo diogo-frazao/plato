@@ -11,6 +11,10 @@ struct TransformComponent
 	Vec2 position;
 	Vec2 previousPosition;
 	Vec2 scale = { 1.f, 1.f };
+
+	// Used every frame to reset the current scale back to {1,1}. Changed at runtime to have slow/fast scale effects
+	float resetScaleLerp = 1.f;
+	bool useDynamicScale = false;
 };
 
 struct AnimationData
@@ -137,6 +141,9 @@ struct MovementComponent
 
 	// How many seconds have passed since we walked off a platform. Jumping doesn't count.
 	float timeSinceLeftPlatform = k_invalidId;
+
+	// Data needed for other components to to things
+	bool isMovingOnFloor = false;
 };
 
 enum WeaponType
