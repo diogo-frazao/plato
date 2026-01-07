@@ -107,18 +107,6 @@ struct RectColliderComponent
 	bool isLevelGeometry = false;
 };
 
-enum MovementState
-{
-	IDLE_STATE,
-	TAKE_OFF_STATE,
-	RUNNING_STATE,
-	SLOWDOWN_STATE,
-	JUMPING_STATE,
-	FALLING_STATE,
-	//TODO REMOVE
-	REMOVE_ATTACKING_STATE
-};
-
 struct MovementComponent
 {
 	// Max horizontal speed while moving
@@ -149,29 +137,15 @@ struct MovementComponent
 
 	// How many seconds have passed since we walked off a platform. Jumping doesn't count.
 	float timeSinceLeftPlatform = k_invalidId;
+};
 
-	MovementState movementState;
+enum WeaponType
+{
+	NO_WEAPON_TYPE,
+	GOLF_WEAPON_TYPE
+};
 
-	const char* getMovementStateAsString()
-	{
-		switch (movementState)
-		{
-		case IDLE_STATE:
-			return "Idle";
-		case TAKE_OFF_STATE:
-			return "Takeoff";
-		case RUNNING_STATE:
-			return "Running";
-		case SLOWDOWN_STATE:
-			return "Slowdown";
-		case JUMPING_STATE:
-			return "Jumping";
-		case FALLING_STATE:
-			return "Falling";
-		case REMOVE_ATTACKING_STATE:
-			return "Attacking";
-		}
-
-		return "INVALID";
-	}
+struct AttackingComponent
+{
+	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
 };

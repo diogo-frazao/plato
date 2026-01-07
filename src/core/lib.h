@@ -3,6 +3,41 @@
 #include <stdint.h>
 #include <cmath>
 
+enum EntityState
+{
+	NO_STATE,
+	IDLE_STATE,
+	TAKE_OFF_STATE,
+	RUNNING_STATE,
+	SLOWDOWN_STATE,
+	JUMPING_STATE,
+	FALLING_STATE,
+	ATTACKING_STATE
+};
+
+inline const char* getEntityStateAsString(EntityState state)
+{
+	switch (state)
+	{
+	case IDLE_STATE:
+		return "Idle";
+	case TAKE_OFF_STATE:
+		return "Takeoff";
+	case RUNNING_STATE:
+		return "Running";
+	case SLOWDOWN_STATE:
+		return "Slowdown";
+	case JUMPING_STATE:
+		return "Jumping";
+	case FALLING_STATE:
+		return "Falling";
+	case ATTACKING_STATE:
+		return "Attacking";
+	}
+
+	return "INVALID";
+}
+
 enum SpriteType
 {
 	INVALID,

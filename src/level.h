@@ -37,6 +37,7 @@ public:
 	MovementSystem _characterMovementSystem;
 	DebugSystem _debugCollidersSystem;
 	CrosshairSystem _crosshairSystem;
+	AttackingSystem _attackingSystem;
 };
 
 struct LevelManager

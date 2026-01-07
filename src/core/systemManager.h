@@ -89,3 +89,11 @@ public:
 
 	inline static CrossHairSmear _crosshairSmear;
 };
+
+class AttackingSystem
+{
+public:
+	void update();
+	
+	void handleMainCharacterAttack();
+};

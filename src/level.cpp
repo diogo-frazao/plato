@@ -46,6 +46,7 @@ void ECSLevel::start()
     Entity& player = addEntity();
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
+    addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
 
     Entity& crosshair = addEntity();
     auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
@@ -95,11 +96,12 @@ void ECSLevel::start()
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
-    Entity& dummyEnemy = addEntity({ 20, 0 });
+    Entity& dummyEnemy = addEntity({ 200, 0 });
     addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
+    addComponentToEntity<AttackingComponent>(dummyEnemy);
 
     #pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
@@ -200,6 +202,7 @@ void ECSLevel::update()
 	_savePositionSystem.update();
     overrideColliderOffsetsBasedOnCurrentSprite();
 	_characterMovementSystem.update();
+    _attackingSystem.update();
     _animationSystem.update();
     _crosshairSystem.update();
 
@@ -243,7 +246,7 @@ void ECSLevel::imguiRender()
 
     ImGui::SeparatorText("Misc");
 
-    ImGui::Text("Character state: %s", movement->getMovementStateAsString());
+    ImGui::Text("Character state: %s", getEntityStateAsString(player.entityState));
 
     ImGui::Text("Player is %s grounded", movement->isGrounded ? "" : "not");
 

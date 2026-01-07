@@ -4,11 +4,13 @@
 #include <array>
 #include "log.h"
 #include "constants.h"
+#include "lib.h"
 
 struct Entity
 {
 	int32_t id = k_invalidId;
 	int32_t componentBitmask = 0;
+	EntityState entityState = NO_STATE;
 };
 
 static Entity s_invalidEntity;

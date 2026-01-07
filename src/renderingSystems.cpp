@@ -530,11 +530,11 @@ void AnimationSystem::update()
 
 void MovementSystem::processMainCharacterMovement()
 {
-	Entity& character = getEntityById(k_playerEntityId);
+	Entity& player = getEntityById(k_playerEntityId);
 
-	auto* transformComponent = getComponentFromEntity<TransformComponent>(character);
-	auto* movementComponent = getComponentFromEntity<MovementComponent>(character);
-	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(character);
+	auto* transformComponent = getComponentFromEntity<TransformComponent>(player);
+	auto* movementComponent = getComponentFromEntity<MovementComponent>(player);
+	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(player);
 
 	//TODO: remove debug to reset player pos
 	if (_isKeyDown(SDL_SCANCODE_Q))
@@ -555,7 +555,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isAttacking = movementComponent->movementState == REMOVE_ATTACKING_STATE;
+	bool isAttacking = player.entityState == ATTACKING_STATE;
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && !isAttacking;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && !isAttacking;
@@ -581,7 +581,7 @@ void MovementSystem::processMainCharacterMovement()
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
 	Vec2 checkGroundBelowPosition{ transformComponent->position.x, transformComponent->position.y + 2 };
-	if (wasJumpKeyPressedThisFrame() && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&character, checkGroundBelowPosition)))
+	if (wasJumpKeyPressedThisFrame() && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&player, checkGroundBelowPosition)))
 	{
 		canJumpWithoutTouchingFloor = true;
 	}
@@ -622,30 +622,8 @@ void MovementSystem::processMainCharacterMovement()
 		movementComponent->currentSpeed.y = approach(movementComponent->currentSpeed.y, movementComponent->maxVerticalSpeed, movementComponent->gravity * k_deltaTime);
 	}
 
-	//TODO: Improve
-	bool attackedThisFrame = false;
-	if (wasAttackKeyPressedThisFrame() && movementComponent->isGrounded)
-	{
-		attackedThisFrame = true;
-
-		// Attack to the side the mouse is facing
-		Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
-		Vec2 characterColliderPosition = getColliderPosition(transformComponent->position, getComponentFromEntity<RectColliderComponent>(character)->collider);
-		
-		bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && spriteComponent->flipX) ||
-											  (mouseWorldPosition.x < characterColliderPosition.x && !spriteComponent->flipX);
-
-		if(shouldAttackInAnotherDirection)
-		{
-			spriteComponent->flipX = !spriteComponent->flipX;
-		}
-
-		float attackForwardBoost = spriteComponent->flipX ? -2.f : 2.f;
-		movementComponent->currentSpeed.x = attackForwardBoost;
-	}
-
-	processHorizontalMovement(&character);
-	processVerticalMovement(&character);
+	processHorizontalMovement(&player);
+	processVerticalMovement(&player);
 
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
@@ -655,30 +633,30 @@ void MovementSystem::processMainCharacterMovement()
 	transformComponent->scale.y = lerp(transformComponent->scale.y, 1.f, resetScaleLerp);
 
 	//TODO REMOVE:
-	bool isNotAttacking = movementComponent->movementState != REMOVE_ATTACKING_STATE;
+	bool isNotAttacking = player.entityState != ATTACKING_STATE;
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
 	if (isGroundedAndNotMoving && isNotAttacking)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
-			movementComponent->movementState = IDLE_STATE;
+			player.entityState = IDLE_STATE;
 		}
 		else
 		{
-			if (movementComponent->movementState != SLOWDOWN_STATE)
+			if (player.entityState != SLOWDOWN_STATE)
 			{
 				transformComponent->scale.x = 1.15f;
 				resetScaleLerp = 0.05f;
 			}
-			movementComponent->movementState = SLOWDOWN_STATE;
+			player.entityState = SLOWDOWN_STATE;
 		}
 	}
 
 	bool isMovingOnFloor = isMovingHorizontally && movementComponent->isGrounded;
-	bool canChangeToTakeOffState = (movementComponent->movementState == IDLE_STATE || movementComponent->movementState == SLOWDOWN_STATE);
+	bool canChangeToTakeOffState = (player.entityState == IDLE_STATE || player.entityState == SLOWDOWN_STATE);
 	if (isMovingOnFloor && canChangeToTakeOffState)
 	{
-		movementComponent->movementState = TAKE_OFF_STATE;
+		player.entityState = TAKE_OFF_STATE;
 		transformComponent->scale.x = 1.3f;
 		resetScaleLerp = 1.f;
 
@@ -690,17 +668,17 @@ void MovementSystem::processMainCharacterMovement()
 		getComponentFromEntity<SpriteComponent>(takeoffParticle)->color = { 255, 255, 255, 200 };
 	}
 
-	bool canChangeFromTakeOffToRunningState = ((movementComponent->movementState == TAKE_OFF_STATE) &&
+	bool canChangeFromTakeOffToRunningState = ((player.entityState == TAKE_OFF_STATE) &&
 		spriteComponent->animationData.finishedPlayingAnimation);
 	if (canChangeFromTakeOffToRunningState)
 	{
-		movementComponent->movementState = RUNNING_STATE;
+		player.entityState = RUNNING_STATE;
 	}
 
-	bool canChangeFromFallingToRunState = (movementComponent->movementState == FALLING_STATE) && movementComponent->isGrounded && isMovingHorizontally;
+	bool canChangeFromFallingToRunState = (player.entityState == FALLING_STATE) && movementComponent->isGrounded && isMovingHorizontally;
 	if (canChangeFromFallingToRunState)
 	{
-		movementComponent->movementState = RUNNING_STATE;
+		player.entityState = RUNNING_STATE;
 	}
 
 	bool changedDirectionThisFrame = (wasMoveRightPressedThisFrame() && movementComponent->currentSpeed.x < 0.f) ||
@@ -717,7 +695,7 @@ void MovementSystem::processMainCharacterMovement()
 
 	if (performedJumpThisFrame)
 	{
-		movementComponent->movementState = JUMPING_STATE;
+		player.entityState = JUMPING_STATE;
 		transformComponent->scale = Vec2(0.8f, 1.5f);
 		resetScaleLerp = 0.1f;
 	}
@@ -725,7 +703,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f;
 	if (canChangeToFallingState)
 	{
-		movementComponent->movementState = FALLING_STATE;
+		player.entityState = FALLING_STATE;
 	}
 
 	if (!wasGrounded && movementComponent->isGrounded)
@@ -741,19 +719,15 @@ void MovementSystem::processMainCharacterMovement()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
 	{
 		hasGolf = !hasGolf;
+		getComponentFromEntity<AttackingComponent>(player)->weaponInHand = hasGolf ? GOLF_WEAPON_TYPE : NO_WEAPON_TYPE;
 	}
 
-	if (attackedThisFrame)
+	if (player.entityState == ATTACKING_STATE && spriteComponent->animationData.finishedPlayingAnimation)
 	{
-		movementComponent->movementState = REMOVE_ATTACKING_STATE;
+		player.entityState = isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
 	}
 
-	if (movementComponent->movementState == REMOVE_ATTACKING_STATE && spriteComponent->animationData.finishedPlayingAnimation)
-	{
-		movementComponent->movementState = isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
-	}
-
-	switch (movementComponent->movementState)
+	switch (player.entityState)
 	{
 	case IDLE_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_IDLE_SPRITE : CHARACTER_IDLE_SPRITE, true, 70, 600);
@@ -773,7 +747,7 @@ void MovementSystem::processMainCharacterMovement()
 	case FALLING_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
 		break;
-	case REMOVE_ATTACKING_STATE:
+	case ATTACKING_STATE:
 		if (spriteComponent->animationData.currentFrame == 2)
 		{
 			spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 140, 70);
@@ -985,3 +959,62 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 }
 
 #pragma endregion
+
+void AttackingSystem::update()
+{
+	for (Entity& entity : getAllEntities())
+	{
+		if (entity.id == k_invalidId)
+		{
+			continue;
+		}
+
+		if (entity.id == k_playerEntityId)
+		{
+			handleMainCharacterAttack();
+			continue;
+		}
+
+		if (!entityHasComponent<AttackingComponent>(entity))
+		{
+			continue;
+		}
+	}
+}
+
+void AttackingSystem::handleMainCharacterAttack()
+{
+	Entity& player = getEntityById(k_playerEntityId);
+	auto* attack = getComponentFromEntity<AttackingComponent>(player);
+	auto* move = getComponentFromEntity<MovementComponent>(player);
+	auto* t = getComponentFromEntity<TransformComponent>(player);
+	auto* s = getComponentFromEntity<SpriteComponent>(player);
+
+	if (move->isGrounded && wasAttackKeyPressedThisFrame())
+	{
+		switch (attack->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			break;
+		case GOLF_WEAPON_TYPE:
+			// Attack to the side the mouse is facing
+			Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+			Vec2 characterColliderPosition = getColliderPosition(t->position, getComponentFromEntity<RectColliderComponent>(player)->collider);
+
+			bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
+				(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
+
+			if (shouldAttackInAnotherDirection)
+			{
+				s->flipX = !s->flipX;
+			}
+
+			float attackForwardBoost = s->flipX ? -2.f : 2.f;
+			move->currentSpeed.x = attackForwardBoost;
+
+			player.entityState = ATTACKING_STATE;
+
+			break;
+		}
+	}
+}
