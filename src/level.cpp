@@ -267,12 +267,6 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
-    if (ImGui::Button("Launch dummy enemy"))
-    {
-        Entity& dummyEnemy = getEntityById(9);
-        getComponentFromEntity<MovementComponent>(dummyEnemy)->currentSpeed = { 3.f, -2.f };
-    }
-
     ImGui::End();
 }
 

@@ -6,9 +6,8 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3/SDL_pixels.h>
 #include <string>
-
-static bool hasAttacked = false;
 
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
@@ -261,6 +260,7 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 
 void DebugSystem::render()
 {
+
 #ifndef RELEASE_BUILD
 	if (s_debugGridEnabled)
 	{
@@ -279,53 +279,74 @@ void DebugSystem::render()
 		return;
 	}
 
-	for (Entity& player : getAllEntities())
+	static constexpr SDL_Color k_defaultCollidersColor = { 255, 255, 0, 255 };
+	static constexpr SDL_Color k_defaultCollisionDetectedColliderColor = { 0, 255, 0, 255 };
+
+	static constexpr SDL_Color k_attackCollidersColor = { 65, 105, 225, 255 };
+	static constexpr SDL_Color k_attackDetectedCollidersColor = { 255, 0, 0, 255 };
+
+	Entity& player = getEntityById(k_playerEntityId);
+
+	bool foundCollision = false;
+
+	// Debug Player vs world
+	for (Entity& possibleCollider : getAllEntities())
 	{
-		if (player.id == k_invalidId)
+		if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
 		{
 			continue;
 		}
 
-		if (!entityHasComponent<MovementComponent>(player))
+		if (!entityHasComponent<RectColliderComponent>(possibleCollider))
 		{
 			continue;
 		}
 
-		bool foundCollision = false;
+		RectCollider& playerRectCollider = getComponentFromEntity<RectColliderComponent>(player)->collider;
+		RectCollider& rectColliderB = getComponentFromEntity<RectColliderComponent>(possibleCollider)->collider;
 
-		//TODO: Expand later, since this only debugs player vs rest
-		for (Entity& possibleCollider : getAllEntities())
+		Vec2& playerPosition = getComponentFromEntity<TransformComponent>(player)->position;
+		Vec2& positionB = getComponentFromEntity<TransformComponent>(possibleCollider)->position;
+
+		if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
 		{
-			if (possibleCollider.id == k_invalidId || player.id == possibleCollider.id)
+			debugRect(playerPosition, playerRectCollider, k_defaultCollisionDetectedColliderColor);
+			debugRect(positionB, rectColliderB, k_defaultCollisionDetectedColliderColor);
+			foundCollision = true;
+		}
+		else
+		{
+			if (!foundCollision)
 			{
-				continue;
+				debugRect(playerPosition, playerRectCollider, k_defaultCollidersColor);
 			}
+			debugRect(positionB, rectColliderB, k_defaultCollidersColor);
+		}
+	}
 
-			if (!entityHasComponent<RectColliderComponent>(possibleCollider) ||
-				!entityHasComponent<TransformComponent>(possibleCollider))
+	// Debug attack colliders
+	for (Entity& possibleCollider : getAllEntities())
+	{
+		if (possibleCollider.id == k_invalidId || !entityHasComponent<AttackingComponent>(possibleCollider) || !entityHasComponent<RectColliderComponent>(possibleCollider))
+		{
+			continue;
+		}
+
+		auto* t = getComponentFromEntity<TransformComponent>(possibleCollider);
+		auto* c = getComponentFromEntity<RectColliderComponent>(possibleCollider);
+
+		for (RectCollider& attackCollider : AttackingSystem::s_attackCollisionsToDebugThisFrame)
+		{
+			// If the attack will land, color attack collider + entity damaged red
+			if (aabb({ 0.f, 0.f }, t->position, attackCollider, c->collider))
 			{
-				continue;
+				debugRect({ 0.f, 0.f }, attackCollider, k_attackDetectedCollidersColor);
+				debugRect(t->position, c->collider, k_attackDetectedCollidersColor);
 			}
-
-			RectCollider& playerRectCollider = getComponentFromEntity<RectColliderComponent>(player)->collider;
-			RectCollider& rectColliderB = getComponentFromEntity<RectColliderComponent>(possibleCollider)->collider;
-
-			Vec2& playerPosition = getComponentFromEntity<TransformComponent>(player)->position;
-			Vec2& positionB = getComponentFromEntity<TransformComponent>(possibleCollider)->position;
-
-			if (aabb(playerPosition, positionB, playerRectCollider, rectColliderB))
-			{
-				debugRect(playerPosition, playerRectCollider, { 0, 255, 0, 255 });
-				debugRect(positionB, rectColliderB, { 0, 255, 0, 255 });
-				foundCollision = true;
-			}
+			// If the attack didn't land, don't touch on the entity, but color the attacking colider pink
 			else
 			{
-				if (!foundCollision)
-				{
-					debugRect(playerPosition, playerRectCollider, { 255, 255, 0, 255 });
-				}
-				debugRect(positionB, rectColliderB, { 255, 255, 0, 255 });
+				debugRect({ 0.f, 0.f }, attackCollider, k_attackCollidersColor);
 			}
 		}
 	}
@@ -554,8 +575,8 @@ void MovementSystem::processMainCharacterMovement()
 		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(200, 0);
 		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
 		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
+		enemy.entityState = IDLE_STATE;
 		getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 70);
-		hasAttacked = false;
 	}
 
 	bool wasGrounded = movementComponent->isGrounded;
@@ -934,6 +955,8 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 
 void AttackingSystem::update()
 {
+	clearDebugCollisions();
+
 	for (Entity& entity : getAllEntities())
 	{
 		if (entity.id == k_invalidId)
@@ -951,6 +974,14 @@ void AttackingSystem::update()
 		{
 			continue;
 		}
+
+		// Later, we also need to switch on entity type
+		switch (entity.entityState)
+		{
+		case HURT_STATE:
+			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
+			break;
+		}
 	}
 }
 
@@ -961,13 +992,18 @@ void AttackingSystem::handleMainCharacterAttack()
 	auto* move = getComponentFromEntity<MovementComponent>(player);
 	auto* t = getComponentFromEntity<TransformComponent>(player);
 	auto* s = getComponentFromEntity<SpriteComponent>(player);
+	auto* c = getComponentFromEntity<RectColliderComponent>(player);
 
+	if (attack->weaponInHand == NO_WEAPON_TYPE)
+	{
+		return;
+	}
+
+	// Attack based on equipped state
 	if (move->isGrounded && wasAttackKeyPressedThisFrame())
 	{
 		switch (attack->weaponInHand)
 		{
-		case NO_WEAPON_TYPE:
-			break;
 		case GOLF_WEAPON_TYPE:
 
 			// Attack to the side the mouse is facing
@@ -987,40 +1023,101 @@ void AttackingSystem::handleMainCharacterAttack()
 				move->currentSpeed.x = attackForwardBoost;
 			}
 
-			player.entityState = ATTACKING_STATE;
+			// Scale effects
+			t->scale = Vec2(1.2f, 0.9f);
+			t->resetScaleLerp = 0.05f;
+
 			break;
 		}
+
+		clearEntitiesPlayerAttacked();
+		player.entityState = ATTACKING_STATE;
 	}
 
+	// Handle player attack animations
+	if (player.entityState != ATTACKING_STATE)
+	{
+		return;
+	}
+
+	// Transition when attacking animation ends.
 	if (player.entityState == ATTACKING_STATE && s->animationData.finishedPlayingAnimation)
 	{
 		player.entityState = move->isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
 	}
 
-	// Handle attack animations
-	if (player.entityState == ATTACKING_STATE)
+	// Set animation based on state
+	float speedForAttackAnimation = (s->animationData.currentFrame == 2) ? 140 : 70;
+	s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, speedForAttackAnimation, 70);
+
+	// Actual attack detection, depending on the weapon
+	if (s->animationData.currentFrame > 3)
 	{
-		if (s->animationData.currentFrame == 2)
+		return;
+	}
+
+	for (Entity& target : getAllEntities())
+	{
+		if (target.id == k_invalidId || target.id == k_playerEntityId)
 		{
-			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 140, 70);
-		}
-		else
-		{
-			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, 70, 70);
+			continue;
 		}
 
-		//TODO: Improve, make aab check and debug collision
-		if (s->animationData.currentFrame >= 0 && !hasAttacked)
+		if (!entityHasComponent<AttackingComponent>(target) || !entityHasComponent<RectColliderComponent>(target) ||
+			hasPlayerAlreadyAttackedEntity(target.id))
 		{
-			t->scale = Vec2(1.2f, 0.9f);
-			t->resetScaleLerp = 0.05f;
-			Entity& enemy = getEntityById(10);
-			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = { 2.5f, -2.f };
-			getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
+			continue;
+		}
 
-			//Vec2 smearOffset = spriteComponent->flipX ? Vec2{ 10, 18 } : Vec2{ 50, 18 };
-			//CrosshairSystem::crosshairMeleeHitFeedback({ transformComponent->position.x + smearOffset.x, transformComponent->position.y + smearOffset.y });
-			hasAttacked = true;
+		Vec2 attackStartingLocation = { t->position.x + 50, t->position.y + 18 };
+		RectCollider attackCollider = { {0,0}, {10, 10} };
+
+		Vec2 targetPos = getComponentFromEntity<TransformComponent>(target)->position;
+		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(target)->collider;
+
+		addColliderToDebugList(attackStartingLocation, attackCollider);
+		if (aabb(attackStartingLocation, targetPos, attackCollider, targetCollider))
+		{
+			registerPlayerAttackToEntity(&target);
+
+			//TODO: Later, iterate based on entity type and state.
+			auto* attacking = getComponentFromEntity<AttackingComponent>(target);
+			auto* move = getComponentFromEntity<MovementComponent>(target);
+
+			move->currentSpeed = { 2.5f, -2.f };
+			target.entityState = HURT_STATE;
 		}
 	}
+}
+
+void AttackingSystem::registerPlayerAttackToEntity(Entity* entity)
+{
+	for (int32_t& entityId : _entitiesPlayerAttackedForCurrentAttack)
+	{
+		if (entityId == k_invalidId)
+		{
+			entityId = entity->id;
+			return;
+		}
+	}
+
+	D_LOG(ERROR, "Player couldn't attack entity %i because array is too small", entity->id);
+}
+
+bool AttackingSystem::hasPlayerAlreadyAttackedEntity(int32_t idToCheck)
+{
+	for (int32_t entityId : _entitiesPlayerAttackedForCurrentAttack)
+	{
+		if (entityId == idToCheck)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void AttackingSystem::clearEntitiesPlayerAttacked()
+{
+	memset(_entitiesPlayerAttackedForCurrentAttack, k_invalidId, sizeof(_entitiesPlayerAttackedForCurrentAttack));
 }

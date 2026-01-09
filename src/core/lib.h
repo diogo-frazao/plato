@@ -2,17 +2,23 @@
 
 #include <stdint.h>
 #include <cmath>
+#include "log.h"
 
 enum EntityState
 {
 	NO_STATE,
+
+	// Locomotion
 	IDLE_STATE,
 	TAKE_OFF_STATE,
 	RUNNING_STATE,
 	SLOWDOWN_STATE,
 	JUMPING_STATE,
 	FALLING_STATE,
-	ATTACKING_STATE
+
+	// Attack
+	ATTACKING_STATE,
+	HURT_STATE
 };
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -33,6 +39,8 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Falling";
 	case ATTACKING_STATE:
 		return "Attacking";
+	case HURT_STATE:
+		return "Hurt";
 	}
 
 	return "INVALID";
@@ -124,8 +132,11 @@ struct RectCollider
 	RectCollider() = default;
 	RectCollider(const IVec2 topLeftOffset, const IVec2 size) : topLeftPointOffset(topLeftOffset), size(size) {};
 
-	IVec2 topLeftPointOffset;
-	IVec2 size;
+	bool isValidCollider() { return size.x > 0.f && size.y > 0.f; }
+	void invalidate() { topLeftPointOffset.x = 0; topLeftPointOffset.y = 0; size.x = 0; size.y = 0; }
+
+	IVec2 topLeftPointOffset{ 0,0 };
+	IVec2 size{ 0,0 };
 };
 
 // In degrees
@@ -235,6 +246,11 @@ inline float approach(float current, float target, float increase)
 	return max(current - increase, target);
 }
 
+inline int8_t sign(int32_t amount)
+{
+	return (amount >= 0) ? 1 : -1;
+}
+
 inline bool aabb(Vec2 positionA, Vec2 positionB, const RectCollider a, const RectCollider b)
 {
 	Vec2 aTopLeftWithOffset = getColliderPosition(positionA, a);
@@ -244,9 +260,4 @@ inline bool aabb(Vec2 positionA, Vec2 positionB, const RectCollider a, const Rec
 		aTopLeftWithOffset.x + a.size.x > bTopLeftWithOffset.x &&		// Collision on Right of a and left of b
 		aTopLeftWithOffset.y < bTopLeftWithOffset.y + b.size.y &&		// Collision on Top of a and Bottom of b
 		aTopLeftWithOffset.y + a.size.y > bTopLeftWithOffset.y;			// Collision on Bottom of a and Top of b
-}
-
-inline int8_t sign(int32_t amount)
-{
-	return (amount >= 0) ? 1 : -1;
 }

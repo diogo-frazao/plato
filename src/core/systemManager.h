@@ -95,5 +95,41 @@ class AttackingSystem
 public:
 	void update();
 	
+	// Player attacks
 	void handleMainCharacterAttack();
+	bool hasPlayerAlreadyAttackedEntity(int32_t entityId);
+	void registerPlayerAttackToEntity(Entity* entity);
+	void clearEntitiesPlayerAttacked();
+	int32_t _entitiesPlayerAttackedForCurrentAttack[10];
+
+	// Cleared at the beginning of each frame
+	// This is the only place where we use RectCollider.topLeftPointOffset as a world position
+	inline static RectCollider s_attackCollisionsToDebugThisFrame[10];
+
+	void addColliderToDebugList(Vec2 position, RectCollider collider)
+	{
+#ifndef RELEASE_BUILD
+		for (RectCollider& col : s_attackCollisionsToDebugThisFrame)
+		{
+			if (!col.isValidCollider())
+			{
+				Vec2 colliderStartingPosition = getColliderPosition(position, collider);
+				col.topLeftPointOffset = { (int32_t)colliderStartingPosition.x, (int32_t)colliderStartingPosition.y };
+				col.size = collider.size;
+				return;
+			}
+		}
+
+		D_LOG(ERROR, "addColliderToDebugList(): Colliders to debug is full, can't debug more");
+
+#endif // !RELEASE_BUILD
+	}
+
+	void clearDebugCollisions()
+	{
+		for (RectCollider& col : s_attackCollisionsToDebugThisFrame)
+		{
+			col.invalidate();
+		}
+	}
 };
