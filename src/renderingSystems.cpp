@@ -722,7 +722,7 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->resetScaleLerp = 0.1f;
 	}
 
-	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f;
+	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE;
 	if (canChangeToFallingState)
 	{
 		player.entityState = FALLING_STATE;
@@ -1000,7 +1000,9 @@ void AttackingSystem::handleMainCharacterAttack()
 	}
 
 	// Attack based on equipped state
-	if (move->isGrounded && wasAttackKeyPressedThisFrame())
+	bool canAttackFromCurrentState = player.entityState != ATTACKING_STATE;
+
+	if (canAttackFromCurrentState && move->isGrounded && wasAttackKeyPressedThisFrame())
 	{
 		switch (attack->weaponInHand)
 		{
