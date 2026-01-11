@@ -446,10 +446,6 @@ void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
 	//}
 }
 
-void CrosshairSystem::render()
-{
-}
-
 #pragma region Movement Systems
 
 void SavePreviousPositionSystem::update()
@@ -564,7 +560,7 @@ void MovementSystem::processMainCharacterMovement()
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(player);
 
 	//TODO: remove debug to reset player pos
-	if (_isKeyDown(SDL_SCANCODE_Q))
+	if (_wasKeyPressedThisFrame(SDL_SCANCODE_Q))
 	{
 		transformComponent->previousPosition = Vec2(0, 0);
 		transformComponent->position = Vec2(0, 0);
@@ -576,7 +572,7 @@ void MovementSystem::processMainCharacterMovement()
 		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
 		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
 		enemy.entityState = IDLE_STATE;
-		getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(CHARACTER_IDLE_SPRITE, true, 70, 70);
+		getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_IDLE_SPRITE, true, 70, 70);
 	}
 
 	bool wasGrounded = movementComponent->isGrounded;

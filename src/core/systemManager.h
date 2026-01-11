@@ -82,7 +82,6 @@ class CrosshairSystem
 {
 public:
 	void update();
-	void render();
 
 	inline static float _resetSpritetimer = k_invalidTime;
 	static void crosshairMeleeHitFeedback(Vec2 hitLocation);

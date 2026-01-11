@@ -98,7 +98,7 @@ void ECSLevel::start()
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
     Entity& dummyEnemy = addEntity({ 200, 0 });
-    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(CHARACTER_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
+    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(DUMMY_ENEMY_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
@@ -273,6 +273,5 @@ void ECSLevel::imguiRender()
 void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
-    _crosshairSystem.render();
 	_debugCollidersSystem.render();
 }
