@@ -5,9 +5,10 @@
 #include "core/input.h"
 
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <SDL3/SDL_pixels.h>
 #include <string>
+
+
 
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
@@ -35,7 +36,8 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 			return nullptr;
 	}
 
-	SDL_Texture* texture = IMG_LoadTexture(s_renderer, atlasFilePath.c_str());
+	SDL_Surface* surface = SDL_LoadPNG(atlasFilePath.c_str());
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(s_renderer, surface);
 	if (!texture)
 	{
 		D_ASSERT(false, "Failed to load atlas texture. Error %s", SDL_GetError());

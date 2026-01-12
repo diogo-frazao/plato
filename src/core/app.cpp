@@ -8,7 +8,6 @@
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include <stdio.h>
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <string>
 #include <stdint.h>
 
