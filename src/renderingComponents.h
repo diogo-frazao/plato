@@ -155,4 +155,9 @@ enum WeaponType
 struct AttackingComponent
 {
 	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
+
+	// After this time (in sec), character will play hurt one recover, and go back to idle at the end.
+	float timeToRecoverFromHurtOneState = 2.f;
+
+	float recoverTimer = k_invalidTime;
 };

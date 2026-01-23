@@ -574,7 +574,6 @@ void MovementSystem::processMainCharacterMovement()
 		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
 		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
 		enemy.entityState = IDLE_STATE;
-		getComponentFromEntity<SpriteComponent>(enemy)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_IDLE_SPRITE, true, 70, 70);
 	}
 
 	bool wasGrounded = movementComponent->isGrounded;
@@ -802,6 +801,14 @@ void MovementSystem::update()
 
 		processHorizontalMovement(&entity);
 		processVerticalMovement(&entity);
+
+		switch (entity.entityState)
+		{
+		case IDLE_STATE:
+		case HURT_ONE_IDLE:
+			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_IDLE_SPRITE, true, 70, 70);
+			break;
+		}
 	}
 	
 }
@@ -973,11 +980,31 @@ void AttackingSystem::update()
 			continue;
 		}
 
+		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(entity);
+		SpriteComponent* s = getComponentFromEntity<SpriteComponent>(entity);
+
 		// Later, we also need to switch on entity type
 		switch (entity.entityState)
 		{
-		case HURT_STATE:
-			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(DUMMY_ENEMY_HURT_SPRITE, false, 70, 70);
+		case HURT_ONE_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_ONE_SPRITE, false, 70, 70);
+
+			a->recoverTimer += k_deltaTime;
+			if (a->recoverTimer >= a->timeToRecoverFromHurtOneState)
+			{
+				entity.entityState = HURT_ONE_RECOVER_STATE;
+				invalidateTimer(a->recoverTimer);
+			}
+			break;
+
+		case HURT_ONE_RECOVER_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE, false, 70, 70);
+
+			if (s->animationData.finishedPlayingAnimation)
+			{
+				entity.entityState = HURT_ONE_IDLE;
+			}
+
 			break;
 		}
 	}
@@ -1069,8 +1096,10 @@ void AttackingSystem::handleMainCharacterAttack()
 			continue;
 		}
 
-		Vec2 attackStartingLocation = { t->position.x + 50, t->position.y + 18 };
-		RectCollider attackCollider = { {0,0}, {10, 10} };
+		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(target);
+
+		Vec2 attackStartingLocation = { t->position.x + 35, t->position.y + 18 };
+		RectCollider attackCollider = { {0,0}, {17, 10} };
 
 		Vec2 targetPos = getComponentFromEntity<TransformComponent>(target)->position;
 		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(target)->collider;
@@ -1085,7 +1114,8 @@ void AttackingSystem::handleMainCharacterAttack()
 			auto* move = getComponentFromEntity<MovementComponent>(target);
 
 			move->currentSpeed = { 2.5f, -2.f };
-			target.entityState = HURT_STATE;
+			target.entityState = HURT_ONE_STATE;
+			invalidateTimer(a->recoverTimer);
 		}
 	}
 }

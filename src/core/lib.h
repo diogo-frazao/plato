@@ -18,7 +18,9 @@ enum EntityState
 
 	// Attack
 	ATTACKING_STATE,
-	HURT_STATE
+	HURT_ONE_STATE,
+	HURT_ONE_RECOVER_STATE,
+	HURT_ONE_IDLE
 };
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -39,7 +41,7 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Falling";
 	case ATTACKING_STATE:
 		return "Attacking";
-	case HURT_STATE:
+	case HURT_ONE_STATE:
 		return "Hurt";
 	}
 
@@ -71,11 +73,14 @@ enum SpriteType
 	CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE,
 	CHARACTER_WEAPON_GOLF_JUMP_SPRITE,
 	CHARACTER_WEAPON_GOLF_FALL_SPRITE,
+
+	// Main Character Golf weapon attacks
 	CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE,
 
-	// Dummy Enemy
-	DUMMY_ENEMY_IDLE_SPRITE,
-	DUMMY_ENEMY_HURT_SPRITE,
+	// Enemies
+	GANGSTER_SMALL_IDLE_SPRITE,
+	GANGSTER_SMALL_HURT_ONE_SPRITE,
+	GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE,
 
 	// Crosshairs
 	CROSSHAIR_MELEE_WEAPON_SPRITE,
