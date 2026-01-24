@@ -154,7 +154,17 @@ enum WeaponType
 
 struct AttackingComponent
 {
+	// Deal Damage related
+
 	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
+
+	// Receive Damage related
+
+	// If damageCounter is equal or greater than this, the character will fall and go to HURT_STATE_TWO
+	uint8_t numberOfHitsToFall = 2;
+
+	// How many times this entity was attacked
+	uint8_t damageCounter = 0;
 
 	// After this time (in sec), character will play hurt one recover, and go back to idle at the end.
 	float timeToRecoverFromHurtOneState = 2.f;

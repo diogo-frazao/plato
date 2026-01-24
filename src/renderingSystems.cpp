@@ -570,9 +570,10 @@ void MovementSystem::processMainCharacterMovement()
 		movementComponent->currentSpeed.y = 0;
 
 		Entity& enemy = getEntityById(10);
-		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(200, 0);
-		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(200, 0);
+		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(160, 0);
+		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(160, 0);
 		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
+		getComponentFromEntity<AttackingComponent>(enemy)->damageCounter = 0;
 		enemy.entityState = IDLE_STATE;
 	}
 
@@ -802,22 +803,26 @@ void MovementSystem::update()
 		processHorizontalMovement(&entity);
 		processVerticalMovement(&entity);
 
-		if (!movementComponent->isGrounded)
+		if (!isEntityInCombatState(entity.entityState))
 		{
-			bool canChangeToFallingState = entity.entityState != HURT_ONE_STATE && entity.entityState != HURT_ONE_RECOVER_STATE;
-			if (canChangeToFallingState && movementComponent->currentSpeed.y > 0.f)
+			if (!movementComponent->isGrounded)
 			{
-				entity.entityState = FALLING_STATE;
+				if (movementComponent->currentSpeed.y > 0.f)
+				{
+					entity.entityState = FALLING_STATE;
+				}
+			}
+			else
+			{
+				bool canChangeToIdle = entity.entityState == RUNNING_STATE || entity.entityState == FALLING_STATE;
+				if (canChangeToIdle && abs(movementComponent->currentSpeed.x) <= 0.05f)
+				{
+					entity.entityState = IDLE_STATE;
+				}
 			}
 		}
-		else
-		{
-			bool canChangeToIdle = entity.entityState == RUNNING_STATE || entity.entityState == FALLING_STATE;
-			if (canChangeToIdle && abs(movementComponent->currentSpeed.x) <= 0.05f)
-			{
-				entity.entityState = IDLE_STATE;
-			}
-		}
+
+		//TODO: quando voltar: fix animation speed for hurt 2 + hitbox for hurt two
 
 		switch (entity.entityState)
 		{
@@ -1022,6 +1027,16 @@ void AttackingSystem::update()
 			}
 
 			break;
+		case HURT_TWO_STATE:
+		{
+			float animationSpeed = 70.f;
+			if (s->animationData.currentFrame == 0)
+			{
+				animationSpeed = 300.f;
+			}
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_SPRITE, false, animationSpeed, 70);
+			break;
+		}
 		}
 	}
 }
@@ -1121,18 +1136,43 @@ void AttackingSystem::handleMainCharacterAttack()
 		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(target)->collider;
 
 		addColliderToDebugList(attackStartingLocation, attackCollider);
-		if (aabb(attackStartingLocation, targetPos, attackCollider, targetCollider))
+		if (!aabb(attackStartingLocation, targetPos, attackCollider, targetCollider))
 		{
-			registerPlayerAttackToEntity(&target);
-
-			//TODO: Later, iterate based on entity type and state.
-			auto* attacking = getComponentFromEntity<AttackingComponent>(target);
-			auto* move = getComponentFromEntity<MovementComponent>(target);
-
-			move->currentSpeed = { 3.f, 0.f };
-			target.entityState = HURT_ONE_STATE;
-			invalidateTimer(a->recoverTimer);
+			continue;
 		}
+
+		registerPlayerAttackToEntity(&target);
+
+		//TODO: Later, iterate based on entity type and state.
+		auto* attacking = getComponentFromEntity<AttackingComponent>(target);
+		auto* move = getComponentFromEntity<MovementComponent>(target);
+
+		a->damageCounter++;
+		if (a->damageCounter < a->numberOfHitsToFall)
+		{
+			target.entityState = HURT_ONE_STATE;
+			move->currentSpeed = { 3.f, 0.f };
+		}
+		else if (a->damageCounter == a->numberOfHitsToFall)
+		{
+			if (target.entityState == IDLE_STATE)
+			{
+				target.entityState = HURT_ONE_STATE;
+				move->currentSpeed = { 3.f, 0.f };
+			}
+			else
+			{
+				target.entityState = HURT_TWO_STATE;
+				move->currentSpeed = { 2.5f, -2.f };
+			}
+		}
+		else
+		{
+			target.entityState = HURT_TWO_STATE;
+			move->currentSpeed = { 2.5f, -2.f };
+		}
+
+		invalidateTimer(a->recoverTimer);
 	}
 }
 
