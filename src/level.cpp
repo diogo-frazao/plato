@@ -6,6 +6,8 @@
 
 int lightThatFollowsPlayerEntityId;
 
+static bool s_canShowImGuiUI = true;
+
 void createBlockAtPosition(IVec2 position)
 {
     Entity& block = addEntity();
@@ -185,6 +187,11 @@ void ECSLevel::update()
         }
     }
 
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
+    {
+        s_canShowImGuiUI = !s_canShowImGuiUI;
+    }
+
     Entity& player = getEntityById(k_playerEntityId);
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
 
@@ -221,6 +228,11 @@ void ECSLevel::update()
 
 void ECSLevel::imguiRender()
 {
+    if (!s_canShowImGuiUI)
+    {
+        return;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
 
     ImGui::Begin("Player");
@@ -231,6 +243,8 @@ void ECSLevel::imguiRender()
 
     auto* movement = getComponentFromEntity<MovementComponent>(player);
     auto* collider = getComponentFromEntity<RectColliderComponent>(player);
+
+    ImGui::TextColored({ 255, 255, 0, 0.2 }, "Press [Tab] to close panel");
 
     ImGui::SeparatorText("Horizontal");
 
@@ -266,6 +280,34 @@ void ECSLevel::imguiRender()
 
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+
+    ImGui::End();
+
+    Entity* testEnemy = nullptr;
+    for (Entity& entity : getAllEntities())
+    {
+        if (entity.id == k_invalidId || entity.id == player.id || !entityHasComponent<AttackingComponent>(entity))
+        {
+            continue;
+        }
+
+        testEnemy = &entity;
+        break;
+    }
+
+    if (!testEnemy)
+    {
+        return;
+    }
+
+    ImGui::Begin("Enemy");
+
+    if (ImGui::GetMouseCursor() == ImGuiMouseCursor_None)
+    {
+        ImGui::SetMouseCursor(ImGui::IsWindowHovered() ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
+    }
+
+    ImGui::Text("Enemy state: %s", getEntityStateAsString(testEnemy->entityState));
 
     ImGui::End();
 }

@@ -15,6 +15,7 @@
 #include "input.h"
 
 void drawImguiDockingPreview();
+void setImGuiWindowsTransparent();
 void testResolutions(SDL_Window* window);
 
 static bool s_isWindowFullscreen = false;
@@ -91,6 +92,7 @@ void App::update()
 
         drawImguiDockingPreview();
         imguiThemes::green();
+        setImGuiWindowsTransparent();
 
         if (showDemoWindow)
         {
@@ -184,6 +186,17 @@ void drawImguiDockingPreview()
     ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
     ImGui::DockSpaceOverViewport();
     ImGui::PopStyleColor(2);
+}
+
+void setImGuiWindowsTransparent()
+{
+    auto& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    const ImVec4 bgColor = ImVec4(0.1f, 0.1f, 0.1f, 0.5f);
+    colors[ImGuiCol_WindowBg] = bgColor;
+    colors[ImGuiCol_ChildBg] = bgColor;
+    colors[ImGuiCol_TitleBg] = bgColor;
 }
 
 void testResolutions(SDL_Window* window)

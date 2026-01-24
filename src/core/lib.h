@@ -19,8 +19,7 @@ enum EntityState
 	// Attack
 	ATTACKING_STATE,
 	HURT_ONE_STATE,
-	HURT_ONE_RECOVER_STATE,
-	HURT_ONE_IDLE
+	HURT_ONE_RECOVER_STATE
 };
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -42,7 +41,9 @@ inline const char* getEntityStateAsString(EntityState state)
 	case ATTACKING_STATE:
 		return "Attacking";
 	case HURT_ONE_STATE:
-		return "Hurt";
+		return "Hurt One";
+	case HURT_ONE_RECOVER_STATE:
+		return "Hurt One Recover";
 	}
 
 	return "INVALID";

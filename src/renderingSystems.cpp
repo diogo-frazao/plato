@@ -802,10 +802,26 @@ void MovementSystem::update()
 		processHorizontalMovement(&entity);
 		processVerticalMovement(&entity);
 
+		if (!movementComponent->isGrounded)
+		{
+			bool canChangeToFallingState = entity.entityState != HURT_ONE_STATE && entity.entityState != HURT_ONE_RECOVER_STATE;
+			if (canChangeToFallingState && movementComponent->currentSpeed.y > 0.f)
+			{
+				entity.entityState = FALLING_STATE;
+			}
+		}
+		else
+		{
+			bool canChangeToIdle = entity.entityState == RUNNING_STATE || entity.entityState == FALLING_STATE;
+			if (canChangeToIdle && abs(movementComponent->currentSpeed.x) <= 0.05f)
+			{
+				entity.entityState = IDLE_STATE;
+			}
+		}
+
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
-		case HURT_ONE_IDLE:
 			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_IDLE_SPRITE, true, 70, 70);
 			break;
 		}
@@ -1002,7 +1018,7 @@ void AttackingSystem::update()
 
 			if (s->animationData.finishedPlayingAnimation)
 			{
-				entity.entityState = HURT_ONE_IDLE;
+				entity.entityState = IDLE_STATE;
 			}
 
 			break;
@@ -1113,7 +1129,7 @@ void AttackingSystem::handleMainCharacterAttack()
 			auto* attacking = getComponentFromEntity<AttackingComponent>(target);
 			auto* move = getComponentFromEntity<MovementComponent>(target);
 
-			move->currentSpeed = { 2.5f, -2.f };
+			move->currentSpeed = { 3.f, 0.f };
 			target.entityState = HURT_ONE_STATE;
 			invalidateTimer(a->recoverTimer);
 		}
