@@ -169,5 +169,11 @@ struct AttackingComponent
 	// After this time (in sec), character will play hurt one recover, and go back to idle at the end.
 	float timeToRecoverFromHurtOneState = 2.f;
 
+	// After this time (in sec), character will play hurt two recover.
+	float timeToRecoverFromHurtTwoState = 1.f;
+
+	// When hurt two recover starts playing, After this time (in sec), the character will start crawling.
+	float timeToStartCrawling = 0.5f;
+
 	float recoverTimer = k_invalidTime;
 };

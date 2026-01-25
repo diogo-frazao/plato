@@ -1035,8 +1035,34 @@ void AttackingSystem::update()
 				animationSpeed = 300.f;
 			}
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_SPRITE, false, animationSpeed, 70);
+
+			a->recoverTimer += k_deltaTime;
+			if (a->recoverTimer >= a->timeToRecoverFromHurtTwoState)
+			{
+				entity.entityState = HURT_TWO_RECOVER_STATE;
+				invalidateTimer(a->recoverTimer);
+			}
+
 			break;
 		}
+		case HURT_TWO_RECOVER_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE, false, 70, 70);
+
+			a->recoverTimer += k_deltaTime;
+			if (a->recoverTimer >= a->timeToStartCrawling)
+			{
+				entity.entityState = CRAWL_STATE;
+				invalidateTimer(a->recoverTimer);
+			}
+
+			break;
+		case CRAWL_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
+			
+			MovementComponent* m = getComponentFromEntity<MovementComponent>(entity);
+			m->currentSpeed.x = -20.f * k_deltaTime;
+
+			break;
 		}
 	}
 }
@@ -1163,13 +1189,13 @@ void AttackingSystem::handleMainCharacterAttack()
 			else
 			{
 				target.entityState = HURT_TWO_STATE;
-				move->currentSpeed = { 2.5f, -2.f };
+				move->currentSpeed = { 3.f, -1.f };
 			}
 		}
 		else
 		{
 			target.entityState = HURT_TWO_STATE;
-			move->currentSpeed = { 2.5f, -2.f };
+			move->currentSpeed = { 3.f, -1.f };
 		}
 
 		invalidateTimer(a->recoverTimer);

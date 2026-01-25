@@ -153,7 +153,21 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		atlasOffset = { 314, 486 };
 		size = { 180, 36 };
 		numberOfFrames = 3;
-		collidertopLeftPointOffset = { 22, 6 };
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 517, 486 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
+	case GANGSTER_SMALL_CRAWL_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 580, 486 };
+		size = { 120, 36 };
+		numberOfFrames = 2;
+		collidertopLeftPointOffset = { 22, 10 };
 		break;
 	case CROSSHAIR_MELEE_WEAPON_SPRITE:
 		atlas = GAME_ATLAS;

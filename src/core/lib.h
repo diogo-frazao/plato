@@ -20,7 +20,9 @@ enum EntityState
 	ATTACKING_STATE,
 	HURT_ONE_STATE,
 	HURT_ONE_RECOVER_STATE,
-	HURT_TWO_STATE
+	HURT_TWO_STATE,
+	HURT_TWO_RECOVER_STATE,
+	CRAWL_STATE
 };
 
 inline bool isEntityInCombatState(EntityState state)
@@ -52,6 +54,10 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Hurt One Recover";
 	case HURT_TWO_STATE:
 		return "Hurt Two";
+	case HURT_TWO_RECOVER_STATE:
+		return "Hurt Two Recover";
+	case CRAWL_STATE:
+		return "Crawl";
 	}
 
 	return "INVALID";
@@ -91,6 +97,8 @@ enum SpriteType
 	GANGSTER_SMALL_HURT_ONE_SPRITE,
 	GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE,
 	GANGSTER_SMALL_HURT_TWO_SPRITE,
+	GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE,
+	GANGSTER_SMALL_CRAWL_SPRITE,
 
 	// Crosshairs
 	CROSSHAIR_MELEE_WEAPON_SPRITE,
