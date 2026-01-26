@@ -1057,11 +1057,16 @@ void AttackingSystem::update()
 
 			break;
 		case CRAWL_STATE:
+		{
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
-			
+
 			MovementComponent* m = getComponentFromEntity<MovementComponent>(entity);
 			m->currentSpeed.x = -20.f * k_deltaTime;
 
+			break;
+		}
+		case DEAD_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_DEAD_SPRITE, false, 70, 70);
 			break;
 		}
 	}
@@ -1173,6 +1178,12 @@ void AttackingSystem::handleMainCharacterAttack()
 		auto* attacking = getComponentFromEntity<AttackingComponent>(target);
 		auto* move = getComponentFromEntity<MovementComponent>(target);
 
+		bool isEnemyAlreadyDead = target.entityState == DEAD_STATE;
+		if (isEnemyAlreadyDead)
+		{
+			continue;
+		}
+
 		a->damageCounter++;
 		if (a->damageCounter < a->numberOfHitsToFall)
 		{
@@ -1194,8 +1205,17 @@ void AttackingSystem::handleMainCharacterAttack()
 		}
 		else
 		{
-			target.entityState = HURT_TWO_STATE;
-			move->currentSpeed = { 3.f, -1.f };
+			bool canKillEnemy = target.entityState == HURT_TWO_STATE || target.entityState == HURT_TWO_RECOVER_STATE || target.entityState == CRAWL_STATE;
+			if (canKillEnemy)
+			{
+				move->currentSpeed = { 4.5f, 0.f };
+				target.entityState = DEAD_STATE;
+			}
+			else
+			{
+				target.entityState = HURT_TWO_STATE;
+				move->currentSpeed = { 3.f, -1.f };
+			}
 		}
 
 		invalidateTimer(a->recoverTimer);
