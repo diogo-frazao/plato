@@ -2,9 +2,9 @@
 
 #include "core/entityManager.h"
 #include "core/componentManager.h"
-#include "core/systemManager.h"
+#include "core/systems.h"
 
-#include "renderingComponents.h"
+#include "components.h"
 #include "core/lib.h"
 #include "core/input.h"
 

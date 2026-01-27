@@ -1,6 +1,6 @@
-#include "core/systemManager.h"
+#include "core/systems.h"
 #include "level.h"
-#include "renderingComponents.h"
+#include "components.h"
 #include "core/constants.h"
 #include "core/input.h"
 

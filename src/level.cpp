@@ -1,7 +1,7 @@
 #include "level.h"
 
 #include "core/input.h"
-#include "renderingComponents.h"
+#include "components.h"
 #include "imgui.h"
 
 int lightThatFollowsPlayerEntityId;

@@ -1,4 +1,4 @@
-#include "renderingComponents.h"
+#include "components.h"
 
 #include "core/log.h"
 
