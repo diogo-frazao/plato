@@ -28,7 +28,8 @@ enum EntityState
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE || state == HURT_TWO_STATE;
+	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE || state == HURT_TWO_STATE || 
+		state == HURT_TWO_RECOVER_STATE || state == CRAWL_STATE || state == DEAD_STATE;
 }
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -101,6 +102,8 @@ enum SpriteType
 	GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE,
 	GANGSTER_SMALL_HURT_TWO_SPRITE,
 	GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE,
+	GANGSTER_SMALL_HURT_TWO_UP_SPRITE,
+	GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE,
 	GANGSTER_SMALL_CRAWL_SPRITE,
 	GANGSTER_SMALL_DEAD_SPRITE,
 

@@ -992,7 +992,7 @@ void AttackingSystem::update()
 
 		if (entity.id == k_playerEntityId)
 		{
-			handleMainCharacterAttack();
+			handleMainCharacter();
 			continue;
 		}
 
@@ -1060,6 +1060,7 @@ void AttackingSystem::update()
 		{
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
 
+			// TODO: Improve to move alongside animation
 			MovementComponent* m = getComponentFromEntity<MovementComponent>(entity);
 			m->currentSpeed.x = -20.f * k_deltaTime;
 
@@ -1072,79 +1073,95 @@ void AttackingSystem::update()
 	}
 }
 
-void AttackingSystem::handleMainCharacterAttack()
+void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+{
+	if (a->weaponInHand == NO_WEAPON_TYPE)
+	{
+		return;
+	}
+
+	// Attack based on state
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE;
+	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
+	if (!canAttack)
+	{
+		return;
+	}
+
+	switch (a->weaponInHand)
+	{
+	case GOLF_WEAPON_TYPE:
+		// Attack to the side the mouse is facing
+		{
+			Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+			Vec2 characterColliderPosition = getColliderPosition(t->position, c->collider);
+
+			bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
+				(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
+
+			if (shouldAttackInAnotherDirection)
+			{
+				s->flipX = !s->flipX;
+			}
+
+			float attackForwardBoost = s->flipX ? -2.f : 2.f;
+			m->currentSpeed.x = attackForwardBoost;
+		}
+
+		// Scale effects
+		t->scale = Vec2(1.2f, 0.9f);
+		t->resetScaleLerp = 0.05f;
+
+		break;
+	}
+
+	clearEntitiesPlayerAttacked();
+	player->entityState = ATTACKING_STATE;
+	return;
+}
+
+void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
+{
+	if (a->weaponInHand == NO_WEAPON_TYPE)
+	{
+		return;
+	}
+
+	switch (player->entityState)
+	{
+	case ATTACKING_STATE:
+		// Transition when attacking animation ends.
+		if (s->animationData.finishedPlayingAnimation)
+		{
+			player->entityState = m->isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
+		}
+
+		// Set animation based on state and weapon
+		float speedForAttackAnimation = (s->animationData.currentFrame == 2) ? 140 : 70;
+		s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, speedForAttackAnimation, 70);
+		break;
+	}
+}
+
+void AttackingSystem::handleMainCharacter()
 {
 	Entity& player = getEntityById(k_playerEntityId);
-	auto* attack = getComponentFromEntity<AttackingComponent>(player);
-	auto* move = getComponentFromEntity<MovementComponent>(player);
+	auto* a = getComponentFromEntity<AttackingComponent>(player);
+	auto* m = getComponentFromEntity<MovementComponent>(player);
 	auto* t = getComponentFromEntity<TransformComponent>(player);
 	auto* s = getComponentFromEntity<SpriteComponent>(player);
 	auto* c = getComponentFromEntity<RectColliderComponent>(player);
 
-	if (attack->weaponInHand == NO_WEAPON_TYPE)
+	tryMainCharacterAttack(&player, a, m, t, s, c);
+	handleMainCharacterAttackAnimations(&player, a, m, s);
+
+	// Actual hit detection, depending on the weapon
+	if (player.entityState != ATTACKING_STATE || s->animationData.currentFrame > 3)
 	{
 		return;
 	}
 
-	// Attack based on equipped state
-	bool canAttackFromCurrentState = player.entityState != ATTACKING_STATE;
-
-	if (canAttackFromCurrentState && move->isGrounded && wasAttackKeyPressedThisFrame())
-	{
-		switch (attack->weaponInHand)
-		{
-		case GOLF_WEAPON_TYPE:
-
-			// Attack to the side the mouse is facing
-			{
-				Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
-				Vec2 characterColliderPosition = getColliderPosition(t->position, getComponentFromEntity<RectColliderComponent>(player)->collider);
-
-				bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
-					(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
-
-				if (shouldAttackInAnotherDirection)
-				{
-					s->flipX = !s->flipX;
-				}
-
-				float attackForwardBoost = s->flipX ? -2.f : 2.f;
-				move->currentSpeed.x = attackForwardBoost;
-			}
-
-			// Scale effects
-			t->scale = Vec2(1.2f, 0.9f);
-			t->resetScaleLerp = 0.05f;
-
-			break;
-		}
-
-		clearEntitiesPlayerAttacked();
-		player.entityState = ATTACKING_STATE;
-	}
-
-	// Handle player attack animations
-	if (player.entityState != ATTACKING_STATE)
-	{
-		return;
-	}
-
-	// Transition when attacking animation ends.
-	if (player.entityState == ATTACKING_STATE && s->animationData.finishedPlayingAnimation)
-	{
-		player.entityState = move->isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
-	}
-
-	// Set animation based on state
-	float speedForAttackAnimation = (s->animationData.currentFrame == 2) ? 140 : 70;
-	s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, speedForAttackAnimation, 70);
-
-	// Actual attack detection, depending on the weapon
-	if (s->animationData.currentFrame > 3)
-	{
-		return;
-	}
-
+	// Look for targets to hit from player attack
 	for (Entity& target : getAllEntities())
 	{
 		if (target.id == k_invalidId || target.id == k_playerEntityId)
@@ -1158,12 +1175,13 @@ void AttackingSystem::handleMainCharacterAttack()
 			continue;
 		}
 
-		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(target);
+		auto* aTarget = getComponentFromEntity<AttackingComponent>(target);
+		auto* tTarget = getComponentFromEntity<TransformComponent>(target);
 
 		Vec2 attackStartingLocation = { t->position.x + 35, t->position.y + 18 };
 		RectCollider attackCollider = { {0,0}, {17, 10} };
 
-		Vec2 targetPos = getComponentFromEntity<TransformComponent>(target)->position;
+		Vec2 targetPos = tTarget->position;
 		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(target)->collider;
 
 		addColliderToDebugList(attackStartingLocation, attackCollider);
@@ -1172,35 +1190,40 @@ void AttackingSystem::handleMainCharacterAttack()
 			continue;
 		}
 
+		// If we get here, we hit the target
 		registerPlayerAttackToEntity(&target);
+		aTarget->damageCounter++;
 
-		//TODO: Later, iterate based on entity type and state.
-		auto* attacking = getComponentFromEntity<AttackingComponent>(target);
-		auto* move = getComponentFromEntity<MovementComponent>(target);
-
-		bool isEnemyAlreadyDead = target.entityState == DEAD_STATE;
+		bool isEnemyAlreadyDead = (target.entityState == DEAD_STATE);
 		if (isEnemyAlreadyDead)
 		{
 			continue;
 		}
 
-		a->damageCounter++;
-		if (a->damageCounter < a->numberOfHitsToFall)
+		// Check if we did a up hit or bottom hit
+		TransformComponent* targetTransform = getComponentFromEntity<TransformComponent>(target);
+		Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+		bool wasUpHit = mouseWorldPosition.y < targetTransform->position.y;
+
+		auto* mTarget = getComponentFromEntity<MovementComponent>(target);
+
+		bool targetWillRemainStanding = aTarget->damageCounter < aTarget->numberOfHitsToFall;
+		if (targetWillRemainStanding)
 		{
 			target.entityState = HURT_ONE_STATE;
-			move->currentSpeed = { 3.f, 0.f };
+			mTarget->currentSpeed = { 3.f, 0.f };
 		}
-		else if (a->damageCounter == a->numberOfHitsToFall)
+		else if (aTarget->damageCounter == aTarget->numberOfHitsToFall)
 		{
 			if (target.entityState == IDLE_STATE)
 			{
 				target.entityState = HURT_ONE_STATE;
-				move->currentSpeed = { 3.f, 0.f };
+				mTarget->currentSpeed = { 3.f, 0.f };
 			}
 			else
 			{
 				target.entityState = HURT_TWO_STATE;
-				move->currentSpeed = { 3.f, -1.f };
+				mTarget->currentSpeed = { 3.f, -1.f };
 			}
 		}
 		else
@@ -1208,17 +1231,17 @@ void AttackingSystem::handleMainCharacterAttack()
 			bool canKillEnemy = target.entityState == HURT_TWO_STATE || target.entityState == HURT_TWO_RECOVER_STATE || target.entityState == CRAWL_STATE;
 			if (canKillEnemy)
 			{
-				move->currentSpeed = { 4.5f, 0.f };
+				mTarget->currentSpeed = { 4.5f, 0.f };
 				target.entityState = DEAD_STATE;
 			}
 			else
 			{
 				target.entityState = HURT_TWO_STATE;
-				move->currentSpeed = { 3.f, -1.f };
+				mTarget->currentSpeed = { 3.f, -1.f };
 			}
 		}
 
-		invalidateTimer(a->recoverTimer);
+		invalidateTimer(aTarget->recoverTimer);
 	}
 }
 

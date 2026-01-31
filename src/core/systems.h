@@ -9,6 +9,9 @@
 class ECSLevel;
 class MovementComponent;
 class TransformComponent;
+class AttackingComponent;
+class SpriteComponent;
+class RectColliderComponent;
 class Entity;
 class SDL_Texture;
 
@@ -95,7 +98,10 @@ public:
 	void update();
 	
 	// Player attacks
-	void handleMainCharacterAttack();
+	void handleMainCharacter();
+	void tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
+	void handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
+
 	bool hasPlayerAlreadyAttackedEntity(int32_t entityId);
 	void registerPlayerAttackToEntity(Entity* entity);
 	void clearEntitiesPlayerAttacked();

@@ -162,6 +162,20 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
+	case GANGSTER_SMALL_HURT_TWO_UP_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 1, 528 };
+		size = { 180, 36 };
+		numberOfFrames = 3;
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 184, 528 };
+		size = { 120, 36 };
+		numberOfFrames = 2;
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
 	case GANGSTER_SMALL_CRAWL_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 580, 486 };
