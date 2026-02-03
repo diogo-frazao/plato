@@ -1045,8 +1045,37 @@ void AttackingSystem::update()
 
 			break;
 		}
+		case HURT_TWO_UP_STATE:
+		{
+			float animationSpeed = 70.f;
+			if (s->animationData.currentFrame == 0)
+			{
+				animationSpeed = 300.f;
+			}
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_UP_SPRITE, false, animationSpeed, 70);
+
+			a->recoverTimer += k_deltaTime;
+			if (a->recoverTimer >= a->timeToRecoverFromHurtTwoState)
+			{
+				entity.entityState = HURT_TWO_UP_RECOVER_STATE;
+				invalidateTimer(a->recoverTimer);
+			}
+
+			break;
+		}
 		case HURT_TWO_RECOVER_STATE:
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE, false, 70, 70);
+
+			a->recoverTimer += k_deltaTime;
+			if (a->recoverTimer >= a->timeToStartCrawling)
+			{
+				entity.entityState = CRAWL_STATE;
+				invalidateTimer(a->recoverTimer);
+			}
+
+			break;
+		case HURT_TWO_UP_RECOVER_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE, false, 70, 70);
 
 			a->recoverTimer += k_deltaTime;
 			if (a->recoverTimer >= a->timeToStartCrawling)
@@ -1222,13 +1251,14 @@ void AttackingSystem::handleMainCharacter()
 			}
 			else
 			{
-				target.entityState = HURT_TWO_STATE;
+				target.entityState = wasUpHit ? HURT_TWO_UP_STATE : HURT_TWO_STATE;
 				mTarget->currentSpeed = { 3.f, -1.f };
 			}
 		}
 		else
 		{
-			bool canKillEnemy = target.entityState == HURT_TWO_STATE || target.entityState == HURT_TWO_RECOVER_STATE || target.entityState == CRAWL_STATE;
+			bool canKillEnemy = target.entityState == HURT_TWO_STATE || target.entityState == HURT_TWO_RECOVER_STATE || 
+								target.entityState == HURT_TWO_UP_STATE || target.entityState == HURT_TWO_UP_RECOVER_STATE || target.entityState == CRAWL_STATE;
 			if (canKillEnemy)
 			{
 				mTarget->currentSpeed = { 4.5f, 0.f };
@@ -1236,7 +1266,7 @@ void AttackingSystem::handleMainCharacter()
 			}
 			else
 			{
-				target.entityState = HURT_TWO_STATE;
+				target.entityState = wasUpHit ? HURT_TWO_UP_STATE : HURT_TWO_STATE;
 				mTarget->currentSpeed = { 3.f, -1.f };
 			}
 		}

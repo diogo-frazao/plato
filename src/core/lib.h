@@ -22,14 +22,18 @@ enum EntityState
 	HURT_ONE_RECOVER_STATE,
 	HURT_TWO_STATE,
 	HURT_TWO_RECOVER_STATE,
+	HURT_TWO_UP_STATE,
+	HURT_TWO_UP_RECOVER_STATE,
 	CRAWL_STATE,
 	DEAD_STATE
 };
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE || state == HURT_TWO_STATE || 
-		state == HURT_TWO_RECOVER_STATE || state == CRAWL_STATE || state == DEAD_STATE;
+	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE || 
+		state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE ||
+		state == HURT_TWO_UP_STATE || state == HURT_TWO_UP_RECOVER_STATE ||
+		state == CRAWL_STATE || state == DEAD_STATE;
 }
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -58,6 +62,10 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Hurt Two";
 	case HURT_TWO_RECOVER_STATE:
 		return "Hurt Two Recover";
+	case HURT_TWO_UP_STATE:
+		return "Hurt Two Up";
+	case HURT_TWO_UP_RECOVER_STATE:
+		return "Hurt Two Up Recover";
 	case CRAWL_STATE:
 		return "Crawl";
 	case DEAD_STATE:
