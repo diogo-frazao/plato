@@ -4,6 +4,8 @@
 #include <cmath>
 #include "log.h"
 
+#pragma region Entity States
+
 enum EntityState
 {
 	NO_STATE,
@@ -22,18 +24,20 @@ enum EntityState
 	HURT_ONE_RECOVER_STATE,
 	HURT_TWO_STATE,
 	HURT_TWO_RECOVER_STATE,
-	HURT_TWO_UP_STATE,
-	HURT_TWO_UP_RECOVER_STATE,
 	CRAWL_STATE,
 	DEAD_STATE
 };
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE || 
+	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE ||
 		state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE ||
-		state == HURT_TWO_UP_STATE || state == HURT_TWO_UP_RECOVER_STATE ||
 		state == CRAWL_STATE || state == DEAD_STATE;
+}
+
+inline bool canKillyEntityFromCurrentState(EntityState state)
+{
+	return state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE || state == CRAWL_STATE;
 }
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -62,10 +66,6 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Hurt Two";
 	case HURT_TWO_RECOVER_STATE:
 		return "Hurt Two Recover";
-	case HURT_TWO_UP_STATE:
-		return "Hurt Two Up";
-	case HURT_TWO_UP_RECOVER_STATE:
-		return "Hurt Two Up Recover";
 	case CRAWL_STATE:
 		return "Crawl";
 	case DEAD_STATE:
@@ -75,9 +75,20 @@ inline const char* getEntityStateAsString(EntityState state)
 	return "INVALID";
 }
 
+#pragma endregion
+
+// Types of attacks. Includes combos (eg: bottom > top)
+enum AttackType
+{
+	NO_ATTACK,
+	BOTTOM_ATTACK,
+	BOTTOM_TOP_ATTACK,
+	BOTTOM_BOTTOM_ATTACK
+};
+
 enum SpriteType
 {
-	INVALID,
+	INVALID_SPRITE,
 	TODO_REMOVE_BG_SPRITE,
 	TODO_REMOVE_FG_SPRITE,
 	ROUND_LIGHT_SPRITE,
@@ -106,12 +117,12 @@ enum SpriteType
 
 	// Enemies
 	GANGSTER_SMALL_IDLE_SPRITE,
-	GANGSTER_SMALL_HURT_ONE_SPRITE,
-	GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE,
-	GANGSTER_SMALL_HURT_TWO_SPRITE,
-	GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE,
-	GANGSTER_SMALL_HURT_TWO_UP_SPRITE,
-	GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_RECOVER_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_RECOVER_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_TOP_SPRITE,
+	GANGSTER_SMALL_HURT_BOTTOM_TOP_RECOVER_SPRITE,
 	GANGSTER_SMALL_CRAWL_SPRITE,
 	GANGSTER_SMALL_DEAD_SPRITE,
 

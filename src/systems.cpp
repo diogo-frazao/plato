@@ -1008,7 +1008,7 @@ void AttackingSystem::update()
 		switch (entity.entityState)
 		{
 		case HURT_ONE_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_ONE_SPRITE, false, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_BOTTOM_SPRITE, false, 70, 70);
 
 			a->recoverTimer += k_deltaTime;
 			if (a->recoverTimer >= a->timeToRecoverFromHurtOneState)
@@ -1019,7 +1019,7 @@ void AttackingSystem::update()
 			break;
 
 		case HURT_ONE_RECOVER_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE, false, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_BOTTOM_RECOVER_SPRITE, false, 70, 70);
 
 			if (s->animationData.finishedPlayingAnimation)
 			{
@@ -1029,12 +1029,23 @@ void AttackingSystem::update()
 			break;
 		case HURT_TWO_STATE:
 		{
+			SpriteType animationToPlay = INVALID_SPRITE;
+			switch (a->lastDamageType)
+			{
+			case BOTTOM_BOTTOM_ATTACK:
+				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_SPRITE;
+				break;
+			case BOTTOM_TOP_ATTACK:
+				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_TOP_SPRITE;
+				break;
+			}
+
 			float animationSpeed = 70.f;
 			if (s->animationData.currentFrame == 0)
 			{
 				animationSpeed = 300.f;
 			}
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_SPRITE, false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, animationSpeed, 70);
 
 			a->recoverTimer += k_deltaTime;
 			if (a->recoverTimer >= a->timeToRecoverFromHurtTwoState)
@@ -1045,46 +1056,30 @@ void AttackingSystem::update()
 
 			break;
 		}
-		case HURT_TWO_UP_STATE:
+		case HURT_TWO_RECOVER_STATE:
 		{
-			float animationSpeed = 70.f;
-			if (s->animationData.currentFrame == 0)
+			SpriteType animationToPlay = INVALID_SPRITE;
+			switch (a->lastDamageType)
 			{
-				animationSpeed = 300.f;
+			case BOTTOM_BOTTOM_ATTACK:
+				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_RECOVER_SPRITE;
+				break;
+			case BOTTOM_TOP_ATTACK:
+				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_TOP_RECOVER_SPRITE;
+				break;
 			}
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_UP_SPRITE, false, animationSpeed, 70);
+
+			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, 70, 70);
 
 			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToRecoverFromHurtTwoState)
+			if (a->recoverTimer >= a->timeToStartCrawling)
 			{
-				entity.entityState = HURT_TWO_UP_RECOVER_STATE;
+				entity.entityState = CRAWL_STATE;
 				invalidateTimer(a->recoverTimer);
 			}
 
 			break;
 		}
-		case HURT_TWO_RECOVER_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE, false, 70, 70);
-
-			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToStartCrawling)
-			{
-				entity.entityState = CRAWL_STATE;
-				invalidateTimer(a->recoverTimer);
-			}
-
-			break;
-		case HURT_TWO_UP_RECOVER_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE, false, 70, 70);
-
-			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToStartCrawling)
-			{
-				entity.entityState = CRAWL_STATE;
-				invalidateTimer(a->recoverTimer);
-			}
-
-			break;
 		case CRAWL_STATE:
 		{
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
@@ -1251,24 +1246,43 @@ void AttackingSystem::handleMainCharacter()
 			}
 			else
 			{
-				target.entityState = wasUpHit ? HURT_TWO_UP_STATE : HURT_TWO_STATE;
+				target.entityState = HURT_TWO_STATE;
 				mTarget->currentSpeed = { 3.f, -1.f };
 			}
 		}
 		else
 		{
-			bool canKillEnemy = target.entityState == HURT_TWO_STATE || target.entityState == HURT_TWO_RECOVER_STATE || 
-								target.entityState == HURT_TWO_UP_STATE || target.entityState == HURT_TWO_UP_RECOVER_STATE || target.entityState == CRAWL_STATE;
-			if (canKillEnemy)
+			if (canKillyEntityFromCurrentState(target.entityState))
 			{
 				mTarget->currentSpeed = { 4.5f, 0.f };
 				target.entityState = DEAD_STATE;
 			}
 			else
 			{
-				target.entityState = wasUpHit ? HURT_TWO_UP_STATE : HURT_TWO_STATE;
+				target.entityState = HURT_TWO_STATE;
 				mTarget->currentSpeed = { 3.f, -1.f };
 			}
+		}
+
+		// TODO: Expand when we add the new combos
+		switch (target.entityState)
+		{
+		case HURT_ONE_STATE:
+			aTarget->lastDamageType = wasUpHit ? BOTTOM_ATTACK : BOTTOM_ATTACK;
+			break;
+		case HURT_TWO_STATE:
+			AttackType lastDamageType = aTarget->lastDamageType;
+			if (lastDamageType == BOTTOM_ATTACK)
+			{
+				aTarget->lastDamageType = wasUpHit ? BOTTOM_TOP_ATTACK : BOTTOM_BOTTOM_ATTACK;
+
+			}
+
+			if (lastDamageType == BOTTOM_ATTACK)
+			{
+				aTarget->lastDamageType = wasUpHit ? BOTTOM_TOP_ATTACK : BOTTOM_BOTTOM_ATTACK;
+			}
+			break;
 		}
 
 		invalidateTimer(aTarget->recoverTimer);

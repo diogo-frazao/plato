@@ -76,7 +76,7 @@ struct SpriteComponent
 	// Atlas the sprite(s) belong to
 	AtlasType atlas = GAME_ATLAS;
 	// Sprite type
-	SpriteType sprite = INVALID;
+	SpriteType sprite = INVALID_SPRITE;
 	// The layer where this sprite is rendered on
 	LayerType layer = BEHIND_CHAR_LAYER;
 	// Color used to render this sprite
@@ -157,6 +157,9 @@ struct AttackingComponent
 	// Deal Damage related
 
 	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
+
+	// Updated as the entity gets damaged.
+	enum AttackType lastDamageType = NO_ATTACK;
 
 	// Receive Damage related
 

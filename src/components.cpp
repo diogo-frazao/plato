@@ -134,42 +134,42 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_ONE_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 79, 486 };
 		size = { 60, 36 };
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 25, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_ONE_RECOVER_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_RECOVER_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 162, 486 };
 		size = { 120, 36 };
 		numberOfFrames = 2;
 		collidertopLeftPointOffset = { 25, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_TWO_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 314, 486 };
 		size = { 180, 36 };
 		numberOfFrames = 3;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_TWO_RECOVER_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_RECOVER_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 517, 486 };
 		size = { 60, 36 };
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_TWO_UP_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_TOP_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 1, 528 };
 		size = { 180, 36 };
 		numberOfFrames = 3;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_TWO_UP_RECOVER_SPRITE:
+	case GANGSTER_SMALL_HURT_BOTTOM_TOP_RECOVER_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 184, 528 };
 		size = { 120, 36 };
