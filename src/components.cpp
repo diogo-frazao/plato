@@ -134,6 +134,41 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 10 };
 		break;
+	case GANGSTER_SMALL_HURT_TOP_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 307, 528 };
+		size = { 120, 36 };
+		numberOfFrames = 2;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TOP_BOTTOM_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 553, 528 };
+		size = { 120, 36 };
+		numberOfFrames = 2;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TOP_BOTTOM_RECOVER_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 676, 528 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TOP_TOP_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 1, 567 };
+		size = { 180, 36 };
+		numberOfFrames = 3;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
+	case GANGSTER_SMALL_HURT_TOP_TOP_RECOVER_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 184, 567 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
 	case GANGSTER_SMALL_HURT_BOTTOM_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 79, 486 };
@@ -209,6 +244,7 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		break;
 	default:
+		SpriteType unimplementedSprite = sprite;
 		D_ASSERT(false, "Unkown sprite type");
 		return;
 	}
