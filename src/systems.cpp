@@ -1117,11 +1117,29 @@ void AttackingSystem::update()
 		}
 		case CRAWL_STATE:
 		{
+			bool shouldInvertCrawlDirection = false;
+			int8_t crawlMovementDirection = -1;
+
+			switch (a->lastDamageType)
+			{
+			case BOTTOM_TOP_ATTACK:
+			case TOP_BOTTOM_ATTACK:
+			case TOP_TOP_ATTACK:
+				shouldInvertCrawlDirection = true;
+				break;
+			}
+
+			if (shouldInvertCrawlDirection)
+			{
+				s->flipX = false;
+				crawlMovementDirection = 1;
+			}
+
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
 
 			// TODO: Improve to move alongside animation
 			MovementComponent* m = getComponentFromEntity<MovementComponent>(entity);
-			m->currentSpeed.x = -20.f * k_deltaTime;
+			m->currentSpeed.x = crawlMovementDirection * 20.f * k_deltaTime;
 
 			break;
 		}
