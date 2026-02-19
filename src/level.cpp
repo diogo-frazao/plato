@@ -6,7 +6,6 @@
 
 int lightThatFollowsPlayerEntityId;
 
-static float s_ambientColorPickerColor[3];
 static bool s_isInsideRestaurant = false;
 
 void createBlockAtPositionWithSize(IVec2 pos, IVec2 size)
@@ -318,12 +317,11 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
-    s_ambientColorPickerColor[0] = RenderingSystem::s_ambientColor[0] / 255.f;
-    s_ambientColorPickerColor[1] = RenderingSystem::s_ambientColor[1] / 255.f;
-    s_ambientColorPickerColor[2] = RenderingSystem::s_ambientColor[2] / 255.f;
-    if (ImGui::ColorEdit3("Ambient Color", s_ambientColorPickerColor, ImGuiColorEditFlags_NoInputs))
+    if (ImGui::ColorEdit3("Ambient Color", RenderingSystem::s_debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
     {
-        RenderingSystem::setAmbientColor(s_ambientColorPickerColor[0] * 255, s_ambientColorPickerColor[1] * 255, s_ambientColorPickerColor[2] * 255);
+        RenderingSystem::setAmbientColor(RenderingSystem::s_debugAmbientColorPicker[0] * 255, 
+                                         RenderingSystem::s_debugAmbientColorPicker[1] * 255, 
+                                         RenderingSystem::s_debugAmbientColorPicker[2] * 255);
     }
 
     ImGui::End();

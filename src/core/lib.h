@@ -226,21 +226,6 @@ inline void invalidateTimer(float& timer)
 	timer = -1;
 }
 
-inline bool isColorValid(uint8_t color[3])
-{
-	static uint8_t s_emptyColor[3] = { 0, 0, 0};
-	
-	for (uint8_t i = 0; i < 3; ++i)
-	{
-		if (color[i] != s_emptyColor[i])
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
 inline int32_t clamp(int32_t value, int32_t min, int32_t max)
 {
 	if (value < min)

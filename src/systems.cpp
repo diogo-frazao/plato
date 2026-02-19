@@ -8,7 +8,11 @@
 #include <SDL3/SDL_pixels.h>
 #include <string>
 
-
+static bool isAmbientColorValid(SDL_Color color)
+{
+	static constexpr SDL_Color k_whiteColor = { 255, 255, 255, 255 };
+	return color.r != k_whiteColor.r || color.g != k_whiteColor.g || color.b != k_whiteColor.b;
+}
 
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
@@ -207,7 +211,7 @@ SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
 void RenderingSystem::renderLightsAtLayer(LayerType layer)
 {
 	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
-	if (isColorValid(s_ambientColor))
+	if (isAmbientColorValid(s_ambientColor))
 	{
 		SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_MOD);
 	}
@@ -222,9 +226,9 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 	SDL_SetRenderTarget(s_renderer, targetBuffer);
 	SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_ADD);
 
-	if (isColorValid(s_ambientColor))
+	if (isAmbientColorValid(s_ambientColor))
 	{
-		SDL_SetRenderDrawColor(s_renderer, s_ambientColor[0], s_ambientColor[1], s_ambientColor[2], 255);
+		SDL_SetRenderDrawColor(s_renderer, s_ambientColor.r, s_ambientColor.g, s_ambientColor.b, 255);
 	}
 	else
 	{
