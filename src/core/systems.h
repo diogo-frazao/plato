@@ -28,6 +28,15 @@ class RenderingSystem
 public:
 	void createLightsBuffers();
 	void render(float renderAlpha);
+
+	static inline uint8_t s_ambientColor[3] = { 0,0,0 };
+	static void setAmbientColor(uint8_t r, uint8_t g, uint8_t b)
+	{
+		s_ambientColor[0] = r;
+		s_ambientColor[1] = b;
+		s_ambientColor[2] = b;
+	}
+
 private:
 	SDL_Texture* loadAtlas(AtlasType type);
 	SDL_Texture* getTargetLightsBuffer(LayerType layer);

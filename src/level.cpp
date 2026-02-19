@@ -6,7 +6,18 @@
 
 int lightThatFollowsPlayerEntityId;
 
-static bool s_canShowImGuiUI = true;
+static float s_ambientColorPickerColor[3];
+static bool s_isInsideRestaurant = false;
+
+void createBlockAtPositionWithSize(IVec2 pos, IVec2 size)
+{
+    Entity& block = addEntity();
+    addComponentToEntity<SpriteComponent>(block)->setupSpriteForLayer(TODO_TEMOVE_INVISIBLE_SPRITE, LEVEL_GEOMETRY_LAYER);
+    getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)pos.x, (float)pos.y };
+    getComponentFromEntity<TransformComponent>(block)->position = { (float)pos.x, (float)pos.y };
+    addComponentToEntity<RectColliderComponent>(block)->collider = RectCollider({ 0, 0 }, { size.x, size.y });
+    getComponentFromEntity<RectColliderComponent>(block)->isLevelGeometry = true;
+}
 
 void createBlockAtPosition(IVec2 position)
 {
@@ -41,50 +52,36 @@ void overrideColliderOffsetsBasedOnCurrentSprite()
     }
 }
 
-void ECSLevel::start()
+void setupOutsideRestaurantScene()
 {
-	_renderingSystem.createLightsBuffers();
-
-    Entity& player = addEntity();
-    SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
-    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
-    addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
-    getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
-
-    Entity& crosshair = addEntity();
-    auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
-    crosshairSprite->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON_SPRITE, CROSSHAIR_LAYER);
-    crosshairSprite->drawnAtScreenSpace = true;
-
-    playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
-    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+    s_isInsideRestaurant = false;
 
     Entity& bg = addEntity();
     addComponentToEntity<SpriteComponent>(bg)->setupSpriteForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
 
-    Entity& geometry = addEntity({0, 135});
+    Entity& geometry = addEntity({ 0, 135 });
     addComponentToEntity<SpriteComponent>(geometry)->setupSpriteForLayer(TODO_REMOVE_LEVEL_GEOMETRY_SPRITE, LEVEL_GEOMETRY_LAYER);
 
-    Entity& fg = addEntity({34, 129});
+    Entity& fg = addEntity({ 34, 129 });
     addComponentToEntity<SpriteComponent>(fg)->setupSpriteForLayer(TODO_REMOVE_FG_SPRITE, IN_FRONT_CHAR_LAYER);
 
     Entity& darwinLettersLight = addEntity();
     addComponentToEntity<SpriteComponent>(darwinLettersLight)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->position = { 220, 55 };
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->scale = { 1.5f, 0.4f };
-    getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 , 255};
+    getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 , 255 };
 
     Entity& darwinLettersSmallGlow = addEntity();
     addComponentToEntity<SpriteComponent>(darwinLettersSmallGlow)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->position = { 225, 20 };
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->scale = { 1.35f, 2.f };
-    getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 , 255};
+    getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 , 255 };
 
     Entity& streetLampLight = addEntity();
     addComponentToEntity<SpriteComponent>(streetLampLight)->setupSpriteForLayer(STREET_LAMP_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(streetLampLight)->position = { 24, 86 };
     getComponentFromEntity<TransformComponent>(streetLampLight)->scale = { 1.f, 1.f };
-    getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255};
+    getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255 };
 
     Entity& streetLampGlow = addEntity();
     addComponentToEntity<SpriteComponent>(streetLampGlow)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -107,7 +104,7 @@ void ECSLevel::start()
     addComponentToEntity<AttackingComponent>(dummyEnemy);
     getComponentFromEntity<TransformComponent>(dummyEnemy)->useDynamicScale = true;
 
-    #pragma region Level Gemoetry
+#pragma region Level Gemoetry
     createBlockAtPosition({ 0, 152 });
     createBlockAtPosition({ 8, 152 });
     createBlockAtPosition({ 16, 152 });
@@ -157,6 +154,46 @@ void ECSLevel::start()
 #pragma endregion
 }
 
+void ECSLevel::start()
+{
+	_renderingSystem.createLightsBuffers();
+
+    Entity& player = addEntity();
+    SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
+    auto* movementComponent = addComponentToEntity<MovementComponent>(player);
+    addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
+    getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
+
+    Entity& crosshair = addEntity();
+    auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
+    crosshairSprite->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON_SPRITE, CROSSHAIR_LAYER);
+    crosshairSprite->drawnAtScreenSpace = true;
+
+    playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
+    addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+
+    // Outside restaurant
+    //setupOutsideRestaurantScene();
+
+    // Inside restaurant
+    {
+        s_isInsideRestaurant = true;
+        Entity& restaurant = addEntity();
+        addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
+        createBlockAtPositionWithSize({ 24, 152 }, { 81, 11 });
+        createBlockAtPositionWithSize({ 105, 144 }, { 488, 18 });
+
+        Entity& lightThatFollowsPlayer = addEntity();
+        addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupSpriteForLayer(ROUND_SOFT_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
+        getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = { 36, 88 };
+        getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
+        getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 255, 255, 255, 255 };
+        lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
+
+        RenderingSystem::setAmbientColor(150, 150, 150);
+    }
+}
+
 void ECSLevel::update()
 {
     // TODO: remove, placeholder to place tiles
@@ -189,7 +226,7 @@ void ECSLevel::update()
 
     if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
     {
-        s_canShowImGuiUI = !s_canShowImGuiUI;
+        s_isImGuiOpen = !s_isImGuiOpen;
     }
 
     Entity& player = getEntityById(k_playerEntityId);
@@ -217,8 +254,8 @@ void ECSLevel::update()
 
     // After all systems, update camera
     {
-        _levelCamera.minX = -320;
-        _levelCamera.maxX = 0;
+        _levelCamera.minX = s_isInsideRestaurant ? 0 : -320;
+        _levelCamera.maxX = s_isInsideRestaurant ? 320 : 0;
         _levelCamera.followTargetRatio = 0.06f;
         _levelCamera.targetPosition = { playerTransform->position.x - (k_baseGameWidth / 2), 0 };
         _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
@@ -228,7 +265,9 @@ void ECSLevel::update()
 
 void ECSLevel::imguiRender()
 {
-    if (!s_canShowImGuiUI)
+    ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
+
+    if (!s_isImGuiOpen)
     {
         return;
     }
@@ -236,8 +275,6 @@ void ECSLevel::imguiRender()
     ImGuiIO& io = ImGui::GetIO();
 
     ImGui::Begin("Player");
-
-    ImGui::SetMouseCursor( ImGui::IsWindowHovered() ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 
     Entity& player = getEntityById(k_playerEntityId);
 
@@ -281,6 +318,14 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
+    s_ambientColorPickerColor[0] = RenderingSystem::s_ambientColor[0] / 255.f;
+    s_ambientColorPickerColor[1] = RenderingSystem::s_ambientColor[1] / 255.f;
+    s_ambientColorPickerColor[2] = RenderingSystem::s_ambientColor[2] / 255.f;
+    if (ImGui::ColorEdit3("Ambient Color", s_ambientColorPickerColor, ImGuiColorEditFlags_NoInputs))
+    {
+        RenderingSystem::setAmbientColor(s_ambientColorPickerColor[0] * 255, s_ambientColorPickerColor[1] * 255, s_ambientColorPickerColor[2] * 255);
+    }
+
     ImGui::End();
 
     Entity* testEnemy = nullptr;
@@ -301,11 +346,6 @@ void ECSLevel::imguiRender()
     }
 
     ImGui::Begin("Enemy");
-
-    if (ImGui::GetMouseCursor() == ImGuiMouseCursor_None)
-    {
-        ImGui::SetMouseCursor(ImGui::IsWindowHovered() ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
-    }
 
     ImGui::Text("Enemy state: %s", getEntityStateAsString(testEnemy->entityState));
 

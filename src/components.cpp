@@ -43,6 +43,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 8, 8 };
 		atlas = GAME_ATLAS;
 		break;
+	case TODO_REMOVE_RESTAURANT_INTERIOR:
+		atlasOffset = { 323, 67 };
+		size = { 640, 180 };
+		atlas = GAME_ATLAS;
+		break;
 	case CHARACTER_IDLE_SPRITE:
 		atlasOffset = { 1, 256 };
 		size = { 480, 36 };

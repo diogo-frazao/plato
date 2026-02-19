@@ -207,6 +207,10 @@ SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
 void RenderingSystem::renderLightsAtLayer(LayerType layer)
 {
 	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
+	if (isColorValid(s_ambientColor))
+	{
+		SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_MOD);
+	}
 	SDL_RenderTexture(s_renderer, targetBuffer, nullptr, nullptr);
 }
 
@@ -217,7 +221,16 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 	// Start drawing to lightsBuffer, make it all black, and set its blend mode to additive
 	SDL_SetRenderTarget(s_renderer, targetBuffer);
 	SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_ADD);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+
+	if (isColorValid(s_ambientColor))
+	{
+		SDL_SetRenderDrawColor(s_renderer, s_ambientColor[0], s_ambientColor[1], s_ambientColor[2], 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+	}
+
 	SDL_RenderClear(s_renderer);
 
 	// Draw each light
@@ -1152,6 +1165,12 @@ void AttackingSystem::update()
 
 void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
 {
+	// Prevent attacking while using the mouse for imgui related things
+	if (s_isImGuiOpen)
+	{
+		return;
+	}
+
 	if (a->weaponInHand == NO_WEAPON_TYPE)
 	{
 		return;
