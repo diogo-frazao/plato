@@ -78,7 +78,7 @@ public:
 		ComponentArray<T>& componentArray = getUniqueComponentArrayForComponent<T>();
 		if (entityHasComponent<T>(entity))
 		{
-			D_LOG(WARNING, "addComponentToEntity(): Skipped since entity %i already has component %s", entity.id, typeid(T).name());
+			//D_LOG(WARNING, "addComponentToEntity(): Skipped since entity %i already has component %s", entity.id, typeid(T).name());
 			return static_cast<T*>(&(componentArray._array[entity.id]));
 		}
 

@@ -3,12 +3,13 @@
 #include "core/input.h"
 #include "components.h"
 #include "imgui.h"
+#include <SDL3/SDL_render.h>
 
-int lightThatFollowsPlayerEntityId;
+int lightThatFollowsPlayerEntityId = k_invalidId;
 
 static bool s_isInsideRestaurant = false;
 
-void createBlockAtPositionWithSize(IVec2 pos, IVec2 size)
+void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
     Entity& block = addEntity();
     addComponentToEntity<SpriteComponent>(block)->setupSpriteForLayer(TODO_TEMOVE_INVISIBLE_SPRITE, LEVEL_GEOMETRY_LAYER);
@@ -89,7 +90,7 @@ void setupOutsideRestaurantScene()
     getComponentFromEntity<SpriteComponent>(streetLampGlow)->color = { 125, 50, 0 , 200 };
 
     Entity& lightThatFollowsPlayer = addEntity();
-    addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupSpriteForLayer(ROUND_SOFT_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
+    addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = { 36, 88 };
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
@@ -153,6 +154,22 @@ void setupOutsideRestaurantScene()
 #pragma endregion
 }
 
+void createDummyEntities(int amount)
+{
+    for (int i = 0; i < amount; ++i)
+    {
+        Entity& entity = addEntity();
+        if (i == 0)
+        {
+            D_LOG(MINI, "Dummy Entities start at %i", entity.id);
+        }
+        if (i == amount - 1)
+        {
+            D_LOG(MINI, "Dummy Entities end at %i", entity.id);
+        }
+    }
+}
+
 void ECSLevel::start()
 {
 	_renderingSystem.createLightsBuffers();
@@ -177,19 +194,24 @@ void ECSLevel::start()
     // Inside restaurant
     {
         s_isInsideRestaurant = true;
-        Entity& restaurant = addEntity();
+
+        Entity& bgColor = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
+        s->setupSpriteForLayer(WHITE_DOT_SPRITE, BEHIND_CHAR_LAYER);
+        s->color = { 0, 0, 0, 255 };
+        s->drawnAtScreenSpace = true;
+        t->scale = { 322.f, 182.f };
+        t->position = { 159, 179 };
+
+        Entity& restaurant = addEntity({ 14, 69 });
         addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
-        createBlockAtPositionWithSize({ 24, 152 }, { 81, 11 });
-        createBlockAtPositionWithSize({ 105, 144 }, { 488, 18 });
+        createBlockAtPositionWithSize({24, 152 }, { 81, 11 });
+        createBlockAtPositionWithSize({ 104, 144 }, { 488, 18 });
 
-        Entity& lightThatFollowsPlayer = addEntity();
-        addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupSpriteForLayer(ROUND_SOFT_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
-        getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = { 36, 88 };
-        getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
-        getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 255, 255, 255, 255 };
-        lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
+        _renderingSystem.setAmbientColor(138, 138, 138);
 
-        RenderingSystem::setAmbientColor(150, 150, 150);
+        createDummyEntities(30);
     }
 }
 
@@ -232,13 +254,14 @@ void ECSLevel::update()
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
 
     // Light that follows player
+    if(lightThatFollowsPlayerEntityId != k_invalidId)
     {
         Entity& lightThatFollowsPlayer = getEntityById(lightThatFollowsPlayerEntityId);
 
         auto* playerSprite = getComponentFromEntity<SpriteComponent>(player);
         SpriteComponent* lightSprite = getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer);
         auto* lightTransform = getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer);
-
+  
         Vec2 targetPos = { playerTransform->position.x - 5,
                            playerTransform->position.y - 15 };
         getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
@@ -250,6 +273,94 @@ void ECSLevel::update()
     _attackingSystem.update();
     _animationSystem.update();
     _crosshairSystem.update();
+
+    {
+        Entity& ceilingLightLeft = getEntityById(7);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightLeft);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightLeft);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 167, 0, 18 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 30, 55 };
+    }
+
+    {
+        Entity& ceilingLightRight = getEntityById(8);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightRight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightRight);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 167, 0, 17 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 270, 55 };
+    }
+
+    {
+        Entity& highlightCeilingLeft = getEntityById(9);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingLeft);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingLeft);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 228, 228, 66, 40 };
+        t->scale = { 0.65f, 0.15f };
+        t->position = { 62, 68 };
+    }
+
+    {
+        Entity& highlightCeilingRight = getEntityById(10);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingRight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingRight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 228, 228, 66, 40 };
+        t->scale = { 0.65f, 0.15f };
+        t->position = { 305, 70 };
+    }
+
+    {
+        Entity& exitLight = getEntityById(11);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(exitLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(exitLight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 0, 255, 50, 20 };
+        t->scale = { 1.3f, 0.8f };
+        t->position = { 10, 95 };
+    }
+
+    {
+        Entity& tvLight = getEntityById(12);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 255, 255, 15 };
+        t->scale = { 0.8f, 0.45f };
+        t->position = { 106, 98 };
+    }
+
+    {
+        Entity& brokenLight = getEntityById(13);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(brokenLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(brokenLight);
+        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 0, 240, 255, 37 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 170, 54 };
+    }
+
+    {
+        Entity& lampLight = getEntityById(14);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(lampLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(lampLight);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 77, 0, 25 };
+        t->scale = { 0.47f, 0.47f };
+        t->position = { 325, 100 };
+    }
+
+    {
+        Entity& floor = getEntityById(15);
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
+        s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
+        t->position = { 24, 144 };
+    }
 
     // After all systems, update camera
     {
@@ -317,11 +428,13 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
-    if (ImGui::ColorEdit3("Ambient Color", RenderingSystem::s_debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
+    ImGui::SeparatorText("Levels");
+
+    if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
     {
-        RenderingSystem::setAmbientColor(RenderingSystem::s_debugAmbientColorPicker[0] * 255, 
-                                         RenderingSystem::s_debugAmbientColorPicker[1] * 255, 
-                                         RenderingSystem::s_debugAmbientColorPicker[2] * 255);
+        _renderingSystem.setAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
+                                         _renderingSystem._debugAmbientColorPicker[1] * 255,
+                                         _renderingSystem._debugAmbientColorPicker[2] * 255);
     }
 
     ImGui::End();

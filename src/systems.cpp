@@ -24,7 +24,7 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 
 	static const std::string artPath = "art/";
 	std::string atlasFilePath = RESOURCES_PATH + artPath;
-	SDL_ScaleMode scaleMode = SDL_SCALEMODE_NEAREST;
+	SDL_ScaleMode scaleMode = SDL_SCALEMODE_PIXELART;
 
 	switch (type)
 	{
@@ -82,12 +82,12 @@ void RenderingSystem::createLightsBuffers()
 void RenderingSystem::render(float renderAlpha)
 {
 	//TODO: If needed improve performance, since every function interates over every entity
-	computeLightsAtLayer(BACK_LIGHTS_LAYER);
+	computeLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	computeLightsAtLayer(FRONT_LIGHTS_LAYER);
 
 	renderSpritesAtLayer(BEHIND_CHAR_LAYER, renderAlpha);
-	renderLightsAtLayer(BACK_LIGHTS_LAYER);
 	renderSpritesAtLayer(CHARACTER_LAYER, renderAlpha);
+	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
@@ -208,17 +208,17 @@ SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
 	return targetBuffer;
 }
 
-void RenderingSystem::renderLightsAtLayer(LayerType layer)
+void RenderingSystem::renderLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight)
 {
 	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
-	if (isAmbientColorValid(s_ambientColor))
+	if (isAffectedByAmbientLight && isAmbientColorValid(_ambientColor))
 	{
-		SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_MOD);
+		SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_MUL);
 	}
 	SDL_RenderTexture(s_renderer, targetBuffer, nullptr, nullptr);
 }
 
-void RenderingSystem::computeLightsAtLayer(LayerType layer)
+void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight)
 {
 	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
 
@@ -226,9 +226,9 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer)
 	SDL_SetRenderTarget(s_renderer, targetBuffer);
 	SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_ADD);
 
-	if (isAmbientColorValid(s_ambientColor))
+	if (isAffectedByAmbientLight && isAmbientColorValid(_ambientColor))
 	{
-		SDL_SetRenderDrawColor(s_renderer, s_ambientColor.r, s_ambientColor.g, s_ambientColor.b, 255);
+		SDL_SetRenderDrawColor(s_renderer, _ambientColor.r, _ambientColor.g, _ambientColor.b, 255);
 	}
 	else
 	{
@@ -587,11 +587,14 @@ void MovementSystem::processMainCharacterMovement()
 		movementComponent->currentSpeed.y = 0;
 
 		Entity& enemy = getEntityById(10);
-		getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(160, 0);
-		getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(160, 0);
-		getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
-		getComponentFromEntity<AttackingComponent>(enemy)->damageCounter = 0;
-		enemy.entityState = IDLE_STATE;
+		if (enemy.id != k_invalidId && entityHasComponent<AttackingComponent>(enemy))
+		{
+			getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(160, 0);
+			getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(160, 0);
+			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
+			getComponentFromEntity<AttackingComponent>(enemy)->damageCounter = 0;
+			enemy.entityState = IDLE_STATE;
+		}
 	}
 
 	bool wasGrounded = movementComponent->isGrounded;

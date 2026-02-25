@@ -29,22 +29,21 @@ public:
 	void createLightsBuffers();
 	void render(float renderAlpha);
 
-	static inline SDL_Color s_ambientColor = { 255, 255, 255, 255 };
-
+	SDL_Color _ambientColor = { 255, 255, 255, 255 };
 	// Used only for debugging with imgui
-	static inline float s_debugAmbientColorPicker[4] = {255, 255, 255};
+	float _debugAmbientColorPicker[4] = {255, 255, 255};
 
-	static void setAmbientColor(uint8_t r, uint8_t g, uint8_t b)
+	void setAmbientColor(uint8_t r, uint8_t g, uint8_t b)
 	{
-		s_ambientColor.r = r;
-		s_ambientColor.g = g;
-		s_ambientColor.b = b;
-		s_ambientColor.a = 255;
+		_ambientColor.r = r;
+		_ambientColor.g = g;
+		_ambientColor.b = b;
+		_ambientColor.a = 255;
 
 #ifndef RELEASE_BUILD
-		s_debugAmbientColorPicker[0] = s_ambientColor.r / 255.f;
-		s_debugAmbientColorPicker[1] = s_ambientColor.g / 255.f;
-		s_debugAmbientColorPicker[2] = s_ambientColor.b / 255.f;
+		_debugAmbientColorPicker[0] = _ambientColor.r / 255.f;
+		_debugAmbientColorPicker[1] = _ambientColor.g / 255.f;
+		_debugAmbientColorPicker[2] = _ambientColor.b / 255.f;
 #endif // !RELEASE_BUILD
 	}
 
@@ -52,9 +51,9 @@ private:
 	SDL_Texture* loadAtlas(AtlasType type);
 	SDL_Texture* getTargetLightsBuffer(LayerType layer);
 
-	void computeLightsAtLayer(LayerType layer);
+	void computeLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight = false);
 	void renderSpritesAtLayer(LayerType layer, float renderAlpha);
-	void renderLightsAtLayer(LayerType layer);
+	void renderLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight = false);
 
 	SDL_FRect _src;
 	SDL_FRect _dest;
