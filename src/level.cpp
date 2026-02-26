@@ -154,6 +154,117 @@ void setupOutsideRestaurantScene()
 #pragma endregion
 }
 
+void setupInsideRestaurantScene()
+{
+    s_isInsideRestaurant = true;
+
+    {
+        Entity& bgColor = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
+        s->setupSpriteForLayer(WHITE_DOT_SPRITE, BEHIND_CHAR_LAYER);
+        s->color = { 0, 0, 0, 255 };
+        s->drawnAtScreenSpace = true;
+        t->scale = { 322.f, 182.f };
+        t->position = { 159, 179 };
+    }
+
+    {
+        Entity& restaurant = addEntity({ 14, 69 });
+        addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
+        createBlockAtPositionWithSize({ 24, 152 }, { 81, 11 });
+        createBlockAtPositionWithSize({ 104, 144 }, { 488, 18 });
+    }
+
+    {
+        Entity& ceilingLightLeft = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightLeft);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightLeft);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 167, 0, 18 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 30, 55 };
+    }
+
+    {
+        Entity& ceilingLightRight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightRight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightRight);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 167, 0, 17 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 270, 55 };
+    }
+
+    {
+        Entity& highlightCeilingLeft = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingLeft);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingLeft);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 228, 228, 66, 40 };
+        t->scale = { 0.65f, 0.15f };
+        t->position = { 62, 68 };
+    }
+
+    {
+        Entity& highlightCeilingRight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingRight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingRight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 228, 228, 66, 40 };
+        t->scale = { 0.65f, 0.15f };
+        t->position = { 305, 70 };
+    }
+
+    {
+        Entity& exitLight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(exitLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(exitLight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 0, 255, 50, 20 };
+        t->scale = { 1.3f, 0.8f };
+        t->position = { 10, 95 };
+    }
+
+    {
+        Entity& tvLight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
+        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 255, 255, 15 };
+        t->scale = { 0.8f, 0.45f };
+        t->position = { 106, 98 };
+    }
+
+    {
+        Entity& brokenLight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(brokenLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(brokenLight);
+        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 0, 240, 255, 37 };
+        t->scale = { 1.f, 1.f };
+        t->position = { 170, 54 };
+    }
+
+    {
+        Entity& lampLight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(lampLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(lampLight);
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 255, 77, 0, 25 };
+        t->scale = { 0.47f, 0.47f };
+        t->position = { 325, 100 };
+    }
+
+    {
+        Entity& floor = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
+        s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
+        t->position = { 24, 144 };
+    }
+}
+
 void createDummyEntities(int amount)
 {
     for (int i = 0; i < amount; ++i)
@@ -192,27 +303,8 @@ void ECSLevel::start()
     //setupOutsideRestaurantScene();
 
     // Inside restaurant
-    {
-        s_isInsideRestaurant = true;
-
-        Entity& bgColor = addEntity();
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
-        s->setupSpriteForLayer(WHITE_DOT_SPRITE, BEHIND_CHAR_LAYER);
-        s->color = { 0, 0, 0, 255 };
-        s->drawnAtScreenSpace = true;
-        t->scale = { 322.f, 182.f };
-        t->position = { 159, 179 };
-
-        Entity& restaurant = addEntity({ 14, 69 });
-        addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
-        createBlockAtPositionWithSize({24, 152 }, { 81, 11 });
-        createBlockAtPositionWithSize({ 104, 144 }, { 488, 18 });
-
-        _renderingSystem.setAmbientColor(138, 138, 138);
-
-        createDummyEntities(30);
-    }
+    setupInsideRestaurantScene();
+    _renderingSystem.setAmbientColor(138, 138, 138);
 }
 
 void ECSLevel::update()
@@ -273,94 +365,6 @@ void ECSLevel::update()
     _attackingSystem.update();
     _animationSystem.update();
     _crosshairSystem.update();
-
-    {
-        Entity& ceilingLightLeft = getEntityById(7);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightLeft);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightLeft);
-        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 167, 0, 18 };
-        t->scale = { 1.f, 1.f };
-        t->position = { 30, 55 };
-    }
-
-    {
-        Entity& ceilingLightRight = getEntityById(8);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightRight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightRight);
-        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 167, 0, 17 };
-        t->scale = { 1.f, 1.f };
-        t->position = { 270, 55 };
-    }
-
-    {
-        Entity& highlightCeilingLeft = getEntityById(9);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingLeft);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingLeft);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 228, 228, 66, 40 };
-        t->scale = { 0.65f, 0.15f };
-        t->position = { 62, 68 };
-    }
-
-    {
-        Entity& highlightCeilingRight = getEntityById(10);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingRight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingRight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 228, 228, 66, 40 };
-        t->scale = { 0.65f, 0.15f };
-        t->position = { 305, 70 };
-    }
-
-    {
-        Entity& exitLight = getEntityById(11);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(exitLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(exitLight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 0, 255, 50, 20 };
-        t->scale = { 1.3f, 0.8f };
-        t->position = { 10, 95 };
-    }
-
-    {
-        Entity& tvLight = getEntityById(12);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 255, 255, 15 };
-        t->scale = { 0.8f, 0.45f };
-        t->position = { 106, 98 };
-    }
-
-    {
-        Entity& brokenLight = getEntityById(13);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(brokenLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(brokenLight);
-        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 0, 240, 255, 37 };
-        t->scale = { 1.f, 1.f };
-        t->position = { 170, 54 };
-    }
-
-    {
-        Entity& lampLight = getEntityById(14);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(lampLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(lampLight);
-        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 77, 0, 25 };
-        t->scale = { 0.47f, 0.47f };
-        t->position = { 325, 100 };
-    }
-
-    {
-        Entity& floor = getEntityById(15);
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
-        s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
-        t->position = { 24, 144 };
-    }
 
     // After all systems, update camera
     {

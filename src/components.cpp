@@ -43,11 +43,6 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 73, 55 };
 		atlas = LIGHTS_ATLAS;
 		break;
-	case CIRCLE_OUTLINE_LIGHT_SPRITE:
-		atlasOffset = { 263, 122 };
-		size = { 57, 58 };
-		atlas = LIGHTS_ATLAS;
-		break;
 	case TODO_REMOVE_LEVEL_GEOMETRY_SPRITE:
 		atlasOffset = { 0, 180 };
 		size = { 320, 45 };
