@@ -257,6 +257,26 @@ void setupInsideRestaurantScene()
     }
 
     {
+        Entity& rightRoomLight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(rightRoomLight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(rightRoomLight);
+        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 215, 218, 143, 46 };
+        t->scale = { 1.25f, 1.25f };
+        t->position = { 463, 85 };
+    }
+
+    {
+        Entity& rightRoomHighlight = addEntity();
+        TransformComponent* t = getComponentFromEntity<TransformComponent>(rightRoomHighlight);
+        SpriteComponent* s = addComponentToEntity<SpriteComponent>(rightRoomHighlight);
+        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+        s->color = { 253, 204, 106, 40 };
+        t->scale = { 0.25f, 0.25f };
+        t->position = { 495 + 2, 100 + 3 };
+    }
+
+    {
         Entity& floor = addEntity();
         TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
