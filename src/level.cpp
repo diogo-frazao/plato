@@ -500,7 +500,4 @@ void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
 	_debugCollidersSystem.render();
-
-    _debugCollidersSystem.debugPoint(s_mousePositionThisFrameInScreenSpace, {255, 0, 255, 255});
-    
 }
