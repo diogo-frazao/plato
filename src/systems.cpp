@@ -119,6 +119,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
 
 		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+		float cameraZoom = LevelManager::getCurrentLevel()->_levelCamera.zoom;
 
 		int32_t currentOffsetX = 0;
 
@@ -158,15 +159,21 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		if (spriteComponent->drawnAtScreenSpace)
 		{
 			_dest.x = interpolatedPosition.x + scaleOffsetX;
+			_dest.y = interpolatedPosition.y + scaleOffsetY;
+			_dest.w = scaledWidth;
+			_dest.h = scaledHeight;
 		}
 		else
 		{
 			_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
+			_dest.y = interpolatedPosition.y + scaleOffsetY - cameraPosition.y;
+			_dest.x = _dest.x * cameraZoom + 320 / 2.f;
+			_dest.y = _dest.y * cameraZoom + 180 / 2.f;
+			_dest.w = scaledWidth;
+			_dest.h = scaledHeight;
+			_dest.w *= cameraZoom;
+			_dest.h *= cameraZoom;
 		}
-
-		_dest.y = interpolatedPosition.y + scaleOffsetY;
-		_dest.w = scaledWidth;
-		_dest.h = scaledHeight;
 
 		SDL_Texture* atlas = loadAtlas(spriteComponent->atlas);
 		SDL_SetTextureColorMod(atlas, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
@@ -260,6 +267,7 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmb
 		SDL_SetTextureAlphaMod(lightsTexture, spriteComponent->color.a);
 
 		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+		float cameraZoom = LevelManager::getCurrentLevel()->_levelCamera.zoom;
 
 		_src.x = spriteComponent->atlasOffset.x;
 		_src.y = spriteComponent->atlasOffset.y;
@@ -267,9 +275,14 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmb
 		_src.h = spriteComponent->size.y;
 
 		_dest.x = transformComponent->position.x - cameraPosition.x;
-		_dest.y = transformComponent->position.y;
+		_dest.y = transformComponent->position.y - cameraPosition.y;
 		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
 		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
+
+		_dest.x = _dest.x * cameraZoom + 320 / 2.0f;
+		_dest.y = _dest.y * cameraZoom + 180 / 2.f;
+		_dest.w *= cameraZoom;
+		_dest.h *= cameraZoom;
 
 		SDL_RenderTexture(s_renderer, lightsTexture, &_src, &_dest);
 		SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
@@ -378,8 +391,13 @@ void DebugSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color colo
 	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
 	Vec2 colliderPosition = getColliderPosition(position, collider);
 
-	Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
-	SDL_FRect debugRect{ colliderPosition.x - cameraPosition.x, colliderPosition.y, (float)collider.size.x, (float)collider.size.y };
+	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
+	SDL_FRect debugRect{ colliderPosition.x - camera.position.x, colliderPosition.y - camera.position.y, (float)collider.size.x, (float)collider.size.y };
+	debugRect.x = debugRect.x * camera.zoom + 320 / 2.f;
+	debugRect.y = debugRect.y * camera.zoom + 180 / 2.f;
+	debugRect.w *= camera.zoom;
+	debugRect.h *= camera.zoom;
+
 
 	SDL_RenderRect(s_renderer, &debugRect);
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);

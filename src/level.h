@@ -15,7 +15,10 @@ struct Camera
 	int32_t minX = 0;
 	int32_t maxX = 0;
 	Vec2 targetPosition;
-	Vec2 position = { 0,0 };
+	// Camera is centered on X and Y instead of top left so the zoom zooms from all sides.
+	// This means that the initial pos is (180,90), otherwhise something at (0,0) would be on the center of the screen.
+	Vec2 position = { k_baseGameWidth / 2, k_baseGameHeight / 2};
+	float zoom = 1.f;
 };
 
 class ECSLevel
@@ -101,8 +104,10 @@ inline Vec2 convertScreenToWorldPosition(Vec2 posInScreenSpace)
 		D_ASSERT(false, "convertScreenToWorldPosition(): The position passed is not in screen space");
 	}
 
-	Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
+	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
 
-	return { posInScreenSpace.x + cameraPosition.x,
-			 posInScreenSpace.y + cameraPosition.y};
+	Vec2 worldPosition = { posInScreenSpace.x + camera.position.x, posInScreenSpace.y + camera.position.y };
+	worldPosition.x = worldPosition.x * camera.zoom - k_baseGameWidth / 2.f;
+	worldPosition.y = worldPosition.y * camera.zoom - k_baseGameHeight / 2.f;
+	return worldPosition;
 }
