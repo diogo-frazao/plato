@@ -388,12 +388,12 @@ void ECSLevel::update()
 
     // After all systems, update camera
     {
-        _levelCamera.minX = s_isInsideRestaurant ? 0 : -320;
-        _levelCamera.maxX = s_isInsideRestaurant ? 320 : 0;
-        _levelCamera.followTargetRatio = 1.f;
-        //_levelCamera.targetPosition = { (playerTransform->position.x - (k_baseGameWidth / 2)) * 1.f, 0 * _levelCamera.zoom};
-        //_levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
-        //_levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+        _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
+        _levelCamera.maxX = s_isInsideRestaurant ? 500 : 0;
+        _levelCamera.followTargetRatio = 0.06f;
+        _levelCamera.targetPosition = { playerTransform->position.x, 90.f };
+        _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+        _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
     }
 }
 
