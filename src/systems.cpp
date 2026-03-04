@@ -118,9 +118,6 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 
 		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
 
-		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
-		float cameraZoom = LevelManager::getCurrentLevel()->_levelCamera.zoom;
-
 		int32_t currentOffsetX = 0;
 
 		int32_t frameSizeX = spriteComponent->size.x;
@@ -156,23 +153,14 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			scaleOffsetY = (frameSizeY - scaledHeight);
 		}
 
-		if (spriteComponent->drawnAtScreenSpace)
+		_dest.x = interpolatedPosition.x + scaleOffsetX;
+		_dest.y = interpolatedPosition.y + scaleOffsetY;
+		_dest.w = scaledWidth;
+		_dest.h = scaledHeight;
+
+		if (!spriteComponent->drawnAtScreenSpace)
 		{
-			_dest.x = interpolatedPosition.x + scaleOffsetX;
-			_dest.y = interpolatedPosition.y + scaleOffsetY;
-			_dest.w = scaledWidth;
-			_dest.h = scaledHeight;
-		}
-		else
-		{
-			_dest.x = interpolatedPosition.x + scaleOffsetX - cameraPosition.x;
-			_dest.y = interpolatedPosition.y + scaleOffsetY - cameraPosition.y;
-			_dest.x = _dest.x * cameraZoom + 320 / 2.f;
-			_dest.y = _dest.y * cameraZoom + 180 / 2.f;
-			_dest.w = scaledWidth;
-			_dest.h = scaledHeight;
-			_dest.w *= cameraZoom;
-			_dest.h *= cameraZoom;
+			_dest = convertWorldRectToCameraSpace(_dest);
 		}
 
 		SDL_Texture* atlas = loadAtlas(spriteComponent->atlas);
@@ -266,23 +254,17 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmb
 		SDL_SetTextureColorMod(lightsTexture, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
 		SDL_SetTextureAlphaMod(lightsTexture, spriteComponent->color.a);
 
-		Vec2 cameraPosition = LevelManager::getCurrentLevel()->_levelCamera.position;
-		float cameraZoom = LevelManager::getCurrentLevel()->_levelCamera.zoom;
-
 		_src.x = spriteComponent->atlasOffset.x;
 		_src.y = spriteComponent->atlasOffset.y;
 		_src.w = spriteComponent->size.x;
 		_src.h = spriteComponent->size.y;
 
-		_dest.x = transformComponent->position.x - cameraPosition.x;
-		_dest.y = transformComponent->position.y - cameraPosition.y;
+		_dest.x = transformComponent->position.x;
+		_dest.y = transformComponent->position.y;
 		_dest.w = spriteComponent->size.x * transformComponent->scale.x;
 		_dest.h = spriteComponent->size.y * transformComponent->scale.y;
 
-		_dest.x = _dest.x * cameraZoom + 320 / 2.0f;
-		_dest.y = _dest.y * cameraZoom + 180 / 2.f;
-		_dest.w *= cameraZoom;
-		_dest.h *= cameraZoom;
+		_dest = convertWorldRectToCameraSpace(_dest);
 
 		SDL_RenderTexture(s_renderer, lightsTexture, &_src, &_dest);
 		SDL_SetTextureColorMod(lightsTexture, 255, 255, 255);
@@ -386,18 +368,13 @@ void DebugSystem::render()
 #endif // RELEASE_BUILD
 }
 
-void DebugSystem::debugRect(Vec2 position, RectCollider collider, SDL_Color color)
+void DebugSystem::debugRect(Vec2 worldPosition, RectCollider collider, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
-	Vec2 colliderPosition = getColliderPosition(position, collider);
+	Vec2 colliderPosition = getColliderPosition(worldPosition, collider);
 
-	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
-	SDL_FRect debugRect{ colliderPosition.x - camera.position.x, colliderPosition.y - camera.position.y, (float)collider.size.x, (float)collider.size.y };
-	debugRect.x = debugRect.x * camera.zoom + 320 / 2.f;
-	debugRect.y = debugRect.y * camera.zoom + 180 / 2.f;
-	debugRect.w *= camera.zoom;
-	debugRect.h *= camera.zoom;
-
+	SDL_FRect debugRect { colliderPosition.x, colliderPosition.y , (float)collider.size.x, (float)collider.size.y };
+	debugRect = convertWorldRectToCameraSpace(debugRect);
 
 	SDL_RenderRect(s_renderer, &debugRect);
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
@@ -464,7 +441,7 @@ void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
 
 	// Smear
 	//{
-	//	Vec2 smearPosition = { LevelManager::getCurrentLevel()->_levelCamera.position.x, hitLocation.y };
+	//	Vec2 smearPosition = { LevelManager::getCurrentLevel()->_levelCamera.worldPosition.x, hitLocation.y };
 	//	_crosshairSmear.entity = &addEntity(smearPosition);
 	//	auto* sprite = addComponentToEntity<SpriteComponent>(*_crosshairSmear.entity);
 	//	sprite->setupSpriteForLayer(SMEAR_MELEE_ATTACK_SPRITE, BEHIND_CHAR_LAYER);
@@ -472,7 +449,7 @@ void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
 	//	sprite->rotationPivotType = TOP_LEFT_ROTATION;
 
 	//	// rotate towards mouse
-	//	Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+	//	Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
 	//	float angleToMouse = getAngleBetweenTwoPoints(smearPosition, mouseWorldPosition);
 	//	sprite->rotation = angleToMouse;
 
@@ -1214,7 +1191,7 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 	case GOLF_WEAPON_TYPE:
 		// Attack to the side the mouse is facing
 		{
-			Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+			Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
 			Vec2 characterColliderPosition = getColliderPosition(t->position, c->collider);
 
 			bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
@@ -1323,7 +1300,7 @@ void AttackingSystem::handleMainCharacter()
 
 		// Check if we did a up hit or bottom hit
 		TransformComponent* targetTransform = getComponentFromEntity<TransformComponent>(target);
-		Vec2 mouseWorldPosition = convertScreenToWorldPosition(s_mousePositionThisFrameInScreenSpace);
+		Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
 		bool wasUpHit = mouseWorldPosition.y < targetTransform->position.y;
 
 		auto* mTarget = getComponentFromEntity<MovementComponent>(target);

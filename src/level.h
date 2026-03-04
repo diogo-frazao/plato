@@ -8,17 +8,22 @@
 #include "core/lib.h"
 #include "core/input.h"
 
+#include <SDL3/SDL_rect.h>
+
 struct Camera
 {
-	// 0 = will never move, 1 = exactly at target pos
+	// 0 = will never move, 1 = exactly at target posInScreenSpace
 	float followTargetRatio = 0.f;
 	int32_t minX = 0;
 	int32_t maxX = 0;
 	Vec2 targetPosition;
 	// Camera is centered on X and Y instead of top left so the zoom zooms from all sides.
-	// This means that the initial pos is (180,90), otherwhise something at (0,0) would be on the center of the screen.
-	Vec2 position = { k_baseGameWidth / 2, k_baseGameHeight / 2};
+	// This means that the initial posInScreenSpace is (180,90), otherwhise something at (0,0) would be on the center of the screen.
+	Vec2 position = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
 	float zoom = 1.f;
+
+	// Point where the zoom will be focused on. By default it's the center of the screen.
+	Vec2 zoomFocusPoint = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
 };
 
 class ECSLevel
@@ -97,17 +102,33 @@ inline Entity& getEntityById(uint32_t id)
 	return LevelManager::getCurrentLevel()->_entityManager._entities[id];
 }
 
-inline Vec2 convertScreenToWorldPosition(Vec2 posInScreenSpace)
+// Takes a screen position and converts it to camera/world space.
+inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)
 {
-	if (posInScreenSpace.x > k_baseGameWidth || posInScreenSpace.y > k_baseGameHeight)
-	{
-		D_ASSERT(false, "convertScreenToWorldPosition(): The position passed is not in screen space");
-	}
-
 	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
 
-	Vec2 worldPosition = { posInScreenSpace.x + camera.position.x, posInScreenSpace.y + camera.position.y };
-	worldPosition.x = worldPosition.x * camera.zoom - k_baseGameWidth / 2.f;
-	worldPosition.y = worldPosition.y * camera.zoom - k_baseGameHeight / 2.f;
-	return worldPosition;
+	if (posInScreenSpace.x > k_baseGameWidth || posInScreenSpace.y > k_baseGameHeight)
+	{
+		D_ASSERT(false, "convertToCameraSpace(): The position passed is not in screen space");
+	}
+
+	Vec2 posInCameraSpace { posInScreenSpace.x + camera.position.x, posInScreenSpace.y + camera.position.y };
+	posInCameraSpace.x = posInCameraSpace.x * camera.zoom - camera.zoomFocusPoint.x;
+	posInCameraSpace.y = posInCameraSpace.y * camera.zoom - camera.zoomFocusPoint.y;
+	return posInCameraSpace;
+}
+
+// Expects a worldRect with x,y in world position and w,h as the desired draw size
+// Used to render sprites, since they should be drawn taking into account the camera pos and zoom
+inline SDL_FRect convertWorldRectToCameraSpace(const SDL_FRect& worldRect)
+{
+	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
+
+	Vec2 posInCameraSpace{ worldRect.x - camera.position.x, worldRect.y - camera.position.y };
+	posInCameraSpace.x = posInCameraSpace.x * camera.zoom + camera.zoomFocusPoint.x;
+	posInCameraSpace.y = posInCameraSpace.y * camera.zoom + camera.zoomFocusPoint.y;
+
+	Vec2 sizeInCameraSpace{ worldRect.w * camera.zoom, worldRect.h * camera.zoom };
+
+	return { posInCameraSpace.x, posInCameraSpace.y, sizeInCameraSpace.x, sizeInCameraSpace.y };
 }
