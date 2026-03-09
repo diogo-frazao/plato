@@ -35,6 +35,9 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 			atlasFilePath += "lights_atlas.png";
 			scaleMode = SDL_SCALEMODE_LINEAR;
 			break;
+		case FONT_ATLAS:
+			atlasFilePath += "font_atlas.png";
+			break;
 		default:
 			D_ASSERT(false, "Unknown atlas type to load");
 			return nullptr;
@@ -48,7 +51,9 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 		return nullptr;
 	}
 
+	SDL_DestroySurface(surface);
 	SDL_SetTextureScaleMode(texture, scaleMode);
+
 	_loadedAtlasFiles[type] = texture;
 
 	return texture;

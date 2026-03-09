@@ -325,6 +325,9 @@ void ECSLevel::start()
     // Inside restaurant
     setupInsideRestaurantScene();
     _renderingSystem.setAmbientColor(138, 138, 138);
+
+    SDL_Texture* atlas = _renderingSystem.loadAtlas(FONT_ATLAS);
+    SDL_RenderTextureRotated(s_renderer, atlas, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
 }
 
 void ECSLevel::update()
@@ -500,4 +503,56 @@ void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
 	_debugCollidersSystem.render();
+
+    constexpr uint16_t k_maxFontGlyphs = 150;
+    // Array index is the decimal ASCII of the character and the value is index on font atlas.
+    // For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
+    int asciiToAtlasIndex[k_maxFontGlyphs]{ 0 };
+
+    SDL_Texture* fontAtlas = _renderingSystem.loadAtlas(FONT_ATLAS);
+
+    // Expand as we support more languages/characters
+    const char* fontAtlasLayout = " abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; fontAtlasLayout[i] != '\0'; ++i)
+    {
+        char c = fontAtlasLayout[i];
+        asciiToAtlasIndex[c] = i;
+    }
+
+    const char* textToDisplay = "i heard a commotion downstairs i just";
+    uint8_t currentSpaceBetweenCharacters = 0;
+    for (int i = 0; textToDisplay[i] != '\0'; ++i)
+    {
+        char c = textToDisplay[i];
+        int atlasIndex = asciiToAtlasIndex[c];
+        //D_LOG(MINI, "Index for character %c is %i", c, atlasIndex);
+
+        static IVec2 firstCharacterOnAtlasOffset = { 17, 19 };
+        IVec2 spaceBetweenCharactersOnAtas = { 8, 9 };
+        Vec2 characterSize = { 2.5f, 2.5f };
+
+        SDL_FRect src;
+        src.x = firstCharacterOnAtlasOffset.x + (spaceBetweenCharactersOnAtas.x * atlasIndex);
+        src.y = firstCharacterOnAtlasOffset.y;
+        src.w = 7;
+        src.h = 7;
+
+        SDL_FRect dest;
+        dest.x = 112 + currentSpaceBetweenCharacters;
+        dest.y = 100;
+        dest.w = characterSize.x;
+        dest.h = characterSize.y;
+
+        if (atlasIndex != 0)
+        {
+            currentSpaceBetweenCharacters += characterSize.x + 1;
+        }
+        else
+        {
+            currentSpaceBetweenCharacters += characterSize.x;
+        }
+
+        SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+    }
 }

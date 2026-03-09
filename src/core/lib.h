@@ -173,7 +173,8 @@ enum LayerType
 enum AtlasType
 {
 	GAME_ATLAS,
-	LIGHTS_ATLAS
+	LIGHTS_ATLAS,
+	FONT_ATLAS
 };
 
 struct IVec2

@@ -47,8 +47,8 @@ public:
 #endif // !RELEASE_BUILD
 	}
 
-private:
 	SDL_Texture* loadAtlas(AtlasType type);
+private:
 	SDL_Texture* getTargetLightsBuffer(LayerType layer);
 
 	void computeLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight = false);
