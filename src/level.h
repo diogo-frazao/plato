@@ -46,6 +46,7 @@ public:
 	DebugSystem _debugCollidersSystem;
 	CrosshairSystem _crosshairSystem;
 	AttackingSystem _attackingSystem;
+	DialogueSystem _dialogueSystem;
 };
 
 struct LevelManager
@@ -58,7 +59,6 @@ struct LevelManager
 		return _levels[s_currentLevelIndex];
 	}
 };
-
 
 template<typename T>
 bool entityHasComponent(Entity& entity)

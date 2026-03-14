@@ -999,6 +999,8 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 
 #pragma endregion
 
+#pragma region Attacking System
+
 void AttackingSystem::update()
 {
 	clearDebugCollisions();
@@ -1399,3 +1401,121 @@ void AttackingSystem::clearEntitiesPlayerAttacked()
 {
 	memset(_entitiesPlayerAttackedForCurrentAttack, k_invalidId, sizeof(_entitiesPlayerAttackedForCurrentAttack));
 }
+
+#pragma endregion
+
+#pragma region Dialogue System
+
+// Things I noticed about the font:
+// T and Y are shifted to the left.
+// , needs to be drawn a bit below, otherwise it's floating
+// For now, " will not be supported. It's ' instead
+// For now \ is not supported. It's _ instead
+
+// Font atlas details
+static const uint8_t k_maxCharactersPerRowOnAtlas = 36;
+static const IVec2 k_characterSizeOnAtlas = { 7, 7 };
+static const IVec2 k_firstCharacterOnAtlasOffset = { 17, 19 };
+static const IVec2 k_spaceBetweenCharactersOnAtas = { 8, 8 };
+
+void DialogueSystem::start()
+{
+	for (int i = 0; k_fontAtlasLayout[i] != '\0'; ++i)
+	{
+		char c = k_fontAtlasLayout[i];
+		_asciiToAtlasIndex[c] = i;
+	}
+}
+
+void DialogueSystem::render(RenderingSystem* renderingSystem)
+{
+	static SDL_FRect src;
+	static SDL_FRect dest;
+
+	//TODO: Improve since current dialogue might not be valid
+	for (DialogueCharacter& c : _currentDialogue.characters)
+	{
+		src.x = c.atlasOffset.x;
+		src.y = c.atlasOffset.y;
+		src.w = k_characterSizeOnAtlas.x;
+		src.h = k_characterSizeOnAtlas.y;
+
+		dest.x = c.position.x;
+		dest.y = c.position.y;
+		dest.w = c.size.x;
+		dest.h = c.size.y;
+
+		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
+		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+	}
+}
+
+void DialogueSystem::showDialogue(const char* textToShow)
+{
+	if (strlen(textToShow) > k_maxCharactersPerDialogue)
+	{
+		D_ASSERT(false, "Trying to print more characters per dialogue than allowed");
+		return;
+	}
+
+	// Characters details (may change at runtime)
+	Vec2 characterSize{ 2.5f, 2.5f };
+	uint8_t k_pixelsBetweenCharacters = 1;
+	uint8_t k_pixelsBetweenNewLine = 5;
+
+	static SDL_FRect src;
+	static SDL_FRect dest;
+
+	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
+	uint32_t currentVerticalSpaceBetweenCharacters = 0;
+	uint16_t charactersOnCurrentLineCounter = 0;
+
+	for (int i = 0; textToShow[i] != '\0'; ++i)
+	{
+		char c = textToShow[i];
+		uint16_t atlasIndex = _asciiToAtlasIndex[c];
+
+		bool isSpaceCharacter = (c == 32);
+		if (atlasIndex == 0 && !isSpaceCharacter)
+		{
+			D_LOG(ERROR, "Trying to print unsupported character: %c", c);
+			// Continue to prevent printing as if it was a space character
+			continue;
+		}
+
+		uint8_t column = atlasIndex % k_maxCharactersPerRowOnAtlas;
+		uint8_t row = floor(atlasIndex / k_maxCharactersPerRowOnAtlas);
+
+		src.x = k_firstCharacterOnAtlasOffset.x + (k_spaceBetweenCharactersOnAtas.x * column);
+		src.y = k_firstCharacterOnAtlasOffset.y + (k_spaceBetweenCharactersOnAtas.y * row);
+		src.w = k_characterSizeOnAtlas.x;
+		src.h = k_characterSizeOnAtlas.y;
+
+		dest.x = 50 + currentHorizontalSpaceBetweenCharacters;
+		dest.y = 100 + currentVerticalSpaceBetweenCharacters;
+		dest.w = characterSize.x;
+		dest.h = characterSize.y;
+
+		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[i];
+		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
+		dialogueCharacter.position = { dest.x, dest.y };
+		dialogueCharacter.size = { characterSize };
+
+		// We only break to a new line if it's a space character. This avoids breaking words in half
+		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+		if (shouldBreakToNewLine)
+		{
+			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
+			currentHorizontalSpaceBetweenCharacters = 0;
+			charactersOnCurrentLineCounter = 0;
+			continue;
+		}
+
+		// If we won't break to a new line, add spacing between the characters
+		currentHorizontalSpaceBetweenCharacters += characterSize.x + k_pixelsBetweenCharacters;
+	}
+}
+
+#pragma endregion
+
+

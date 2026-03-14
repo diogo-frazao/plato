@@ -157,3 +157,34 @@ public:
 		}
 	}
 };
+
+class DialogueSystem
+{
+public:
+	void start();
+	void render(RenderingSystem* renderingSystem);
+	void showDialogue(const char* text);
+
+private:
+
+	struct DialogueCharacter
+	{
+		IVec2 atlasOffset{ 0,0 };
+		Vec2 position{ 0.f, 0.f };
+		Vec2 size{ 0.f, 0.f };
+	};
+
+	struct Dialogue
+	{
+		DialogueCharacter characters[k_maxCharactersPerDialogue];
+
+		float timeSinceStartedShowingDialogue = k_invalidTime;
+	};
+
+	// Array index is the decimal ASCII of the character and the value is index on font atlas.
+	// For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
+	uint16_t _asciiToAtlasIndex[k_maxFontGlyphs]{ 0 };
+
+	//TODO: Improve later
+	Dialogue _currentDialogue;
+};

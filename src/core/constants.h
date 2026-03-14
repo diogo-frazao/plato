@@ -16,6 +16,13 @@ inline constexpr uint16_t k_maxAtlasFiles = 3;
 inline constexpr uint16_t k_maxLevels = 1;
 inline bool s_isImGuiOpen = true;
 
+// Dialogue
+// Expand as we support more languages/characters
+inline const uint16_t k_maxFontGlyphs = 128;
+inline const char* k_fontAtlasLayout = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;''(!?)+-*/=__[]{}|#$%&<>^@~";
+inline const uint16_t k_maxCharactersPerDialogue = 200;
+inline const uint16_t k_maxCharacterPerLine = 30;
+
 // Frame rate related
 // Milliseconds divided by target frame rate for physics/game logic
 constexpr float k_targetMillisecondsBetweenFrames = 1000.f / 60.f;

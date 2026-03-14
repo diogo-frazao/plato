@@ -304,6 +304,7 @@ void createDummyEntities(int amount)
 void ECSLevel::start()
 {
 	_renderingSystem.createLightsBuffers();
+    _dialogueSystem.start();
 
     Entity& player = addEntity();
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
@@ -328,6 +329,8 @@ void ECSLevel::start()
 
     SDL_Texture* atlas = _renderingSystem.loadAtlas(FONT_ATLAS);
     SDL_RenderTextureRotated(s_renderer, atlas, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
+
+    _dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
 }
 
 void ECSLevel::update()
@@ -502,75 +505,6 @@ void ECSLevel::imguiRender()
 void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
+    _dialogueSystem.render(&_renderingSystem);
 	_debugCollidersSystem.render();
-
-    // Things I noticed about the font:
-    // T and Y are shifted to the left.
-    // , needs to be drawn a bit below, otherwise it's floating
-    // For now, " will not be supported. It's ' instead
-    // For now \ is not supported. It's _ instead
-
-    constexpr uint16_t k_maxFontGlyphs = 128;
-    // Array index is the decimal ASCII of the character and the value is index on font atlas.
-    // For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
-    int asciiToAtlasIndex[k_maxFontGlyphs]{ 0 };
-
-    uint8_t k_maxCharactersPerRowOnAtlas = 36;
-
-    SDL_Texture* fontAtlas = _renderingSystem.loadAtlas(FONT_ATLAS);
-
-    // Expand as we support more languages/characters
-    const char* fontAtlasLayout = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;''(!?)+-*/=__[]{}|#$%&<>^@~";
-
-    for (int i = 0; fontAtlasLayout[i] != '\0'; ++i)
-    {
-        char c = fontAtlasLayout[i];
-        asciiToAtlasIndex[c] = i;   
-    }
-
-    const char* textToDisplay = "*/=__[Oi]{} Hello. < kill him > He said: Oi, and you; |#$%&<>^@~ it's floating? (he is not sure!!)";
-    uint32_t currentSpaceBetweenCharacters = 0;
-    for (int i = 0; textToDisplay[i] != '\0'; ++i)
-    {
-        char c = textToDisplay[i];
-
-        static IVec2 firstCharacterOnAtlasOffset = { 17, 19 };
-        IVec2 spaceBetweenCharactersOnAtas = { 8, 8 };
-        Vec2 characterSize = { 2.5f, 2.5f };
-
-        int atlasIndex = asciiToAtlasIndex[c];
-        bool isSpaceCharacter = (c == 32);
-        if (atlasIndex == 0 && !isSpaceCharacter)
-        {
-            D_LOG(ERROR, "Trying to print unsupported character: %c", c);
-            // Continue to prevent printing as if it was a space character
-            continue;
-        }
-
-        uint8_t column = atlasIndex % k_maxCharactersPerRowOnAtlas;
-        uint8_t row = floor(atlasIndex / k_maxCharactersPerRowOnAtlas);
-
-        SDL_FRect src;
-        src.x = firstCharacterOnAtlasOffset.x + (spaceBetweenCharactersOnAtas.x * column);
-        src.y = firstCharacterOnAtlasOffset.y + (spaceBetweenCharactersOnAtas.y * row);
-        src.w = 7;
-        src.h = 7;
-
-        SDL_FRect dest;
-        dest.x = 50 + currentSpaceBetweenCharacters;
-        dest.y = 100;
-        dest.w = characterSize.x;
-        dest.h = characterSize.y;
-
-        if (atlasIndex != 0)
-        {
-            currentSpaceBetweenCharacters += characterSize.x + 1;
-        }
-        else
-        {
-            currentSpaceBetweenCharacters += characterSize.x;
-        }
-
-        SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
-    }
 }
