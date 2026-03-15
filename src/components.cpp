@@ -18,7 +18,7 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 320, 23 };
 		atlas = GAME_ATLAS;
 		break;
-	case WHITE_DOT_SPRITE:
+	case WHITE_ONE_BY_ONE_SPRITE:
 		atlasOffset = { 323, 209 };
 		size = { 1, 1 };
 		atlas = GAME_ATLAS;

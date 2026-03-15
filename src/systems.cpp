@@ -24,7 +24,7 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 
 	static const std::string artPath = "art/";
 	std::string atlasFilePath = RESOURCES_PATH + artPath;
-	SDL_ScaleMode scaleMode = SDL_SCALEMODE_PIXELART;
+	SDL_ScaleMode scaleMode = SDL_SCALEMODE_NEAREST;
 
 	switch (type)
 	{
@@ -37,6 +37,7 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 			break;
 		case FONT_ATLAS:
 			atlasFilePath += "font_atlas.png";
+			scaleMode = SDL_SCALEMODE_NEAREST;
 			break;
 		default:
 			D_ASSERT(false, "Unknown atlas type to load");
@@ -1432,6 +1433,92 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
+	// If (0,0) speech bubble is drawn exactly at the beginning and end of text
+	Vec2 dialogueOuterPadding = { 3.f, 3.f };
+
+	// Dialogue base
+	{
+		DialogueBoxSprite& speechBubbleSprite = _currentDialogue.dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+
+		src.x = speechBubbleSprite.atlasOffset.x;
+		src.y = speechBubbleSprite.atlasOffset.y;
+		src.w = speechBubbleSprite.spriteSize.x;
+		src.h = speechBubbleSprite.spriteSize.y;
+
+		dest.x = 50 - dialogueOuterPadding.x;
+		dest.y = 100 - dialogueOuterPadding.y;
+		dest.w = _currentDialogue.dialogueBoxSize.x + (dialogueOuterPadding.x * 2.f);
+		dest.h = _currentDialogue.dialogueBoxSize.y + (dialogueOuterPadding.y * 2.f);
+
+		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
+		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
+		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+	}
+
+	float dialogueOutlineHeight = 0.75f;
+
+	// Dialogue outline
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& speechBubbleSprite = _currentDialogue.dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+
+		src.x = speechBubbleSprite.atlasOffset.x;
+		src.y = speechBubbleSprite.atlasOffset.y;
+		src.w = speechBubbleSprite.spriteSize.x;
+		src.h = speechBubbleSprite.spriteSize.y;
+
+		dest.x = 50 - dialogueOuterPadding.x;
+		// Since the last thing drawn was the dialogue box, use dest directly
+		float dialogueBoxEndYPosition = dest.y + dest.h;
+		dest.y = dialogueBoxEndYPosition - dialogueOutlineHeight;
+		dest.w = _currentDialogue.dialogueBoxSize.x + (dialogueOuterPadding.x * 2.f);
+		dest.h = dialogueOutlineHeight;
+
+		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
+		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
+		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+	}
+
+	float speechIndicatorXOffset = 15.f;
+
+	// Speech indicator
+	{
+		DialogueBoxSprite& speechIndicatorSprite = _currentDialogue.dialogueSpeechSprites[DIALOGUE_INDICATOR_SPRITE];
+
+		src.x = speechIndicatorSprite.atlasOffset.x;
+		src.y = speechIndicatorSprite.atlasOffset.y;
+		src.w = speechIndicatorSprite.spriteSize.x;
+		src.h = speechIndicatorSprite.spriteSize.y;
+
+		dest.x = 50 + speechIndicatorXOffset;
+		// Since the last thing drawn was the dialogue outline, use dest directly
+		float dialogueOutlineEndYPosition = dest.y + dest.h;
+		dest.y = dialogueOutlineEndYPosition - dialogueOutlineHeight;
+		dest.w = 3.f;
+		dest.h = 3.f;
+
+		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
+		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
+		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+	}
+
+	// Speech indicator outline
+	{
+		DialogueBoxSprite& speechIndicatorOutlineSprite = _currentDialogue.dialogueSpeechSprites[DIALOGUE_INDICATOR_OUTLINE_SPRITE];
+
+		src.x = speechIndicatorOutlineSprite.atlasOffset.x;
+		src.y = speechIndicatorOutlineSprite.atlasOffset.y;
+		src.w = speechIndicatorOutlineSprite.spriteSize.x;
+		src.h = speechIndicatorOutlineSprite.spriteSize.y;
+
+		// Since the last thing drawn was the speech indicator, use dest directly
+		// Share everything since this sprite has the same size
+
+		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
+		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
+		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+	}
+
 	//TODO: Improve since current dialogue might not be valid
 	for (DialogueCharacter& c : _currentDialogue.characters)
 	{
@@ -1470,6 +1557,8 @@ void DialogueSystem::showDialogue(const char* textToShow)
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
 	uint16_t charactersOnCurrentLineCounter = 0;
 
+	float maxXPosition = 0;
+
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{
 		char c = textToShow[i];
@@ -1505,6 +1594,7 @@ void DialogueSystem::showDialogue(const char* textToShow)
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
 		if (shouldBreakToNewLine)
 		{
+			maxXPosition = currentHorizontalSpaceBetweenCharacters;
 			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
 			currentHorizontalSpaceBetweenCharacters = 0;
 			charactersOnCurrentLineCounter = 0;
@@ -1513,6 +1603,15 @@ void DialogueSystem::showDialogue(const char* textToShow)
 
 		// If we won't break to a new line, add spacing between the characters
 		currentHorizontalSpaceBetweenCharacters += characterSize.x + k_pixelsBetweenCharacters;
+	}
+
+	// Dialogue speech bubble sprite
+	{
+		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
+		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXPosition : currentHorizontalSpaceBetweenCharacters;
+
+		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + characterSize.y;
+		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;
 	}
 }
 

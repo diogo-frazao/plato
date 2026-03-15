@@ -162,7 +162,7 @@ void setupInsideRestaurantScene()
         Entity& bgColor = addEntity();
         TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
-        s->setupSpriteForLayer(WHITE_DOT_SPRITE, BEHIND_CHAR_LAYER);
+        s->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
         s->color = { 0, 0, 0, 255 };
         s->drawnAtScreenSpace = true;
         t->scale = { 322.f, 182.f };
@@ -327,10 +327,7 @@ void ECSLevel::start()
     setupInsideRestaurantScene();
     _renderingSystem.setAmbientColor(138, 138, 138);
 
-    SDL_Texture* atlas = _renderingSystem.loadAtlas(FONT_ATLAS);
-    SDL_RenderTextureRotated(s_renderer, atlas, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
-
-    _dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+    //_dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
 }
 
 void ECSLevel::update()
@@ -401,6 +398,8 @@ void ECSLevel::update()
         _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
         _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
     }
+
+    _dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
 }
 
 void ECSLevel::imguiRender()
