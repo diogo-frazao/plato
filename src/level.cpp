@@ -327,7 +327,7 @@ void ECSLevel::start()
     setupInsideRestaurantScene();
     _renderingSystem.setAmbientColor(138, 138, 138);
 
-    //_dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
 }
 
 void ECSLevel::update()
@@ -388,6 +388,7 @@ void ECSLevel::update()
     _attackingSystem.update();
     _animationSystem.update();
     _crosshairSystem.update();
+    _dialogueSystem.update();
 
     // After all systems, update camera
     {
@@ -398,8 +399,6 @@ void ECSLevel::update()
         _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
         _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
     }
-
-    _dialogueSystem.showDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
 }
 
 void ECSLevel::imguiRender()

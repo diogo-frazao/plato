@@ -234,7 +234,7 @@ inline void invalidateTimer(float& timer)
 	timer = -1;
 }
 
-inline int32_t clamp(int32_t value, int32_t min, int32_t max)
+inline float clamp(float value, float min, float max)
 {
 	if (value < min)
 	{

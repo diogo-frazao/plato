@@ -162,8 +162,9 @@ class DialogueSystem
 {
 public:
 	void start();
+	void update();
 	void render(RenderingSystem* renderingSystem);
-	void showDialogue(const char* text);
+	void setupDialogueToShow(const char* text);
 
 private:
 
@@ -172,6 +173,22 @@ private:
 		IVec2 atlasOffset{ 0,0 };
 		Vec2 position{ 0.f, 0.f };
 		Vec2 size{ 0.f, 0.f };
+		float secondsToStartShowingCharacter = 0.f;
+		float opacity = 0.f;
+
+		bool isValid()
+		{
+			return size.x > 0.f;
+		}
+
+		void reset()
+		{
+			this->atlasOffset = { 0,0 };
+			this->position = { 0.f, 0.f };
+			this->size = { 0.f, 0.f };
+			this->secondsToStartShowingCharacter = 0.f;
+			this->opacity = 0.f;
+		}
 	};
 
 	enum DialgueSpriteType
@@ -200,7 +217,26 @@ private:
 		};
 
 		// Changed at runtime
+		float timeSinceDialogueStarted = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
+		float dialogueBoxOpacity = 0.f;
+
+		void destroyDialoge()
+		{
+			for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+			{
+				if (!characters[i].isValid())
+				{
+					break;
+				}
+
+				this->characters[i].reset();
+			}
+
+			this->timeSinceDialogueStarted = 0.f;
+			this->dialogueBoxSize = { 0.f, 0.f };
+			this->dialogueBoxOpacity = 0.f;
+		}
 	};
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.

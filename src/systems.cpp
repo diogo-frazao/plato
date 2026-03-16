@@ -1414,10 +1414,18 @@ void AttackingSystem::clearEntitiesPlayerAttacked()
 // For now \ is not supported. It's _ instead
 
 // Font atlas details
-static const uint8_t k_maxCharactersPerRowOnAtlas = 36;
-static const IVec2 k_characterSizeOnAtlas = { 7, 7 };
-static const IVec2 k_firstCharacterOnAtlasOffset = { 17, 19 };
-static const IVec2 k_spaceBetweenCharactersOnAtas = { 8, 8 };
+uint8_t k_maxCharactersPerRowOnAtlas = 36;
+IVec2 k_characterSizeOnAtlas = { 7, 7 };
+IVec2 k_firstCharacterOnAtlasOffset = { 17, 19 };
+IVec2 k_spaceBetweenCharactersOnAtas = { 8, 8 };
+
+// If (0,0) speech bubble is drawn exactly at the beginning and end of text
+Vec2 k_dialogueOuterPadding = { 3.f, 3.f };
+float k_secondsToFadeInDialogueBox = 1.f;
+float k_dialogueOutlineHeight = 0.75f;
+
+float k_secondsToFadeInEachCharacter = 1.f;
+float k_secondsBetweenEachCharacter = 0.05f;
 
 void DialogueSystem::start()
 {
@@ -1428,13 +1436,30 @@ void DialogueSystem::start()
 	}
 }
 
+void DialogueSystem::update()
+{
+	// Destroy dialogue and reconstruct
+	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
+	{
+		_currentDialogue.destroyDialoge();
+		D_LOG(MINI, "Destroyed");
+		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+	}
+}
+
 void DialogueSystem::render(RenderingSystem* renderingSystem)
 {
+	// Prevent executing any code if there's nothing to print
+	if (!_currentDialogue.characters[0].isValid())
+	{
+		return;
+	}
+
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
-	// If (0,0) speech bubble is drawn exactly at the beginning and end of text
-	Vec2 dialogueOuterPadding = { 3.f, 3.f };
+	float fadeSpeed = 255.f / k_secondsToFadeInDialogueBox;
+	_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
 
 	// Dialogue base
 	{
@@ -1445,17 +1470,18 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = 50 - dialogueOuterPadding.x;
-		dest.y = 100 - dialogueOuterPadding.y;
-		dest.w = _currentDialogue.dialogueBoxSize.x + (dialogueOuterPadding.x * 2.f);
-		dest.h = _currentDialogue.dialogueBoxSize.y + (dialogueOuterPadding.y * 2.f);
+		dest.x = 50 - k_dialogueOuterPadding.x;
+		dest.y = 100 - k_dialogueOuterPadding.y;
+		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
 		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
-		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
-	}
 
-	float dialogueOutlineHeight = 0.75f;
+		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, (uint8_t)_currentDialogue.dialogueBoxOpacity);
+		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, 255);
+	}
 
 	// Dialogue outline
 	{
@@ -1467,15 +1493,16 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = 50 - dialogueOuterPadding.x;
+		dest.x = 50 - k_dialogueOuterPadding.x;
 		// Since the last thing drawn was the dialogue box, use dest directly
 		float dialogueBoxEndYPosition = dest.y + dest.h;
-		dest.y = dialogueBoxEndYPosition - dialogueOutlineHeight;
-		dest.w = _currentDialogue.dialogueBoxSize.x + (dialogueOuterPadding.x * 2.f);
-		dest.h = dialogueOutlineHeight;
+		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
+		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+		dest.h = k_dialogueOutlineHeight;
 
 		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
+		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
 		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
 	}
 
@@ -1493,12 +1520,13 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.x = 50 + speechIndicatorXOffset;
 		// Since the last thing drawn was the dialogue outline, use dest directly
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
-		dest.y = dialogueOutlineEndYPosition - dialogueOutlineHeight;
+		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
 		dest.w = 3.f;
 		dest.h = 3.f;
 
 		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
 		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
+		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
 		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
 	}
 
@@ -1516,12 +1544,22 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
 		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
+		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
 		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
 	}
 
 	//TODO: Improve since current dialogue might not be valid
-	for (DialogueCharacter& c : _currentDialogue.characters)
+	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
+		DialogueCharacter& c = _currentDialogue.characters[i];
+
+		// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
+		// Since it means we reached the end of the dialogue
+		if (!c.isValid())
+		{
+			break;
+		}
+
 		src.x = c.atlasOffset.x;
 		src.y = c.atlasOffset.y;
 		src.w = k_characterSizeOnAtlas.x;
@@ -1533,11 +1571,25 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.h = c.size.y;
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
+
+		if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
+		{
+			float speed = 255.f / k_secondsToFadeInEachCharacter;
+			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
+		}
+		else
+		{
+			c.opacity = 0.f;
+		}
+
+		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 	}
+
+	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 }
 
-void DialogueSystem::showDialogue(const char* textToShow)
+void DialogueSystem::setupDialogueToShow(const char* textToShow)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -1549,6 +1601,7 @@ void DialogueSystem::showDialogue(const char* textToShow)
 	Vec2 characterSize{ 2.5f, 2.5f };
 	uint8_t k_pixelsBetweenCharacters = 1;
 	uint8_t k_pixelsBetweenNewLine = 5;
+	uint16_t k_maxCharacterPerLine = 35;
 
 	static SDL_FRect src;
 	static SDL_FRect dest;
@@ -1589,12 +1642,17 @@ void DialogueSystem::showDialogue(const char* textToShow)
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.position = { dest.x, dest.y };
 		dialogueCharacter.size = { characterSize };
+		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToFadeInDialogueBox * 0.5f) + (k_secondsBetweenEachCharacter * i);
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
 		if (shouldBreakToNewLine)
 		{
-			maxXPosition = currentHorizontalSpaceBetweenCharacters;
+			if (currentHorizontalSpaceBetweenCharacters > maxXPosition)
+			{
+				maxXPosition = currentHorizontalSpaceBetweenCharacters;
+			}
+
 			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
 			currentHorizontalSpaceBetweenCharacters = 0;
 			charactersOnCurrentLineCounter = 0;
