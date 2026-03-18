@@ -56,3 +56,4 @@ bool isMoveLeftKeyDown();
 bool wasMoveRightPressedThisFrame();
 bool wasMoveLeftPressedThisFrame();
 bool wasAttackKeyPressedThisFrame();
+bool wasSkipDialogueKeyPressedThisFrame();

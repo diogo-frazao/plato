@@ -1442,8 +1442,24 @@ void DialogueSystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		_currentDialogue.destroyDialoge();
-		D_LOG(MINI, "Destroyed");
+		D_LOG(LOG, "Dialogue recreated");
 		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+	}
+
+	if (wasSkipDialogueKeyPressedThisFrame())
+	{
+		// Pretend the dialogue already started a long time ago to allow opacity override
+		_currentDialogue.timeSinceDialogueStarted = 50.f;
+
+		for (DialogueCharacter& c : _currentDialogue.characters)
+		{
+			if (!c.isValid())
+			{
+				break;
+			}
+
+			c.opacity = 255;
+		}
 	}
 }
 
