@@ -327,7 +327,7 @@ void ECSLevel::start()
     setupInsideRestaurantScene();
     _renderingSystem.setAmbientColor(138, 138, 138);
 
-    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {50, 100});
 }
 
 void ECSLevel::update()
@@ -449,6 +449,10 @@ void ECSLevel::imguiRender()
     ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
     ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
     ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
+
+    Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
+    ImGui::Text("Mouse World X: %f", mouseWorldPosition.x);
+    ImGui::Text("Mouse World Y: %f", mouseWorldPosition.y);
 
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
     ImGui::Checkbox("Debug grid", &s_debugGridEnabled);

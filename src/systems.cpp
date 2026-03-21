@@ -1423,9 +1423,16 @@ IVec2 k_spaceBetweenCharactersOnAtas = { 8, 8 };
 Vec2 k_dialogueOuterPadding = { 3.f, 3.f };
 float k_secondsToFadeInDialogueBox = 1.f;
 float k_dialogueOutlineHeight = 0.75f;
+Vec2 k_speechIndicatorSize = { 3.f, 3.f };
 
 float k_secondsToFadeInEachCharacter = 1.f;
 float k_secondsBetweenEachCharacter = 0.05f;
+
+// Characters details (may change at runtime)
+Vec2 characterSize{ 2.5f, 2.5f };
+uint8_t k_pixelsBetweenCharacters = 1;
+uint8_t k_pixelsBetweenNewLine = 5;
+uint16_t k_maxCharacterPerLine = 35;
 
 void DialogueSystem::start()
 {
@@ -1443,23 +1450,28 @@ void DialogueSystem::update()
 	{
 		_currentDialogue.destroyDialoge();
 		D_LOG(LOG, "Dialogue recreated");
-		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...");
+		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {90, 123});
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
 	{
-		// Pretend the dialogue already started a long time ago to allow opacity override
-		_currentDialogue.timeSinceDialogueStarted = 50.f;
+		skipDialogue();
+	}
+}
 
-		for (DialogueCharacter& c : _currentDialogue.characters)
+void DialogueSystem::skipDialogue()
+{
+	// Pretend the dialogue already started a long time ago to allow opacity override
+	_currentDialogue.timeSinceDialogueStarted = 50.f;
+
+	for (DialogueCharacter& c : _currentDialogue.characters)
+	{
+		if (!c.isValid())
 		{
-			if (!c.isValid())
-			{
-				break;
-			}
-
-			c.opacity = 255;
+			break;
 		}
+
+		c.opacity = 255.f;
 	}
 }
 
@@ -1486,8 +1498,8 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = 50 - k_dialogueOuterPadding.x;
-		dest.y = 100 - k_dialogueOuterPadding.y;
+		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
+		dest.y = _currentDialogue.topLeftPosition.y - k_dialogueOuterPadding.y;
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
@@ -1509,7 +1521,7 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = 50 - k_dialogueOuterPadding.x;
+		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
 		// Since the last thing drawn was the dialogue box, use dest directly
 		float dialogueBoxEndYPosition = dest.y + dest.h;
 		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
@@ -1522,8 +1534,6 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
 	}
 
-	float speechIndicatorXOffset = 15.f;
-
 	// Speech indicator
 	{
 		DialogueBoxSprite& speechIndicatorSprite = _currentDialogue.dialogueSpeechSprites[DIALOGUE_INDICATOR_SPRITE];
@@ -1533,12 +1543,13 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.w = speechIndicatorSprite.spriteSize.x;
 		src.h = speechIndicatorSprite.spriteSize.y;
 
-		dest.x = 50 + speechIndicatorXOffset;
 		// Since the last thing drawn was the dialogue outline, use dest directly
+		float textCenterXPos = dest.x + (dest.w / 2);
+		dest.x = textCenterXPos;
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
-		dest.w = 3.f;
-		dest.h = 3.f;
+		dest.w = k_speechIndicatorSize.x;
+		dest.h = k_speechIndicatorSize.y;
 
 		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
 		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
@@ -1564,7 +1575,7 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
 	}
 
-	//TODO: Improve since current dialogue might not be valid
+	// Draw each character
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
 		DialogueCharacter& c = _currentDialogue.characters[i];
@@ -1605,7 +1616,59 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 }
 
-void DialogueSystem::setupDialogueToShow(const char* textToShow)
+Vec2 DialogueSystem::getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPosition)
+{
+	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
+	uint32_t currentVerticalSpaceBetweenCharacters = 0;
+	uint16_t charactersOnCurrentLineCounter = 0;
+
+	float maxXDialogueSize = 0;
+
+	for (int i = 0; textToShow[i] != '\0'; ++i)
+	{
+		char c = textToShow[i];
+		bool isSpaceCharacter = (c == 32);
+
+		// We only break to a new line if it's a space character. This avoids breaking words in half
+		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+		if (shouldBreakToNewLine)
+		{
+			if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
+			{
+				maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
+			}
+
+			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
+			currentHorizontalSpaceBetweenCharacters = 0;
+			charactersOnCurrentLineCounter = 0;
+			continue;
+		}
+
+		// If we won't break to a new line, add spacing between the characters
+		currentHorizontalSpaceBetweenCharacters += characterSize.x + k_pixelsBetweenCharacters;
+	}
+
+	// Calculate dialogue box size
+	Vec2 dialogueBoxSize;
+
+	bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
+	dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
+
+	float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + characterSize.y;
+	dialogueBoxSize.y = yPosWhereLastLineEnds;
+
+	Vec2 topLeftPositionToStartDrawingText;
+
+	// Go to left from center
+	topLeftPositionToStartDrawingText.x = bottomCenterPosition.x - (dialogueBoxSize.x / 2);
+	// Go to top from bottom, also considering the dialogue outer padding and speech indicator size.
+	// This way, we can pass a pos bottomCenterPosition that corresponds to where the tip of the speech indicator will be
+	topLeftPositionToStartDrawingText.y = bottomCenterPosition.y - dialogueBoxSize.y - k_dialogueOuterPadding.y - k_speechIndicatorSize.y;
+
+	return topLeftPositionToStartDrawingText;
+}
+
+void DialogueSystem::setupDialogueToShow(const char* textToShow, Vec2 bottomCenterPosition)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -1613,20 +1676,15 @@ void DialogueSystem::setupDialogueToShow(const char* textToShow)
 		return;
 	}
 
-	// Characters details (may change at runtime)
-	Vec2 characterSize{ 2.5f, 2.5f };
-	uint8_t k_pixelsBetweenCharacters = 1;
-	uint8_t k_pixelsBetweenNewLine = 5;
-	uint16_t k_maxCharacterPerLine = 35;
-
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
 	uint16_t charactersOnCurrentLineCounter = 0;
+	float maxXDialogueSize = 0;
 
-	float maxXPosition = 0;
+	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, bottomCenterPosition);
 
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{
@@ -1649,8 +1707,8 @@ void DialogueSystem::setupDialogueToShow(const char* textToShow)
 		src.w = k_characterSizeOnAtlas.x;
 		src.h = k_characterSizeOnAtlas.y;
 
-		dest.x = 50 + currentHorizontalSpaceBetweenCharacters;
-		dest.y = 100 + currentVerticalSpaceBetweenCharacters;
+		dest.x = _currentDialogue.topLeftPosition.x + currentHorizontalSpaceBetweenCharacters;
+		dest.y = _currentDialogue.topLeftPosition.y + currentVerticalSpaceBetweenCharacters;
 		dest.w = characterSize.x;
 		dest.h = characterSize.y;
 
@@ -1664,9 +1722,9 @@ void DialogueSystem::setupDialogueToShow(const char* textToShow)
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
 		if (shouldBreakToNewLine)
 		{
-			if (currentHorizontalSpaceBetweenCharacters > maxXPosition)
+			if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
 			{
-				maxXPosition = currentHorizontalSpaceBetweenCharacters;
+				maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
 			}
 
 			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
@@ -1682,7 +1740,7 @@ void DialogueSystem::setupDialogueToShow(const char* textToShow)
 	// Dialogue speech bubble sprite
 	{
 		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
-		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXPosition : currentHorizontalSpaceBetweenCharacters;
+		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
 
 		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + characterSize.y;
 		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;

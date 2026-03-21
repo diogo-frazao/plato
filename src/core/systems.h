@@ -164,7 +164,7 @@ public:
 	void start();
 	void update();
 	void render(RenderingSystem* renderingSystem);
-	void setupDialogueToShow(const char* text);
+	void setupDialogueToShow(const char* text, Vec2 bottomCenterPosition);
 
 private:
 
@@ -219,6 +219,7 @@ private:
 		// Changed at runtime
 		float timeSinceDialogueStarted = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
+		Vec2 topLeftPosition{ 0.f,0.f };
 		float dialogueBoxOpacity = 0.f;
 
 		void destroyDialoge()
@@ -238,6 +239,9 @@ private:
 			this->dialogueBoxOpacity = 0.f;
 		}
 	};
+
+	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPos);
+	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
 	// For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
