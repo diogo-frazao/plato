@@ -1503,12 +1503,14 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
-		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
+		dest = convertWorldRectToCameraSpace(dest);
 
-		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, (uint8_t)_currentDialogue.dialogueBoxOpacity);
-		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
-		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, 255);
+		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 9, 7, 19);
+
+		SDL_SetTextureAlphaMod(atlas, (uint8_t)_currentDialogue.dialogueBoxOpacity);
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_SetTextureAlphaMod(atlas, 255);
 	}
 
 	// Dialogue outline
@@ -1528,10 +1530,12 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = k_dialogueOutlineHeight;
 
-		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
-		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+		dest = convertWorldRectToCameraSpace(dest);
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 27, 52, 45);
+		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
 	// Speech indicator
@@ -1551,10 +1555,14 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = k_speechIndicatorSize.x;
 		dest.h = k_speechIndicatorSize.y;
 
-		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
-		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 9, 7, 19);
-		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
-		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+		// Since the speech indicator has its X and Y pos defined by the previous value, we shouldn't convert to camera space
+		// as it's already in camera space
+		//dest = convertWorldRectToCameraSpace(dest);
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 9, 7, 19);
+		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
 	// Speech indicator outline
@@ -1569,10 +1577,10 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		// Since the last thing drawn was the speech indicator, use dest directly
 		// Share everything since this sprite has the same size
 
-		SDL_Texture* dialogueBaseSpriteAtlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
-		SDL_SetTextureColorMod(dialogueBaseSpriteAtlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(dialogueBaseSpriteAtlas, _currentDialogue.dialogueBoxOpacity);
-		SDL_RenderTexture(s_renderer, dialogueBaseSpriteAtlas, &src, &dest);
+		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 27, 52, 45);
+		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
 	// Draw each character
@@ -1596,6 +1604,8 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.y = c.position.y;
 		dest.w = c.size.x;
 		dest.h = c.size.y;
+
+		dest = convertWorldRectToCameraSpace(dest);
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 
