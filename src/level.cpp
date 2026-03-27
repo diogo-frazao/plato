@@ -306,7 +306,7 @@ void ECSLevel::start()
 	_renderingSystem.createLightsBuffers();
     _dialogueSystem.start();
 
-    Entity& player = addEntity();
+    Entity& player = addEntity({ 490, 117 });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
@@ -318,6 +318,7 @@ void ECSLevel::start()
     crosshairSprite->drawnAtScreenSpace = true;
 
     playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
+    playerSprite->flipX = true;
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
     // Outside restaurant
@@ -325,44 +326,51 @@ void ECSLevel::start()
 
     // Inside restaurant
     setupInsideRestaurantScene();
-    _renderingSystem.setAmbientColor(138, 138, 138);
+    if (s_isInsideRestaurant)
+    {
+        _renderingSystem.setAmbientColor(138, 138, 138);
+        _levelCamera.position = { 540, 90.f };
+    }
 
-    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {50, 100});
+    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {35, 100});
 }
 
 void ECSLevel::update()
 {
-    // TODO: remove, placeholder to place tiles
-    /*
-    if (wasMouseButtonPressedThisFrame(LEFT))
+    // Debug
     {
-        IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
-        IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
-        createBlockAtPosition(gridWorldPosition);
-    }
-    */
-
-    if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
-    {
-        D_LOG(LOG, "--------------");
-        for (Entity& entity : getAllEntities())
+        // TODO: remove, placeholder to place tiles
+        /*
+        if (wasMouseButtonPressedThisFrame(LEFT))
         {
-            if (entity.id == k_invalidId)
-            {
-                continue;
-            }
+            IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
+            IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
+            createBlockAtPosition(gridWorldPosition);
+        }
+        */
 
-            if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
+        {
+            D_LOG(LOG, "--------------");
+            for (Entity& entity : getAllEntities())
             {
-                auto* t = getComponentFromEntity<TransformComponent>(entity);
-                D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
+                if (entity.id == k_invalidId)
+                {
+                    continue;
+                }
+
+                if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
+                {
+                    auto* t = getComponentFromEntity<TransformComponent>(entity);
+                    D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
+                }
             }
         }
-    }
 
-    if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
-    {
-        s_isImGuiOpen = !s_isImGuiOpen;
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
+        {
+            s_isImGuiOpen = !s_isImGuiOpen;
+        }
     }
 
     Entity& player = getEntityById(k_playerEntityId);
@@ -382,22 +390,36 @@ void ECSLevel::update()
         getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
     }
 
-	_savePositionSystem.update();
-    overrideColliderOffsetsBasedOnCurrentSprite();
-	_characterMovementSystem.update();
-    _attackingSystem.update();
-    _animationSystem.update();
-    _crosshairSystem.update();
-    _dialogueSystem.update();
+    // Update systems
+    {
+        _savePositionSystem.update();
+        overrideColliderOffsetsBasedOnCurrentSprite();
+        _characterMovementSystem.update();
+        _attackingSystem.update();
+        _animationSystem.update();
+        _crosshairSystem.update();
+        _dialogueSystem.update();
+    }
+
+
+    static float cameraOffsetXFromPlayer = 50.f;
+    // Custom level logic
+    {
+
+    }
 
     // After all systems, update camera
     {
         _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
-        _levelCamera.maxX = s_isInsideRestaurant ? 500 : 0;
+        _levelCamera.maxX = s_isInsideRestaurant ? 540 : 0;
         _levelCamera.followTargetRatio = 0.06f;
-        _levelCamera.targetPosition = { playerTransform->position.x, 90.f };
+        _levelCamera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
         _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
-        _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+
+        if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f)
+        {
+            _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+        }
     }
 }
 

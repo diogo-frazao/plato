@@ -109,6 +109,7 @@ inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)
 
 	if (posInScreenSpace.x > k_baseGameWidth || posInScreenSpace.y > k_baseGameHeight)
 	{
+		//TODO: This happens sometimes, we need a proper fix to not crash
 		D_ASSERT(false, "convertToCameraSpace(): The position passed is not in screen space");
 	}
 

@@ -582,10 +582,11 @@ void MovementSystem::processMainCharacterMovement()
 	//TODO: remove debug to reset player pos
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_Q))
 	{
-		transformComponent->previousPosition = Vec2(0, 0);
-		transformComponent->position = Vec2(0, 0);
+		transformComponent->previousPosition = Vec2(490, 117);
+		transformComponent->position = Vec2(490, 117);
 		movementComponent->currentSpeed.x = 0;
 		movementComponent->currentSpeed.y = 0;
+		spriteComponent->flipX = true;
 
 		Entity& enemy = getEntityById(10);
 		if (enemy.id != k_invalidId && entityHasComponent<AttackingComponent>(enemy))
@@ -1450,7 +1451,7 @@ void DialogueSystem::update()
 	{
 		_currentDialogue.destroyDialoge();
 		D_LOG(LOG, "Dialogue recreated");
-		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {90, 123});
+		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {490, 123});
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
