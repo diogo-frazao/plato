@@ -158,15 +158,12 @@ public:
 	}
 };
 
-class DialogueSystem
+class UISystem
 {
 public:
 	void start();
 	void update();
 	void render(RenderingSystem* renderingSystem);
-	void setupDialogueToShow(const char* text, Vec2 bottomCenterPosition);
-
-private:
 
 	struct DialogueCharacter
 	{
@@ -189,6 +186,12 @@ private:
 			this->secondsToStartShowingCharacter = 0.f;
 			this->opacity = 0.f;
 		}
+	};
+
+	enum DialogueIndicatorPosition
+	{
+		DIALOGUE_INDICATOR_CENTERED,
+		DIALOGUE_INDICATOR_LEFT_ALIGNED
 	};
 
 	enum DialgueSpriteType
@@ -217,10 +220,12 @@ private:
 		};
 
 		// Changed at runtime
+		bool isScreenSpace = false;
 		float timeSinceDialogueStarted = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		Vec2 topLeftPosition{ 0.f,0.f };
 		float dialogueBoxOpacity = 0.f;
+		DialogueIndicatorPosition indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
 
 		void destroyDialoge()
 		{
@@ -237,9 +242,12 @@ private:
 			this->timeSinceDialogueStarted = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
 			this->dialogueBoxOpacity = 0.f;
+			this->isScreenSpace = false;
+			this->indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
 		}
 	};
 
+	void pushDialogue(const char* text, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueIndicatorPosition indicatorPositionType = DIALOGUE_INDICATOR_CENTERED);
 	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPos);
 	void skipDialogue();
 
@@ -249,4 +257,21 @@ private:
 
 	//TODO: Improve later
 	Dialogue _currentDialogue;
+
+	enum CellphoneState
+	{
+		CELLPHONE_NOT_VISIBLE_STATE,
+		CELLPHONE_PENDING_CALL_STATE,
+		CELLPHONE_TALKING
+	};
+
+	struct Cellphone
+	{
+		Entity* entity = nullptr;
+		CellphoneState state = CELLPHONE_NOT_VISIBLE_STATE;
+		char* dialogueToShowOnAnswer = nullptr;
+	};
+
+	void receivePhoneCallAndPushDialogueOnAnswer(char* textToShow);
+	Cellphone _cellphone;
 };

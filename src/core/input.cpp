@@ -178,8 +178,6 @@ static SDL_Scancode s_alternateMoveRightKey = SDL_SCANCODE_RIGHT;
 static SDL_Scancode s_moveLeftKey = SDL_SCANCODE_A;
 static SDL_Scancode s_alternateMoveLeftKey = SDL_SCANCODE_LEFT;
 
-static SDL_Scancode s_skipDialogueKey = SDL_SCANCODE_RETURN;
-
 bool wasJumpKeyPressedThisFrame()
 {
 	return _wasKeyPressedThisFrame(s_jumpKey) || _wasKeyPressedThisFrame(s_alternateJumpKey);
@@ -217,6 +215,11 @@ bool wasAttackKeyPressedThisFrame()
 
 bool wasSkipDialogueKeyPressedThisFrame()
 {
-	return wasAttackKeyPressedThisFrame() || _wasKeyPressedThisFrame(s_skipDialogueKey);
+	return wasAttackKeyPressedThisFrame() || _wasKeyPressedThisFrame(SDL_SCANCODE_RETURN);
+}
+
+bool wasPickupPhoneKeyPressedThisFrame()
+{
+	return wasJumpKeyPressedThisFrame();
 }
 

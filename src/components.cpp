@@ -245,6 +245,12 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
+	case CELLPHONE_IDLE_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 386, 217 };
+		size = { 25, 28 };
+		numberOfFrames = 1;
+		break;
 	case CROSSHAIR_MELEE_WEAPON_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 322, 33 };

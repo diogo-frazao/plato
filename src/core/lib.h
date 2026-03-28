@@ -18,6 +18,9 @@ enum EntityState
 	JUMPING_STATE,
 	FALLING_STATE,
 
+	//General
+	ON_PHONE_STATE,
+
 	// Attack
 	ATTACKING_STATE,
 	HURT_ONE_STATE,
@@ -58,6 +61,8 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Falling";
 	case ATTACKING_STATE:
 		return "Attacking";
+	case ON_PHONE_STATE:
+		return "On the Phone";
 	case HURT_ONE_STATE:
 		return "Hurt One";
 	case HURT_ONE_RECOVER_STATE:
@@ -143,6 +148,8 @@ enum SpriteType
 	GANGSTER_SMALL_CRAWL_SPRITE,
 	GANGSTER_SMALL_DEAD_SPRITE,
 
+	CELLPHONE_IDLE_SPRITE,
+
 	// Crosshairs
 	CROSSHAIR_MELEE_WEAPON_SPRITE,
 	CROSSHAIR_MELEE_WEAPON_HIT_SPRITE,
@@ -167,6 +174,7 @@ enum LayerType
 	IN_FRONT_CHAR_LAYER,
 	FRONT_LIGHTS_LAYER,
 	LEVEL_GEOMETRY_LAYER,
+	CELLPHONE_LAYER,
 	CROSSHAIR_LAYER,
 };
 

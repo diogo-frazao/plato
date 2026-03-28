@@ -46,7 +46,7 @@ public:
 	DebugSystem _debugCollidersSystem;
 	CrosshairSystem _crosshairSystem;
 	AttackingSystem _attackingSystem;
-	DialogueSystem _dialogueSystem;
+	UISystem _uiSystem;
 };
 
 struct LevelManager

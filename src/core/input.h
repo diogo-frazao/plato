@@ -57,3 +57,4 @@ bool wasMoveRightPressedThisFrame();
 bool wasMoveLeftPressedThisFrame();
 bool wasAttackKeyPressedThisFrame();
 bool wasSkipDialogueKeyPressedThisFrame();
+bool wasPickupPhoneKeyPressedThisFrame();

@@ -304,18 +304,24 @@ void createDummyEntities(int amount)
 void ECSLevel::start()
 {
 	_renderingSystem.createLightsBuffers();
-    _dialogueSystem.start();
+    _uiSystem.start();
 
     Entity& player = addEntity({ 490, 117 });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
     getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
+    player.entityState = ON_PHONE_STATE;
 
     Entity& crosshair = addEntity();
     auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
     crosshairSprite->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON_SPRITE, CROSSHAIR_LAYER);
     crosshairSprite->drawnAtScreenSpace = true;
+
+    Entity& cellphone = addEntity({10, 200});
+    auto* cellphoneSprite = addComponentToEntity<SpriteComponent>(cellphone);
+    cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, CELLPHONE_LAYER);
+    cellphoneSprite->drawnAtScreenSpace = true;
 
     playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
     playerSprite->flipX = true;
@@ -332,7 +338,7 @@ void ECSLevel::start()
         _levelCamera.position = { 540, 90.f };
     }
 
-    _dialogueSystem.setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {35, 100});
+    _uiSystem.pushDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {35, 100});
 }
 
 void ECSLevel::update()
@@ -398,16 +404,27 @@ void ECSLevel::update()
         _attackingSystem.update();
         _animationSystem.update();
         _crosshairSystem.update();
-        _dialogueSystem.update();
+        _uiSystem.update();
     }
 
 
-    static float cameraOffsetXFromPlayer = 50.f;
     // Custom level logic
     {
+        static float cellphoneCallTutorialTimer = 0.f;
+        if (isTimerOngoing(cellphoneCallTutorialTimer))
+        {
+            cellphoneCallTutorialTimer += k_deltaTime;
 
+            float k_timeToShowCellphoneFirstTime = 1.f;
+            if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
+            {
+                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer("alo?");
+                invalidateTimer(cellphoneCallTutorialTimer);
+            }
+        }
     }
 
+    static float cameraOffsetXFromPlayer = 50.f;
     // After all systems, update camera
     {
         _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
@@ -529,6 +546,6 @@ void ECSLevel::imguiRender()
 void ECSLevel::render(float renderAlpha)
 {
 	_renderingSystem.render(renderAlpha);
-    _dialogueSystem.render(&_renderingSystem);
+    _uiSystem.render(&_renderingSystem);
 	_debugCollidersSystem.render();
 }

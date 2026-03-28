@@ -97,6 +97,7 @@ void RenderingSystem::render(float renderAlpha)
 	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
+	renderSpritesAtLayer(CELLPHONE_LAYER, renderAlpha);
 	renderSpritesAtLayer(CROSSHAIR_LAYER, renderAlpha);
 }
 
@@ -602,7 +603,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE;
+	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
@@ -625,10 +626,12 @@ void MovementSystem::processMainCharacterMovement()
 		spriteComponent->flipX = true;
 	}
 
+	bool canJumpFromCurrentState = player.entityState != ON_PHONE_STATE;
+
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
 	Vec2 checkGroundBelowPosition{ transformComponent->position.x, transformComponent->position.y + 2 };
-	if (wasJumpKeyPressedThisFrame() && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&player, checkGroundBelowPosition)))
+	if (canJumpFromCurrentState && wasJumpKeyPressedThisFrame() && !movementComponent->isGrounded && (willCollideWithLevelGeometryAtPosition(&player, checkGroundBelowPosition)))
 	{
 		canJumpWithoutTouchingFloor = true;
 	}
@@ -636,7 +639,7 @@ void MovementSystem::processMainCharacterMovement()
 	// Jump
 	bool canCoyoteJump = (movementComponent->timeSinceLeftPlatform > k_invalidId && movementComponent->timeSinceLeftPlatform <= movementComponent->coyoteTime);
 	bool canJump = movementComponent->isGrounded || canCoyoteJump || canJumpWithoutTouchingFloor;
-	if (wasJumpKeyPressedThisFrame() && canJump)
+	if (canJumpFromCurrentState && wasJumpKeyPressedThisFrame() && canJump)
 	{
 		movementComponent->currentSpeed.y = -movementComponent->jumpSpeed;
 		movementComponent->isGrounded = false;
@@ -650,7 +653,7 @@ void MovementSystem::processMainCharacterMovement()
 	}
 
 	//TODO: Improve since this will reduce also when free falling
-	if (wasJumpKeyReleasedThisFrame())
+	if (canJumpFromCurrentState && wasJumpKeyReleasedThisFrame())
 	{
 		movementComponent->currentSpeed.y *= 0.5f;
 	}
@@ -675,7 +678,8 @@ void MovementSystem::processMainCharacterMovement()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE;
+	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
+
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
 	if (isGroundedAndNotMoving && canChangeFromCurrentStateToIdle)
 	{
@@ -742,7 +746,7 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->resetScaleLerp = 0.1f;
 	}
 
-	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE;
+	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
 	if (canChangeToFallingState)
 	{
 		player.entityState = FALLING_STATE;
@@ -768,6 +772,7 @@ void MovementSystem::processMainCharacterMovement()
 	switch (player.entityState)
 	{
 	case IDLE_STATE:
+	case ON_PHONE_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_IDLE_SPRITE : CHARACTER_IDLE_SPRITE, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
@@ -1435,7 +1440,7 @@ uint8_t k_pixelsBetweenCharacters = 1;
 uint8_t k_pixelsBetweenNewLine = 5;
 uint16_t k_maxCharacterPerLine = 35;
 
-void DialogueSystem::start()
+void UISystem::start()
 {
 	for (int i = 0; k_fontAtlasLayout[i] != '\0'; ++i)
 	{
@@ -1444,23 +1449,62 @@ void DialogueSystem::start()
 	}
 }
 
-void DialogueSystem::update()
+void UISystem::receivePhoneCallAndPushDialogueOnAnswer(char* textToShow)
 {
+	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
+	_cellphone.dialogueToShowOnAnswer = textToShow;
+}
+
+void UISystem::update()
+{
+	if (_cellphone.entity == nullptr)
+	{
+		_cellphone.entity = &getEntityById(k_cellphoneEntityId);
+	}
+
+	auto* t = getComponentFromEntity<TransformComponent>(*_cellphone.entity);
+	switch (_cellphone.state)
+	{
+	case CELLPHONE_NOT_VISIBLE_STATE:
+		t->position = lerp(t->position, { 10, 200 }, 10 * k_deltaTime);
+		break;
+
+	case CELLPHONE_PENDING_CALL_STATE:
+		t->position = lerp(t->position, { 10, 163 }, 10 * k_deltaTime);
+
+		if (wasPickupPhoneKeyPressedThisFrame())
+		{
+			_cellphone.state = CELLPHONE_TALKING;
+			pushDialogue(_cellphone.dialogueToShowOnAnswer, { 42, 151 }, true, DIALOGUE_INDICATOR_LEFT_ALIGNED);
+			_cellphone.dialogueToShowOnAnswer = nullptr;
+		}
+		break;
+
+	case CELLPHONE_TALKING:
+		t->position = lerp(t->position, { 10, 152 }, 10 * k_deltaTime);
+		break;
+
+	default:
+		D_ASSERT(false, "Unsupported cellphone state");
+		break;
+	}
+
+#ifndef RELEASE_BUILD
 	// Destroy dialogue and reconstruct
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
-		_currentDialogue.destroyDialoge();
 		D_LOG(LOG, "Dialogue recreated");
-		setupDialogueToShow("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {490, 123});
+		pushDialogue("alo?", { 42, 151 }, true, DIALOGUE_INDICATOR_LEFT_ALIGNED);
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
 	{
 		skipDialogue();
 	}
+#endif // !RELEASE_BUILD
 }
 
-void DialogueSystem::skipDialogue()
+void UISystem::skipDialogue()
 {
 	// Pretend the dialogue already started a long time ago to allow opacity override
 	_currentDialogue.timeSinceDialogueStarted = 50.f;
@@ -1476,7 +1520,7 @@ void DialogueSystem::skipDialogue()
 	}
 }
 
-void DialogueSystem::render(RenderingSystem* renderingSystem)
+void UISystem::render(RenderingSystem* renderingSystem)
 {
 	// Prevent executing any code if there's nothing to print
 	if (!_currentDialogue.characters[0].isValid())
@@ -1504,7 +1548,10 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
-		dest = convertWorldRectToCameraSpace(dest);
+		if (!_currentDialogue.isScreenSpace)
+		{
+			dest = convertWorldRectToCameraSpace(dest);
+		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
@@ -1531,7 +1578,10 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = k_dialogueOutlineHeight;
 
-		dest = convertWorldRectToCameraSpace(dest);
+		if (!_currentDialogue.isScreenSpace)
+		{
+			dest = convertWorldRectToCameraSpace(dest);
+		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
@@ -1549,8 +1599,22 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		src.h = speechIndicatorSprite.spriteSize.y;
 
 		// Since the last thing drawn was the dialogue outline, use dest directly
-		float textCenterXPos = dest.x + (dest.w / 2);
-		dest.x = textCenterXPos;
+		switch (_currentDialogue.indicatorPositionType)
+		{
+			case DIALOGUE_INDICATOR_CENTERED:
+			{
+				float textCenterXPos = dest.x + (dest.w / 2);
+				dest.x = textCenterXPos;
+				break;
+			}
+			case DIALOGUE_INDICATOR_LEFT_ALIGNED:
+			{
+				float textLeftAlignedXPos = dest.x + 3;
+				dest.x = textLeftAlignedXPos;
+				break;
+			}
+		}
+
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
 		dest.w = k_speechIndicatorSize.x;
@@ -1606,7 +1670,10 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 		dest.w = c.size.x;
 		dest.h = c.size.y;
 
-		dest = convertWorldRectToCameraSpace(dest);
+		if (!_currentDialogue.isScreenSpace)
+		{
+			dest = convertWorldRectToCameraSpace(dest);
+		}
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 
@@ -1627,7 +1694,7 @@ void DialogueSystem::render(RenderingSystem* renderingSystem)
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 }
 
-Vec2 DialogueSystem::getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPosition)
+Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPosition)
 {
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
@@ -1679,13 +1746,15 @@ Vec2 DialogueSystem::getPositionToStartDrawingText(const char* textToShow, Vec2 
 	return topLeftPositionToStartDrawingText;
 }
 
-void DialogueSystem::setupDialogueToShow(const char* textToShow, Vec2 bottomCenterPosition)
+void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, bool isScreenSpace, DialogueIndicatorPosition indicatorPositionType)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
 		D_ASSERT(false, "Trying to print more characters per dialogue than allowed");
 		return;
 	}
+
+	_currentDialogue.destroyDialoge();
 
 	static SDL_FRect src;
 	static SDL_FRect dest;
@@ -1696,6 +1765,8 @@ void DialogueSystem::setupDialogueToShow(const char* textToShow, Vec2 bottomCent
 	float maxXDialogueSize = 0;
 
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, bottomCenterPosition);
+	_currentDialogue.isScreenSpace = isScreenSpace;
+	_currentDialogue.indicatorPositionType = indicatorPositionType;
 
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{

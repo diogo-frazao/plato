@@ -8,6 +8,7 @@ inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
 inline constexpr uint32_t k_playerEntityId = 0;
 inline constexpr uint32_t k_crosshairEntityId = 1;
+inline constexpr uint32_t k_cellphoneEntityId = 2;
 
 // General
 inline constexpr int32_t k_invalidId = -1;
