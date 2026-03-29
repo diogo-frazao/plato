@@ -194,30 +194,9 @@ public:
 		DIALOGUE_INDICATOR_LEFT_ALIGNED
 	};
 
-	enum DialgueSpriteType
-	{
-		DIALOGUE_BASE_SPRITE,
-		DIALOGUE_INDICATOR_SPRITE,
-		DIALOGUE_INDICATOR_OUTLINE_SPRITE,
-		DIALOGUE_SPRITE_COUNT
-	};
-
-	struct DialogueBoxSprite
-	{
-		// Sprite properties
-		AtlasType atlasType = GAME_ATLAS;
-		IVec2 atlasOffset { 0, 0 };
-		IVec2 spriteSize { 0, 0 };
-	};
-
 	struct Dialogue
 	{
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
-		DialogueBoxSprite dialogueSpeechSprites[DIALOGUE_SPRITE_COUNT] = {
-			{GAME_ATLAS, {323, 209}, {1,1}},  // Base sprite
-			{GAME_ATLAS, {323, 213}, {10,8}}, // Dialogue indicator
-			{GAME_ATLAS, {337, 213}, {10,8}}  // Dialogue indicator outline
-		};
 
 		// Changed at runtime
 		bool isScreenSpace = false;
