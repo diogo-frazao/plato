@@ -1455,12 +1455,11 @@ IVec2 k_spaceBetweenCharactersOnAtas = { 8, 8 };
 
 // If (0,0) speech bubble is drawn exactly at the beginning and end of text
 Vec2 k_dialogueOuterPadding = { 3.f, 3.f };
-float k_secondsToFadeInDialogueBox = 1.f;
+float k_secondsToStartShowingFirstCharacter = 0.3f;
 float k_dialogueOutlineHeight = 0.75f;
 
-
-float k_secondsToFadeInEachCharacter = 1.f;
-float k_secondsBetweenEachCharacter = 0.05f;
+float k_secondsToFadeInEachCharacter = 0.3f;
+float k_secondsBetweenEachCharacter = 0.055f;
 
 // Characters details (may change at runtime)
 uint8_t k_pixelsBetweenCharacters = 1;
@@ -1566,8 +1565,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
-	float fadeSpeed = 255.f / k_secondsToFadeInDialogueBox;
-	_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
+	//_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
+	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, dialogueBoxTargetXSize, 6.25 * k_deltaTime);
 
 	// Dialogue base
 	{
@@ -1580,7 +1580,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
 		dest.y = _currentDialogue.topLeftPosition.y - k_dialogueOuterPadding.y;
-		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+		dest.w = _currentDialogue.dialogueBoxDynamicXSize;
 		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
 		if (!_currentDialogue.isScreenSpace)
@@ -1591,7 +1591,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 
-		SDL_SetTextureAlphaMod(atlas, (uint8_t)_currentDialogue.dialogueBoxOpacity);
+		SDL_SetTextureAlphaMod(atlas, 255);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 		SDL_SetTextureAlphaMod(atlas, 255);
 	}
@@ -1610,7 +1610,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Since the last thing drawn was the dialogue box, use dest directly
 		float dialogueBoxEndYPosition = dest.y + dest.h;
 		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
-		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+		dest.w = _currentDialogue.dialogueBoxDynamicXSize;
 		dest.h = k_dialogueOutlineHeight;
 
 		if (!_currentDialogue.isScreenSpace)
@@ -1620,7 +1620,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_SetTextureAlphaMod(atlas, 255);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1638,7 +1638,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 			case DIALOGUE_INDICATOR_CENTERED:
 			{
-				float textCenterXPos = dest.x + (dest.w / 2);
+				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
 				dest.x = textCenterXPos;
 				break;
 			}
@@ -1661,7 +1661,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
-		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_SetTextureAlphaMod(atlas, 255);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1679,7 +1679,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(atlas, _currentDialogue.dialogueBoxOpacity);
+		SDL_SetTextureAlphaMod(atlas, 255);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1854,7 +1854,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, b
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.position = { dest.x, dest.y };
 		dialogueCharacter.size = { k_characterSize };
-		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToFadeInDialogueBox * 0.5f) + (k_secondsBetweenEachCharacter * i);
+		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * i);
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);

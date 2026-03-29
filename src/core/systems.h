@@ -203,8 +203,9 @@ public:
 		float timeSinceDialogueStarted = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		Vec2 topLeftPosition{ 0.f,0.f };
-		float dialogueBoxOpacity = 0.f;
 		DialogueIndicatorPosition indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
+		// Used to animate the dialogue box from left to right
+		float dialogueBoxDynamicXSize = 0.f;
 
 		void destroyDialoge()
 		{
@@ -220,9 +221,9 @@ public:
 
 			this->timeSinceDialogueStarted = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
-			this->dialogueBoxOpacity = 0.f;
 			this->isScreenSpace = false;
 			this->indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
+			this->dialogueBoxDynamicXSize = 0.f;
 		}
 	};
 
