@@ -1467,7 +1467,7 @@ uint8_t k_pixelsBetweenCharacters = 1;
 uint8_t k_pixelsBetweenNewLine = 5;
 uint16_t k_maxCharacterPerLine = 35;
 
-// Text related sizes
+// UI related sizes
 Vec2 k_characterSize = { k_characterSizeOnAtlas.x / k_UIToGameCanvasScale,
 						 k_characterSizeOnAtlas.y / k_UIToGameCanvasScale };
 Vec2 k_speechIndicatorSize = { k_dialogueSpeechSprites[DIALOGUE_INDICATOR_SPRITE].spriteSize.x / k_UIToGameCanvasScale,
@@ -1569,7 +1569,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	float fadeSpeed = 255.f / k_secondsToFadeInDialogueBox;
 	_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
 
-	SDL_FRect dialogueBaseSpriteDest;
 	// Dialogue base
 	{
 		DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
@@ -1583,7 +1582,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		dest.y = _currentDialogue.topLeftPosition.y - k_dialogueOuterPadding.y;
 		dest.w = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
-		dialogueBaseSpriteDest = dest;
 
 		if (!_currentDialogue.isScreenSpace)
 		{
@@ -1737,10 +1735,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = dialogueFinishedSprite.spriteSize.x;
 		src.h = dialogueFinishedSprite.spriteSize.y;
 
-		dest.x = dialogueBaseSpriteDest.x + dialogueBaseSpriteDest.w;
-		dest.y = dialogueBaseSpriteDest.y + dialogueBaseSpriteDest.h;
-		dest.w = 5 / 3.f;
-		dest.h = 3 / 3.f;
+		dest.x = _currentDialogue.topLeftPosition.x + _currentDialogue.dialogueBoxSize.x - 1;
+		dest.y = _currentDialogue.topLeftPosition.y + _currentDialogue.dialogueBoxSize.y;
+		dest.w = k_dialogueEndedIndicatorSize.x;
+		dest.h = k_dialogueEndedIndicatorSize.y;
+
+		// Since this is on the same texture as the font characters, we don't need to override the opacity
+		// This will make it only visible when the last character is also visible
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
@@ -1878,7 +1879,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, b
 	{
 		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
 		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
-		_currentDialogue.dialogueBoxSize.x += 5;
+		_currentDialogue.dialogueBoxSize.x += 3;
 
 		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
 		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;
