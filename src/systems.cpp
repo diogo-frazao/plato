@@ -1509,7 +1509,7 @@ void UISystem::update()
 		if (wasPickupPhoneKeyPressedThisFrame())
 		{
 			_cellphone.state = CELLPHONE_TALKING;
-			pushDialogue(_cellphone.dialogueToShowOnAnswer, { 42, 151 }, true, DIALOGUE_INDICATOR_LEFT_ALIGNED);
+			pushDialogue(_cellphone.dialogueToShowOnAnswer, { 42, 151 }, true, DIALOGUE_LEFT_ALIGNED);
 			_cellphone.dialogueToShowOnAnswer = nullptr;
 		}
 		break;
@@ -1528,7 +1528,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushDialogue("I heard a commotion downstairs.I just thought it was the pizza guy.Hah...", { 100, 151 }, true, DIALOGUE_INDICATOR_LEFT_ALIGNED);
+		pushDialogue("yes i can hear you don't worry", { 42, 151 }, true, DIALOGUE_LEFT_ALIGNED);
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
@@ -1634,15 +1634,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.h = speechIndicatorSprite.spriteSize.y;
 
 		// Since the last thing drawn was the dialogue outline, use dest directly
-		switch (_currentDialogue.indicatorPositionType)
+		switch (_currentDialogue.alignmentType)
 		{
-			case DIALOGUE_INDICATOR_CENTERED:
+			case DIALOGUE_CENTERED:
 			{
 				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
 				dest.x = textCenterXPos;
 				break;
 			}
-			case DIALOGUE_INDICATOR_LEFT_ALIGNED:
+			case DIALOGUE_LEFT_ALIGNED:
 			{
 				float textLeftAlignedXPos = dest.x + 3;
 				dest.x = textLeftAlignedXPos;
@@ -1750,7 +1750,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 }
 
-Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPosition)
+Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType)
 {
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
@@ -1793,16 +1793,31 @@ Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 bottom
 
 	Vec2 topLeftPositionToStartDrawingText;
 
-	// Go to left from center
-	topLeftPositionToStartDrawingText.x = bottomCenterPosition.x - (dialogueBoxSize.x / 2);
+	switch (alignmentType)
+	{
+	case DIALOGUE_CENTERED:
+		// Go to left from center. Position passed as argument must be bottomCenterPosition
+		topLeftPositionToStartDrawingText.x = position.x - (dialogueBoxSize.x / 2);
+		break;
+	case DIALOGUE_LEFT_ALIGNED:
+		// No need to change it. Position passed as arg must be bottomLeftPosition
+		topLeftPositionToStartDrawingText.x = position.x;
+		break;
+	}
+
 	// Go to top from bottom, also considering the dialogue outer padding and speech indicator size.
 	// This way, we can pass a pos bottomCenterPosition that corresponds to where the tip of the speech indicator will be
-	topLeftPositionToStartDrawingText.y = bottomCenterPosition.y - dialogueBoxSize.y - k_dialogueOuterPadding.y - k_speechIndicatorSize.y;
+	topLeftPositionToStartDrawingText.y = position.y - dialogueBoxSize.y - k_dialogueOuterPadding.y - k_speechIndicatorSize.y;
 
 	return topLeftPositionToStartDrawingText;
 }
 
-void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, bool isScreenSpace, DialogueIndicatorPosition indicatorPositionType)
+void UISystem::pushCellphoneDialogue(const char* text, Vec2 bottomLeftPosition)
+{
+	pushDialogue(text, bottomLeftPosition, true, DIALOGUE_LEFT_ALIGNED);
+}
+
+void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -1820,9 +1835,9 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, b
 	uint16_t charactersOnCurrentLineCounter = 0;
 	float maxXDialogueSize = 0;
 
-	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, bottomCenterPosition);
+	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, bottomCenterPosition, alignmentType);
 	_currentDialogue.isScreenSpace = isScreenSpace;
-	_currentDialogue.indicatorPositionType = indicatorPositionType;
+	_currentDialogue.alignmentType = alignmentType;
 
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{

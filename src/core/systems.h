@@ -188,10 +188,10 @@ public:
 		}
 	};
 
-	enum DialogueIndicatorPosition
+	enum DialogueAlignmentType
 	{
-		DIALOGUE_INDICATOR_CENTERED,
-		DIALOGUE_INDICATOR_LEFT_ALIGNED
+		DIALOGUE_CENTERED,
+		DIALOGUE_LEFT_ALIGNED
 	};
 
 	struct Dialogue
@@ -203,7 +203,7 @@ public:
 		float timeSinceDialogueStarted = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		Vec2 topLeftPosition{ 0.f,0.f };
-		DialogueIndicatorPosition indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
+		DialogueAlignmentType alignmentType = DIALOGUE_CENTERED;
 		// Used to animate the dialogue box from left to right
 		float dialogueBoxDynamicXSize = 0.f;
 
@@ -222,13 +222,14 @@ public:
 			this->timeSinceDialogueStarted = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
 			this->isScreenSpace = false;
-			this->indicatorPositionType = DIALOGUE_INDICATOR_CENTERED;
+			this->alignmentType = DIALOGUE_CENTERED;
 			this->dialogueBoxDynamicXSize = 0.f;
 		}
 	};
 
-	void pushDialogue(const char* text, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueIndicatorPosition indicatorPositionType = DIALOGUE_INDICATOR_CENTERED);
-	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 bottomCenterPos);
+	void pushCellphoneDialogue(const char* text, Vec2 bottomLeftPosition);
+	void pushDialogue(const char* text, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType);
 	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
