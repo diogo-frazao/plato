@@ -1427,6 +1427,7 @@ enum DialgueSpriteType
 	DIALOGUE_INDICATOR_SPRITE,
 	DIALOGUE_INDICATOR_OUTLINE_SPRITE,
 	DIALOGUE_FINISHED_INDICATOR_SPRITE,
+	DIALOGUE_OPTION_BORDER_SPRITE,
 	DIALOGUE_SPRITE_COUNT
 };
 
@@ -1434,7 +1435,8 @@ DialogueBoxSprite k_dialogueSpeechSprites[DIALOGUE_SPRITE_COUNT] = {
 	{FONT_ATLAS, {1, 32}, {1,1}},   // Base sprite
 	{FONT_ATLAS, {79, 1}, {10,8}},  // Dialogue indicator
 	{FONT_ATLAS, {93, 1}, {10,8}},  // Dialogue indicator outline
-	{FONT_ATLAS, {1, 1},  {5, 3}}	// Dialogue finished indicator
+	{FONT_ATLAS, {1, 1},  {5, 3}},	// Dialogue finished indicator
+	{FONT_ATLAS, {1, 7},  {4, 22}}	// Dialogue option border
 };
 
 // Things I noticed about the font:
@@ -1473,6 +1475,8 @@ Vec2 k_speechIndicatorSize = { k_dialogueSpeechSprites[DIALOGUE_INDICATOR_SPRITE
 							   k_dialogueSpeechSprites[DIALOGUE_INDICATOR_SPRITE].spriteSize.y / k_UIToGameCanvasScale };
 Vec2 k_dialogueEndedIndicatorSize = { k_dialogueSpeechSprites[DIALOGUE_FINISHED_INDICATOR_SPRITE].spriteSize.x / k_UIToGameCanvasScale,
 							          k_dialogueSpeechSprites[DIALOGUE_FINISHED_INDICATOR_SPRITE].spriteSize.y / k_UIToGameCanvasScale };
+Vec2 k_dialogueOptionBorderSize = { k_dialogueSpeechSprites[DIALOGUE_OPTION_BORDER_SPRITE].spriteSize.x / k_UIToGameCanvasScale,
+									  k_dialogueSpeechSprites[DIALOGUE_OPTION_BORDER_SPRITE].spriteSize.y / k_UIToGameCanvasScale };
 
 void UISystem::start()
 {
@@ -1771,9 +1775,12 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		return;
 	}
 
+	Vec2 dialogueOptionsOuterPadding{ 1.5f, 2.5f };
+	// Take the position of the first character since it's where we start
+	Vec2 topLeftDialogueOptionPosition = _dialogueOptions.characters[0].position;
+
 	// Dialogue option base sprite
 	{
-		Vec2 dialogueOptionsOuterPadding{ 3.f, 3.f };
 
 		// Reuse the same texture since it's a white 1x1 pixel
 		DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
@@ -1783,18 +1790,46 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		// Take the position of the first character since it's where we start
-		Vec2 topLeftDialogueOptionPosition = _dialogueOptions.characters[0].position;
-
 		dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
 		dest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
 		dest.w = _dialogueOptions.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
 		dest.h = _dialogueOptions.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, 9, 7, 19);
+		SDL_SetTextureColorMod(atlas, 23, 9, 31);
 
 		SDL_SetTextureAlphaMod(atlas, 255);
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+	}
+
+	// Dialogue option border (letf + right)
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& borderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_BORDER_SPRITE];
+
+		src.x = borderSprite.atlasOffset.x;
+		src.y = borderSprite.atlasOffset.y;
+		src.w = borderSprite.spriteSize.x;
+		src.h = borderSprite.spriteSize.y;
+
+		// First draw the right side, to reuse dest (since last thing drawn was the dialogue box)
+		dest.x = dest.x + dest.w;
+		dest.y = dest.y;
+		dest.w = k_dialogueOptionBorderSize.x;
+		dest.h = k_dialogueOptionBorderSize.y;
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 23, 9, 31);
+		SDL_SetTextureAlphaMod(atlas, 255);
+
+		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
+		
+		// Now draw the left border
+		dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
+		dest.y = dest.y;
+		dest.w = k_dialogueOptionBorderSize.x;
+		dest.h = k_dialogueOptionBorderSize.y;
+		SDL_SetTextureColorMod(atlas, 23, 9, 31);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
