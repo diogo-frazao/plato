@@ -194,6 +194,34 @@ public:
 		DIALOGUE_LEFT_ALIGNED
 	};
 
+	struct DialogueOption
+	{
+		DialogueCharacter characters[k_maxCharactersPerDialogue];
+
+		// Changed at runtime
+		Vec2 dialogueBoxSize{ 0.f, 0.f };
+
+		void destroyDialogueOption()
+		{
+			for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+			{
+				if (!characters[i].isValid())
+				{
+					break;
+				}
+
+				this->characters[i].reset();
+			}
+
+			this->dialogueBoxSize = {0.f, 0.f};
+		}
+
+		bool isValid()
+		{
+			return characters[0].isValid();
+		}
+	};
+
 	struct Dialogue
 	{
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
@@ -232,7 +260,8 @@ public:
 	};
 
 	void pushCellphoneDialogue(const char* text);
-	void pushDialogue(const char* text, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+	void pushDialogue(const char* text, bool hasOptions, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+
 	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType);
 	void skipDialogue();
 
@@ -242,6 +271,7 @@ public:
 
 	//TODO: Improve later
 	Dialogue _currentDialogue;
+	DialogueOption _dialogueOptions;
 
 	enum CellphoneState
 	{

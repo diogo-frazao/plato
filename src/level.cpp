@@ -338,7 +338,7 @@ void ECSLevel::start()
         _levelCamera.position = { 540, 90.f };
     }
 
-    _uiSystem.pushDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", {35, 100});
+    _uiSystem.pushDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", false, {35, 100});
 }
 
 void ECSLevel::update()
@@ -448,6 +448,10 @@ void ECSLevel::update()
 void ECSLevel::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
+
+    // TODO: see if it causes issues. this will overlap crosshair alpha blending
+    Entity& crosshair = getEntityById(k_crosshairEntityId);
+    getComponentFromEntity<SpriteComponent>(crosshair)->color.a = s_isImGuiOpen ? 0 : 255;
 
     if (!s_isImGuiOpen)
     {
