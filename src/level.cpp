@@ -418,9 +418,14 @@ void ECSLevel::update()
             float k_timeToShowCellphoneFirstTime = 1.f;
             if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
             {
-                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer("alo?");
+                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer("halo?");
                 invalidateTimer(cellphoneCallTutorialTimer);
             }
+        }
+
+        if (_uiSystem._currentDialogue.hasEnded)
+        {
+            _uiSystem.pushCellphoneDialogue("halloooo? rostov?");
         }
     }
 

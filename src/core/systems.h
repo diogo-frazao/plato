@@ -199,8 +199,10 @@ public:
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
 
 		// Changed at runtime
+		bool hasEnded = false;
 		bool isScreenSpace = false;
 		float timeSinceDialogueStarted = 0.f;
+		float timeSinceFinalCharacterWasDrawn = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		Vec2 topLeftPosition{ 0.f,0.f };
 		DialogueAlignmentType alignmentType = DIALOGUE_CENTERED;
@@ -219,7 +221,9 @@ public:
 				this->characters[i].reset();
 			}
 
+			this->hasEnded = false;
 			this->timeSinceDialogueStarted = 0.f;
+			this->timeSinceFinalCharacterWasDrawn = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
 			this->isScreenSpace = false;
 			this->alignmentType = DIALOGUE_CENTERED;
@@ -227,7 +231,7 @@ public:
 		}
 	};
 
-	void pushCellphoneDialogue(const char* text, Vec2 bottomLeftPosition);
+	void pushCellphoneDialogue(const char* text);
 	void pushDialogue(const char* text, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
 	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType);
 	void skipDialogue();

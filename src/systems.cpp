@@ -1431,9 +1431,9 @@ enum DialgueSpriteType
 };
 
 DialogueBoxSprite k_dialogueSpeechSprites[DIALOGUE_SPRITE_COUNT] = {
-	{GAME_ATLAS, {323, 209}, {1,1}},  // Base sprite
-	{GAME_ATLAS, {323, 213}, {10,8}}, // Dialogue indicator
-	{GAME_ATLAS, {337, 213}, {10,8}},  // Dialogue indicator outline
+	{FONT_ATLAS, {1, 32}, {1,1}},  // Base sprite
+	{FONT_ATLAS, {79, 1}, {10,8}}, // Dialogue indicator
+	{FONT_ATLAS, {93, 1}, {10,8}},  // Dialogue indicator outline
 	{FONT_ATLAS, {1,1}, {5, 3}}		  // Dialogue finished indicator
 };
 
@@ -1509,7 +1509,7 @@ void UISystem::update()
 		if (wasPickupPhoneKeyPressedThisFrame())
 		{
 			_cellphone.state = CELLPHONE_TALKING;
-			pushDialogue(_cellphone.dialogueToShowOnAnswer, { 42, 151 }, true, DIALOGUE_LEFT_ALIGNED);
+			pushCellphoneDialogue(_cellphone.dialogueToShowOnAnswer);
 			_cellphone.dialogueToShowOnAnswer = nullptr;
 		}
 		break;
@@ -1533,8 +1533,16 @@ void UISystem::update()
 
 	if (wasSkipDialogueKeyPressedThisFrame())
 	{
-		skipDialogue();
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.f)
+		{
+			_currentDialogue.hasEnded = true;
+		}
+		else
+		{
+			skipDialogue();
+		}
 	}
+
 #endif // !RELEASE_BUILD
 }
 
@@ -1684,6 +1692,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Draw each character
+	bool hasDialogueFinished = false;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
 		DialogueCharacter& c = _currentDialogue.characters[i];
@@ -1692,6 +1701,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Since it means we reached the end of the dialogue
 		if (!c.isValid())
 		{
+			int lastValidCharacterIndex = max(i - 1, 0);
+			DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
+			hasDialogueFinished = lastValidCharacter.opacity > 200;
 			break;
 		}
 
@@ -1748,6 +1760,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
+
+	if (hasDialogueFinished)
+	{
+		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
+	}
 }
 
 Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType)
@@ -1812,9 +1829,10 @@ Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 positi
 	return topLeftPositionToStartDrawingText;
 }
 
-void UISystem::pushCellphoneDialogue(const char* text, Vec2 bottomLeftPosition)
+void UISystem::pushCellphoneDialogue(const char* text)
 {
-	pushDialogue(text, bottomLeftPosition, true, DIALOGUE_LEFT_ALIGNED);
+	Vec2 k_positionToDrawCellphoneDialogue = { 42, 151 };
+	pushDialogue(text, k_positionToDrawCellphoneDialogue, true, DIALOGUE_LEFT_ALIGNED);
 }
 
 void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, bool isScreenSpace, DialogueAlignmentType alignmentType)
