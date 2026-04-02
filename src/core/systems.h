@@ -259,8 +259,27 @@ public:
 		}
 	};
 
-	void pushCellphoneDialogue(const char* text);
-	void pushDialogue(const char* text, bool hasOptions, Vec2 bottomCenterPosition, bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+	struct DialogueOptionsTexts
+	{
+		const char* options[k_maxDialogueOptions];
+
+		DialogueOptionsTexts()
+		{
+			options[0] = nullptr;
+			options[1] = nullptr;
+			options[2] = nullptr;
+		}
+
+		DialogueOptionsTexts(const char* opt1, const char* opt2 = nullptr, const char* opt3 = nullptr)
+		{
+			options[0] = opt1;
+			options[1] = opt2;
+			options[2] = opt3;
+		}
+	};
+
+	void pushCellphoneDialogue(const char* text, const DialogueOptionsTexts& dialogueOptions = {});
+	void pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, const DialogueOptionsTexts& dialogueOptions = {},bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
 
 	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType);
 	void skipDialogue();

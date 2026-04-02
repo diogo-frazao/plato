@@ -337,8 +337,6 @@ void ECSLevel::start()
         _renderingSystem.setAmbientColor(138, 138, 138);
         _levelCamera.position = { 540, 90.f };
     }
-
-    _uiSystem.pushDialogue("I heard a commotion downstairs. I just thought it was the pizza guy. Hah...", false, {35, 100});
 }
 
 void ECSLevel::update()
@@ -425,7 +423,7 @@ void ECSLevel::update()
 
         if (_uiSystem._currentDialogue.hasEnded)
         {
-            _uiSystem.pushCellphoneDialogue("halloooo? rostov?");
+            _uiSystem.pushCellphoneDialogue("halloooo? rostov?", {"bye bye"});
         }
     }
 

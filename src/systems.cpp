@@ -1532,7 +1532,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushDialogue("yes yes of course", true, { 20, 151 }, true, DIALOGUE_LEFT_ALIGNED);
+		pushDialogue("yes yes of course", { 20, 151 }, {}, true, DIALOGUE_LEFT_ALIGNED);
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
@@ -1927,13 +1927,13 @@ Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 positi
 	return topLeftPositionToStartDrawingText;
 }
 
-void UISystem::pushCellphoneDialogue(const char* text)
+void UISystem::pushCellphoneDialogue(const char* text, const DialogueOptionsTexts& dialogueOptions)
 {
 	Vec2 k_positionToDrawCellphoneDialogue = { 20, 151 };
-	pushDialogue(text, false, k_positionToDrawCellphoneDialogue, true, DIALOGUE_LEFT_ALIGNED);
+	pushDialogue(text, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
 }
 
-void UISystem::pushDialogue(const char* textToShow, bool hasOptions, Vec2 bottomCenterPosition, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, const DialogueOptionsTexts& dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -2018,23 +2018,24 @@ void UISystem::pushDialogue(const char* textToShow, bool hasOptions, Vec2 bottom
 	}
 
 	// Dialogue options
-	/*if (!hasOptions)
+	bool hasDialogueOptions = (dialogueOptions.options[0] != nullptr);
+	if (!hasDialogueOptions)
 	{
 		return;
-	}*/
+	}
 
 	_dialogueOptions.destroyDialogueOption();
 
-	const char* exampleText = "this is an example of an option";
+	const char* optionText = dialogueOptions.options[0];
 
 	currentHorizontalSpaceBetweenCharacters = 0;
 	currentVerticalSpaceBetweenCharacters = 0;
 	charactersOnCurrentLineCounter = 0;
 	maxXDialogueSize = 0;
 
-	for (int i = 0; exampleText[i] != '\0'; ++i)
+	for (int i = 0; optionText[i] != '\0'; ++i)
 	{
-		char c = exampleText[i];
+		char c = optionText[i];
 		uint16_t atlasIndex = _asciiToAtlasIndex[c];
 
 		bool isSpaceCharacter = (c == 32);
