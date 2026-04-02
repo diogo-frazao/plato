@@ -288,7 +288,7 @@ public:
 
 	//TODO: Improve later
 	Dialogue _currentDialogue;
-	DialogueOption _dialogueOptions;
+	DialogueOption _dialogueOptions[k_maxDialogueOptions];
 
 	enum CellphoneState
 	{

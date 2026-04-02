@@ -423,7 +423,7 @@ void ECSLevel::update()
 
         if (_uiSystem._currentDialogue.hasEnded)
         {
-            _uiSystem.pushCellphoneDialogue("halloooo? rostov?", {"I heard a commotion dowstairs and it's"});
+            _uiSystem.pushCellphoneDialogue("halloooo? rostov?", {"yes yes hm hm!!", "I heard a commotion dowstairs and it's", "mamaco peludo"});
         }
     }
 

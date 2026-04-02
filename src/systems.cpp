@@ -1770,98 +1770,109 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
 
-	if (!_dialogueOptions.isValid())
+	// Dialogue Options
+	bool hasAtleastOneDialogueOption = _dialogueOptions[0].isValid();
+	if (!hasAtleastOneDialogueOption)
 	{
 		return;
 	}
 
 	Vec2 dialogueOptionsOuterPadding{ 1.5f, 2.5f };
-	// Take the position of the first character since it's where we start
-	Vec2 topLeftDialogueOptionPosition = _dialogueOptions.characters[0].position;
 
-	// Dialogue option base sprite
+	for (DialogueOption& dialogueOption : _dialogueOptions)
 	{
-
-		// Reuse the same texture since it's a white 1x1 pixel
-		DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
-
-		src.x = speechBubbleSprite.atlasOffset.x;
-		src.y = speechBubbleSprite.atlasOffset.y;
-		src.w = speechBubbleSprite.spriteSize.x;
-		src.h = speechBubbleSprite.spriteSize.y;
-
-		dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
-		dest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
-		dest.w = _dialogueOptions.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
-		dest.h = _dialogueOptions.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
-
-		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, 23, 9, 31);
-
-		SDL_SetTextureAlphaMod(atlas, 255);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
-	}
-
-	// Dialogue option border (letf + right)
-	{
-		// Reuse the same texture since it's a white 1x1 pixel
-		DialogueBoxSprite& borderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_BORDER_SPRITE];
-
-		src.x = borderSprite.atlasOffset.x;
-		src.y = borderSprite.atlasOffset.y;
-		src.w = borderSprite.spriteSize.x;
-		src.h = borderSprite.spriteSize.y;
-
-		// First draw the right side, to reuse dest (since last thing drawn was the dialogue box)
-		dest.x = dest.x + dest.w;
-		dest.y = dest.y;
-		dest.w = k_dialogueOptionBorderSize.x;
-		dest.h = k_dialogueOptionBorderSize.y;
-
-		SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, 23, 9, 31);
-		SDL_SetTextureAlphaMod(atlas, 255);
-
-		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
-		
-		// Now draw the left border
-		dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
-		dest.y = dest.y;
-		dest.w = k_dialogueOptionBorderSize.x;
-		dest.h = k_dialogueOptionBorderSize.y;
-		SDL_SetTextureColorMod(atlas, 23, 9, 31);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
-	}
-
-	// Dialogue options characters
-	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
-	{
-		DialogueCharacter& c = _dialogueOptions.characters[i];
-
-		// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
-		// Since it means we reached the end of the dialogue
-		if (!c.isValid())
+		if (!dialogueOption.isValid())
 		{
-			break;
+			continue;
 		}
 
-		src.x = c.atlasOffset.x;
-		src.y = c.atlasOffset.y;
-		src.w = k_characterSizeOnAtlas.x;
-		src.h = k_characterSizeOnAtlas.y;
+		// Take the position of the first character since it's where we start
+		Vec2 topLeftDialogueOptionPosition = dialogueOption.characters[0].position;
 
-		dest.x = c.position.x;
-		dest.y = c.position.y;
-		dest.w = c.size.x;
-		dest.h = c.size.y;
+		// Dialogue option base sprite
+		{
 
-		c.opacity = 255.f;
+			// Reuse the same texture since it's a white 1x1 pixel
+			DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
 
-		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
+			src.x = speechBubbleSprite.atlasOffset.x;
+			src.y = speechBubbleSprite.atlasOffset.y;
+			src.w = speechBubbleSprite.spriteSize.x;
+			src.h = speechBubbleSprite.spriteSize.y;
 
-		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
-		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
-		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
+			dest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
+			dest.w = dialogueOption.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
+			dest.h = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+
+			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
+			SDL_SetTextureColorMod(atlas, 23, 9, 31);
+
+			SDL_SetTextureAlphaMod(atlas, 255);
+			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		}
+
+		// Dialogue option border (letf + right)
+		{
+			// Reuse the same texture since it's a white 1x1 pixel
+			DialogueBoxSprite& borderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_BORDER_SPRITE];
+
+			src.x = borderSprite.atlasOffset.x;
+			src.y = borderSprite.atlasOffset.y;
+			src.w = borderSprite.spriteSize.x;
+			src.h = borderSprite.spriteSize.y;
+
+			// First draw the right side, to reuse dest (since last thing drawn was the dialogue box)
+			dest.x = dest.x + dest.w;
+			dest.y = dest.y;
+			dest.w = k_dialogueOptionBorderSize.x;
+			dest.h = k_dialogueOptionBorderSize.y;
+
+			SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
+			SDL_SetTextureColorMod(atlas, 23, 9, 31);
+			SDL_SetTextureAlphaMod(atlas, 255);
+
+			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
+
+			// Now draw the left border
+			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
+			dest.y = dest.y;
+			dest.w = k_dialogueOptionBorderSize.x;
+			dest.h = k_dialogueOptionBorderSize.y;
+			SDL_SetTextureColorMod(atlas, 23, 9, 31);
+			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		}
+
+		// Dialogue options characters
+		for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+		{
+			DialogueCharacter& c = dialogueOption.characters[i];
+
+			// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
+			// Since it means we reached the end of the dialogue
+			if (!c.isValid())
+			{
+				break;
+			}
+
+			src.x = c.atlasOffset.x;
+			src.y = c.atlasOffset.y;
+			src.w = k_characterSizeOnAtlas.x;
+			src.h = k_characterSizeOnAtlas.y;
+
+			dest.x = c.position.x;
+			dest.y = c.position.y;
+			dest.w = c.size.x;
+			dest.h = c.size.y;
+
+			c.opacity = 255.f;
+
+			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
+
+			SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
+			SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
+			SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+		}
 	}
 }
 
@@ -1935,7 +1946,7 @@ void UISystem::pushCellphoneDialogue(const char* text, const DialogueOptionsText
 	pushDialogue(text, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
 }
 
-void UISystem::pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptionsText, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -2020,82 +2031,89 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 position, const Dialogu
 	}
 
 	// Dialogue options
-	bool hasDialogueOptions = (dialogueOptions.options[0] != nullptr);
+	bool hasDialogueOptions = (dialogueOptionsText.options[0] != nullptr);
 	if (!hasDialogueOptions)
 	{
 		return;
 	}
 
-	_dialogueOptions.destroyDialogueOption();
+	Vec2 dialogueOptionsBottomCenterPositions[k_maxDialogueOptions] = { { k_baseGameWidth * 0.5f, 155.f } , { k_baseGameWidth * 0.5f, 165.f } , { k_baseGameWidth * 0.5f, 175.f } };
 
-	const char* optionText = dialogueOptions.options[0];
-
-	Vec2 bottomCenterPositionForFirstOption = { k_baseGameWidth * 0.5f, 155.f };
-	Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, bottomCenterPositionForFirstOption, DIALOGUE_CENTERED);
-
-	currentHorizontalSpaceBetweenCharacters = 0;
-	currentVerticalSpaceBetweenCharacters = 0;
-	charactersOnCurrentLineCounter = 0;
-	maxXDialogueSize = 0;
-
-	for (int i = 0; optionText[i] != '\0'; ++i)
+	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
 	{
-		char c = optionText[i];
-		uint16_t atlasIndex = _asciiToAtlasIndex[c];
-
-		bool isSpaceCharacter = (c == 32);
-		if (atlasIndex == 0 && !isSpaceCharacter)
+		_dialogueOptions[optionIndex].destroyDialogueOption();
+		if (dialogueOptionsText.options[optionIndex] == nullptr)
 		{
-			D_LOG(ERROR, "Trying to print unsupported character: %c", c);
-			// Continue to prevent printing unsupported characters as a space character
 			continue;
 		}
 
-		uint8_t column = atlasIndex % k_maxCharactersPerRowOnAtlas;
-		uint8_t row = floor(atlasIndex / k_maxCharactersPerRowOnAtlas);
+		currentHorizontalSpaceBetweenCharacters = 0;
+		currentVerticalSpaceBetweenCharacters = 0;
+		charactersOnCurrentLineCounter = 0;
+		maxXDialogueSize = 0;
 
-		src.x = k_firstCharacterOnAtlasOffset.x + (k_spaceBetweenCharactersOnAtas.x * column);
-		src.y = k_firstCharacterOnAtlasOffset.y + (k_spaceBetweenCharactersOnAtas.y * row);
-		src.w = k_characterSizeOnAtlas.x;
-		src.h = k_characterSizeOnAtlas.y;
+		const char* optionText = dialogueOptionsText.options[optionIndex];
+		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsBottomCenterPositions[optionIndex], DIALOGUE_CENTERED);
 
-		dest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
-		dest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
-		dest.w = k_characterSize.x;
-		dest.h = k_characterSize.y;
-
-		DialogueCharacter& dialogueCharacter = _dialogueOptions.characters[i];
-		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
-		dialogueCharacter.position = { dest.x, dest.y };
-		dialogueCharacter.size = { k_characterSize };
-		dialogueCharacter.secondsToStartShowingCharacter = 0.2f;
-
-		// We only break to a new line if it's a space character. This avoids breaking words in half
-		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
-		if (shouldBreakToNewLine)
+		for (int i = 0; optionText[i] != '\0'; ++i)
 		{
-			if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
+			char c = optionText[i];
+			uint16_t atlasIndex = _asciiToAtlasIndex[c];
+
+			bool isSpaceCharacter = (c == 32);
+			if (atlasIndex == 0 && !isSpaceCharacter)
 			{
-				maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
+				D_LOG(ERROR, "Trying to print unsupported character: %c", c);
+				// Continue to prevent printing unsupported characters as a space character
+				continue;
 			}
 
-			currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
-			currentHorizontalSpaceBetweenCharacters = 0;
-			charactersOnCurrentLineCounter = 0;
-			continue;
+			uint8_t column = atlasIndex % k_maxCharactersPerRowOnAtlas;
+			uint8_t row = floor(atlasIndex / k_maxCharactersPerRowOnAtlas);
+
+			src.x = k_firstCharacterOnAtlasOffset.x + (k_spaceBetweenCharactersOnAtas.x * column);
+			src.y = k_firstCharacterOnAtlasOffset.y + (k_spaceBetweenCharactersOnAtas.y * row);
+			src.w = k_characterSizeOnAtlas.x;
+			src.h = k_characterSizeOnAtlas.y;
+
+			dest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
+			dest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
+			dest.w = k_characterSize.x;
+			dest.h = k_characterSize.y;
+
+			DialogueCharacter& dialogueCharacter = _dialogueOptions[optionIndex].characters[i];
+			dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
+			dialogueCharacter.position = { dest.x, dest.y };
+			dialogueCharacter.size = { k_characterSize };
+			dialogueCharacter.secondsToStartShowingCharacter = 0.2f;
+
+			// We only break to a new line if it's a space character. This avoids breaking words in half
+			bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+			if (shouldBreakToNewLine)
+			{
+				if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
+				{
+					maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
+				}
+
+				currentVerticalSpaceBetweenCharacters += k_pixelsBetweenNewLine;
+				currentHorizontalSpaceBetweenCharacters = 0;
+				charactersOnCurrentLineCounter = 0;
+				continue;
+			}
+
+			// If we won't break to a new line, add spacing between the characters
+			currentHorizontalSpaceBetweenCharacters += k_characterSize.x + k_pixelsBetweenCharacters;
 		}
 
-		// If we won't break to a new line, add spacing between the characters
-		currentHorizontalSpaceBetweenCharacters += k_characterSize.x + k_pixelsBetweenCharacters;
-	}
+		// Dialogue option speech bubble
+		{
+			bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
+			_dialogueOptions[optionIndex].dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
 
-	// Dialogue option speech bubble
-	{
-		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
-		_dialogueOptions.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
-
-		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
-		_dialogueOptions.dialogueBoxSize.y = yPosWhereLastLineEnds;
+			float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
+			_dialogueOptions[optionIndex].dialogueBoxSize.y = yPosWhereLastLineEnds;
+		}
 	}
 
 }
