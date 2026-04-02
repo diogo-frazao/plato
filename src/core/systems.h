@@ -158,6 +158,12 @@ public:
 	}
 };
 
+enum DialogueAlignmentType
+{
+	DIALOGUE_CENTERED,
+	DIALOGUE_LEFT_ALIGNED
+};
+
 class UISystem
 {
 public:
@@ -186,12 +192,6 @@ public:
 			this->secondsToStartShowingCharacter = 0.f;
 			this->opacity = 0.f;
 		}
-	};
-
-	enum DialogueAlignmentType
-	{
-		DIALOGUE_CENTERED,
-		DIALOGUE_LEFT_ALIGNED
 	};
 
 	struct DialogueOption
@@ -279,9 +279,7 @@ public:
 	};
 
 	void pushCellphoneDialogue(const char* text, const DialogueOptionsTexts& dialogueOptions = {});
-	void pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, const DialogueOptionsTexts& dialogueOptions = {},bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
-
-	Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType);
+	void pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptions = {},bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
 	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.

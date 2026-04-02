@@ -1865,7 +1865,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 }
 
-Vec2 UISystem::getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType)
+// Dpending on alignmentType the position should be different things.
+// IF it's CENTERED, position should be bottom center pos. If it's left aligned, should be bottom left pos.
+Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType)
 {
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
@@ -1933,7 +1935,7 @@ void UISystem::pushCellphoneDialogue(const char* text, const DialogueOptionsText
 	pushDialogue(text, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
 }
 
-void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, const DialogueOptionsTexts& dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
@@ -1951,7 +1953,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, c
 	uint16_t charactersOnCurrentLineCounter = 0;
 	float maxXDialogueSize = 0;
 
-	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, bottomCenterPosition, alignmentType);
+	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;
 
@@ -2028,6 +2030,9 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, c
 
 	const char* optionText = dialogueOptions.options[0];
 
+	Vec2 bottomCenterPositionForFirstOption = { k_baseGameWidth * 0.5f, 155.f };
+	Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, bottomCenterPositionForFirstOption, DIALOGUE_CENTERED);
+
 	currentHorizontalSpaceBetweenCharacters = 0;
 	currentVerticalSpaceBetweenCharacters = 0;
 	charactersOnCurrentLineCounter = 0;
@@ -2054,8 +2059,8 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 bottomCenterPosition, c
 		src.w = k_characterSizeOnAtlas.x;
 		src.h = k_characterSizeOnAtlas.y;
 
-		dest.x = 100 + currentHorizontalSpaceBetweenCharacters;
-		dest.y = 148 + currentVerticalSpaceBetweenCharacters;
+		dest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
+		dest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
 		dest.w = k_characterSize.x;
 		dest.h = k_characterSize.y;
 
