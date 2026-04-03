@@ -1487,12 +1487,6 @@ void UISystem::start()
 	}
 }
 
-void UISystem::receivePhoneCallAndPushDialogueOnAnswer(char* textToShow)
-{
-	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
-	_cellphone.dialogueToShowOnAnswer = textToShow;
-}
-
 void UISystem::update()
 {
 	if (_cellphone.entity == nullptr)
@@ -1513,8 +1507,8 @@ void UISystem::update()
 		if (wasPickupPhoneKeyPressedThisFrame())
 		{
 			_cellphone.state = CELLPHONE_TALKING;
-			pushCellphoneDialogue(_cellphone.dialogueToShowOnAnswer);
-			_cellphone.dialogueToShowOnAnswer = nullptr;
+			pushCellphoneDialogue(_cellphone.textToShowOnAnswer);
+			_cellphone.textToShowOnAnswer = INVALID_TEXT;
 		}
 		break;
 
@@ -1532,7 +1526,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushDialogue("yes yes of course", { 20, 151 }, {}, true, DIALOGUE_LEFT_ALIGNED);
+		pushDialogue(DEBUG_TEXT, { 20, 151 }, {}, true, DIALOGUE_LEFT_ALIGNED);
 	}
 
 	if (wasSkipDialogueKeyPressedThisFrame())
@@ -1940,14 +1934,21 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 	return topLeftPositionToStartDrawingText;
 }
 
-void UISystem::pushCellphoneDialogue(const char* text, const DialogueOptionsTexts& dialogueOptions)
+void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
 {
-	Vec2 k_positionToDrawCellphoneDialogue = { 20, 151 };
-	pushDialogue(text, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
+	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
+	_cellphone.textToShowOnAnswer = dialogueTextType;
 }
 
-void UISystem::pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptionsText, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
+	Vec2 k_positionToDrawCellphoneDialogue = { 20, 151 };
+	pushDialogue(dialogueTextType, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
+}
+
+void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+{
+	const char* textToShow = getText(dialogueTextType);
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
 		D_ASSERT(false, "Trying to print more characters per dialogue than allowed");
@@ -2031,7 +2032,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 position, const Dialogu
 	}
 
 	// Dialogue options
-	bool hasDialogueOptions = (dialogueOptionsText.options[0] != nullptr);
+	bool hasDialogueOptions = (dialogueOptions.options[0] != INVALID_TEXT);
 	if (!hasDialogueOptions)
 	{
 		return;
@@ -2042,7 +2043,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 position, const Dialogu
 	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
 	{
 		_dialogueOptions[optionIndex].destroyDialogueOption();
-		if (dialogueOptionsText.options[optionIndex] == nullptr)
+		if (dialogueOptions.options[optionIndex] == INVALID_TEXT)
 		{
 			continue;
 		}
@@ -2052,7 +2053,7 @@ void UISystem::pushDialogue(const char* textToShow, Vec2 position, const Dialogu
 		charactersOnCurrentLineCounter = 0;
 		maxXDialogueSize = 0;
 
-		const char* optionText = dialogueOptionsText.options[optionIndex];
+		const char* optionText = getText(dialogueOptions.options[optionIndex]);
 		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsBottomCenterPositions[optionIndex], DIALOGUE_CENTERED);
 
 		for (int i = 0; optionText[i] != '\0'; ++i)

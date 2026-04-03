@@ -5,6 +5,7 @@
 #include "SDL3/SDL_pixels.h"
 #include "SDL3/SDL_rect.h"
 #include <stdint.h>
+#include "text.h"
 
 class ECSLevel;
 class MovementComponent;
@@ -259,18 +260,11 @@ public:
 		}
 	};
 
-	struct DialogueOptionsTexts
+	struct DialogueOptionsDTO
 	{
-		const char* options[k_maxDialogueOptions];
+		TextType options[k_maxDialogueOptions];
 
-		DialogueOptionsTexts()
-		{
-			options[0] = nullptr;
-			options[1] = nullptr;
-			options[2] = nullptr;
-		}
-
-		DialogueOptionsTexts(const char* opt1, const char* opt2 = nullptr, const char* opt3 = nullptr)
+		DialogueOptionsDTO(TextType opt1 = INVALID_TEXT, TextType opt2 = INVALID_TEXT, TextType opt3 = INVALID_TEXT)
 		{
 			options[0] = opt1;
 			options[1] = opt2;
@@ -278,8 +272,10 @@ public:
 		}
 	};
 
-	void pushCellphoneDialogue(const char* text, const DialogueOptionsTexts& dialogueOptions = {});
-	void pushDialogue(const char* textToShow, Vec2 position, const DialogueOptionsTexts& dialogueOptions = {},bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+	void pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions = {},bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
+	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
+
 	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
@@ -301,9 +297,8 @@ public:
 	{
 		Entity* entity = nullptr;
 		CellphoneState state = CELLPHONE_NOT_VISIBLE_STATE;
-		char* dialogueToShowOnAnswer = nullptr;
+		TextType textToShowOnAnswer = INVALID_TEXT;
 	};
 
-	void receivePhoneCallAndPushDialogueOnAnswer(char* textToShow);
 	Cellphone _cellphone;
 };

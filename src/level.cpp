@@ -416,14 +416,14 @@ void ECSLevel::update()
             float k_timeToShowCellphoneFirstTime = 1.f;
             if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
             {
-                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer("halo?");
+                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ROSTOV_DAD_PHONE_1);
                 invalidateTimer(cellphoneCallTutorialTimer);
             }
         }
 
         if (_uiSystem._currentDialogue.hasEnded)
         {
-            _uiSystem.pushCellphoneDialogue("halloooo? rostov?", {"yes yes hm hm!!", "I heard a commotion dowstairs and it's", "mamaco peludo"});
+            _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_2, {ROSTOV_DAD_PHONE_2_1, ROSTOV_DAD_PHONE_2_2, ROSTOV_DAD_PHONE_2_3});
         }
     }
 
