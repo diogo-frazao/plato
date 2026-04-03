@@ -1533,7 +1533,12 @@ void UISystem::update()
 	{
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.f)
 		{
-			_currentDialogue.hasEnded = true;
+			// If the dialogue has options we can't skip it, we need to choose a dialogue option
+			bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+			if (!doesDialogueHaveOptions)
+			{
+				_currentDialogue.hasEnded = true;
+			}
 		}
 		else
 		{
@@ -1934,6 +1939,11 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 	return topLeftPositionToStartDrawingText;
 }
 
+bool UISystem::hasDialogueFinihsed(TextType dialogueType)
+{
+	return (_currentDialogue.dialogueType == dialogueType) && _currentDialogue.hasEnded;
+}
+
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
 {
 	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
@@ -1968,6 +1978,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;
+	_currentDialogue.dialogueType = dialogueTextType;
 
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{

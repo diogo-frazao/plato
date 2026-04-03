@@ -228,6 +228,7 @@ public:
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
 
 		// Changed at runtime
+		TextType dialogueType = INVALID_TEXT;
 		bool hasEnded = false;
 		bool isScreenSpace = false;
 		float timeSinceDialogueStarted = 0.f;
@@ -257,6 +258,7 @@ public:
 			this->isScreenSpace = false;
 			this->alignmentType = DIALOGUE_CENTERED;
 			this->dialogueBoxDynamicXSize = 0.f;
+			this->dialogueType = INVALID_TEXT;
 		}
 	};
 
@@ -276,6 +278,7 @@ public:
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
 
+	bool hasDialogueFinihsed(TextType dialogueType);
 	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
