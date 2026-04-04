@@ -98,6 +98,10 @@ void RenderingSystem::render(float renderAlpha)
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
 	renderSpritesAtLayer(CELLPHONE_LAYER, renderAlpha);
+}
+
+void RenderingSystem::renderCrosshair(float renderAlpha)
+{
 	renderSpritesAtLayer(CROSSHAIR_LAYER, renderAlpha);
 }
 

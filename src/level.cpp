@@ -449,6 +449,14 @@ void ECSLevel::update()
     }
 }
 
+void ECSLevel::render(float renderAlpha)
+{
+    _renderingSystem.render(renderAlpha);
+    _uiSystem.render(&_renderingSystem);
+    _debugCollidersSystem.render();
+    _renderingSystem.renderCrosshair(renderAlpha);
+}
+
 void ECSLevel::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
@@ -554,11 +562,4 @@ void ECSLevel::imguiRender()
     ImGui::Text("Enemy state: %s", getEntityStateAsString(testEnemy->entityState));
 
     ImGui::End();
-}
-
-void ECSLevel::render(float renderAlpha)
-{
-	_renderingSystem.render(renderAlpha);
-    _uiSystem.render(&_renderingSystem);
-	_debugCollidersSystem.render();
 }

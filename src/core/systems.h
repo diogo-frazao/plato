@@ -29,6 +29,7 @@ class RenderingSystem
 public:
 	void createLightsBuffers();
 	void render(float renderAlpha);
+	void renderCrosshair(float renderAlpha);
 
 	SDL_Color _ambientColor = { 255, 255, 255, 255 };
 	// Used only for debugging with imgui
