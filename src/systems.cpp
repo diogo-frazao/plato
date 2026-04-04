@@ -379,13 +379,16 @@ void DebugSystem::render()
 #endif // RELEASE_BUILD
 }
 
-void DebugSystem::debugRect(Vec2 worldPosition, RectCollider collider, SDL_Color color)
+void DebugSystem::debugRect(Vec2 worldPosition, RectCollider collider, SDL_Color color, bool isScreenSpaceRect)
 {
 	SDL_SetRenderDrawColor(s_renderer, color.r, color.g, color.b, color.a);
 	Vec2 colliderPosition = getColliderPosition(worldPosition, collider);
 
-	SDL_FRect debugRect { colliderPosition.x, colliderPosition.y , (float)collider.size.x, (float)collider.size.y };
-	debugRect = convertWorldRectToCameraSpace(debugRect);
+	SDL_FRect debugRect{ colliderPosition.x, colliderPosition.y , (float)collider.size.x, (float)collider.size.y };
+	if (!isScreenSpaceRect)
+	{
+		debugRect = convertWorldRectToCameraSpace(debugRect);
+	}
 
 	SDL_RenderRect(s_renderer, &debugRect);
 	SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
@@ -1498,6 +1501,7 @@ void UISystem::update()
 		_cellphone.entity = &getEntityById(k_cellphoneEntityId);
 	}
 
+	// Handle cellphone state
 	auto* t = getComponentFromEntity<TransformComponent>(*_cellphone.entity);
 	switch (_cellphone.state)
 	{
@@ -1532,7 +1536,9 @@ void UISystem::update()
 		D_LOG(LOG, "Dialogue recreated");
 		pushDialogue(DEBUG_TEXT, { 20, 151 }, {}, true, DIALOGUE_LEFT_ALIGNED);
 	}
+#endif // !RELEASE_BUILD
 
+	// Skip dialogue
 	if (wasSkipDialogueKeyPressedThisFrame())
 	{
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.f)
@@ -1550,7 +1556,24 @@ void UISystem::update()
 		}
 	}
 
-#endif // !RELEASE_BUILD
+	// Choose dialogue option
+	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+	if (!doesDialogueHaveOptions)
+	{
+		return;
+	}
+
+	RectCollider mouseCollider{ {0,0}, {1, 1} };
+	for (DialogueOption& dialogueOption : _dialogueOptions)
+	{
+		Vec2 dialogueOptionPosition{ dialogueOption.colliderDest.x , dialogueOption.colliderDest.y };
+		RectCollider dialogueOptionCollider{ {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} };
+
+		if (aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider))
+		{
+			D_LOG(MINI, "mouse hovering option");
+		}
+	}
 }
 
 void UISystem::skipDialogue()
@@ -1578,7 +1601,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	static SDL_FRect src;
-	static SDL_FRect dest;
+	static SDL_FRect colliderDest;
 
 	//_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
 	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
@@ -1593,21 +1616,21 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
-		dest.y = _currentDialogue.topLeftPosition.y - k_dialogueOuterPadding.y;
-		dest.w = _currentDialogue.dialogueBoxDynamicXSize;
-		dest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
+		colliderDest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
+		colliderDest.y = _currentDialogue.topLeftPosition.y - k_dialogueOuterPadding.y;
+		colliderDest.w = _currentDialogue.dialogueBoxDynamicXSize;
+		colliderDest.h = _currentDialogue.dialogueBoxSize.y + (k_dialogueOuterPadding.y * 2.f);
 
 		if (!_currentDialogue.isScreenSpace)
 		{
-			dest = convertWorldRectToCameraSpace(dest);
+			colliderDest = convertWorldRectToCameraSpace(colliderDest);
 		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 
 		SDL_SetTextureAlphaMod(atlas, 255);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 		SDL_SetTextureAlphaMod(atlas, 255);
 	}
 
@@ -1621,22 +1644,22 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = speechBubbleSprite.spriteSize.x;
 		src.h = speechBubbleSprite.spriteSize.y;
 
-		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
-		// Since the last thing drawn was the dialogue box, use dest directly
-		float dialogueBoxEndYPosition = dest.y + dest.h;
-		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
-		dest.w = _currentDialogue.dialogueBoxDynamicXSize;
-		dest.h = k_dialogueOutlineHeight;
+		colliderDest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
+		// Since the last thing drawn was the dialogue box, use colliderDest directly
+		float dialogueBoxEndYPosition = colliderDest.y + colliderDest.h;
+		colliderDest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
+		colliderDest.w = _currentDialogue.dialogueBoxDynamicXSize;
+		colliderDest.h = k_dialogueOutlineHeight;
 
 		if (!_currentDialogue.isScreenSpace)
 		{
-			dest = convertWorldRectToCameraSpace(dest);
+			colliderDest = convertWorldRectToCameraSpace(colliderDest);
 		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
 		SDL_SetTextureAlphaMod(atlas, 255);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 	}
 
 	// Speech indicator
@@ -1648,36 +1671,36 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = speechIndicatorSprite.spriteSize.x;
 		src.h = speechIndicatorSprite.spriteSize.y;
 
-		// Since the last thing drawn was the dialogue outline, use dest directly
+		// Since the last thing drawn was the dialogue outline, use colliderDest directly
 		switch (_currentDialogue.alignmentType)
 		{
 			case DIALOGUE_CENTERED:
 			{
-				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
-				dest.x = textCenterXPos;
+				float textCenterXPos = colliderDest.x + (dialogueBoxTargetXSize / 2);
+				colliderDest.x = textCenterXPos;
 				break;
 			}
 			case DIALOGUE_LEFT_ALIGNED:
 			{
-				float textLeftAlignedXPos = dest.x + 3;
-				dest.x = textLeftAlignedXPos;
+				float textLeftAlignedXPos = colliderDest.x + 3;
+				colliderDest.x = textLeftAlignedXPos;
 				break;
 			}
 		}
 
-		float dialogueOutlineEndYPosition = dest.y + dest.h;
-		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
-		dest.w = k_speechIndicatorSize.x;
-		dest.h = k_speechIndicatorSize.y;
+		float dialogueOutlineEndYPosition = colliderDest.y + colliderDest.h;
+		colliderDest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
+		colliderDest.w = k_speechIndicatorSize.x;
+		colliderDest.h = k_speechIndicatorSize.y;
 
 		// Since the speech indicator has its X and Y pos defined by the previous value, we shouldn't convert to camera space
 		// as it's already in camera space
-		//dest = convertWorldRectToCameraSpace(dest);
+		//colliderDest = convertWorldRectToCameraSpace(colliderDest);
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 		SDL_SetTextureAlphaMod(atlas, 255);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 	}
 
 	// Speech indicator outline
@@ -1689,13 +1712,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = speechIndicatorOutlineSprite.spriteSize.x;
 		src.h = speechIndicatorOutlineSprite.spriteSize.y;
 
-		// Since the last thing drawn was the speech indicator, use dest directly
+		// Since the last thing drawn was the speech indicator, use colliderDest directly
 		// Share everything since this sprite has the same size
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
 		SDL_SetTextureAlphaMod(atlas, 255);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 	}
 
 	// Draw each character
@@ -1719,14 +1742,14 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = k_characterSizeOnAtlas.x;
 		src.h = k_characterSizeOnAtlas.y;
 
-		dest.x = c.position.x;
-		dest.y = c.position.y;
-		dest.w = c.size.x;
-		dest.h = c.size.y;
+		colliderDest.x = c.position.x;
+		colliderDest.y = c.position.y;
+		colliderDest.w = c.size.x;
+		colliderDest.h = c.size.y;
 
 		if (!_currentDialogue.isScreenSpace)
 		{
-			dest = convertWorldRectToCameraSpace(dest);
+			colliderDest = convertWorldRectToCameraSpace(colliderDest);
 		}
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
@@ -1743,7 +1766,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
-		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, fontAtlas, &src, &colliderDest);
 	}
 
 	// Draw dialogue ended indicator
@@ -1754,16 +1777,16 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = dialogueFinishedSprite.spriteSize.x;
 		src.h = dialogueFinishedSprite.spriteSize.y;
 
-		dest.x = _currentDialogue.topLeftPosition.x + _currentDialogue.dialogueBoxSize.x - 1;
-		dest.y = _currentDialogue.topLeftPosition.y + _currentDialogue.dialogueBoxSize.y;
-		dest.w = k_dialogueEndedIndicatorSize.x;
-		dest.h = k_dialogueEndedIndicatorSize.y;
+		colliderDest.x = _currentDialogue.topLeftPosition.x + _currentDialogue.dialogueBoxSize.x - 1;
+		colliderDest.y = _currentDialogue.topLeftPosition.y + _currentDialogue.dialogueBoxSize.y;
+		colliderDest.w = k_dialogueEndedIndicatorSize.x;
+		colliderDest.h = k_dialogueEndedIndicatorSize.y;
 
 		// Since this is on the same texture as the font characters, we don't need to override the opacity
 		// This will make it only visible when the last character is also visible
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
-		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+		SDL_RenderTexture(s_renderer, fontAtlas, &src, &colliderDest);
 	}
 
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
@@ -1803,16 +1826,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			src.w = speechBubbleSprite.spriteSize.x;
 			src.h = speechBubbleSprite.spriteSize.y;
 
-			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
-			dest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
-			dest.w = dialogueOption.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
-			dest.h = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+			colliderDest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
+			colliderDest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
+			colliderDest.w = dialogueOption.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
+			colliderDest.h = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+			dialogueOption.colliderDest = colliderDest;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 			SDL_SetTextureColorMod(atlas, 23, 9, 31);
 
 			SDL_SetTextureAlphaMod(atlas, 255);
-			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+			SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 		}
 
 		// Dialogue option border (letf + right)
@@ -1825,25 +1849,28 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			src.w = borderSprite.spriteSize.x;
 			src.h = borderSprite.spriteSize.y;
 
-			// First draw the right side, to reuse dest (since last thing drawn was the dialogue box)
-			dest.x = dest.x + dest.w;
-			dest.y = dest.y;
-			dest.w = k_dialogueOptionBorderSize.x;
-			dest.h = k_dialogueOptionBorderSize.y;
+			// First draw the right side, to reuse colliderDest (since last thing drawn was the dialogue box)
+			colliderDest.x = colliderDest.x + colliderDest.w;
+			colliderDest.y = colliderDest.y;
+			colliderDest.w = k_dialogueOptionBorderSize.x;
+			colliderDest.h = k_dialogueOptionBorderSize.y;
+
+			dialogueOption.colliderDest.x -= k_dialogueOptionBorderSize.x;
+			dialogueOption.colliderDest.w += k_dialogueOptionBorderSize.x * 2.f;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
 			SDL_SetTextureColorMod(atlas, 23, 9, 31);
 			SDL_SetTextureAlphaMod(atlas, 255);
 
-			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
+			SDL_RenderTextureRotated(s_renderer, atlas, &src, &colliderDest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 
 			// Now draw the left border
-			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
-			dest.y = dest.y;
-			dest.w = k_dialogueOptionBorderSize.x;
-			dest.h = k_dialogueOptionBorderSize.y;
+			colliderDest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
+			colliderDest.y = colliderDest.y;
+			colliderDest.w = k_dialogueOptionBorderSize.x;
+			colliderDest.h = k_dialogueOptionBorderSize.y;
 			SDL_SetTextureColorMod(atlas, 23, 9, 31);
-			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+			SDL_RenderTexture(s_renderer, atlas, &src, &colliderDest);
 		}
 
 		// Dialogue options characters
@@ -1863,10 +1890,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			src.w = k_characterSizeOnAtlas.x;
 			src.h = k_characterSizeOnAtlas.y;
 
-			dest.x = c.position.x;
-			dest.y = c.position.y;
-			dest.w = c.size.x;
-			dest.h = c.size.y;
+			colliderDest.x = c.position.x;
+			colliderDest.y = c.position.y;
+			colliderDest.w = c.size.x;
+			colliderDest.h = c.size.y;
 
 			c.opacity = 255.f;
 
@@ -1874,9 +1901,33 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 			SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 			SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
-			SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+			SDL_RenderTexture(s_renderer, fontAtlas, &src, &colliderDest);
 		}
 	}
+}
+
+void UISystem::debugColliders()
+{
+#ifndef RELEASE_BUILD
+
+	if (!s_debugUICollidersEnabled)
+	{
+		return;
+	}
+
+	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+	if (!doesDialogueHaveOptions)
+	{
+		return;
+	}
+
+	SDL_Color dialogueOptionsDebugColor = { 251, 107, 29 };
+	for (DialogueOption& dialogueOption : _dialogueOptions)
+	{
+		DebugSystem::debugRect({ dialogueOption.colliderDest.x, dialogueOption.colliderDest.y }, 
+							   { {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} }, dialogueOptionsDebugColor, true);
+	}
+#endif // !RELEASE_BUILD
 }
 
 // Dpending on alignmentType the position should be different things.
@@ -1972,7 +2023,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	_currentDialogue.destroyDialoge();
 
 	static SDL_FRect src;
-	static SDL_FRect dest;
+	static SDL_FRect colliderDest;
 
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
@@ -2005,14 +2056,14 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		src.w = k_characterSizeOnAtlas.x;
 		src.h = k_characterSizeOnAtlas.y;
 
-		dest.x = _currentDialogue.topLeftPosition.x + currentHorizontalSpaceBetweenCharacters;
-		dest.y = _currentDialogue.topLeftPosition.y + currentVerticalSpaceBetweenCharacters;
-		dest.w = k_characterSize.x;
-		dest.h = k_characterSize.y;
+		colliderDest.x = _currentDialogue.topLeftPosition.x + currentHorizontalSpaceBetweenCharacters;
+		colliderDest.y = _currentDialogue.topLeftPosition.y + currentVerticalSpaceBetweenCharacters;
+		colliderDest.w = k_characterSize.x;
+		colliderDest.h = k_characterSize.y;
 
 		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[i];
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
-		dialogueCharacter.position = { dest.x, dest.y };
+		dialogueCharacter.position = { colliderDest.x, colliderDest.y };
 		dialogueCharacter.size = { k_characterSize };
 		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * i);
 
@@ -2092,14 +2143,14 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			src.w = k_characterSizeOnAtlas.x;
 			src.h = k_characterSizeOnAtlas.y;
 
-			dest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
-			dest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
-			dest.w = k_characterSize.x;
-			dest.h = k_characterSize.y;
+			colliderDest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
+			colliderDest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
+			colliderDest.w = k_characterSize.x;
+			colliderDest.h = k_characterSize.y;
 
 			DialogueCharacter& dialogueCharacter = _dialogueOptions[optionIndex].characters[i];
 			dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
-			dialogueCharacter.position = { dest.x, dest.y };
+			dialogueCharacter.position = { colliderDest.x, colliderDest.y };
 			dialogueCharacter.size = { k_characterSize };
 			dialogueCharacter.secondsToStartShowingCharacter = 0.2f;
 

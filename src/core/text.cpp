@@ -15,7 +15,7 @@ const char* getText(TextType textType)
 	case ROSTOV_DAD_PHONE_2:
 		return "haloooo? rostov?";
 	case ROSTOV_DAD_PHONE_2_1:
-		return "what about now?";
+		return "yes it's indeed very alarming my friend";
 	case ROSTOV_DAD_PHONE_2_2:
 		return "I heard a commotion dowstairs and it's";
 	case ROSTOV_DAD_PHONE_2_3:

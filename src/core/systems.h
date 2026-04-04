@@ -90,7 +90,7 @@ class DebugSystem
 {
 public:
 	void render();
-	void debugRect(Vec2 position, RectCollider collider, SDL_Color color);
+	static void debugRect(Vec2 position, RectCollider collider, SDL_Color color, bool isScreenSpaceRect = false);
 	void debugLine(Vec2 start, Vec2 end, SDL_Color color);
 	void debugPoint(Vec2 position, SDL_Color color);
 };
@@ -172,6 +172,7 @@ public:
 	void start();
 	void update();
 	void render(RenderingSystem* renderingSystem);
+	void debugColliders();
 
 	struct DialogueCharacter
 	{
@@ -199,6 +200,9 @@ public:
 	struct DialogueOption
 	{
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
+
+		// Used to know x,y,w,h for collisions
+		SDL_FRect colliderDest;
 
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };

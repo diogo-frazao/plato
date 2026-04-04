@@ -454,6 +454,7 @@ void ECSLevel::render(float renderAlpha)
     _renderingSystem.render(renderAlpha);
     _uiSystem.render(&_renderingSystem);
     _debugCollidersSystem.render();
+    _uiSystem.debugColliders();
     _renderingSystem.renderCrosshair(renderAlpha);
 }
 
@@ -515,6 +516,7 @@ void ECSLevel::imguiRender()
     ImGui::Text("Mouse World Y: %f", mouseWorldPosition.y);
 
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
+    ImGui::Checkbox("Debug UI colliders", &s_debugUICollidersEnabled);
     ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
 
     ImGui::Text("Average %.1f FPS", io.Framerate);
