@@ -223,3 +223,8 @@ bool wasPickupPhoneKeyPressedThisFrame()
 	return wasJumpKeyPressedThisFrame();
 }
 
+bool wasChooseDialogueOptionKeyPressedThisFrame()
+{
+	return wasSkipDialogueKeyPressedThisFrame();
+}
+

@@ -1576,23 +1576,50 @@ void UISystem::update()
 		RectCollider mouseCollider{ {0,0}, {1, 1} };
 		bool isHoverOption = false;
 
-		for (DialogueOption& dialogueOption : _dialogueOptions)
+		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
 		{
+			DialogueOption& dialogueOption = _dialogueOptions[i];
+
 			Vec2 dialogueOptionPosition{ dialogueOption.colliderDest.x , dialogueOption.colliderDest.y };
 			RectCollider dialogueOptionCollider{ {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} };
 
+			bool canReactToHoverFeedback = (dialogueOption.state == DIALOGUE_OPTION_IDLE_STATE) || (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE);
+
 			if (aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider))
 			{
-				dialogueOption.state = DIALOGUE_OPTION_HOVERED_STATE;
-				isHoverOption = true;
+				if (canReactToHoverFeedback)
+				{
+					dialogueOption.state = DIALOGUE_OPTION_HOVERED_STATE;
+					isHoverOption = true;
+				}
+
+				if (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE)
+				{
+					isHoverOption = true;
+				}
+
+				if (wasChooseDialogueOptionKeyPressedThisFrame())
+				{
+					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
+
+					for (DialogueOption& option : _dialogueOptions)
+					{
+						if (option.state == dialogueOption.state)
+						{
+							continue;
+						}
+
+						option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE;
+					}
+				}
 			}
-			else
+			else if(canReactToHoverFeedback)
 			{
 				dialogueOption.state = DIALOGUE_OPTION_IDLE_STATE;
 			}
 		}
 
-		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 100 : 255;
+		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 50 : 255;
 	}
 }
 
@@ -1839,16 +1866,23 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		switch (dialogueOption.state)
 		{
 		case DIALOGUE_OPTION_IDLE_STATE:
-			dialogueOptionBaseColor = { 23, 9, 31 };
+			dialogueOptionBaseColor = { 23, 9, 31, 255};
 			break;
 		case DIALOGUE_OPTION_HOVERED_STATE:
-			dialogueOptionBaseColor = { 81, 34, 43 };
+		case DIALOGUE_OPTION_CHOSEN_STATE:
+			dialogueOptionBaseColor = { 81, 34, 43, 255};
+			break;
+		case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
+			dialogueOptionBaseColor = { 23, 9, 31, (uint8_t)dialogueOption.opacity };
+			dialogueOption.opacity = max(dialogueOption.opacity - (2500.f * k_deltaTime), 0.f);
+			break;
+		default:
+			D_ASSERT(false, "Unsupported dialogue option state");
 			break;
 		}
 
 		// Dialogue option base sprite
 		{
-
 			// Reuse the same texture since it's a white 1x1 pixel
 			DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
 
@@ -1866,7 +1900,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 			SDL_SetTextureColorMod(atlas, dialogueOptionBaseColor.r, dialogueOptionBaseColor.g, dialogueOptionBaseColor.b);
 
-			SDL_SetTextureAlphaMod(atlas, 255);
+			SDL_SetTextureAlphaMod(atlas, dialogueOptionBaseColor.a);
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 		}
 
@@ -1890,12 +1924,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
 			SDL_SetTextureColorMod(atlas, dialogueOptionBaseColor.r, dialogueOptionBaseColor.g, dialogueOptionBaseColor.b);
-			SDL_SetTextureAlphaMod(atlas, 255);
+			SDL_SetTextureAlphaMod(atlas, dialogueOptionBaseColor.a);
 
 			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 
 			// Hovered border for right side
-			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE)
+			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE || 
+				dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE)
 			{
 				DialogueBoxSprite& hoveredBorderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_HOVERED_BORDER_SPRITE];
 
@@ -1928,7 +1963,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 
 			// Hovered border for left side
-			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE)
+			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE ||
+				dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE)
 			{
 				DialogueBoxSprite& hoveredBorderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_HOVERED_BORDER_SPRITE];
 
@@ -1969,7 +2005,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.w = c.size.x;
 			dest.h = c.size.y;
 
-			c.opacity = 255.f;
+			c.opacity = dialogueOptionBaseColor.a;
 
 			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 

@@ -201,7 +201,9 @@ public:
 	enum DialogueOptionState
 	{
 		DIALOGUE_OPTION_IDLE_STATE,
-		DIALOGUE_OPTION_HOVERED_STATE
+		DIALOGUE_OPTION_HOVERED_STATE,
+		DIALOGUE_OPTION_CHOSEN_STATE,
+		DIALOGUE_OPTION_NOT_CHOSEN_STATE
 	};
 
 	struct DialogueOption
@@ -215,6 +217,8 @@ public:
 
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
+		// Used to fade out when another option is selected
+		float opacity = 255.f;
 
 		void destroyDialogueOption()
 		{
@@ -232,6 +236,7 @@ public:
 			this->colliderDest.x = this->colliderDest.y = this->colliderDest.w = this->colliderDest.h = 0.f;
 			this->dialogueType = INVALID_TEXT;
 			this->state = DIALOGUE_OPTION_IDLE_STATE;
+			this->opacity = 255.f;
 		}
 
 		bool isValid()
