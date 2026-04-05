@@ -1543,7 +1543,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushDialogue(DEBUG_TEXT, { 20, 151 }, {}, true, DIALOGUE_LEFT_ALIGNED);
+		pushCellphoneDialogue(ROSTOV_DAD_PHONE_2, { ROSTOV_DAD_PHONE_2_1, ROSTOV_DAD_PHONE_2_2, ROSTOV_DAD_PHONE_2_3 });
 	}
 #endif // !RELEASE_BUILD
 
@@ -1601,6 +1601,8 @@ void UISystem::update()
 				if (wasChooseDialogueOptionKeyPressedThisFrame())
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
+					dialogueOption.color = { 108, 26, 86, 255 };
+					dialogueOption.color2 = { 108, 26, 86, 255 };
 
 					for (DialogueOption& option : _dialogueOptions)
 					{
@@ -1867,10 +1869,18 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 		case DIALOGUE_OPTION_IDLE_STATE:
 			dialogueOptionBaseColor = { 23, 9, 31, 255};
+			dialogueOption.color = dialogueOptionBaseColor;
 			break;
 		case DIALOGUE_OPTION_HOVERED_STATE:
 		case DIALOGUE_OPTION_CHOSEN_STATE:
 			dialogueOptionBaseColor = { 81, 34, 43, 255};
+			dialogueOption.color.r = lerp(dialogueOption.color.r, 81, 0.2f);
+			dialogueOption.color.g = lerp(dialogueOption.color.g, 34, 0.2f);
+			dialogueOption.color.b = lerp(dialogueOption.color.b, 43, 0.2f);
+
+			dialogueOption.color2.r = lerp(dialogueOption.color2.r, 209, 0.2f);
+			dialogueOption.color2.g = lerp(dialogueOption.color2.g, 209, 0.2f);
+			dialogueOption.color2.b = lerp(dialogueOption.color2.b, 209, 0.2f);
 			break;
 		case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
 			dialogueOptionBaseColor = { 23, 9, 31, (uint8_t)dialogueOption.opacity };
@@ -1898,7 +1908,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dialogueOption.colliderDest = dest;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-			SDL_SetTextureColorMod(atlas, dialogueOptionBaseColor.r, dialogueOptionBaseColor.g, dialogueOptionBaseColor.b);
+			SDL_SetTextureColorMod(atlas, dialogueOption.color.r, dialogueOption.color.g, dialogueOption.color.b);
 
 			SDL_SetTextureAlphaMod(atlas, dialogueOptionBaseColor.a);
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
@@ -1944,7 +1954,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
-				SDL_SetTextureColorMod(atlas, 209, 209, 209);
+				SDL_SetTextureColorMod(atlas, dialogueOption.color2.r, dialogueOption.color2.g, dialogueOption.color2.b);
 				SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 			}
 
@@ -1978,7 +1988,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
-				SDL_SetTextureColorMod(atlas, 209, 209, 209);
+				SDL_SetTextureColorMod(atlas, dialogueOption.color2.r, dialogueOption.color2.g, dialogueOption.color2.b);
 				SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 			}
 		}

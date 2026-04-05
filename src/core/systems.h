@@ -219,6 +219,8 @@ public:
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		// Used to fade out when another option is selected
 		float opacity = 255.f;
+		SDL_Color color{ 23, 9, 31, 255 };
+		SDL_Color color2{ 209, 209, 209, 255};
 
 		void destroyDialogueOption()
 		{
