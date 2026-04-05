@@ -1584,8 +1584,9 @@ void UISystem::update()
 			RectCollider dialogueOptionCollider{ {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} };
 
 			bool canReactToHoverFeedback = (dialogueOption.state == DIALOGUE_OPTION_IDLE_STATE) || (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE);
+			bool isMouseHoverOption = aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider);
 
-			if (aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider))
+			if (isMouseHoverOption)
 			{
 				if (canReactToHoverFeedback)
 				{
@@ -1601,18 +1602,11 @@ void UISystem::update()
 				if (wasChooseDialogueOptionKeyPressedThisFrame())
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
-					dialogueOption.color = { 108, 26, 86, 255 };
-					dialogueOption.color2 = { 108, 26, 86, 255 };
+					dialogueOption.backgroundSpriteColor = { 108, 26, 86, 255 };
+					dialogueOption.hoveredBorderSpriteColor = { 108, 26, 86, 255 };
 
-					for (DialogueOption& option : _dialogueOptions)
-					{
-						if (option.state == dialogueOption.state)
-						{
-							continue;
-						}
-
-						option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE;
-					}
+					// Change all the other options to be NOT_CHOSEN
+					for (DialogueOption& option : _dialogueOptions) { if (option.state == dialogueOption.state) continue; option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE; }
 				}
 			}
 			else if(canReactToHoverFeedback)
@@ -1652,7 +1646,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
-	//_currentDialogue.dialogueBoxOpacity = min(_currentDialogue.dialogueBoxOpacity + (fadeSpeed * k_deltaTime), 255.f);
+	// Animate dialogue box size
 	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, dialogueBoxTargetXSize, 6.25 * k_deltaTime);
 
@@ -1838,8 +1832,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 	}
 
+	// Understand that dialogue ended
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
-
 	if (hasDialogueFinished)
 	{
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
@@ -1861,35 +1855,40 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			continue;
 		}
 
+		// Dynamic colors + opacity for dialogue options
+		{
+			switch (dialogueOption.state)
+			{
+			case DIALOGUE_OPTION_IDLE_STATE:
+				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+				dialogueOption.opacity = 255.f;
+				// No need to set the hovered border color since it's not visible on idle
+				break;
+			case DIALOGUE_OPTION_HOVERED_STATE:
+			case DIALOGUE_OPTION_CHOSEN_STATE:
+				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
+				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
+				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
+
+				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+
+				dialogueOption.opacity = 255.f;
+				break;
+			case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
+				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+				dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
+				// No need to set the hovered border color since it's not visible on idle
+				break;
+			default:
+				D_ASSERT(false, "Unsupported dialogue option state");
+				break;
+			}
+		}
+
 		// Take the position of the first character since it's where we start
 		Vec2 topLeftDialogueOptionPosition = dialogueOption.characters[0].position;
-
-		SDL_Color dialogueOptionBaseColor;
-		switch (dialogueOption.state)
-		{
-		case DIALOGUE_OPTION_IDLE_STATE:
-			dialogueOptionBaseColor = { 23, 9, 31, 255};
-			dialogueOption.color = dialogueOptionBaseColor;
-			break;
-		case DIALOGUE_OPTION_HOVERED_STATE:
-		case DIALOGUE_OPTION_CHOSEN_STATE:
-			dialogueOptionBaseColor = { 81, 34, 43, 255};
-			dialogueOption.color.r = lerp(dialogueOption.color.r, 81, 0.2f);
-			dialogueOption.color.g = lerp(dialogueOption.color.g, 34, 0.2f);
-			dialogueOption.color.b = lerp(dialogueOption.color.b, 43, 0.2f);
-
-			dialogueOption.color2.r = lerp(dialogueOption.color2.r, 209, 0.2f);
-			dialogueOption.color2.g = lerp(dialogueOption.color2.g, 209, 0.2f);
-			dialogueOption.color2.b = lerp(dialogueOption.color2.b, 209, 0.2f);
-			break;
-		case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
-			dialogueOptionBaseColor = { 23, 9, 31, (uint8_t)dialogueOption.opacity };
-			dialogueOption.opacity = max(dialogueOption.opacity - (2500.f * k_deltaTime), 0.f);
-			break;
-		default:
-			D_ASSERT(false, "Unsupported dialogue option state");
-			break;
-		}
 
 		// Dialogue option base sprite
 		{
@@ -1908,9 +1907,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dialogueOption.colliderDest = dest;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-			SDL_SetTextureColorMod(atlas, dialogueOption.color.r, dialogueOption.color.g, dialogueOption.color.b);
+			SDL_SetTextureColorMod(atlas, dialogueOption.backgroundSpriteColor.r, dialogueOption.backgroundSpriteColor.g, dialogueOption.backgroundSpriteColor.b);
 
-			SDL_SetTextureAlphaMod(atlas, dialogueOptionBaseColor.a);
+			SDL_SetTextureAlphaMod(atlas, dialogueOption.opacity);
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 		}
 
@@ -1933,8 +1932,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dialogueOption.colliderDest.w += k_dialogueOptionBorderSize.x * 2.f;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(borderSprite.atlasType);
-			SDL_SetTextureColorMod(atlas, dialogueOptionBaseColor.r, dialogueOptionBaseColor.g, dialogueOptionBaseColor.b);
-			SDL_SetTextureAlphaMod(atlas, dialogueOptionBaseColor.a);
+			SDL_SetTextureColorMod(atlas, dialogueOption.backgroundSpriteColor.r, dialogueOption.backgroundSpriteColor.g, dialogueOption.backgroundSpriteColor.b);
+			SDL_SetTextureAlphaMod(atlas, dialogueOption.opacity);
 
 			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 
@@ -1954,7 +1953,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
-				SDL_SetTextureColorMod(atlas, dialogueOption.color2.r, dialogueOption.color2.g, dialogueOption.color2.b);
+				SDL_SetTextureColorMod(atlas, dialogueOption.hoveredBorderSpriteColor.r, dialogueOption.hoveredBorderSpriteColor.g, dialogueOption.hoveredBorderSpriteColor.b);
 				SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 			}
 
@@ -1969,7 +1968,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.w = k_dialogueOptionBorderSize.x;
 			dest.h = k_dialogueOptionBorderSize.y;
 
-			SDL_SetTextureColorMod(atlas, dialogueOptionBaseColor.r, dialogueOptionBaseColor.g, dialogueOptionBaseColor.b);
+			SDL_SetTextureColorMod(atlas, dialogueOption.backgroundSpriteColor.r, dialogueOption.backgroundSpriteColor.g, dialogueOption.backgroundSpriteColor.b);
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 
 			// Hovered border for left side
@@ -1988,7 +1987,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
-				SDL_SetTextureColorMod(atlas, dialogueOption.color2.r, dialogueOption.color2.g, dialogueOption.color2.b);
+				SDL_SetTextureColorMod(atlas, dialogueOption.hoveredBorderSpriteColor.r, dialogueOption.hoveredBorderSpriteColor.g, dialogueOption.hoveredBorderSpriteColor.b);
 				SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 			}
 		}
@@ -2015,7 +2014,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.w = c.size.x;
 			dest.h = c.size.y;
 
-			c.opacity = dialogueOptionBaseColor.a;
+			c.opacity = dialogueOption.opacity;
 
 			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 

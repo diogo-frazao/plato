@@ -217,10 +217,13 @@ public:
 
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
-		// Used to fade out when another option is selected
+		// Used to fade out when another option is selected. 
+		// This controls the opacity of everything rendered for a dialogue option (text + sprites)
 		float opacity = 255.f;
-		SDL_Color color{ 23, 9, 31, 255 };
-		SDL_Color color2{ 209, 209, 209, 255};
+		// Color of the square background that surrounds characters
+		SDL_Color backgroundSpriteColor{ 0, 0, 0, 0};
+		// Color of the hovered sprite
+		SDL_Color hoveredBorderSpriteColor{ 0, 0, 0, 0 };
 
 		void destroyDialogueOption()
 		{
@@ -239,6 +242,8 @@ public:
 			this->dialogueType = INVALID_TEXT;
 			this->state = DIALOGUE_OPTION_IDLE_STATE;
 			this->opacity = 255.f;
+			this->backgroundSpriteColor = { 0, 0, 0, 0 };
+			this->hoveredBorderSpriteColor = { 0, 0, 0, 0};
 		}
 
 		bool isValid()
