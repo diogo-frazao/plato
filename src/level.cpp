@@ -464,7 +464,7 @@ void ECSLevel::imguiRender()
 
     // TODO: see if it causes issues. this will overlap crosshair alpha blending
     Entity& crosshair = getEntityById(k_crosshairEntityId);
-    getComponentFromEntity<SpriteComponent>(crosshair)->color.a = s_isImGuiOpen ? 0 : 255;
+    getComponentFromEntity<SpriteComponent>(crosshair)->color.a = s_isImGuiOpen ? 0 : CrosshairSystem::s_corsshairOpacity;
 
     if (!s_isImGuiOpen)
     {

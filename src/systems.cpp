@@ -413,6 +413,8 @@ void CrosshairSystem::update()
 	Entity& crosshair = getEntityById(k_crosshairEntityId);
 	auto* s = getComponentFromEntity<SpriteComponent>(crosshair);
 
+	s->color.a = s_corsshairOpacity;
+
 	// Follow mouse
 	{
 		SDL_HideCursor();
@@ -424,7 +426,6 @@ void CrosshairSystem::update()
 	// Reset crosshair sprite
 	if (isTimerOngoing(_resetSpritetimer))
 	{
-
 		_resetSpritetimer += k_deltaTime;
 		if (_resetSpritetimer >= 0.2f)
 		{
@@ -1200,7 +1201,7 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 	}
 
 	// Attack based on state
-	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE;
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_PHONE_STATE;
 	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
 	if (!canAttack)
 	{
@@ -1573,6 +1574,8 @@ void UISystem::update()
 		}
 
 		RectCollider mouseCollider{ {0,0}, {1, 1} };
+		bool isHoverOption = false;
+
 		for (DialogueOption& dialogueOption : _dialogueOptions)
 		{
 			Vec2 dialogueOptionPosition{ dialogueOption.colliderDest.x , dialogueOption.colliderDest.y };
@@ -1581,12 +1584,15 @@ void UISystem::update()
 			if (aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider))
 			{
 				dialogueOption.state = DIALOGUE_OPTION_HOVERED_STATE;
+				isHoverOption = true;
 			}
 			else
 			{
 				dialogueOption.state = DIALOGUE_OPTION_IDLE_STATE;
 			}
 		}
+
+		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 100 : 255;
 	}
 }
 

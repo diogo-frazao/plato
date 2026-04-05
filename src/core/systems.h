@@ -110,6 +110,7 @@ public:
 	inline static float _resetSpritetimer = k_invalidTime;
 	static void crosshairMeleeHitFeedback(Vec2 hitLocation);
 
+	inline static uint8_t s_corsshairOpacity = 255;
 	inline static CrossHairSmear _crosshairSmear;
 };
 
