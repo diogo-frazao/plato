@@ -1543,7 +1543,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushCellphoneDialogue(ROSTOV_DAD_PHONE_2, { ROSTOV_DAD_PHONE_2_1, ROSTOV_DAD_PHONE_2_2, ROSTOV_DAD_PHONE_2_3 });
+		pushCellphoneDialogue(DEBUG_TEXT);
 	}
 #endif // !RELEASE_BUILD
 
@@ -1648,7 +1648,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 	// Animate dialogue box size
 	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
-	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, dialogueBoxTargetXSize, 6.25 * k_deltaTime);
+
+	if (_currentDialogue.hasEnded)
+	{
+		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, 0.f, 6.25 * k_deltaTime);
+	}
+	else
+	{
+		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, dialogueBoxTargetXSize, 6.25 * k_deltaTime);
+	}
 
 	// Dialogue base
 	{
@@ -1742,7 +1750,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
-		SDL_SetTextureAlphaMod(atlas, 255);
+
+		float opacity = 255.f;
+		if (_currentDialogue.hasEnded)
+		{
+			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
+			{
+				opacity = 0.f;
+			}
+		}
+
+		SDL_SetTextureAlphaMod(atlas, (int8_t)opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1760,7 +1778,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(atlas, 255);
+
+		float opacity = 255.f;
+		if (_currentDialogue.hasEnded)
+		{
+			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
+			{
+				opacity = 0.f;
+			}
+		}
+
+		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1803,6 +1831,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
 		}
 		else
+		{
+			c.opacity = 0.f;
+		}
+
+		if (_currentDialogue.hasEnded && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x)
 		{
 			c.opacity = 0.f;
 		}
