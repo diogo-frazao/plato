@@ -1835,7 +1835,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
-		if (_currentDialogue.hasEnded && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x)
+		if (_currentDialogue.hasEnded && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x + c.size.x + c.size.x - _currentDialogue.topLeftPosition.x)
 		{
 			c.opacity = 0.f;
 		}
@@ -1858,10 +1858,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		dest.w = k_dialogueEndedIndicatorSize.x;
 		dest.h = k_dialogueEndedIndicatorSize.y;
 
-		// Since this is on the same texture as the font characters, we don't need to override the opacity
-		// This will make it only visible when the last character is also visible
+
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
+
+		if (_currentDialogue.hasEnded)
+		{
+			SDL_SetTextureAlphaMod(fontAtlas, 0);
+		}
+		// Don't do anything for else, since this is on the same texture as the font characters, we don't need to override the opacity
+		// This will make it only visible when the last character is also visible
+
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 	}
 
