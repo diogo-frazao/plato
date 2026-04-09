@@ -1537,6 +1537,12 @@ void UISystem::update()
 		}
 	}
 	
+	// Destroy dialogue if has ended and it's not visible anymore
+	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.hasEnded)
+	{
+		_currentDialogue.destroyDialoge();
+		D_LOG(WARNING, "Dialogue destroyed")
+	}
 
 #ifndef RELEASE_BUILD
 	// Destroy dialogue and reconstruct
@@ -1565,7 +1571,7 @@ void UISystem::update()
 		}
 	}
 
-	// Choose dialogue option
+	// Handle dialogue options
 	{
 		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 		if (!doesDialogueHaveOptions)
@@ -1586,6 +1592,15 @@ void UISystem::update()
 			bool canReactToHoverFeedback = (dialogueOption.state == DIALOGUE_OPTION_IDLE_STATE) || (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE);
 			bool isMouseHoverOption = aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider);
 
+			// End current dialogue and destroy dialogue options when the fade out of the chosen option is complete
+			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 5 && !_currentDialogue.hasEnded;
+			if (canRequestDialogueToEnd)
+			{
+				_currentDialogue.hasEnded = true;
+				for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
+				return;
+			}
+
 			if (isMouseHoverOption)
 			{
 				if (canReactToHoverFeedback)
@@ -1599,11 +1614,13 @@ void UISystem::update()
 					isHoverOption = true;
 				}
 
+				// Choose dialogue option
 				if (wasChooseDialogueOptionKeyPressedThisFrame())
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
 					dialogueOption.backgroundSpriteColor = { 108, 26, 86, 255 };
 					dialogueOption.hoveredBorderSpriteColor = { 108, 26, 86, 255 };
+					startTimer(dialogueOption.fadeOutTimer);
 
 					// Change all the other options to be NOT_CHOSEN
 					for (DialogueOption& option : _dialogueOptions) { if (option.state == dialogueOption.state) continue; option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE; }
@@ -1617,6 +1634,7 @@ void UISystem::update()
 
 		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 50 : 255;
 	}
+
 }
 
 void UISystem::skipDialogue()
@@ -1648,15 +1666,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 	// Animate dialogue box size
 	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
-
-	if (_currentDialogue.hasEnded)
-	{
-		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, 0.f, 6.25 * k_deltaTime);
-	}
-	else
-	{
-		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, dialogueBoxTargetXSize, 6.25 * k_deltaTime);
-	}
+	float currentTargetXSize = _currentDialogue.hasEnded ? 0.f : dialogueBoxTargetXSize;
+	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
 
 	// Dialogue base
 	{
@@ -1914,7 +1925,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
 				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
 
-				dialogueOption.opacity = 255.f;
+				dialogueOption.fadeOutTimer += k_deltaTime;
+				if(dialogueOption.fadeOutTimer >= 2.f)
+				{
+					dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
+				}
+				else
+				{
+					dialogueOption.opacity = 255.f;
+				}
 				break;
 			case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
 				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };

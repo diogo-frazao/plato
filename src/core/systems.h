@@ -217,6 +217,7 @@ public:
 
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
+		float fadeOutTimer = 0.f;
 		// Used to fade out when another option is selected. 
 		// This controls the opacity of everything rendered for a dialogue option (text + sprites)
 		float opacity = 255.f;
@@ -244,6 +245,7 @@ public:
 			this->opacity = 255.f;
 			this->backgroundSpriteColor = { 0, 0, 0, 0 };
 			this->hoveredBorderSpriteColor = { 0, 0, 0, 0};
+			this->fadeOutTimer = 0.f;
 		}
 
 		bool isValid()
