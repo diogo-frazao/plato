@@ -1579,7 +1579,7 @@ void UISystem::update()
 			return;
 		}
 
-		RectCollider mouseCollider{ {0,0}, {1, 1} };
+		static RectCollider mouseCollider{ {0,0}, {1, 1} };
 		bool isHoverOption = false;
 
 		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
@@ -1593,7 +1593,7 @@ void UISystem::update()
 			bool isMouseHoverOption = aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider);
 
 			// End current dialogue and destroy dialogue options when the fade out of the chosen option is complete
-			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 5 && !_currentDialogue.hasEnded;
+			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 50 && !_currentDialogue.hasEnded;
 			if (canRequestDialogueToEnd)
 			{
 				_currentDialogue.hasEnded = true;
@@ -1615,7 +1615,7 @@ void UISystem::update()
 				}
 
 				// Choose dialogue option
-				if (wasChooseDialogueOptionKeyPressedThisFrame())
+				if (wasChooseDialogueOptionKeyPressedThisFrame() && dialogueOption.state != DIALOGUE_OPTION_CHOSEN_STATE)
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
 					dialogueOption.backgroundSpriteColor = { 108, 26, 86, 255 };
@@ -1916,6 +1916,14 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				// No need to set the hovered border color since it's not visible on idle
 				break;
 			case DIALOGUE_OPTION_HOVERED_STATE:
+				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
+				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
+				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
+
+				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+				break;
 			case DIALOGUE_OPTION_CHOSEN_STATE:
 				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
 				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
