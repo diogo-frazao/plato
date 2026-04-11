@@ -181,7 +181,10 @@ public:
 		Vec2 position{ 0.f, 0.f };
 		Vec2 size{ 0.f, 0.f };
 		float secondsToStartShowingCharacter = 0.f;
+
+		// Changed at runtime
 		float opacity = 0.f;
+		float dynamicYSize = 0.f;
 
 		bool isValid()
 		{
@@ -195,6 +198,7 @@ public:
 			this->size = { 0.f, 0.f };
 			this->secondsToStartShowingCharacter = 0.f;
 			this->opacity = 0.f;
+			this->dynamicYSize = 0.f;
 		}
 	};
 
@@ -218,6 +222,8 @@ public:
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		float fadeOutTimer = 0.f;
+		float dialogueBoxDynamicYSize = 0.f;
+		float secondsToStartShowingOption = 0.f;
 		// Used to fade out when another option is selected. 
 		// This controls the opacity of everything rendered for a dialogue option (text + sprites)
 		float opacity = 255.f;
@@ -246,6 +252,8 @@ public:
 			this->backgroundSpriteColor = { 0, 0, 0, 0 };
 			this->hoveredBorderSpriteColor = { 0, 0, 0, 0};
 			this->fadeOutTimer = 0.f;
+			this->dialogueBoxDynamicYSize = 0.f;
+			this->secondsToStartShowingOption = 0.f;
 		}
 
 		bool isValid()

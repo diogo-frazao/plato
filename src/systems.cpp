@@ -1803,7 +1803,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
-	// Draw each character
+	// Main dialogue draw each character
 	bool hasDialogueFinished = false;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
@@ -1907,51 +1907,49 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		// Dynamic colors + opacity for dialogue options
+		switch (dialogueOption.state)
 		{
-			switch (dialogueOption.state)
+		case DIALOGUE_OPTION_IDLE_STATE:
+			dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+			dialogueOption.opacity = 255.f;
+			// No need to set the hovered border color since it's not visible on idle
+			break;
+		case DIALOGUE_OPTION_HOVERED_STATE:
+			dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
+			dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
+			dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
+
+			dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+			dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+			dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+			break;
+		case DIALOGUE_OPTION_CHOSEN_STATE:
+			dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.02f);
+			dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.02f);
+			dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.02f);
+
+			dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+			dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+			dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+
+			dialogueOption.fadeOutTimer += k_deltaTime;
+			if(dialogueOption.fadeOutTimer >= 1.f)
 			{
-			case DIALOGUE_OPTION_IDLE_STATE:
-				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
-				dialogueOption.opacity = 255.f;
-				// No need to set the hovered border color since it's not visible on idle
-				break;
-			case DIALOGUE_OPTION_HOVERED_STATE:
-				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
-				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
-				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
-
-				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
-				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
-				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
-				break;
-			case DIALOGUE_OPTION_CHOSEN_STATE:
-				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
-				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
-				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
-
-				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
-				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
-				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
-
-				dialogueOption.fadeOutTimer += k_deltaTime;
-				if(dialogueOption.fadeOutTimer >= 2.f)
-				{
-					dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
-				}
-				else
-				{
-					dialogueOption.opacity = 255.f;
-				}
-				break;
-			case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
-				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
 				dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
-				// No need to set the hovered border color since it's not visible on idle
-				break;
-			default:
-				D_ASSERT(false, "Unsupported dialogue option state");
-				break;
 			}
+			else
+			{
+				dialogueOption.opacity = 255.f;
+			}
+			break;
+		case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
+			dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+			dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
+			// No need to set the hovered border color since it's not visible on idle
+			break;
+		default:
+			D_ASSERT(false, "Unsupported dialogue option state");
+			break;
 		}
 
 		// Take the position of the first character since it's where we start
@@ -1962,6 +1960,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			// Reuse the same texture since it's a white 1x1 pixel
 			DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
 
+			float targetDialogueBoxYSize = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+
+			if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
+			{
+				dialogueOption.dialogueBoxDynamicYSize = lerp(dialogueOption.dialogueBoxDynamicYSize, targetDialogueBoxYSize, 0.1f);
+			}
+			else
+			{
+				dialogueOption.dialogueBoxDynamicYSize = 0.f;
+			}
+
 			src.x = speechBubbleSprite.atlasOffset.x;
 			src.y = speechBubbleSprite.atlasOffset.y;
 			src.w = speechBubbleSprite.spriteSize.x;
@@ -1970,7 +1979,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x;
 			dest.y = topLeftDialogueOptionPosition.y - dialogueOptionsOuterPadding.y;
 			dest.w = dialogueOption.dialogueBoxSize.x + (dialogueOptionsOuterPadding.x * 2.f);
-			dest.h = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+			dest.h = dialogueOption.dialogueBoxDynamicYSize;
 			dialogueOption.colliderDest = dest;
 
 			SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
@@ -1993,8 +2002,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = dest.x + dest.w;
 			dest.y = dest.y;
 			dest.w = k_dialogueOptionBorderSize.x;
-			dest.h = k_dialogueOptionBorderSize.y;
+			// Don't override dest.y since we can share the one used for option's dialogue box
 
+			// Adjust collider to match the dialogue box considering the borders
 			dialogueOption.colliderDest.x -= k_dialogueOptionBorderSize.x;
 			dialogueOption.colliderDest.w += k_dialogueOptionBorderSize.x * 2.f;
 
@@ -2016,7 +2026,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				src.h = hoveredBorderSprite.spriteSize.y;
 
 				dest.w = k_dialogueHoveredBorderSize.x;
-				dest.h = k_dialogueHoveredBorderSize.y;
+				// Don't override dest.y since we can share the one used for option's dialogue box
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
@@ -2033,7 +2043,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = topLeftDialogueOptionPosition.x - dialogueOptionsOuterPadding.x - k_dialogueOptionBorderSize.x;
 			dest.y = dest.y;
 			dest.w = k_dialogueOptionBorderSize.x;
-			dest.h = k_dialogueOptionBorderSize.y;
+			// Don't override dest.y since we can share the one used for option's dialogue box
 
 			SDL_SetTextureColorMod(atlas, dialogueOption.backgroundSpriteColor.r, dialogueOption.backgroundSpriteColor.g, dialogueOption.backgroundSpriteColor.b);
 			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
@@ -2050,7 +2060,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				src.h = hoveredBorderSprite.spriteSize.y;
 
 				dest.w = k_dialogueHoveredBorderSize.x;
-				dest.h = k_dialogueHoveredBorderSize.y;
+				// Don't override dest.y since we can share the one used for option's dialogue box
 
 				SDL_Texture* atlas = renderingSystem->loadAtlas(hoveredBorderSprite.atlasType);
 
@@ -2079,8 +2089,17 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = c.position.x;
 			dest.y = c.position.y;
 			dest.w = c.size.x;
-			dest.h = c.size.y;
 
+			if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
+			{
+				c.dynamicYSize = lerp(c.dynamicYSize, c.size.y, 0.25f);
+			}
+			else
+			{
+				c.dynamicYSize = 0.f;
+			}
+
+			dest.h = c.dynamicYSize;
 			c.opacity = dialogueOption.opacity;
 
 			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
@@ -2220,7 +2239,9 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;
 	_currentDialogue.dialogueType = dialogueTextType;
+	_currentDialogue.timeSinceDialogueStarted = 0.f;
 
+	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{
 		char c = textToShow[i];
@@ -2272,7 +2293,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		currentHorizontalSpaceBetweenCharacters += k_characterSize.x + k_pixelsBetweenCharacters;
 	}
 
-	// Dialogue speech bubble sprite
+	// Main Dialogue speech bubble sprite
 	{
 		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
 		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
@@ -2292,6 +2313,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 	Vec2 dialogueOptionsBottomCenterPositions[k_maxDialogueOptions] = { { k_baseGameWidth * 0.5f, 155.f } , { k_baseGameWidth * 0.5f, 165.f } , { k_baseGameWidth * 0.5f, 175.f } };
 
+	// Dialogue options characters + speech bubble
 	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
 	{
 		_dialogueOptions[optionIndex].destroyDialogueOption();
@@ -2339,7 +2361,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 			dialogueCharacter.position = { dest.x, dest.y };
 			dialogueCharacter.size = { k_characterSize };
-			dialogueCharacter.secondsToStartShowingCharacter = 0.2f;
+			dialogueCharacter.dynamicYSize = 0.f;
 
 			// We only break to a new line if it's a space character. This avoids breaking words in half
 			bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
@@ -2362,11 +2384,16 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 		// Dialogue option speech bubble
 		{
+			DialogueOption& dialogueOption = _dialogueOptions[optionIndex];
+
 			bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
-			_dialogueOptions[optionIndex].dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
+			dialogueOption.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
 
 			float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
-			_dialogueOptions[optionIndex].dialogueBoxSize.y = yPosWhereLastLineEnds;
+			dialogueOption.dialogueBoxSize.y = yPosWhereLastLineEnds;
+
+			dialogueOption.dialogueBoxDynamicYSize = 0.f;
+			dialogueOption.secondsToStartShowingOption = optionIndex * 0.2f;
 		}
 	}
 
