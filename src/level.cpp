@@ -427,7 +427,12 @@ void ECSLevel::update()
             _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_2, { ROSTOV_DAD_PHONE_2_1, ROSTOV_DAD_PHONE_2_2, ROSTOV_DAD_PHONE_2_3});
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_DAD_PHONE_2))
+        if (_uiSystem.hasChosenOption(ROSTOV_DAD_PHONE_2_2))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_1);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(DEBUG_TEXT))
         {
             _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_1);
         }

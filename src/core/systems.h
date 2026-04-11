@@ -277,6 +277,8 @@ public:
 		DialogueAlignmentType alignmentType = DIALOGUE_CENTERED;
 		// Used to animate the dialogue box from left to right
 		float dialogueBoxDynamicXSize = 0.f;
+		// Only matters if the current dialogue has options
+		TextType dialogueOptionChosen = INVALID_TEXT;
 
 		void destroyDialoge()
 		{
@@ -298,6 +300,7 @@ public:
 			this->alignmentType = DIALOGUE_CENTERED;
 			this->dialogueBoxDynamicXSize = 0.f;
 			this->dialogueType = INVALID_TEXT;
+			this->dialogueOptionChosen = INVALID_TEXT;
 		}
 	};
 
@@ -318,6 +321,7 @@ public:
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
 
 	bool hasDialogueFinihsed(TextType dialogueType);
+	bool hasChosenOption(TextType dialogueType);
 	void skipDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.

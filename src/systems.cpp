@@ -1597,6 +1597,8 @@ void UISystem::update()
 			if (canRequestDialogueToEnd)
 			{
 				_currentDialogue.hasEnded = true;
+				_currentDialogue.dialogueOptionChosen = dialogueOption.dialogueType;
+				CrosshairSystem::s_corsshairOpacity = 255;
 				for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
 				return;
 			}
@@ -2202,6 +2204,11 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 {
 	return (_currentDialogue.dialogueType == dialogueType) && _currentDialogue.hasEnded;
+}
+
+bool UISystem::hasChosenOption(TextType dialogueType)
+{
+	return _currentDialogue.hasEnded && (_currentDialogue.dialogueOptionChosen == dialogueType);
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
