@@ -417,24 +417,33 @@ void ECSLevel::update()
             float k_timeToShowCellphoneFirstTime = 1.f;
             if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
             {
-                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ROSTOV_DAD_PHONE_1);
+                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ROSTOV_MARKETING_PHONE_1);
                 invalidateTimer(cellphoneCallTutorialTimer);
             }
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_DAD_PHONE_1))
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_1))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_2, { ROSTOV_DAD_PHONE_2_1, ROSTOV_DAD_PHONE_2_2, ROSTOV_DAD_PHONE_2_3});
+            _uiSystem.pushCellphoneDialogue(ETC_TEXT);
         }
 
-        if (_uiSystem.hasChosenOption(ROSTOV_DAD_PHONE_2_2))
+        if (_uiSystem.hasDialogueFinihsed(ETC_TEXT))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_1);
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_2, {ROSTOV_MARKETING_PHONE_2_1, ROSTOV_MARKETING_PHONE_2_2});
         }
 
-        if (_uiSystem.hasDialogueFinihsed(DEBUG_TEXT))
+        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_2_2))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_DAD_PHONE_1);
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_3);
+        }
+        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_2_1))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_4, { ROSTOV_MARKETING_PHONE_4_1, ROSTOV_MARKETING_PHONE_4_2, ROSTOV_MARKETING_PHONE_4_3 });
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_3))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_4, {ROSTOV_MARKETING_PHONE_4_1, ROSTOV_MARKETING_PHONE_4_2, ROSTOV_MARKETING_PHONE_4_3});
         }
     }
 
@@ -519,6 +528,8 @@ void ECSLevel::imguiRender()
     Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
     ImGui::Text("Mouse World X: %f", mouseWorldPosition.x);
     ImGui::Text("Mouse World Y: %f", mouseWorldPosition.y);
+    ImGui::Text("Mouse Screen X: %f", s_mousePositionThisFrameInScreenSpace.x);
+    ImGui::Text("Mouse Screen Y: %f", s_mousePositionThisFrameInScreenSpace.y);
 
     ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
     ImGui::Checkbox("Debug UI colliders", &s_debugUICollidersEnabled);

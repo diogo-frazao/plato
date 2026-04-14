@@ -1476,7 +1476,6 @@ float k_secondsBetweenEachCharacter = 0.055f;
 // Characters details (may change at runtime)
 uint8_t k_pixelsBetweenCharacters = 1;
 uint8_t k_pixelsBetweenNewLine = 5;
-uint16_t k_maxCharacterPerLine = 35;
 
 // UI related sizes
 Vec2 k_characterSize = { k_characterSizeOnAtlas.x / k_UIToGameCanvasScale,
@@ -1549,7 +1548,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushCellphoneDialogue(DEBUG_TEXT);
+		pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_1);
 	}
 #endif // !RELEASE_BUILD
 
@@ -2139,7 +2138,7 @@ void UISystem::debugColliders()
 
 // Dpending on alignmentType the position should be different things.
 // IF it's CENTERED, position should be bottom center pos. If it's left aligned, should be bottom left pos.
-Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType)
+Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType, uint8_t maxCharactersPerLine = 35)
 {
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
 	uint32_t currentVerticalSpaceBetweenCharacters = 0;
@@ -2153,7 +2152,7 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 		bool isSpaceCharacter = (c == 32);
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
-		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);
 		if (shouldBreakToNewLine)
 		{
 			if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
@@ -2169,6 +2168,12 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 
 		// If we won't break to a new line, add spacing between the characters
 		currentHorizontalSpaceBetweenCharacters += k_characterSize.x + k_pixelsBetweenCharacters;
+
+		// Also check outside because the longest line might be the last oen
+		if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
+		{
+			maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
+		}
 	}
 
 	// Calculate dialogue box size
@@ -2220,10 +2225,10 @@ void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType
 void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
 	Vec2 k_positionToDrawCellphoneDialogue = { 20, 151 };
-	pushDialogue(dialogueTextType, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED);
+	pushDialogue(dialogueTextType, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED, true);
 }
 
-void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType, bool isCellphoneDialogue)
 {
 	const char* textToShow = getText(dialogueTextType);
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
@@ -2242,7 +2247,13 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	uint16_t charactersOnCurrentLineCounter = 0;
 	float maxXDialogueSize = 0;
 
-	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType);
+	uint8_t maxCharactersPerLine = 35;
+	if (isCellphoneDialogue)
+	{
+		maxCharactersPerLine = 25;
+	}
+
+	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;
 	_currentDialogue.dialogueType = dialogueTextType;
@@ -2282,7 +2293,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * i);
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
-		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);
 		if (shouldBreakToNewLine)
 		{
 			if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
@@ -2298,6 +2309,13 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 		// If we won't break to a new line, add spacing between the characters
 		currentHorizontalSpaceBetweenCharacters += k_characterSize.x + k_pixelsBetweenCharacters;
+
+		// This will only be executed if the very last word makes the dialogue box go beyond maxXDialogueSize
+		// As a safeguard, also update maxXDialogueSize for the text to not be drawn outside
+		if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)
+		{
+			maxXDialogueSize = currentHorizontalSpaceBetweenCharacters;
+		}
 	}
 
 	// Main Dialogue speech bubble sprite
@@ -2319,6 +2337,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	}
 
 	Vec2 dialogueOptionsBottomCenterPositions[k_maxDialogueOptions] = { { k_baseGameWidth * 0.5f, 155.f } , { k_baseGameWidth * 0.5f, 165.f } , { k_baseGameWidth * 0.5f, 175.f } };
+	maxCharactersPerLine = 35;
 
 	// Dialogue options characters + speech bubble
 	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
@@ -2336,7 +2355,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		maxXDialogueSize = 0;
 
 		const char* optionText = getText(dialogueOptions.options[optionIndex]);
-		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsBottomCenterPositions[optionIndex], DIALOGUE_CENTERED);
+		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsBottomCenterPositions[optionIndex], DIALOGUE_CENTERED, maxCharactersPerLine);
 
 		for (int i = 0; optionText[i] != '\0'; ++i)
 		{
@@ -2371,7 +2390,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			dialogueCharacter.dynamicYSize = 0.f;
 
 			// We only break to a new line if it's a space character. This avoids breaking words in half
-			bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= k_maxCharacterPerLine && isSpaceCharacter);
+			bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);
 			if (shouldBreakToNewLine)
 			{
 				if (currentHorizontalSpaceBetweenCharacters > maxXDialogueSize)

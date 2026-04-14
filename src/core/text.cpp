@@ -10,16 +10,26 @@ const char* getText(TextType textType)
 		return "Invalid Text";
 	case DEBUG_TEXT:
 		return "yes yes of course";
-	case ROSTOV_DAD_PHONE_1:
-		return "halo?";
-	case ROSTOV_DAD_PHONE_2:
-		return "haloooo? rostov?";
-	case ROSTOV_DAD_PHONE_2_1:
-		return "yes it's indeed very alarming my friend";
-	case ROSTOV_DAD_PHONE_2_2:
-		return "I heard a commotion dowstairs and it's";
-	case ROSTOV_DAD_PHONE_2_3:
-		return "mamaco peludo";
+	case ETC_TEXT:
+		return "...";
+	case ROSTOV_MARKETING_PHONE_1:
+		return "hello?";
+	case ROSTOV_MARKETING_PHONE_2:
+		return "do i have the pleasure of speaking with Mr.Rostov?";
+	case ROSTOV_MARKETING_PHONE_2_1:
+		return "yes...";
+	case ROSTOV_MARKETING_PHONE_2_2:
+		return "i don't know";
+	case ROSTOV_MARKETING_PHONE_3:
+		return "well fear not sir, because even if you're not Mr.Rostov";
+	case ROSTOV_MARKETING_PHONE_4:
+		return "i call you with good news sir!";
+	case ROSTOV_MARKETING_PHONE_4_1:
+		return "who are you?";
+	case ROSTOV_MARKETING_PHONE_4_2:
+		return "i am not interested";
+	case ROSTOV_MARKETING_PHONE_4_3:
+		return "< say nothing >";
 	}
 
 	D_ASSERT(false, "Invalid text for type: %i", textType);
