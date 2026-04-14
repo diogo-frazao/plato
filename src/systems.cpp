@@ -1898,7 +1898,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		return;
 	}
 
-	Vec2 dialogueOptionsOuterPadding{ 1.5f, 2.5f };
+	Vec2 dialogueOptionsOuterPadding{ 10.f, 2.75f };
 
 	for (DialogueOption& dialogueOption : _dialogueOptions)
 	{
