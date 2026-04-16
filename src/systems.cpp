@@ -2419,7 +2419,12 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			dialogueOption.dialogueBoxSize.y = yPosWhereLastLineEnds;
 
 			dialogueOption.dialogueBoxDynamicYSize = 0.f;
-			dialogueOption.secondsToStartShowingOption = optionIndex * 0.2f;
+
+			// Dialogue options appear close to the finishing of the main dialogue
+			int32_t characterIndexToStartShowingOptions = max(strlen(textToShow) - 10, 0);
+			float baseSecondsToWaitBeforeShowingOptions = _currentDialogue.characters[characterIndexToStartShowingOptions].secondsToStartShowingCharacter;
+
+			dialogueOption.secondsToStartShowingOption = baseSecondsToWaitBeforeShowingOptions + (optionIndex * 0.2f);
 		}
 	}
 
