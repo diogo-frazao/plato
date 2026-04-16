@@ -9,6 +9,8 @@ int lightThatFollowsPlayerEntityId = k_invalidId;
 
 static bool s_isInsideRestaurant = false;
 
+float k_restaurantBaseY = 60.f;
+
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
     Entity& block = addEntity();
@@ -170,10 +172,10 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& restaurant = addEntity({ 14, 69 });
+        Entity& restaurant = addEntity({ 14, k_restaurantBaseY });
         addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
-        createBlockAtPositionWithSize({ 24, 152 }, { 81, 11 });
-        createBlockAtPositionWithSize({ 104, 144 }, { 488, 18 });
+        createBlockAtPositionWithSize({ 24, k_restaurantBaseY + 83.f }, { 81, 11 });
+        createBlockAtPositionWithSize({ 104, k_restaurantBaseY + 75.f }, { 488, 18 });
     }
 
     {
@@ -193,7 +195,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 255, 167, 0, 17 };
         t->scale = { 1.f, 1.f };
-        t->position = { 270, 55 };
+        t->position = { 270, k_restaurantBaseY - 14.f };
     }
 
     {
@@ -203,7 +205,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 228, 228, 66, 40 };
         t->scale = { 0.65f, 0.15f };
-        t->position = { 62, 68 };
+        t->position = { 62, k_restaurantBaseY - 1.f };
     }
 
     {
@@ -213,7 +215,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 228, 228, 66, 40 };
         t->scale = { 0.65f, 0.15f };
-        t->position = { 305, 70 };
+        t->position = { 305, k_restaurantBaseY + 1.f };
     }
 
     {
@@ -223,7 +225,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 0, 255, 50, 20 };
         t->scale = { 1.3f, 0.8f };
-        t->position = { 10, 95 };
+        t->position = { 10, k_restaurantBaseY + 26.f };
     }
 
     {
@@ -233,7 +235,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 255, 255, 255, 15 };
         t->scale = { 0.8f, 0.45f };
-        t->position = { 106, 98 };
+        t->position = { 106, k_restaurantBaseY + 29.f };
     }
 
     {
@@ -243,7 +245,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 0, 240, 255, 37 };
         t->scale = { 1.f, 1.f };
-        t->position = { 170, 54 };
+        t->position = { 170, k_restaurantBaseY - 15.f };
     }
 
     {
@@ -253,7 +255,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 255, 77, 0, 25 };
         t->scale = { 0.47f, 0.47f };
-        t->position = { 325, 100 };
+        t->position = { 325, k_restaurantBaseY + 31.f };
     }
 
     {
@@ -263,7 +265,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 215, 218, 143, 46 };
         t->scale = { 1.25f, 1.25f };
-        t->position = { 463, 85 };
+        t->position = { 463, k_restaurantBaseY + 16.f };
     }
 
     {
@@ -273,7 +275,7 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 253, 204, 106, 40 };
         t->scale = { 0.25f, 0.25f };
-        t->position = { 495 + 2, 100 + 3 };
+        t->position = { 495 + 2, k_restaurantBaseY + 34.f };
     }
 
     {
@@ -281,7 +283,7 @@ void setupInsideRestaurantScene()
         TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
         s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
-        t->position = { 24, 144 };
+        t->position = { 24, k_restaurantBaseY + 75.f };
     }
 }
 
@@ -306,7 +308,7 @@ void ECSLevel::start()
 	_renderingSystem.createLightsBuffers();
     _uiSystem.start();
 
-    Entity& player = addEntity({ 490, 117 });
+    Entity& player = addEntity({ 490, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
@@ -444,6 +446,35 @@ void ECSLevel::update()
         if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_3))
         {
             _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_4, {ROSTOV_MARKETING_PHONE_4_1, ROSTOV_MARKETING_PHONE_4_2, ROSTOV_MARKETING_PHONE_4_3});
+        }
+
+        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_1) || _uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_2))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_5);
+        }
+        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_3))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_6);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_5))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_6);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_6))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_7);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_7))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_8);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_8))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_9, {ROSTOV_MARKETING_PHONE_9_1, ROSTOV_MARKETING_PHONE_9_2, ROSTOV_MARKETING_PHONE_9_3});
         }
     }
 

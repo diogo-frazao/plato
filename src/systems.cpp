@@ -1550,6 +1550,12 @@ void UISystem::update()
 		D_LOG(LOG, "Dialogue recreated");
 		pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_1);
 	}
+
+	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
+	{
+		pushCellphoneDialogue(_currentDialogue.dialogueType);
+	}
+
 #endif // !RELEASE_BUILD
 
 	// Skip dialogue
@@ -2329,6 +2335,8 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;
 	}
 
+
+	for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
 	// Dialogue options
 	bool hasDialogueOptions = (dialogueOptions.options[0] != INVALID_TEXT);
 	if (!hasDialogueOptions)
