@@ -35,7 +35,7 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_6:
 		return "mr.Rostov, i have to say, i'm a person just like you";
 	case ROSTOV_MARKETING_PHONE_7:
-		return "i know how frustrating it is to use the trains in this city. always late and overcrowded!";
+		return "i know how frustrating it is to use the trains in this city. always overcrowded and late!";
 	case ROSTOV_MARKETING_PHONE_8:
 		return "but now imagine if you could track the trains' locations in real time from your very phone!!";
 	case ROSTOV_MARKETING_PHONE_9:
@@ -46,6 +46,20 @@ const char* getText(TextType textType)
 		return "PERFECT";
 	case ROSTOV_MARKETING_PHONE_9_3:
 		return "again, i am not interested";
+	case ROSTOV_MARKETING_PHONE_10:
+		return "EXACTLY";
+	case ROSTOV_MARKETING_PHONE_11:
+		return "wait sir now i'm sure i'll convince you";
+	case ROSTOV_MARKETING_PHONE_12:
+		return "this technology comes from Father Edward's research department directly!";
+	case ROSTOV_MARKETING_PHONE_13:
+		return "and for the very very low price of just 499D, mr Rostov will have access to this app";
+	case ROSTOV_MARKETING_PHONE_13_1:
+		return "< hang up >";
+	case ROSTOV_MARKETING_PHONE_13_2:
+		return "i don't want anything from that cult";
+	case ROSTOV_MARKETING_PHONE_13_3:
+		return "< say nothing >";
 	}
 
 	D_ASSERT(false, "Invalid text for type: %i", textType);

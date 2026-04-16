@@ -476,6 +476,25 @@ void ECSLevel::update()
         {
             _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_9, {ROSTOV_MARKETING_PHONE_9_1, ROSTOV_MARKETING_PHONE_9_2, ROSTOV_MARKETING_PHONE_9_3});
         }
+
+        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_9_2))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_10);
+        }
+        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_9_3))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_11);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_10) || _uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_11))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_12);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_12))
+        {
+            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_13, { ROSTOV_MARKETING_PHONE_13_1, ROSTOV_MARKETING_PHONE_13_2, ROSTOV_MARKETING_PHONE_13_3 });
+        }
     }
 
     static float cameraOffsetXFromPlayer = 50.f;
