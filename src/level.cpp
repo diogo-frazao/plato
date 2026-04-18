@@ -497,7 +497,7 @@ void ECSLevel::update()
         }
     }
 
-    static float cameraOffsetXFromPlayer = 0.f;
+    static float cameraOffsetXFromPlayer = 20.f;
     // After all systems, update camera
     {
         _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;

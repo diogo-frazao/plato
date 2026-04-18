@@ -1437,6 +1437,7 @@ enum DialgueSpriteType
 	DIALOGUE_FINISHED_INDICATOR_SPRITE,
 	DIALOGUE_OPTION_BORDER_SPRITE,
 	DIALOGUE_OPTION_HOVERED_BORDER_SPRITE,
+	DIALOGUE_TENSION_FADE_SPRITE,
 	DIALOGUE_SPRITE_COUNT
 };
 
@@ -1446,7 +1447,8 @@ DialogueBoxSprite k_dialogueSpeechSprites[DIALOGUE_SPRITE_COUNT] = {
 	{FONT_ATLAS, {93, 1}, {10,8}},  // Dialogue indicator outline
 	{FONT_ATLAS, {1, 1},  {5, 3}},	// Dialogue finished indicator
 	{FONT_ATLAS, {1, 7},  {4, 22}},	// Dialogue option border
-	{FONT_ATLAS, {1, 39}, {5, 22}}	// Dialogue option hovered border
+	{FONT_ATLAS, {1, 39}, {5, 22}},	// Dialogue option hovered border,
+	{FONT_ATLAS, {146, 1}, {15, 5}}	// Dialogue tension border,
 };
 
 // Things I noticed about the font:
@@ -1471,7 +1473,7 @@ float k_secondsToStartShowingFirstCharacter = 0.3f;
 float k_dialogueOutlineHeight = 0.75f;
 
 float k_secondsToFadeInEachCharacter = 0.3f;
-float k_secondsBetweenEachCharacter = 0.055f;
+float k_secondsBetweenEachCharacter = 0.035f;
 
 // Characters details (may change at runtime)
 uint8_t k_pixelsBetweenCharacters = 1;
@@ -1489,6 +1491,9 @@ Vec2 k_dialogueOptionBorderSize = { k_dialogueSpeechSprites[DIALOGUE_OPTION_BORD
 
 Vec2 k_dialogueHoveredBorderSize = { k_dialogueSpeechSprites[DIALOGUE_OPTION_HOVERED_BORDER_SPRITE].spriteSize.x / k_UIToGameCanvasScale,
 									  k_dialogueSpeechSprites[DIALOGUE_OPTION_HOVERED_BORDER_SPRITE].spriteSize.y / k_UIToGameCanvasScale };
+
+Vec2 k_tensionFadeSize = { k_dialogueSpeechSprites[DIALOGUE_TENSION_FADE_SPRITE].spriteSize.x / k_UIToGameCanvasScale,
+									  k_dialogueSpeechSprites[DIALOGUE_TENSION_FADE_SPRITE].spriteSize.y / k_UIToGameCanvasScale };
 
 void UISystem::start()
 {
@@ -1912,6 +1917,52 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	{
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
+		
+	// Tension bar
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+
+		src.x = baseSprite.atlasOffset.x;
+		src.y = baseSprite.atlasOffset.y;
+		src.w = baseSprite.spriteSize.x;
+		src.h = baseSprite.spriteSize.y;
+
+		float tensionBarXSize = 90.f;
+
+		dest.x = (k_baseGameWidth * 0.5f) - (tensionBarXSize * 0.5f);
+		dest.y = 144.f;
+		dest.w = tensionBarXSize;
+		dest.h = 1.85f;
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 98, 85, 101);
+		SDL_SetTextureAlphaMod(atlas, 255);
+
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+
+		// Fade out left and right
+		{
+			DialogueBoxSprite& fadeSprite = k_dialogueSpeechSprites[DIALOGUE_TENSION_FADE_SPRITE];
+
+			src.x = fadeSprite.atlasOffset.x;
+			src.y = fadeSprite.atlasOffset.y;
+			src.w = fadeSprite.spriteSize.x;
+			src.h = fadeSprite.spriteSize.y;
+
+			dest.x = dest.x - (k_tensionFadeSize.x);
+			dest.w = k_tensionFadeSize.x;
+
+			SDL_Texture* atlas = renderingSystem->loadAtlas(fadeSprite.atlasType);
+			SDL_SetTextureColorMod(atlas, 98, 85, 101);
+			SDL_SetTextureAlphaMod(atlas, 255);
+
+			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+
+			dest.x = dest.x + (k_tensionFadeSize.x) + tensionBarXSize;
+			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
+		}
+	}
 
 	// Dialogue Options
 	bool hasAtleastOneDialogueOption = _dialogueOptions[0].isValid();
@@ -2038,7 +2089,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 
 			// Hovered border for right side
-			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE || 
+			if (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE ||
 				dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE)
 			{
 				DialogueBoxSprite& hoveredBorderSprite = k_dialogueSpeechSprites[DIALOGUE_OPTION_HOVERED_BORDER_SPRITE];

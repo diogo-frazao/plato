@@ -17,19 +17,19 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_2:
 		return "do i have the pleasure of speaking with mr.Rostov?";
 	case ROSTOV_MARKETING_PHONE_2_1:
-		return "yes...";
+		return "Yes...";
 	case ROSTOV_MARKETING_PHONE_2_2:
-		return "i don't know";
+		return "No...";
 	case ROSTOV_MARKETING_PHONE_3:
 		return "well fear not sir, because even if you're not mr.Rostov";
 	case ROSTOV_MARKETING_PHONE_4:
 		return "i call you with good news sir!";
 	case ROSTOV_MARKETING_PHONE_4_1:
-		return "who are you?";
+		return "Who are you?";
 	case ROSTOV_MARKETING_PHONE_4_2:
-		return "i am not interested";
+		return "I am not interested";
 	case ROSTOV_MARKETING_PHONE_4_3:
-		return "< say nothing >";
+		return "< Say nothing >";
 	case ROSTOV_MARKETING_PHONE_5:
 		return "wait, one moment sir... (clears throat)";
 	case ROSTOV_MARKETING_PHONE_6:
@@ -41,9 +41,9 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_9:
 		return "tell me sir, how perfect would that be?";
 	case ROSTOV_MARKETING_PHONE_9_1:
-		return "can you shut the fuck up?";
+		return "Can you shut the fuck up?";
 	case ROSTOV_MARKETING_PHONE_9_2:
-		return "again, i am not interested";
+		return "Again, i am not interested";
 	case ROSTOV_MARKETING_PHONE_9_3:
 		return "PERFECT";
 	case ROSTOV_MARKETING_PHONE_10:
@@ -55,11 +55,11 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_13:
 		return "and for the very very low price of just 499D, mr Rostov will have access to this app";
 	case ROSTOV_MARKETING_PHONE_13_1:
-		return "< hang up >";
+		return "< Hang up >";
 	case ROSTOV_MARKETING_PHONE_13_2:
-		return "fuck that cult";
+		return "Fuck that cult";
 	case ROSTOV_MARKETING_PHONE_13_3:
-		return "< keep listening >";
+		return "< Keep listening >";
 	}
 
 	D_ASSERT(false, "Invalid text for type: %i", textType);
