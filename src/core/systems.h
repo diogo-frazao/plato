@@ -317,7 +317,7 @@ public:
 	};
 
 	void pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions = {}, 
-					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED, bool isCellphoneDialogue = false);
+					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
 

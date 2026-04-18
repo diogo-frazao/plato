@@ -1779,7 +1779,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_SetTextureAlphaMod(atlas, (int8_t)opacity);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 	}
 
 	// Speech indicator outline
@@ -1807,7 +1807,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_SetTextureAlphaMod(atlas, opacity);
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 	}
 
 	// Main dialogue draw each character
@@ -1876,6 +1876,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		dest.w = k_dialogueEndedIndicatorSize.x;
 		dest.h = k_dialogueEndedIndicatorSize.y;
 
+		if (!_currentDialogue.isScreenSpace)
+		{
+			dest = convertWorldRectToCameraSpace(dest);
+		}
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
@@ -2230,11 +2234,13 @@ void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType
 
 void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
-	Vec2 k_positionToDrawCellphoneDialogue = { 20, 151 };
-	pushDialogue(dialogueTextType, k_positionToDrawCellphoneDialogue, dialogueOptions, true, DIALOGUE_LEFT_ALIGNED, true);
+	Entity& player = getEntityById(k_playerEntityId);
+	Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
+	Vec2 bottomLeftPosForCellphoneDialogue{ playerPos.x + 22, playerPos.y + 9 };
+	pushDialogue(dialogueTextType, bottomLeftPosForCellphoneDialogue, dialogueOptions, false, DIALOGUE_CENTERED);
 }
 
-void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType, bool isCellphoneDialogue)
+void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	const char* textToShow = getText(dialogueTextType);
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
@@ -2254,10 +2260,6 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	float maxXDialogueSize = 0;
 
 	uint8_t maxCharactersPerLine = 35;
-	if (isCellphoneDialogue)
-	{
-		maxCharactersPerLine = 25;
-	}
 
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;
