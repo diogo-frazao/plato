@@ -163,8 +163,9 @@ public:
 
 enum DialogueAlignmentType
 {
-	DIALOGUE_CENTERED,
-	DIALOGUE_LEFT_ALIGNED
+	DIALOGUE_CENTER_ALIGNED,
+	DIALOGUE_LEFT_ALIGNED,
+	DIALOGUE_RIGHT_ALIGNED
 };
 
 class UISystem
@@ -274,7 +275,7 @@ public:
 		float timeSinceFinalCharacterWasDrawn = 0.f;
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
 		Vec2 topLeftPosition{ 0.f,0.f };
-		DialogueAlignmentType alignmentType = DIALOGUE_CENTERED;
+		DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED;
 		// Used to animate the dialogue box from left to right
 		float dialogueBoxDynamicXSize = 0.f;
 		// Only matters if the current dialogue has options
@@ -297,7 +298,7 @@ public:
 			this->timeSinceFinalCharacterWasDrawn = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
 			this->isScreenSpace = false;
-			this->alignmentType = DIALOGUE_CENTERED;
+			this->alignmentType = DIALOGUE_CENTER_ALIGNED;
 			this->dialogueBoxDynamicXSize = 0.f;
 			this->dialogueType = INVALID_TEXT;
 			this->dialogueOptionChosen = INVALID_TEXT;
@@ -317,7 +318,7 @@ public:
 	};
 
 	void pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions = {}, 
-					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTERED);
+					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
 

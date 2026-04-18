@@ -43,9 +43,9 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_9_1:
 		return "can you shut the fuck up?";
 	case ROSTOV_MARKETING_PHONE_9_2:
-		return "PERFECT";
-	case ROSTOV_MARKETING_PHONE_9_3:
 		return "again, i am not interested";
+	case ROSTOV_MARKETING_PHONE_9_3:
+		return "PERFECT";
 	case ROSTOV_MARKETING_PHONE_10:
 		return "EXACTLY";
 	case ROSTOV_MARKETING_PHONE_11:
@@ -57,9 +57,9 @@ const char* getText(TextType textType)
 	case ROSTOV_MARKETING_PHONE_13_1:
 		return "< hang up >";
 	case ROSTOV_MARKETING_PHONE_13_2:
-		return "i don't want anything from that cult";
+		return "fuck that cult";
 	case ROSTOV_MARKETING_PHONE_13_3:
-		return "< say nothing >";
+		return "< keep listening >";
 	}
 
 	D_ASSERT(false, "Invalid text for type: %i", textType);

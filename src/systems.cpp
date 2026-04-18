@@ -1553,7 +1553,16 @@ void UISystem::update()
 
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
 	{
-		pushCellphoneDialogue(_currentDialogue.dialogueType);
+		DialogueOptionsDTO currentDialogueOptions;
+		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
+		{
+			if (_dialogueOptions[i].isValid())
+			{
+				currentDialogueOptions.options[i] = _dialogueOptions[i].dialogueType;
+			}
+		}
+
+		pushCellphoneDialogue(_currentDialogue.dialogueType, currentDialogueOptions);
 	}
 
 #endif // !RELEASE_BUILD
@@ -1743,7 +1752,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Since the last thing drawn was the dialogue outline, use dest directly
 		switch (_currentDialogue.alignmentType)
 		{
-			case DIALOGUE_CENTERED:
+			case DIALOGUE_CENTER_ALIGNED:
 			{
 				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
 				dest.x = textCenterXPos;
@@ -1755,6 +1764,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				dest.x = textLeftAlignedXPos;
 				break;
 			}
+			default:
+				D_ASSERT(false, "Alignment type not supported");
+				break;
 		}
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
@@ -1908,7 +1920,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		return;
 	}
 
-	Vec2 dialogueOptionsOuterPadding{ 10.f, 2.75f };
+	Vec2 dialogueOptionsOuterPadding{ 5.f, 2.75f };
 
 	for (DialogueOption& dialogueOption : _dialogueOptions)
 	{
@@ -2147,7 +2159,7 @@ void UISystem::debugColliders()
 }
 
 // Dpending on alignmentType the position should be different things.
-// IF it's CENTERED, position should be bottom center pos. If it's left aligned, should be bottom left pos.
+// IF it's CENTERED, position should be bottom center pos. If it's left aligned, should be bottom left pos. If it's right aligned, should be bottom right pos
 Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, DialogueAlignmentType alignmentType, uint8_t maxCharactersPerLine = 35)
 {
 	uint32_t currentHorizontalSpaceBetweenCharacters = 0;
@@ -2199,13 +2211,16 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 
 	switch (alignmentType)
 	{
-	case DIALOGUE_CENTERED:
+	case DIALOGUE_CENTER_ALIGNED:
 		// Go to left from center. Position passed as argument must be bottomCenterPosition
 		topLeftPositionToStartDrawingText.x = position.x - (dialogueBoxSize.x / 2);
 		break;
 	case DIALOGUE_LEFT_ALIGNED:
 		// No need to change it. Position passed as arg must be bottomLeftPosition
 		topLeftPositionToStartDrawingText.x = position.x;
+		break;
+	case DIALOGUE_RIGHT_ALIGNED:
+		topLeftPositionToStartDrawingText.x = position.x - dialogueBoxSize.x;
 		break;
 	}
 
@@ -2237,7 +2252,7 @@ void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOp
 	Entity& player = getEntityById(k_playerEntityId);
 	Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
 	Vec2 bottomLeftPosForCellphoneDialogue{ playerPos.x + 22, playerPos.y + 9 };
-	pushDialogue(dialogueTextType, bottomLeftPosForCellphoneDialogue, dialogueOptions, false, DIALOGUE_CENTERED);
+	pushDialogue(dialogueTextType, bottomLeftPosForCellphoneDialogue, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
 }
 
 void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
@@ -2346,8 +2361,11 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		return;
 	}
 
-	Vec2 dialogueOptionsBottomCenterPositions[k_maxDialogueOptions] = { { k_baseGameWidth * 0.5f, 155.f } , { k_baseGameWidth * 0.5f, 165.f } , { k_baseGameWidth * 0.5f, 175.f } };
 	maxCharactersPerLine = 35;
+
+	float screenCenterX = k_baseGameWidth * 0.5f;
+	Vec2 dialogueOptionsStartPosition[k_maxDialogueOptions] = { { screenCenterX - 15.f, 162.f } , { screenCenterX + 15.f, 162.f } , { screenCenterX, 174.f } };
+	DialogueAlignmentType dialogueOptionsAlignmentType[k_maxDialogueOptions] = { DIALOGUE_RIGHT_ALIGNED, DIALOGUE_LEFT_ALIGNED, DIALOGUE_CENTER_ALIGNED };
 
 	// Dialogue options characters + speech bubble
 	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
@@ -2365,7 +2383,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 		maxXDialogueSize = 0;
 
 		const char* optionText = getText(dialogueOptions.options[optionIndex]);
-		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsBottomCenterPositions[optionIndex], DIALOGUE_CENTERED, maxCharactersPerLine);
+		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsStartPosition[optionIndex], dialogueOptionsAlignmentType[optionIndex], maxCharactersPerLine);
 
 		for (int i = 0; optionText[i] != '\0'; ++i)
 		{
