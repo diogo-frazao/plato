@@ -419,81 +419,124 @@ void ECSLevel::update()
             float k_timeToShowCellphoneFirstTime = 1.f;
             if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
             {
-                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ROSTOV_MARKETING_PHONE_1);
+                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
                 invalidateTimer(cellphoneCallTutorialTimer);
             }
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_1))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
         {
-            _uiSystem.pushCellphoneDialogue(ETC_TEXT);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, {MARKETING_PHONE_2_A, MARKETING_PHONE_2_B});
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ETC_TEXT))
+        if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_2, {ROSTOV_MARKETING_PHONE_2_1, ROSTOV_MARKETING_PHONE_2_2});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_A_1);
+        }
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
         }
 
-        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_2_2))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_3);
-        }
-        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_2_1))
-        {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_4, { ROSTOV_MARKETING_PHONE_4_1, ROSTOV_MARKETING_PHONE_4_2, ROSTOV_MARKETING_PHONE_4_3 });
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_2);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_3))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_4, {ROSTOV_MARKETING_PHONE_4_1, ROSTOV_MARKETING_PHONE_4_2, ROSTOV_MARKETING_PHONE_4_3});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, {MARKETING_PHONE_3_A, MARKETING_PHONE_3_B});
         }
 
-        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_1) || _uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_2))
+        if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_5);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_A_1);
         }
-        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_4_3))
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_B))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_6);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_5))
-        {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_6);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_6))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_7);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_2);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_7))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_8);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_8))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_9, {ROSTOV_MARKETING_PHONE_9_1, ROSTOV_MARKETING_PHONE_9_2, ROSTOV_MARKETING_PHONE_9_3});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
         }
 
-        if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_9_2))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_11);
-        }
-        else if (_uiSystem.hasChosenOption(ROSTOV_MARKETING_PHONE_9_3))
-        {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_10);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_10) || _uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_11))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_12);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, MARKETING_PHONE_7_B, MARKETING_PHONE_7_C_LOW_TENSION});
         }
 
-        if (_uiSystem.hasDialogueFinihsed(ROSTOV_MARKETING_PHONE_12))
+        if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
         {
-            _uiSystem.pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_13, { ROSTOV_MARKETING_PHONE_13_1, ROSTOV_MARKETING_PHONE_13_2, ROSTOV_MARKETING_PHONE_13_3 });
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
+        }
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
+        }
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A, MARKETING_PHONE_11_B_LOW_TENSION});
+        }
+
+        if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
+        }
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
         }
     }
 

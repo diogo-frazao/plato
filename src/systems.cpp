@@ -1553,7 +1553,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
-		pushCellphoneDialogue(ROSTOV_MARKETING_PHONE_1);
+		pushCellphoneDialogue(MARKETING_PHONE_1);
 	}
 
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
