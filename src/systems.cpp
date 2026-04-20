@@ -1829,6 +1829,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 	// Main dialogue draw each character
 	bool hasDialogueFinished = false;
+	uint16_t numberOfCharactersOnCurrentDialogue = 0;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
 		DialogueCharacter& c = _currentDialogue.characters[i];
@@ -1840,6 +1841,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			int lastValidCharacterIndex = max(i - 1, 0);
 			DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
 			hasDialogueFinished = lastValidCharacter.opacity > 200;
+			numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
 			break;
 		}
 
@@ -1919,13 +1921,29 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Auto skip dialogue if it doesn't have choices
-	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
-	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 2.f && !doesDialogueHaveOptions)
 	{
-		_currentDialogue.hasEnded = true;
+		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+		float secondsToSkipDialogue = 3.f;
+		if (numberOfCharactersOnCurrentDialogue < 10)
+		{
+			secondsToSkipDialogue = 2.f;
+		}
+
+		if (numberOfCharactersOnCurrentDialogue > 70)
+		{
+			secondsToSkipDialogue = 4.f;
+		}
+
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
+		{
+			D_LOG(MINI, "Number of characters on dialogue: %i", numberOfCharactersOnCurrentDialogue);
+			_currentDialogue.hasEnded = true;
+		}
 	}
+	
 		
 	// Tension bar
+	float tensionBarXSize = 90.f;
 	{
 		// Reuse the same texture since it's a white 1x1 pixel
 		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
@@ -1934,8 +1952,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.y = baseSprite.atlasOffset.y;
 		src.w = baseSprite.spriteSize.x;
 		src.h = baseSprite.spriteSize.y;
-
-		float tensionBarXSize = 90.f;
 
 		dest.x = (k_baseGameWidth * 0.5f) - (tensionBarXSize * 0.5f);
 		dest.y = 144.f;
@@ -1969,6 +1985,26 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = dest.x + (k_tensionFadeSize.x) + tensionBarXSize;
 			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 		}
+	}
+
+	// Tension inside bar
+	float tensionSize = 0.f;
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+		src.x = baseSprite.atlasOffset.x;
+		src.y = baseSprite.atlasOffset.y;
+		src.w = baseSprite.spriteSize.x;
+		src.h = baseSprite.spriteSize.y;
+
+		dest.x = (k_baseGameWidth * 0.5f) - (tensionSize * 0.5f);
+		dest.w = tensionSize;
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 255, 0, 0);
+		SDL_SetTextureAlphaMod(atlas, 255);
+
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
 	// Dialogue Options

@@ -13,21 +13,21 @@ const char* getText(TextType textType)
 	case ETC_TEXT:
 		return "...";
 	case MARKETING_PHONE_1:
-		return "goooooood atfternoon";
+		return "Goooooood afternoon";
 	case MARKETING_PHONE_2:
-		return "do i have the pleasure of speaking with mr.Rostov?";
+		return "Do I have the pleasure of speaking with Mr.ROSTOV?";
 		case MARKETING_PHONE_2_A:
 			return "Yes...";
 			case MARKETING_PHONE_2_A_1:
-				return "PERFECT! i call you with good news sir";
+				return "PERFECT! I call you with good news sir";
 		case MARKETING_PHONE_2_B:
 			return "Who are you?";
 			case MARKETING_PHONE_2_B_1:
-				return "oh";
+				return "Oh";
 			case MARKETING_PHONE_2_B_2:
-				return "my name is Frederico from Kelia's marketing department";
+				return "My name is FREDERICO from Kelia's marketing department";
 	case MARKETING_PHONE_3:
-		return "i bring to you a deal too good to miss!";
+		return "I bring to you a deal too good to miss!";
 		case MARKETING_PHONE_3_A:
 			return "I'm listning";
 			case MARKETING_PHONE_3_A_1:
@@ -37,19 +37,19 @@ const char* getText(TextType textType)
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
-				return "mr.Rostov please listen, i'm sure you'll be interested";
+				return "Mr.ROSTOV please listen, I'm sure you'll be interested";
 	case MARKETING_PHONE_4:
 		return "(clears throath)";
 	case MARKETING_PHONE_5:
-		return "it's with great honor that i present to you sir the newest creation from Father Edward's research department team here at Kelia";
+		return "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at Kelia";
 	case MARKETING_PHONE_6:
 		return "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT";
 	case MARKETING_PHONE_7:
-		return "and what is this creation I hear you ask?";
+		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
 			return "I'm not interested";
 			case MARKETING_PHONE_7_A_1:
-				return "wait sir now I'm sure you'll be interested";
+				return "Wait sir now I'm sure you'll be interested";
 		case MARKETING_PHONE_7_B:
 			return "Shut the fuck up";
 		case MARKETING_PHONE_7_C_LOW_TENSION:
@@ -67,17 +67,17 @@ const char* getText(TextType textType)
 		case MARKETING_PHONE_11_A:
 			return "I don't have the money";
 			case MARKETING_PHONE_11_A_1:
-				return "what do you mean you don't have the money sir?";
+				return "What do you mean you don't have the money?";
 		case MARKETING_PHONE_11_B_LOW_TENSION:
 			return "Still not interested";
 			case MARKETING_PHONE_11_B_1:
-				return "what did you just say?";
+				return "What did you just say?";
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
 			return "< Hang up >";
 	case MARKETING_PHONE_12:
-		return "I bring you the holy technology from Father Edward himself";
+		return "I bring you the holy technology from FATHER EDWARD himself";
 	case MARKETING_PHONE_13:
-		return "a man so humble that still helps those that live outside of Kelia!";
+		return "A man so humble that still helps those that live outside of Kelia!";
 	case MARKETING_PHONE_14:
 		return "and you receive it like this?";
 		case MARKETING_PHONE_14_A:
