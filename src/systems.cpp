@@ -1917,6 +1917,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	{
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
+
+	// Auto skip dialogue if it doesn't have choices
+	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 2.f && !doesDialogueHaveOptions)
+	{
+		_currentDialogue.hasEnded = true;
+	}
 		
 	// Tension bar
 	{
