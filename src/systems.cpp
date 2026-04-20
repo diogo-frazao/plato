@@ -1643,6 +1643,8 @@ void UISystem::update()
 					dialogueOption.hoveredBorderSpriteColor = { 108, 26, 86, 255 };
 					startTimer(dialogueOption.fadeOutTimer);
 
+					s_playerTension += dialogueOption.tensionDelta;
+
 					// Change all the other options to be NOT_CHOSEN
 					for (DialogueOption& option : _dialogueOptions) { if (option.state == dialogueOption.state) continue; option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE; }
 				}
@@ -1917,6 +1919,12 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 	if (hasDialogueFinished)
 	{
+		// Hacky way to only call this once
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
+		{
+			s_playerTension += _currentDialogue.tensionDelta;
+		}
+
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
 
@@ -1988,7 +1996,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Tension inside bar
-	float tensionSize = 0.f;
+	_currentTensionSpriteXSize = lerp(_currentTensionSpriteXSize, s_playerTension, 0.2f);
 	{
 		// Reuse the same texture since it's a white 1x1 pixel
 		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
@@ -1997,8 +2005,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.w = baseSprite.spriteSize.x;
 		src.h = baseSprite.spriteSize.y;
 
-		dest.x = (k_baseGameWidth * 0.5f) - (tensionSize * 0.5f);
-		dest.w = tensionSize;
+		dest.x = (k_baseGameWidth * 0.5f) - (_currentTensionSpriteXSize * 0.5f);
+		dest.w = _currentTensionSpriteXSize;
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 255, 0, 0);
@@ -2351,7 +2359,8 @@ void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOp
 
 void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
-	const char* textToShow = getText(dialogueTextType);
+	TextDTO textInfo = getTextInfo(dialogueTextType);
+	const char* textToShow = textInfo.text;
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
 		D_ASSERT(false, "Trying to print more characters per dialogue than allowed");
@@ -2375,6 +2384,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	_currentDialogue.alignmentType = alignmentType;
 	_currentDialogue.dialogueType = dialogueTextType;
 	_currentDialogue.timeSinceDialogueStarted = 0.f;
+	_currentDialogue.tensionDelta = textInfo.playerTensionDelta;
 
 	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
@@ -2470,13 +2480,17 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			continue;
 		}
 
+		TextDTO optionInfo = getTextInfo(dialogueOptions.options[optionIndex]);
+
 		_dialogueOptions[optionIndex].dialogueType = dialogueOptions.options[optionIndex];
+		_dialogueOptions[optionIndex].tensionDelta = optionInfo.playerTensionDelta;
+
 		currentHorizontalSpaceBetweenCharacters = 0;
 		currentVerticalSpaceBetweenCharacters = 0;
 		charactersOnCurrentLineCounter = 0;
 		maxXDialogueSize = 0;
 
-		const char* optionText = getText(dialogueOptions.options[optionIndex]);
+		const char* optionText = optionInfo.text;
 		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsStartPosition[optionIndex], dialogueOptionsAlignmentType[optionIndex], maxCharactersPerLine);
 
 		for (int i = 0; optionText[i] != '\0'; ++i)

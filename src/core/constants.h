@@ -43,3 +43,6 @@ inline bool s_vsyncEnabled = true;
 inline bool s_debugCollidersEnabled = false;
 inline bool s_debugUICollidersEnabled = false;
 inline bool s_debugGridEnabled = false;
+
+//Gameplay related
+inline uint8_t s_playerTension = 0;

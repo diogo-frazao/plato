@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include "constants.h"
+
 enum TextType
 {
 	INVALID_TEXT,
@@ -43,4 +46,16 @@ enum TextType
 	MARKETING_PHONE_14_B,
 };
 
-const char* getText(TextType textTye);
+struct TextDTO
+{
+	char* text = nullptr;
+	uint8_t playerTensionDelta = 0;
+
+	TextDTO(char* text, uint8_t playerTensionDelta = 0)
+	{
+		this->text = text;
+		this->playerTensionDelta = playerTensionDelta;
+	}
+};
+
+TextDTO getTextInfo(TextType textTye);

@@ -216,6 +216,7 @@ public:
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
 		DialogueOptionState state = DIALOGUE_OPTION_IDLE_STATE;
 		TextType dialogueType = INVALID_TEXT;
+		uint8_t tensionDelta = 0;
 
 		// Used to know x,y,w,h for collisions
 		SDL_FRect colliderDest;
@@ -255,6 +256,7 @@ public:
 			this->fadeOutTimer = 0.f;
 			this->dialogueBoxDynamicYSize = 0.f;
 			this->secondsToStartShowingOption = 0.f;
+			this->tensionDelta = 0;
 		}
 
 		bool isValid()
@@ -266,6 +268,7 @@ public:
 	struct Dialogue
 	{
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
+		uint8_t tensionDelta = 0;
 
 		// Changed at runtime
 		TextType dialogueType = INVALID_TEXT;
@@ -302,6 +305,7 @@ public:
 			this->dialogueBoxDynamicXSize = 0.f;
 			this->dialogueType = INVALID_TEXT;
 			this->dialogueOptionChosen = INVALID_TEXT;
+			this->tensionDelta = 0;
 		}
 	};
 
@@ -333,6 +337,7 @@ public:
 	//TODO: Improve later
 	Dialogue _currentDialogue;
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
+	float _currentTensionSpriteXSize = 0.f;
 
 	enum CellphoneState
 	{

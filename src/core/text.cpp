@@ -1,7 +1,7 @@
 #include "text.h"
 #include "log.h"
 
-const char* getText(TextType textType)
+TextDTO getTextInfo(TextType textType)
 {
 	// TODO switch on language
 	switch (textType)
@@ -21,7 +21,7 @@ const char* getText(TextType textType)
 			case MARKETING_PHONE_2_A_1:
 				return "PERFECT! I call you with good news sir";
 		case MARKETING_PHONE_2_B:
-			return "Who are you?";
+			return { "Who are you?", 10 };
 			case MARKETING_PHONE_2_B_1:
 				return "Oh";
 			case MARKETING_PHONE_2_B_2:
