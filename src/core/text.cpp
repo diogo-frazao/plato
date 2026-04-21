@@ -21,7 +21,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_A_1:
 				return "PERFECT! I call you with good news sir";
 		case MARKETING_PHONE_2_B:
-			return { "Who are you?", 10 };
+			return { "Who are you?", 10 , HIGH_TENSION };
 			case MARKETING_PHONE_2_B_1:
 				return "Oh";
 			case MARKETING_PHONE_2_B_2:
@@ -33,7 +33,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_A_1:
 				return "PERFECT";
 		case MARKETING_PHONE_3_B:
-			return "I don't care";
+			return { "I don't care", 10 , HIGH_TENSION};
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
@@ -41,9 +41,9 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_4:
 		return "(clears throath)";
 	case MARKETING_PHONE_5:
-		return "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at Kelia";
+		return { "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at Kelia", 5};
 	case MARKETING_PHONE_6:
-		return "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT";
+		return { "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT", 5 };
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
@@ -51,37 +51,37 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_7_A_1:
 				return "Wait sir now I'm sure you'll be interested";
 		case MARKETING_PHONE_7_B:
-			return "Shut the fuck up";
+			return { "Shut the fuck up", 20 , HIGH_TENSION };
 		case MARKETING_PHONE_7_C_LOW_TENSION:
 			return "...";
 		case MARKETING_PHONE_7_C_HIGH_TENSION:
-			return "< Hang up >";
+			return { "< HANG UP >", 0, FATAL_TENSION };
 	case MARKETING_PHONE_8:
-		return "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME";
+		return { "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME", 10 };
 	case MARKETING_PHONE_9:
-		return "NO MORE WAITING";
+		return { "NO MORE WAITING", 5 };
 	case MARKETING_PHONE_10:
-		return "NO MORE MISSING TRAINS";
+		return { "NO MORE MISSING TRAINS", 5 };
 	case MARKETING_PHONE_11:
 		return "ALL OF THIS... for only 499D";
 		case MARKETING_PHONE_11_A:
 			return "I don't have the money";
 			case MARKETING_PHONE_11_A_1:
-				return "What do you mean you don't have the money?";
+				return { "What do you mean you don't have the money?", 10 };
 		case MARKETING_PHONE_11_B_LOW_TENSION:
 			return "Still not interested";
 			case MARKETING_PHONE_11_B_1:
-				return "What did you just say?";
+				return { "What did you just say?", 10 };
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
-			return "< Hang up >";
+			return { "< HANG UP >", 0, FATAL_TENSION };
 	case MARKETING_PHONE_12:
-		return "I bring you the holy technology from FATHER EDWARD himself";
+		return { "I bring you the holy technology from FATHER EDWARD himself", 10 };
 	case MARKETING_PHONE_13:
-		return "A man so humble that still helps those that live outside of Kelia!";
+		return { "A man so humble that still helps those that live outside of Kelia!", 10 };
 	case MARKETING_PHONE_14:
 		return "and you receive it like this?";
 		case MARKETING_PHONE_14_A:
-			return "Fuck you < Hang up >";
+			return { "FUCK YOU < HANG UP >", 0, FATAL_TENSION };
 		case MARKETING_PHONE_14_B:
 			return "Goodbye < Hang up >";
 	}

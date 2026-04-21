@@ -479,7 +479,8 @@ void ECSLevel::update()
 
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
         {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, MARKETING_PHONE_7_B, MARKETING_PHONE_7_C_LOW_TENSION});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, 
+                MARKETING_PHONE_7_B, s_playerTension >= 30 ? MARKETING_PHONE_7_C_HIGH_TENSION : MARKETING_PHONE_7_C_LOW_TENSION });
         }
 
         if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
@@ -512,7 +513,8 @@ void ECSLevel::update()
 
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
         {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A, MARKETING_PHONE_11_B_LOW_TENSION});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A, 
+                s_playerTension >= 40 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
         }
 
         if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))

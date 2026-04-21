@@ -46,15 +46,24 @@ enum TextType
 	MARKETING_PHONE_14_B,
 };
 
+enum TextTensionType
+{
+	NORMAL_TENSION,
+	HIGH_TENSION,
+	FATAL_TENSION,
+};
+
 struct TextDTO
 {
 	char* text = nullptr;
 	uint8_t playerTensionDelta = 0;
+	TextTensionType tensionType = NORMAL_TENSION;
 
-	TextDTO(char* text, uint8_t playerTensionDelta = 0)
+	TextDTO(char* text, uint8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
 	{
 		this->text = text;
 		this->playerTensionDelta = playerTensionDelta;
+		this->tensionType = tensionType;
 	}
 };
 

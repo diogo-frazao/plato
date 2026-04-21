@@ -217,6 +217,7 @@ public:
 		DialogueOptionState state = DIALOGUE_OPTION_IDLE_STATE;
 		TextType dialogueType = INVALID_TEXT;
 		uint8_t tensionDelta = 0;
+		TextTensionType optionTensionType = NORMAL_TENSION;
 
 		// Used to know x,y,w,h for collisions
 		SDL_FRect colliderDest;
@@ -257,6 +258,7 @@ public:
 			this->dialogueBoxDynamicYSize = 0.f;
 			this->secondsToStartShowingOption = 0.f;
 			this->tensionDelta = 0;
+			this->optionTensionType = NORMAL_TENSION;
 		}
 
 		bool isValid()

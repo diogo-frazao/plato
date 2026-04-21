@@ -1554,6 +1554,7 @@ void UISystem::update()
 	{
 		D_LOG(LOG, "Dialogue recreated");
 		pushCellphoneDialogue(MARKETING_PHONE_1);
+		s_playerTension = 0;
 	}
 
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
@@ -1944,7 +1945,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
 		{
-			D_LOG(MINI, "Number of characters on dialogue: %i", numberOfCharactersOnCurrentDialogue);
 			_currentDialogue.hasEnded = true;
 		}
 	}
@@ -2010,7 +2010,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 255, 0, 0);
-		SDL_SetTextureAlphaMod(atlas, 255);
+
+		// current * maxOpacity / maxTensionSize. Make sure doesn't go below min allowed opacity
+		float minOpacity = 150.f;
+		float opacity = min(minOpacity + _currentTensionSpriteXSize, 255.f);
+		SDL_SetTextureAlphaMod(atlas, opacity);
 
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
@@ -2194,6 +2198,29 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			}
 		}
 
+		// Custom characters colors
+		SDL_Color optionTextColor;
+		{
+			switch (dialogueOption.optionTensionType)
+			{
+			case NORMAL_TENSION:
+				optionTextColor.r = 209;
+				optionTextColor.g = 209;
+				optionTextColor.b = 209;
+				break;
+			case HIGH_TENSION:
+				optionTextColor.r = 255;
+				optionTextColor.g = 0;
+				optionTextColor.b = 0;
+				break;
+			case FATAL_TENSION:
+				optionTextColor.r = 255;
+				optionTextColor.g = 0;
+				optionTextColor.b = 0;
+				break;
+			}
+		}
+
 		// Dialogue options characters
 		for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 		{
@@ -2229,7 +2256,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 
-			SDL_SetTextureColorMod(fontAtlas, 209, 209, 209);
+			SDL_SetTextureColorMod(fontAtlas, optionTextColor.r, optionTextColor.g, optionTextColor.b);
 			SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 			SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 		}
@@ -2474,7 +2501,9 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 	// Dialogue options characters + speech bubble
 	for (uint8_t optionIndex = 0; optionIndex < k_maxDialogueOptions; ++optionIndex)
 	{
-		_dialogueOptions[optionIndex].destroyDialogueOption();
+		DialogueOption& dialogueOption = _dialogueOptions[optionIndex];
+
+		dialogueOption.destroyDialogueOption();
 		if (dialogueOptions.options[optionIndex] == INVALID_TEXT)
 		{
 			continue;
@@ -2482,8 +2511,9 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 		TextDTO optionInfo = getTextInfo(dialogueOptions.options[optionIndex]);
 
-		_dialogueOptions[optionIndex].dialogueType = dialogueOptions.options[optionIndex];
-		_dialogueOptions[optionIndex].tensionDelta = optionInfo.playerTensionDelta;
+		dialogueOption.dialogueType = dialogueOptions.options[optionIndex];
+		dialogueOption.tensionDelta = optionInfo.playerTensionDelta;
+		dialogueOption.optionTensionType = optionInfo.tensionType;
 
 		currentHorizontalSpaceBetweenCharacters = 0;
 		currentVerticalSpaceBetweenCharacters = 0;
@@ -2546,8 +2576,6 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 		// Dialogue option speech bubble
 		{
-			DialogueOption& dialogueOption = _dialogueOptions[optionIndex];
-
 			bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
 			dialogueOption.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
 
