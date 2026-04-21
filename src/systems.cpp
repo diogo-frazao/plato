@@ -2039,7 +2039,18 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		switch (dialogueOption.state)
 		{
 		case DIALOGUE_OPTION_IDLE_STATE:
-			dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+			switch (dialogueOption.optionTensionType)
+			{
+			case NORMAL_TENSION:
+				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+				break;
+			case HIGH_TENSION:
+				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+				break;
+			case FATAL_TENSION:
+				dialogueOption.backgroundSpriteColor = { 0, 0, 0 };
+				break;
+			}
 			dialogueOption.opacity = 255.f;
 			// No need to set the hovered border color since it's not visible on idle
 			break;
