@@ -26,6 +26,20 @@ TextDTO getTextInfo(TextType textType)
 				return "Oh";
 			case MARKETING_PHONE_2_B_2:
 				return "My name is FREDERICO from Kelia's marketing department";
+		case MARKETING_PHONE_2_C:
+			return { "Shut the fuck up", 20, HIGH_TENSION };
+			case MARKETING_PHONE_2_C_1:
+				return { "What did you just say to me?", 10, HIGH_TENSION };
+			case MARKETING_PHONE_2_C_2:
+				return { "DO YOU KNOW WHO I AM", 10, HIGH_TENSION };
+			case MARKETING_PHONE_2_C_3:
+				return { "I BRING TO YOU THE HOLY TECHNOLOGY FROM FATHER EDWARD HIMSELF", 10, HIGH_TENSION };
+			case MARKETING_PHONE_2_C_4:
+				return { "AND YOU HAVE THE AUDACITY TO RECEIVE IT LIKE THIS?", 10, HIGH_TENSION };
+				case MARKETING_PHONE_2_C_4_A:
+					return {"YES < HANG UP >", 10, FATAL_TENSION };
+				case MARKETING_PHONE_2_C_4_B:
+					return { "FUCK YOU < HANG UP >", 20, FATAL_TENSION };
 	case MARKETING_PHONE_3:
 		return "I bring to you a deal too good to miss!";
 		case MARKETING_PHONE_3_A:
@@ -51,11 +65,11 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_7_A_1:
 				return "Wait sir now I'm sure you'll be interested";
 		case MARKETING_PHONE_7_B:
-			return { "Shut the fuck up", 20 , HIGH_TENSION };
+			return { "I didn't ask shit", 20 , HIGH_TENSION };
 		case MARKETING_PHONE_7_C_LOW_TENSION:
 			return "...";
 		case MARKETING_PHONE_7_C_HIGH_TENSION:
-			return { "< HANG UP >", 0, FATAL_TENSION };
+			return { "< HANG UP >", 5, FATAL_TENSION };
 	case MARKETING_PHONE_8:
 		return { "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME", 10 };
 	case MARKETING_PHONE_9:
@@ -69,11 +83,11 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_11_A_1:
 				return { "What do you mean you don't have the money?", 10 };
 		case MARKETING_PHONE_11_B_LOW_TENSION:
-			return "Still not interested";
+			return { "STOP YELLING", 10, HIGH_TENSION };
 			case MARKETING_PHONE_11_B_1:
 				return { "What did you just say?", 10 };
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
-			return { "< HANG UP >", 0, FATAL_TENSION };
+			return { "< HANG UP >", 5, FATAL_TENSION };
 	case MARKETING_PHONE_12:
 		return { "I bring you the holy technology from FATHER EDWARD himself", 10 };
 	case MARKETING_PHONE_13:
@@ -81,9 +95,9 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_14:
 		return "and you receive it like this?";
 		case MARKETING_PHONE_14_A:
-			return { "FUCK YOU < HANG UP >", 0, FATAL_TENSION };
+			return { "FUCK YOU < HANG UP >", 20, FATAL_TENSION };
 		case MARKETING_PHONE_14_B:
-			return "Goodbye < Hang up >";
+			return { "GOODBYE < HANG UP >", 10, FATAL_TENSION };
 	}
 
 	D_ASSERT(false, "Invalid text for type: %i", textType);

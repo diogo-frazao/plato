@@ -426,7 +426,7 @@ void ECSLevel::update()
 
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
         {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, {MARKETING_PHONE_2_A, MARKETING_PHONE_2_B});
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, {MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C});
         }
 
         if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
@@ -436,6 +436,25 @@ void ECSLevel::update()
         else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
         {
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
+        }
+        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
+        }
+
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
+        {
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B});
         }
 
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
@@ -514,7 +533,7 @@ void ECSLevel::update()
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
         {
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A, 
-                s_playerTension >= 40 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
+                s_playerTension >= 50 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
         }
 
         if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
@@ -526,7 +545,7 @@ void ECSLevel::update()
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
         }
 
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
+        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
         {
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
         }
