@@ -1553,6 +1553,7 @@ void UISystem::update()
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
 	{
 		D_LOG(LOG, "Dialogue recreated");
+		_cellphone.state = CELLPHONE_TALKING;
 		pushCellphoneDialogue(MARKETING_PHONE_1);
 		s_playerTension = 0;
 	}
@@ -1920,7 +1921,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
 	if (hasDialogueFinished)
 	{
-		// Hacky way to only call this once
+		// Incrase player tension once when dialogue ends
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
 		{
 			s_playerTension += _currentDialogue.tensionDelta;
@@ -2385,6 +2386,11 @@ void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType
 {
 	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
 	_cellphone.textToShowOnAnswer = dialogueTextType;
+}
+
+void UISystem::hangupPhone()
+{
+	_cellphone.state = CELLPHONE_NOT_VISIBLE_STATE;
 }
 
 void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)

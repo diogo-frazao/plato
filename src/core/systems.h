@@ -355,5 +355,7 @@ public:
 		TextType textToShowOnAnswer = INVALID_TEXT;
 	};
 
+	void hangupPhone();
+
 	Cellphone _cellphone;
 };

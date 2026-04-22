@@ -337,7 +337,7 @@ void ECSLevel::start()
     if (s_isInsideRestaurant)
     {
         _renderingSystem.setAmbientColor(138, 138, 138);
-        _levelCamera.position = { 490.f, 90.f };
+        _levelCamera.position = { 510.f, 90.f };
     }
 }
 
@@ -408,7 +408,7 @@ void ECSLevel::update()
     }
 
 
-    // Custom level logic
+    // Starting marketing dialogue
     {
         // Receive phone call
         static float cellphoneCallTutorialTimer = 0.f;
@@ -558,6 +558,13 @@ void ECSLevel::update()
         if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
         {
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
+        }
+
+        if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
+            _uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || _uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
+            _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
+        {
+            _uiSystem.hangupPhone();
         }
     }
 
