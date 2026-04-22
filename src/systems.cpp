@@ -1558,6 +1558,7 @@ void UISystem::update()
 		s_playerTension = 0;
 	}
 
+	// Reconstruct current dialogue
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
 	{
 		DialogueOptionsDTO currentDialogueOptions;

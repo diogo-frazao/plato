@@ -407,164 +407,196 @@ void ECSLevel::update()
         _uiSystem.update();
     }
 
-
-    // Starting marketing dialogue
+    enum LevelStages
     {
-        // Receive phone call
-        static float cellphoneCallTutorialTimer = 0.f;
-        if (isTimerOngoing(cellphoneCallTutorialTimer))
-        {
-            cellphoneCallTutorialTimer += k_deltaTime;
+        MARKETING_PHONE_STAGE,
+        FIRST_DAD_PHONE_STAGE
+    };
 
-            float k_timeToShowCellphoneFirstTime = 1.f;
-            if (cellphoneCallTutorialTimer >= k_timeToShowCellphoneFirstTime)
+    static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
+    static float s_multiPurpuseTimer = 0.f;
+
+    // Level logic
+    switch (s_levelStage)
+    {
+        case MARKETING_PHONE_STAGE:
+        {
+            // Receive phone call
+            if (isTimerOngoing(s_multiPurpuseTimer))
             {
-                _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
-                invalidateTimer(cellphoneCallTutorialTimer);
+                s_multiPurpuseTimer += k_deltaTime;
+
+                float k_timeToShowCellphoneFirstTime = 1.f;
+                if (s_multiPurpuseTimer >= k_timeToShowCellphoneFirstTime)
+                {
+                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
+                    invalidateTimer(s_multiPurpuseTimer);
+                }
             }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, { MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C });
+            }
+
+            if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_A_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B });
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_2);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, { MARKETING_PHONE_3_A, MARKETING_PHONE_3_B });
+            }
+
+            if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_A_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_B))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_2);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A,
+                    MARKETING_PHONE_7_B, s_playerTension >= 30 ? MARKETING_PHONE_7_C_HIGH_TENSION : MARKETING_PHONE_7_C_LOW_TENSION });
+            }
+
+            if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A,
+                    s_playerTension >= 50 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
+            }
+
+            if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
+            }
+            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
+            }
+
+            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
+            {
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
+            }
+
+            if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
+                _uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || _uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
+                _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
+            {
+                _uiSystem.hangupPhone();
+                s_levelStage = FIRST_DAD_PHONE_STAGE;
+                startTimer(s_multiPurpuseTimer);
+            }
+
+            break;
         }
 
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
+        case FIRST_DAD_PHONE_STAGE:
         {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, {MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C});
-        }
+            // After marketing dialogue, wait x seconds and receive dad call
+            if (isTimerOngoing(s_multiPurpuseTimer))
+            {
+                s_multiPurpuseTimer += k_deltaTime;
 
-        if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_A_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
-        }
+                if (s_multiPurpuseTimer >= 5.f)
+                {
+                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
+                    invalidateTimer(s_multiPurpuseTimer);
+                }
+            }
 
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B});
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_2);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, {MARKETING_PHONE_3_A, MARKETING_PHONE_3_B});
-        }
-
-        if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_A_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_B))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_2);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, 
-                MARKETING_PHONE_7_B, s_playerTension >= 30 ? MARKETING_PHONE_7_C_HIGH_TENSION : MARKETING_PHONE_7_C_LOW_TENSION });
-        }
-
-        if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A, 
-                s_playerTension >= 50 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
-        }
-
-        if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
-        }
-        else if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
-        }
-
-        if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
-        {
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
-        }
-
-        if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
-            _uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || _uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
-            _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
-        {
-            _uiSystem.hangupPhone();
+            break;
         }
     }
 
