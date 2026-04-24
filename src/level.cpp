@@ -343,42 +343,6 @@ void ECSLevel::start()
 
 void ECSLevel::update()
 {
-    // Debug
-    {
-        // TODO: remove, placeholder to place tiles
-        /*
-        if (wasMouseButtonPressedThisFrame(LEFT))
-        {
-            IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
-            IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
-            createBlockAtPosition(gridWorldPosition);
-        }
-        */
-
-        if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
-        {
-            D_LOG(LOG, "--------------");
-            for (Entity& entity : getAllEntities())
-            {
-                if (entity.id == k_invalidId)
-                {
-                    continue;
-                }
-
-                if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
-                {
-                    auto* t = getComponentFromEntity<TransformComponent>(entity);
-                    D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
-                }
-            }
-        }
-
-        if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
-        {
-            s_isImGuiOpen = !s_isImGuiOpen;
-        }
-    }
-
     Entity& player = getEntityById(k_playerEntityId);
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
 
@@ -413,8 +377,10 @@ void ECSLevel::update()
         FIRST_DAD_PHONE_STAGE
     };
 
-    static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
     static float s_multiPurpuseTimer = 0.f;
+    static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
+
+    UISystem& u = _uiSystem;
 
     // Level logic
     switch (s_levelStage)
@@ -591,9 +557,105 @@ void ECSLevel::update()
 
                 if (s_multiPurpuseTimer >= 5.f)
                 {
-                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
+                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ONE_DAD_PHONE_1);
                     invalidateTimer(s_multiPurpuseTimer);
                 }
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_1))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_2, { ONE_DAD_PHONE_2_A, ONE_DAD_PHONE_2_B});
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_2))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3, { ONE_DAD_PHONE_3_A, ONE_DAD_PHONE_3_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_3_A))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_1);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_1))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_2, { ONE_DAD_PHONE_3_A_2_A, ONE_DAD_PHONE_3_A_2_B, ONE_DAD_PHONE_3_A_2_C });
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_2))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_3);
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_3_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_1))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_2);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_2))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_3, { ONE_DAD_PHONE_3_B_3_A , ONE_DAD_PHONE_3_B_3_B });
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_3))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_4);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_4))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_5);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_3) || 
+                u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_5))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_4, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B, ONE_DAD_PHONE_4_C });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_4_C))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_4_C_1);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_4_C_1))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_4_C_2);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_4_C_2))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_4_C_3, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_4_A) || u.hasChosenOption(ONE_DAD_PHONE_4_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_5);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_5))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_6, { ONE_DAD_PHONE_6_A , ONE_DAD_PHONE_6_B });
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_6))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_7);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_7))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_8);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_8))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             }
 
             break;
@@ -612,6 +674,59 @@ void ECSLevel::update()
         if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f)
         {
             _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+        }
+    }
+
+    // Debug
+    {
+        // TODO: remove, placeholder to place tiles
+        /*
+        if (wasMouseButtonPressedThisFrame(LEFT))
+        {
+            IVec2 closestGridPosition = { (int32_t)(s_mousePositionThisFrame.x / 8), (int32_t)(s_mousePositionThisFrame.y / 8) };
+            IVec2 gridWorldPosition = { closestGridPosition.x * 8, closestGridPosition.y * 8 };
+            createBlockAtPosition(gridWorldPosition);
+        }
+        */
+
+        // Debug level blocks
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
+        {
+            D_LOG(LOG, "--------------");
+            for (Entity& entity : getAllEntities())
+            {
+                if (entity.id == k_invalidId)
+                {
+                    continue;
+                }
+
+                if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
+                {
+                    auto* t = getComponentFromEntity<TransformComponent>(entity);
+                    D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
+                }
+            }
+        }
+
+        // Toggle imgui
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
+        {
+            s_isImGuiOpen = !s_isImGuiOpen;
+        }
+
+        // Destroy dialogue and reconstruct
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
+        {
+            D_LOG(LOG, "Dialogue recreated");
+            _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
+            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+            s_levelStage = FIRST_DAD_PHONE_STAGE;
+        }
+
+        // Debug to not have to wait x seconds for things to happen
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
+        {
+            s_multiPurpuseTimer = 100.f;
         }
     }
 }

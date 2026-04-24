@@ -1549,14 +1549,6 @@ void UISystem::update()
 	}
 
 #ifndef RELEASE_BUILD
-	// Destroy dialogue and reconstruct
-	if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
-	{
-		D_LOG(LOG, "Dialogue recreated");
-		_cellphone.state = CELLPHONE_TALKING;
-		pushCellphoneDialogue(MARKETING_PHONE_1);
-		s_playerTension = 0;
-	}
 
 	// Reconstruct current dialogue
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
@@ -1998,6 +1990,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Tension inside bar
+	s_playerTension = max(s_playerTension, 0);
 	_currentTensionSpriteXSize = lerp(_currentTensionSpriteXSize, s_playerTension, 0.2f);
 	{
 		// Reuse the same texture since it's a white 1x1 pixel
@@ -2043,14 +2036,16 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		case DIALOGUE_OPTION_IDLE_STATE:
 			switch (dialogueOption.optionTensionType)
 			{
+			case LOW_TENSION:
 			case NORMAL_TENSION:
-				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
-				break;
 			case HIGH_TENSION:
 				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
 				break;
 			case FATAL_TENSION:
 				dialogueOption.backgroundSpriteColor = { 0, 0, 0 };
+				break;
+			default:
+				D_ASSERT(false, "Unsupported tension type");
 				break;
 			}
 			dialogueOption.opacity = 255.f;
@@ -2090,7 +2085,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			// No need to set the hovered border color since it's not visible on idle
 			break;
 		default:
-			D_ASSERT(false, "Unsupported dialogue option state");
+			D_ASSERT(false, "Unsupported tension type");
 			break;
 		}
 
@@ -2216,6 +2211,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 			switch (dialogueOption.optionTensionType)
 			{
+			case LOW_TENSION:
+				optionTextColor.r = 240;
+				optionTextColor.g = 79;
+				optionTextColor.b = 120;
+				break;
 			case NORMAL_TENSION:
 				optionTextColor.r = 209;
 				optionTextColor.g = 209;
@@ -2230,6 +2230,9 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				optionTextColor.r = 255;
 				optionTextColor.g = 0;
 				optionTextColor.b = 0;
+				break;
+			default:
+				D_ASSERT(false, "Unsupported tension type");
 				break;
 			}
 		}
@@ -2603,7 +2606,8 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 			dialogueOption.dialogueBoxDynamicYSize = 0.f;
 
 			// Dialogue options appear close to the finishing of the main dialogue
-			int32_t characterIndexToStartShowingOptions = max(strlen(textToShow) - 10, 0);
+			int mainDialogueLength = int(strlen(textToShow));
+			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 0);
 			float baseSecondsToWaitBeforeShowingOptions = _currentDialogue.characters[characterIndexToStartShowingOptions].secondsToStartShowingCharacter;
 
 			dialogueOption.secondsToStartShowingOption = baseSecondsToWaitBeforeShowingOptions + (optionIndex * 0.2f);

@@ -8,6 +8,7 @@ enum TextType
 	INVALID_TEXT,
 	DEBUG_TEXT,
 	ETC_TEXT,
+	// Marketing dialogue
 	MARKETING_PHONE_1,
 	MARKETING_PHONE_2,
 	MARKETING_PHONE_2_A,
@@ -51,11 +52,47 @@ enum TextType
 	MARKETING_PHONE_14,
 	MARKETING_PHONE_14_A,
 	MARKETING_PHONE_14_B,
+	// Starting dialogue with dad
+	ONE_DAD_PHONE_1,
+	ONE_DAD_PHONE_2,
+	ONE_DAD_PHONE_2_A,
+	ONE_DAD_PHONE_2_B,
+	ONE_DAD_PHONE_3,
+	ONE_DAD_PHONE_3_A,
+	ONE_DAD_PHONE_3_A_1,
+	ONE_DAD_PHONE_3_A_2,
+	ONE_DAD_PHONE_3_A_2_A,
+	ONE_DAD_PHONE_3_A_2_B,
+	ONE_DAD_PHONE_3_A_2_C,
+	ONE_DAD_PHONE_3_A_3,
+	ONE_DAD_PHONE_3_B,
+	ONE_DAD_PHONE_3_B_1,
+	ONE_DAD_PHONE_3_B_2,
+	ONE_DAD_PHONE_3_B_3,
+	ONE_DAD_PHONE_3_B_3_A,
+	ONE_DAD_PHONE_3_B_3_B,
+	ONE_DAD_PHONE_3_B_4,
+	ONE_DAD_PHONE_3_B_5,
+	ONE_DAD_PHONE_4,
+	ONE_DAD_PHONE_4_A,
+	ONE_DAD_PHONE_4_B,
+	ONE_DAD_PHONE_4_C,
+	ONE_DAD_PHONE_4_C_1,
+	ONE_DAD_PHONE_4_C_2,
+	ONE_DAD_PHONE_4_C_3,
+	ONE_DAD_PHONE_5,
+	ONE_DAD_PHONE_6,
+	ONE_DAD_PHONE_6_A,
+	ONE_DAD_PHONE_6_B,
+	ONE_DAD_PHONE_7,
+	ONE_DAD_PHONE_8,
+	ONE_DAD_PHONE_9,
 };
 
 enum TextTensionType
 {
 	NORMAL_TENSION,
+	LOW_TENSION,
 	HIGH_TENSION,
 	FATAL_TENSION,
 };
@@ -63,10 +100,10 @@ enum TextTensionType
 struct TextDTO
 {
 	char* text = nullptr;
-	uint8_t playerTensionDelta = 0;
+	int8_t playerTensionDelta = 0;
 	TextTensionType tensionType = NORMAL_TENSION;
 
-	TextDTO(char* text, uint8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
+	TextDTO(char* text, int8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
 	{
 		this->text = text;
 		this->playerTensionDelta = playerTensionDelta;

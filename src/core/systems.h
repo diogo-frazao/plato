@@ -216,7 +216,7 @@ public:
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
 		DialogueOptionState state = DIALOGUE_OPTION_IDLE_STATE;
 		TextType dialogueType = INVALID_TEXT;
-		uint8_t tensionDelta = 0;
+		int8_t tensionDelta = 0;
 		TextTensionType optionTensionType = NORMAL_TENSION;
 
 		// Used to know x,y,w,h for collisions
