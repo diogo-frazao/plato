@@ -587,6 +587,11 @@ void ECSLevel::update()
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_3);
             }
 
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_3))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_4);
+            }
+
             if (u.hasChosenOption(ONE_DAD_PHONE_3_B))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_1);
@@ -612,7 +617,7 @@ void ECSLevel::update()
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_5);
             }
 
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_3) || 
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_4) || 
                 u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_5))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_4, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B, ONE_DAD_PHONE_4_C });
@@ -721,6 +726,7 @@ void ECSLevel::update()
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
             s_levelStage = FIRST_DAD_PHONE_STAGE;
+            s_playerTension = 90;
         }
 
         // Debug to not have to wait x seconds for things to happen

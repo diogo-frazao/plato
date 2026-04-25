@@ -110,25 +110,27 @@ TextDTO getTextInfo(TextType textType)
 		case ONE_DAD_PHONE_2:
 			return "Can you hear me son?";
 			case ONE_DAD_PHONE_2_A:
-				return { "Oh, it's you Pa", -100 };
+				return { "Oh, it's you Pa", -100 , LOW_TENSION};
 			case ONE_DAD_PHONE_2_B:
-				return { "Yes Pa", - 100 };
+				return { "Yes Pa", - 100 , LOW_TENSION};
 		case ONE_DAD_PHONE_3:
 			return "I tried to call you, is everything ok?";
 			case ONE_DAD_PHONE_3_A:
-				return "Yes, and you?";
+				return "Yes and you?";
 				case ONE_DAD_PHONE_3_A_1:
 					return "*cough* *cough*";
 				case ONE_DAD_PHONE_3_A_2:
-					return "...";
+					return "The usual...";
 					case ONE_DAD_PHONE_3_A_2_A:
-						return "Are you there?";
+						return "But any news?";
 					case ONE_DAD_PHONE_3_A_2_B:
-						return "Did you hear me?";
+						return "What else?";
 					case ONE_DAD_PHONE_3_A_2_C:
-						return "And you?";
+						return "Something to tell me?";
 				case ONE_DAD_PHONE_3_A_3:
-					return "Yes ROSTOV";
+					return "ROSTOV, stop it";
+				case ONE_DAD_PHONE_3_A_4:
+					return "If there's something you want to know, *cough*, just say it";
 			case ONE_DAD_PHONE_3_B:
 				return { "A solicitor called me", 10, HIGH_TENSION };
 				case ONE_DAD_PHONE_3_B_1:
@@ -144,7 +146,7 @@ TextDTO getTextInfo(TextType textType)
 				case ONE_DAD_PHONE_3_B_4:
 					return "I know son, I know...";
 				case ONE_DAD_PHONE_3_B_5:
-					return { "Let's talk about something else", -100 };
+					return { "But let's talk about something else", -5};
 			case ONE_DAD_PHONE_4:
 				return "...";
 				case ONE_DAD_PHONE_4_A:
@@ -156,13 +158,13 @@ TextDTO getTextInfo(TextType textType)
 					case ONE_DAD_PHONE_4_C_1:
 						return "...";
 					case ONE_DAD_PHONE_4_C_2:
-						return "Cmon ROSTOV, you're going to make the old man here cry";
+						return "Cmon ROSTOV, you're going to make your old man cry";
 					case ONE_DAD_PHONE_4_C_3:
 						return "You know I can't have any visits...";
 			case ONE_DAD_PHONE_5:
 				return "Oh...";
 			case ONE_DAD_PHONE_6:
-				return { "No news yet, it will still take a while", 5 };
+				return { "No no news yet, it will still take a while", 5 };
 				case ONE_DAD_PHONE_6_A:
 					return "Are you sure?";
 				case ONE_DAD_PHONE_6_B:

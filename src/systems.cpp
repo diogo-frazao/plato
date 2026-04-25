@@ -2607,7 +2607,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, const Dial
 
 			// Dialogue options appear close to the finishing of the main dialogue
 			int mainDialogueLength = int(strlen(textToShow));
-			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 0);
+			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 3);
 			float baseSecondsToWaitBeforeShowingOptions = _currentDialogue.characters[characterIndexToStartShowingOptions].secondsToStartShowingCharacter;
 
 			dialogueOption.secondsToStartShowingOption = baseSecondsToWaitBeforeShowingOptions + (optionIndex * 0.2f);
