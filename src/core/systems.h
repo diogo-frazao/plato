@@ -186,6 +186,7 @@ public:
 		// Changed at runtime
 		float opacity = 0.f;
 		float dynamicYSize = 0.f;
+		Vec2 velocity = { 0.f, 0.f };
 
 		bool isValid()
 		{
@@ -200,6 +201,7 @@ public:
 			this->secondsToStartShowingCharacter = 0.f;
 			this->opacity = 0.f;
 			this->dynamicYSize = 0.f;
+			this->velocity = { 0.f, 0.f };
 		}
 	};
 

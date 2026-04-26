@@ -174,7 +174,7 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_8:
 				return "With the money you send I'm getting the proper treatment";
 			case ONE_DAD_PHONE_9:
-				return "But the truth is the doctor told me that unless I ";
+				return "But the truth is the doctor told me that";
 	}
 
 	}

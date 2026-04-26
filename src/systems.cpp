@@ -1674,7 +1674,24 @@ void UISystem::skipDialogue()
 void UISystem::interruptCurrentDialogue()
 {
 	_currentDialogue.dialogueBoxDynamicXSize = 0.f;
-	_currentDialogue.state = DIALOGUE_ENDED_STATE;
+	_currentDialogue.state = DIALOGUE_INTERRUPTED_STATE;
+
+	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+	{
+		DialogueCharacter& c = _currentDialogue.characters[i];
+
+		if (!c.isValid())
+		{
+			break;
+		}
+		
+		// Rand 0 or 1
+		bool shouldInvertXSpeed = SDL_rand(2);
+		c.velocity.x = SDL_randf() * 2.f;
+		c.velocity.x *= shouldInvertXSpeed ? -1.f : 1.f;
+
+		c.velocity.y = SDL_randf() * 4.f * -1.f;
+	}
 }
 
 void UISystem::render(RenderingSystem* renderingSystem)
@@ -1715,7 +1732,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 
-		SDL_SetTextureAlphaMod(atlas, 255);
+		uint8_t opacity = 255;
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		{
+			opacity = 0;
+		}
+
+		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 		SDL_SetTextureAlphaMod(atlas, 255);
 	}
@@ -1742,9 +1765,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest = convertWorldRectToCameraSpace(dest);
 		}
 
+		uint8_t opacity = 255;
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		{
+			opacity = 0;
+		}
+
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(atlas, 255);
+		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1797,6 +1826,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				opacity = 0.f;
 			}
 		}
+		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		{
+			opacity = 0.f;
+		}
 
 		SDL_SetTextureAlphaMod(atlas, (int8_t)opacity);
 		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
@@ -1824,6 +1857,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			{
 				opacity = 0.f;
 			}
+		}
+		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		{
+			opacity = 0.f;
 		}
 
 		SDL_SetTextureAlphaMod(atlas, opacity);
@@ -1880,6 +1917,14 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		{
+			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
+			c.velocity.y = approach(c.velocity.y, 2.f, 10.f * k_deltaTime);
+			c.position.x += c.velocity.x;
+			c.position.y += c.velocity.y;
+		}
+
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
@@ -1906,7 +1951,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 
-		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 		{
 			SDL_SetTextureAlphaMod(fontAtlas, 0);
 		}
@@ -1930,6 +1975,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Auto skip dialogue if it doesn't have choices
+	if(_currentDialogue.state == DIALOGUE_BASE_STATE)
 	{
 		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 		float secondsToSkipDialogue = 3.f;
@@ -1948,7 +1994,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			_currentDialogue.state = DIALOGUE_ENDED_STATE;
 		}
 	}
-	
 		
 	// Tension bar
 	float tensionBarXSize = 90.f;

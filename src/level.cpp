@@ -6,9 +6,8 @@
 #include <SDL3/SDL_render.h>
 
 int lightThatFollowsPlayerEntityId = k_invalidId;
-
 static bool s_isInsideRestaurant = false;
-
+static float s_multiPurpuseTimer = 0.f;
 float k_restaurantBaseY = 60.f;
 
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
@@ -377,7 +376,6 @@ void ECSLevel::update()
         FIRST_DAD_PHONE_STAGE
     };
 
-    static float s_multiPurpuseTimer = 0.f;
     static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
 
     UISystem& u = _uiSystem;
@@ -661,13 +659,14 @@ void ECSLevel::update()
             if (u.hasDialogueFinihsed(ONE_DAD_PHONE_8))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_9);
+                startTimer(s_multiPurpuseTimer);
             }
 
             // Darwin enters and interrupts father dialogue
-            if (u._currentDialogue.dialogueType == ONE_DAD_PHONE_9)
+            if (u._currentDialogue.dialogueType == ONE_DAD_PHONE_9 && isTimerOngoing(s_multiPurpuseTimer))
             {
                 s_multiPurpuseTimer += k_deltaTime;
-                if (s_multiPurpuseTimer >= 2.f)
+                if (s_multiPurpuseTimer >= 3.1f)
                 {
                     u.interruptCurrentDialogue();
                     invalidateTimer(s_multiPurpuseTimer);
@@ -737,6 +736,7 @@ void ECSLevel::update()
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             s_levelStage = FIRST_DAD_PHONE_STAGE;
+            startTimer(s_multiPurpuseTimer);
             //s_playerTension = 90;
         }
 

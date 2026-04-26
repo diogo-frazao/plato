@@ -322,6 +322,11 @@ inline float approach(float current, float target, float increase)
 	return max(current - increase, target);
 }
 
+inline float sign(float x)
+{
+	return (x >= 0) ? 1 : -1;
+}
+
 inline int8_t sign(int32_t amount)
 {
 	return (amount >= 0) ? 1 : -1;
