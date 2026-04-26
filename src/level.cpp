@@ -663,6 +663,17 @@ void ECSLevel::update()
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             }
 
+            // Darwin enters and interrupts father dialogue
+            if (u._currentDialogue.dialogueType == ONE_DAD_PHONE_9)
+            {
+                s_multiPurpuseTimer += k_deltaTime;
+                if (s_multiPurpuseTimer >= 2.f)
+                {
+                    u.interruptCurrentDialogue();
+                    invalidateTimer(s_multiPurpuseTimer);
+                }
+            }
+
             break;
         }
     }
@@ -724,9 +735,9 @@ void ECSLevel::update()
         {
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
-            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             s_levelStage = FIRST_DAD_PHONE_STAGE;
-            s_playerTension = 90;
+            //s_playerTension = 90;
         }
 
         // Debug to not have to wait x seconds for things to happen

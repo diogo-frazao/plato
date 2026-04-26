@@ -1542,7 +1542,7 @@ void UISystem::update()
 	}
 	
 	// Destroy dialogue if has ended and it's not visible anymore
-	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.hasEnded)
+	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.state == DIALOGUE_ENDED_STATE)
 	{
 		_currentDialogue.destroyDialoge();
 		D_LOG(WARNING, "Dialogue destroyed")
@@ -1576,7 +1576,7 @@ void UISystem::update()
 			bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 			if (!doesDialogueHaveOptions)
 			{
-				_currentDialogue.hasEnded = true;
+				_currentDialogue.state = DIALOGUE_ENDED_STATE;
 			}
 		}
 		else
@@ -1606,11 +1606,11 @@ void UISystem::update()
 			bool canReactToHoverFeedback = (dialogueOption.state == DIALOGUE_OPTION_IDLE_STATE) || (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE);
 			bool isMouseHoverOption = aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider);
 
-			// End current dialogue and destroy dialogue options when the fade out of the chosen option is complete
-			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 50 && !_currentDialogue.hasEnded;
+			// End current dialogue and destroy dialogue options after choosing an option and the fade out of the chosen option is complete
+			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 50 && (_currentDialogue.state == DIALOGUE_BASE_STATE);
 			if (canRequestDialogueToEnd)
 			{
-				_currentDialogue.hasEnded = true;
+				_currentDialogue.state = DIALOGUE_ENDED_STATE;
 				_currentDialogue.dialogueOptionChosen = dialogueOption.dialogueType;
 				CrosshairSystem::s_corsshairOpacity = 255;
 				for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
@@ -1671,6 +1671,12 @@ void UISystem::skipDialogue()
 	}
 }
 
+void UISystem::interruptCurrentDialogue()
+{
+	_currentDialogue.dialogueBoxDynamicXSize = 0.f;
+	_currentDialogue.state = DIALOGUE_ENDED_STATE;
+}
+
 void UISystem::render(RenderingSystem* renderingSystem)
 {
 	// Prevent executing any code if there's nothing to print
@@ -1684,7 +1690,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 	// Animate dialogue box size
 	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
-	float currentTargetXSize = _currentDialogue.hasEnded ? 0.f : dialogueBoxTargetXSize;
+	float currentTargetXSize = (_currentDialogue.state == DIALOGUE_ENDED_STATE) ? 0.f : dialogueBoxTargetXSize;
 	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
 
 	// Dialogue base
@@ -1784,7 +1790,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 
 		float opacity = 255.f;
-		if (_currentDialogue.hasEnded)
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
 		{
 			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
 			{
@@ -1812,7 +1818,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
 
 		float opacity = 255.f;
-		if (_currentDialogue.hasEnded)
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
 		{
 			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
 			{
@@ -1869,7 +1875,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
-		if (_currentDialogue.hasEnded && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x + c.size.x + c.size.x - _currentDialogue.topLeftPosition.x)
+		if ((_currentDialogue.state == DIALOGUE_ENDED_STATE) && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x + c.size.x + c.size.x - _currentDialogue.topLeftPosition.x)
 		{
 			c.opacity = 0.f;
 		}
@@ -1900,7 +1906,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 
-		if (_currentDialogue.hasEnded)
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
 		{
 			SDL_SetTextureAlphaMod(fontAtlas, 0);
 		}
@@ -1939,7 +1945,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
 		{
-			_currentDialogue.hasEnded = true;
+			_currentDialogue.state = DIALOGUE_ENDED_STATE;
 		}
 	}
 	
@@ -2378,12 +2384,12 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 
 bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 {
-	return (_currentDialogue.dialogueType == dialogueType) && _currentDialogue.hasEnded;
+	return (_currentDialogue.dialogueType == dialogueType) && (_currentDialogue.state == DIALOGUE_ENDED_STATE);
 }
 
 bool UISystem::hasChosenOption(TextType dialogueType)
 {
-	return _currentDialogue.hasEnded && (_currentDialogue.dialogueOptionChosen == dialogueType);
+	return (_currentDialogue.state == DIALOGUE_ENDED_STATE) && (_currentDialogue.dialogueOptionChosen == dialogueType);
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)

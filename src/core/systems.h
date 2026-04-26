@@ -220,7 +220,7 @@ public:
 		TextTensionType optionTensionType = NORMAL_TENSION;
 
 		// Used to know x,y,w,h for collisions
-		SDL_FRect colliderDest;
+		SDL_FRect colliderDest{};
 
 		// Changed at runtime
 		Vec2 dialogueBoxSize{ 0.f, 0.f };
@@ -267,6 +267,13 @@ public:
 		}
 	};
 
+	enum DialogueStateType
+	{
+		DIALOGUE_BASE_STATE, // Base state unless it's changed for one of the below
+		DIALOGUE_ENDED_STATE, // Set automatically when a dialogue finishes or we choose an option. 
+		DIALOGUE_INTERRUPTED_STATE, // Set manually. Will also end the dialogue but in a different way
+	};
+
 	struct Dialogue
 	{
 		DialogueCharacter characters[k_maxCharactersPerDialogue];
@@ -274,7 +281,7 @@ public:
 
 		// Changed at runtime
 		TextType dialogueType = INVALID_TEXT;
-		bool hasEnded = false;
+		DialogueStateType state = DIALOGUE_BASE_STATE;
 		bool isScreenSpace = false;
 		float timeSinceDialogueStarted = 0.f;
 		float timeSinceFinalCharacterWasDrawn = 0.f;
@@ -298,7 +305,7 @@ public:
 				this->characters[i].reset();
 			}
 
-			this->hasEnded = false;
+			this->state = DIALOGUE_BASE_STATE;
 			this->timeSinceDialogueStarted = 0.f;
 			this->timeSinceFinalCharacterWasDrawn = 0.f;
 			this->dialogueBoxSize = { 0.f, 0.f };
@@ -330,7 +337,9 @@ public:
 
 	bool hasDialogueFinihsed(TextType dialogueType);
 	bool hasChosenOption(TextType dialogueType);
+
 	void skipDialogue();
+	void interruptCurrentDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
 	// For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
