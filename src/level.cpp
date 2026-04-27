@@ -6,6 +6,8 @@
 #include <SDL3/SDL_render.h>
 
 int lightThatFollowsPlayerEntityId = k_invalidId;
+int32_t s_darwinEntityId = k_invalidId;
+
 static bool s_isInsideRestaurant = false;
 static float s_multiPurpuseTimer = 0.f;
 float k_restaurantBaseY = 60.f;
@@ -284,6 +286,10 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
         t->position = { 24, k_restaurantBaseY + 75.f };
     }
+
+    Entity& darwin = addEntity();
+    addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, IN_FRONT_CHAR_LAYER);
+    s_darwinEntityId = darwin.id;
 }
 
 void createDummyEntities(int amount)
@@ -373,7 +379,8 @@ void ECSLevel::update()
     enum LevelStages
     {
         MARKETING_PHONE_STAGE,
-        FIRST_DAD_PHONE_STAGE
+        FIRST_DAD_PHONE_STAGE,
+        DARWIN_CONVERSATION_STAGE,
     };
 
     static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
@@ -669,8 +676,25 @@ void ECSLevel::update()
                 if (s_multiPurpuseTimer >= 3.1f)
                 {
                     u.interruptCurrentDialogue();
-                    invalidateTimer(s_multiPurpuseTimer);
+                    s_levelStage = DARWIN_CONVERSATION_STAGE;
+                    startTimer(s_multiPurpuseTimer);
                 }
+            }
+
+            break;
+        }
+
+        case DARWIN_CONVERSATION_STAGE:
+        {
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            TransformComponent* darwnT = getComponentFromEntity<TransformComponent>(darwin);
+            SpriteComponent* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
+            darwnT->position = { 430.f, 117.f };
+
+            if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9))
+            {
+                Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
+                u.pushDialogue(DEBUG_TEXT, { playerPos.x - 40, playerPos.y });
             }
 
             break;

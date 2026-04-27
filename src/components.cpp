@@ -245,6 +245,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
+	case DARWIN_PLACEHOLDER_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 339, 2 };
+		size = { 13, 18 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 0, 0 };
+		break;
 	case CELLPHONE_IDLE_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 386, 217 };

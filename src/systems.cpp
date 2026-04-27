@@ -93,8 +93,8 @@ void RenderingSystem::render(float renderAlpha)
 
 	renderSpritesAtLayer(BEHIND_CHAR_LAYER, renderAlpha);
 	renderSpritesAtLayer(CHARACTER_LAYER, renderAlpha);
-	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
+	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
 	renderSpritesAtLayer(CELLPHONE_LAYER, renderAlpha);
@@ -1734,14 +1734,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_SetTextureColorMod(atlas, 9, 7, 19);
 
 		uint8_t opacity = 255;
-		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
 		{
 			opacity = 0;
 		}
 
 		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
-		SDL_SetTextureAlphaMod(atlas, 255);
 	}
 
 	// Dialogue outline
@@ -1766,15 +1765,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest = convertWorldRectToCameraSpace(dest);
 		}
 
-		uint8_t opacity = 255;
-		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
-		{
-			opacity = 0;
-		}
-
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -1827,7 +1819,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				opacity = 0.f;
 			}
 		}
-		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
 		{
 			opacity = 0.f;
 		}
@@ -1850,26 +1842,12 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
 		SDL_SetTextureColorMod(atlas, 27, 52, 45);
-
-		float opacity = 255.f;
-		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
-		{
-			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
-			{
-				opacity = 0.f;
-			}
-		}
-		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
-		{
-			opacity = 0.f;
-		}
-
-		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 	}
 
 	// Main dialogue draw each character
 	bool hasDialogueFinished = false;
+	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
 	uint16_t numberOfCharactersOnCurrentDialogue = 0;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
@@ -1918,12 +1896,18 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
-		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE && c.position.y < 200.f)
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 		{
 			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
 			c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
 			c.position.x += c.velocity.x;
 			c.position.y += c.velocity.y;
+
+			bool isOffscreen = c.position.y > 190.f;
+			if (!isOffscreen)
+			{
+				hasFinishedInterrupting = false;
+			}
 		}
 
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
@@ -1952,7 +1936,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 		SDL_SetTextureColorMod(fontAtlas, 145, 210, 104);
 
-		if (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
 		{
 			SDL_SetTextureAlphaMod(fontAtlas, 0);
 		}
@@ -1973,6 +1957,12 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
+	}
+
+	// Destroy dialogue if has finished interrupting
+	if (hasFinishedInterrupting)
+	{
+		_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
 	}
 
 	// Auto skip dialogue if it doesn't have choices
@@ -2436,6 +2426,11 @@ bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 bool UISystem::hasChosenOption(TextType dialogueType)
 {
 	return (_currentDialogue.state == DIALOGUE_ENDED_STATE) && (_currentDialogue.dialogueOptionChosen == dialogueType);
+}
+
+bool UISystem::hasDialogueFinishedInterrupting(TextType dialogueType)
+{
+	return (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueType == dialogueType);
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)

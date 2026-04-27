@@ -274,6 +274,7 @@ public:
 		DIALOGUE_BASE_STATE, // Base state unless it's changed for one of the below
 		DIALOGUE_ENDED_STATE, // Set automatically when a dialogue finishes or we choose an option. 
 		DIALOGUE_INTERRUPTED_STATE, // Set manually. Will also end the dialogue but in a different way
+		DIALOGUE_FINISHED_INTERRUPTED, // Set automatically when the interrupted animation finishes
 	};
 
 	struct Dialogue
@@ -339,6 +340,7 @@ public:
 
 	bool hasDialogueFinihsed(TextType dialogueType);
 	bool hasChosenOption(TextType dialogueType);
+	bool hasDialogueFinishedInterrupting(TextType dialogueType);
 
 	void skipDialogue();
 	void interruptCurrentDialogue();
