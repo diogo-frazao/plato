@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "constants.h"
+#include <SDL3/SDL_pixels.h>
 
 enum TextType
 {
@@ -113,3 +114,21 @@ struct TextDTO
 };
 
 TextDTO getTextInfo(TextType textTye);
+
+
+enum DialogueColorsType
+{
+	INVALID_TEXT_COLOR,
+	CELLPHONE_TEXT_COLOR,
+	DARWIN_TEXT_COLOR,
+};
+
+struct DialogueColor
+{
+	SDL_Color dialogueBoxColor;
+	SDL_Color outlineColor;
+	SDL_Color textColor;
+};
+
+inline DialogueColor s_currentDialogueColor{};
+void updateCurrentDialogueColors(DialogueColorsType textColorsType);

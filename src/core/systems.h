@@ -333,7 +333,7 @@ public:
 		}
 	};
 
-	void pushDialogue(TextType dialogueTextType, Vec2 position, const DialogueOptionsDTO dialogueOptions = {}, 
+	void pushDialogue(TextType dialogueTextType, Vec2 position, DialogueColorsType dialogueColors, const DialogueOptionsDTO dialogueOptions = {}, 
 					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);

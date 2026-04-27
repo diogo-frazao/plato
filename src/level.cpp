@@ -694,7 +694,7 @@ void ECSLevel::update()
             if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9))
             {
                 Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
-                u.pushDialogue(DEBUG_TEXT, { playerPos.x - 40, playerPos.y });
+                u.pushDialogue(DEBUG_TEXT, { playerPos.x - 40, playerPos.y }, DARWIN_TEXT_COLOR);
             }
 
             break;

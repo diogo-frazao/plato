@@ -181,3 +181,23 @@ TextDTO getTextInfo(TextType textType)
 	D_ASSERT(false, "Invalid text for type: %i", textType);
 	return "Invalid Text";
 }
+
+void updateCurrentDialogueColors(DialogueColorsType dialogueColorsType)
+{
+	switch (dialogueColorsType)
+	{
+	case INVALID_TEXT_COLOR:
+		D_ASSERT(false, "Invalid color");
+		break;
+	case CELLPHONE_TEXT_COLOR:
+		s_currentDialogueColor.dialogueBoxColor = { 9, 7, 19 };
+		s_currentDialogueColor.outlineColor = { 27, 52, 45 };
+		s_currentDialogueColor.textColor = { 145, 210, 104 };
+		break;
+	case DARWIN_TEXT_COLOR:
+		s_currentDialogueColor.dialogueBoxColor = { 25, 11, 13 };
+		s_currentDialogueColor.outlineColor = { 84, 23, 35 };
+		s_currentDialogueColor.textColor = { 224, 61, 69 };
+		break;
+	}
+}
