@@ -1921,7 +1921,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE && c.position.y < 200.f)
 		{
 			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
-			c.velocity.y = approach(c.velocity.y, 3.f, 10.f * k_deltaTime);
+			c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
 			c.position.x += c.velocity.x;
 			c.position.y += c.velocity.y;
 		}
