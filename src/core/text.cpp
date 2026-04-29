@@ -12,7 +12,7 @@ TextDTO getTextInfo(TextType textType)
 	case INVALID_TEXT:
 		return "Invalid Text";
 	case DEBUG_TEXT:
-		return "yes yes of course";
+		return "Is that SR.DARWIN?";
 	case ETC_TEXT:
 		return "...";
 	case MARKETING_PHONE_1:
@@ -154,7 +154,7 @@ TextDTO getTextInfo(TextType textType)
 				case ONE_DAD_PHONE_4_B:
 					return "Do you know the results already?";
 				case ONE_DAD_PHONE_4_C:
-					return { "I miss you dad", -100, LOW_TENSION };
+					return { "I miss you pa", -100, LOW_TENSION };
 					case ONE_DAD_PHONE_4_C_1:
 						return "...";
 					case ONE_DAD_PHONE_4_C_2:
@@ -175,6 +175,42 @@ TextDTO getTextInfo(TextType textType)
 				return "With the money you send I'm getting the proper treatment";
 			case ONE_DAD_PHONE_9:
 				return "But the truth is the doctor told me that";
+	}
+
+	// Starting dialogue with Darwin
+	{
+	case ONE_DARWIN_1:
+		return "ROSTOV your shift is o-";
+	case ONE_DARWIN_2:
+		return "Oh. I'm sorry, I didn't know you were on the phone.";
+		case ONE_DARWIN_2_A:
+			return "No worries DARWIN";
+		case ONE_DARWIN_2_B:
+			return "I'm talking with Pa";
+	case ONE_DARWIN_3:
+		return "SR.DARWIN! *cough* *cough*";
+	case ONE_DARWIN_4:
+		return "Did ROSTOV do a good job today?";
+	case ONE_DARWIN_5:
+		return { "I hope he didn't fell asleep again", 10 };
+	case ONE_DARWIN_6:
+		return "Ahahah. Don't worry MISTER";
+	case ONE_DARWIN_7:
+		return { "ROSTOV works very hard and helps me every day", -10 };
+	case ONE_DARWIN_8:
+		return "...";
+	case ONE_DARWIN_9:
+		return "MISTER what did the doctors say about your exam?";
+	case ONE_DARWIN_10:
+		return "Can he hear me?";
+		case ONE_DARWIN_10_A:
+			return "Pa are you there?";
+		case ONE_DARWIN_10_B:
+			return "Did you hear SR.DARWIN?";
+		case ONE_DARWIN_10_C:
+			return "Papa?";
+	case ONE_DARWIN_11:
+		return "Sorry the doctor is here *cough* *cough* I need to go";
 	}
 
 	}

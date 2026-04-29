@@ -338,6 +338,7 @@ public:
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
 
+	bool isCurrentDialogue(TextType dialogueType);
 	bool hasDialogueFinihsed(TextType dialogueType);
 	bool hasChosenOption(TextType dialogueType);
 	bool hasDialogueFinishedInterrupting(TextType dialogueType);

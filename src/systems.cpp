@@ -830,6 +830,7 @@ void MovementSystem::update()
 		}
 
 		// Friction
+		if(!movementComponent->isMovingOnFloor)
 		{
 			float friction = movementComponent->isGrounded ? movementComponent->friction : movementComponent->airFriction;
 			movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, 0, friction * k_deltaTime);
@@ -858,11 +859,19 @@ void MovementSystem::update()
 		}
 
 		//TODO: quando voltar: fix animation speed for hurt 2 + hitbox for hurt two
-
+		//TODO: Fix hardcoded sprites
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
-			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_IDLE_SPRITE, true, 70, 70);
+			if (entityHasComponent<AttackingComponent>(entity))
+			{
+				getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_IDLE_SPRITE, true, 70, 70);
+
+			}
+			else
+			{
+				getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(DARWIN_PLACEHOLDER_SPRITE, true, 70, 70);
+			}
 			break;
 		}
 	}
@@ -1903,7 +1912,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.position.x += c.velocity.x;
 			c.position.y += c.velocity.y;
 
-			bool isOffscreen = c.position.y > 190.f;
+			bool isOffscreen = c.position.y > 180.f;
 			if (!isOffscreen)
 			{
 				hasFinishedInterrupting = false;
@@ -2416,6 +2425,11 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 	topLeftPositionToStartDrawingText.y = position.y - dialogueBoxSize.y - k_dialogueOuterPadding.y - k_speechIndicatorSize.y;
 
 	return topLeftPositionToStartDrawingText;
+}
+
+bool UISystem::isCurrentDialogue(TextType dialogueType)
+{
+	return (_currentDialogue.dialogueType == dialogueType);
 }
 
 bool UISystem::hasDialogueFinihsed(TextType dialogueType)
