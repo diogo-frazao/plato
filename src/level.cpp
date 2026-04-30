@@ -801,10 +801,82 @@ void ECSLevel::update()
                 }
             }
 
+            static float waitAfterCallEndsTimer = k_invalidTime;
+
             if (u.hasDialogueFinihsed(ONE_DARWIN_10))
             {
                 Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
                 u.pushCellphoneDialogue(ONE_DARWIN_11);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_11))
+            {
+                startTimer(waitAfterCallEndsTimer);
+            }
+
+            if (isTimerOngoing(waitAfterCallEndsTimer))
+            {
+                waitAfterCallEndsTimer += k_deltaTime;
+                if (waitAfterCallEndsTimer >= 2.f)
+                {
+                    Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
+                    u.pushDialogue(ONE_DARWIN_12, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR);
+                    invalidateTimer(waitAfterCallEndsTimer);
+                }
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_12))
+            {
+                Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
+                u.pushDialogue(ONE_DARWIN_13, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR, { ONE_DARWIN_13_A, ONE_DARWIN_13_B, ONE_DARWIN_13_C });
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_13))
+            {
+                Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
+                u.pushDialogue(ONE_DARWIN_14, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR);
+            }
+
+            static bool canMoveBack = false;
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_14))
+            {
+                canMoveBack = true;
+            }
+
+            if (canMoveBack)
+            {
+                darwinT->position.x = max(darwinT->position.x - 0.30f, 440.f);
+                darwinS->flipX = true;
+                if (abs(darwinT->position.x - 440.f) < 0.1f)
+                {
+                    Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
+                    u.pushDialogue(ONE_DARWIN_15, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR);
+                    canMoveBack = false;
+                }
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_15))
+            {
+                Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
+                u.pushDialogue(ONE_DARWIN_16, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR);
+            }
+
+            static bool canMoveToKitchen = false;
+
+            if (u.hasDialogueFinihsed(ONE_DARWIN_16))
+            {
+                canMoveToKitchen = true;
+            }
+
+            if (canMoveToKitchen)
+            {
+                darwinT->position.x = max(darwinT->position.x - 0.60f, 320.f);
+                darwinS->flipX = true;
+                if (abs(darwinT->position.x - 320.f) < 0.1f)
+                {
+                    canMoveToKitchen = false;
+                }
             }
 
             break;
@@ -868,12 +940,12 @@ void ECSLevel::update()
         {
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
-            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
-            s_levelStage = FIRST_DAD_PHONE_STAGE;
-            startTimer(s_multiPurpuseTimer);
+            _uiSystem.pushCellphoneDialogue(ONE_DARWIN_13);
+            s_levelStage = DARWIN_CONVERSATION_STAGE;
+            //startTimer(s_multiPurpuseTimer);
 
             Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = { 415.f, 117.f };
+            getComponentFromEntity<TransformComponent>(darwin)->position = { 480.f, 117.f };
 
             //s_playerTension = 90;
         }

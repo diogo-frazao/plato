@@ -105,76 +105,76 @@ TextDTO getTextInfo(TextType textType)
 
 	// Starting dialogue with dad
 	{
-		case ONE_DAD_PHONE_1:
-			return "Halo? *cough* *cough* ROSTOV?";
-		case ONE_DAD_PHONE_2:
-			return "Can you hear me son?";
-			case ONE_DAD_PHONE_2_A:
-				return { "Oh, it's you Pa", -100 , LOW_TENSION};
-			case ONE_DAD_PHONE_2_B:
-				return { "Yes Pa", - 100 , LOW_TENSION};
-		case ONE_DAD_PHONE_3:
-			return "I was trying to call you, is everything ok?";
-			case ONE_DAD_PHONE_3_A:
-				return "Yes and you?";
-				case ONE_DAD_PHONE_3_A_1:
-					return "*cough* *cough*";
-				case ONE_DAD_PHONE_3_A_2:
-					return "The usual...";
-					case ONE_DAD_PHONE_3_A_2_A:
-						return "But any news?";
-					case ONE_DAD_PHONE_3_A_2_B:
-						return "What else?";
-					case ONE_DAD_PHONE_3_A_2_C:
-						return "Something to tell me?";
-				case ONE_DAD_PHONE_3_A_3:
-					return "ROSTOV, stop it";
-				case ONE_DAD_PHONE_3_A_4:
-					return "If there's something you want to know, *cough*, just say it";
-			case ONE_DAD_PHONE_3_B:
-				return { "A solicitor called me", 10, HIGH_TENSION };
-				case ONE_DAD_PHONE_3_B_1:
-					return "Oh brilliant...";
-				case ONE_DAD_PHONE_3_B_2:
-					return "*cough* *cough*";
-				case ONE_DAD_PHONE_3_B_3:
-					return "Another one from the cult";
-					case ONE_DAD_PHONE_3_B_3_A:
-						return "They are all the same";
-					case ONE_DAD_PHONE_3_B_3_B:
-						return { "I hate them", 10, HIGH_TENSION };
-				case ONE_DAD_PHONE_3_B_4:
-					return "I know son, I know...";
-				case ONE_DAD_PHONE_3_B_5:
-					return { "But let's talk about something else", -5};
-			case ONE_DAD_PHONE_4:
-				return "...";
-				case ONE_DAD_PHONE_4_A:
-					return "How did your exam go?";
-				case ONE_DAD_PHONE_4_B:
-					return "Do you know the results already?";
-				case ONE_DAD_PHONE_4_C:
-					return { "I miss you pa", -100, LOW_TENSION };
-					case ONE_DAD_PHONE_4_C_1:
-						return "...";
-					case ONE_DAD_PHONE_4_C_2:
-						return "Cmon ROSTOV, you're going to make your old man cry";
-					case ONE_DAD_PHONE_4_C_3:
-						return "You know I can't have any visits...";
-			case ONE_DAD_PHONE_5:
-				return "Oh...";
-			case ONE_DAD_PHONE_6:
-				return { "No no news yet, it will still take a while", 5 };
-				case ONE_DAD_PHONE_6_A:
-					return "Are you sure?";
-				case ONE_DAD_PHONE_6_B:
-					return { "Be honest", 5 , HIGH_TENSION};
-			case ONE_DAD_PHONE_7:
-				return "ROSTOV, please *cough* cough*";
-			case ONE_DAD_PHONE_8:
-				return "With the money you send I'm getting the proper treatment";
-			case ONE_DAD_PHONE_9:
-				return "But the truth is the doctor told me that";
+	case ONE_DAD_PHONE_1:
+		return "Halo? *cough* *cough* ROSTOV?";
+	case ONE_DAD_PHONE_2:
+		return "Can you hear me son?";
+		case ONE_DAD_PHONE_2_A:
+			return { "Oh, it's you Pa", -100 , LOW_TENSION};
+		case ONE_DAD_PHONE_2_B:
+			return { "Yes Pa", - 100 , LOW_TENSION};
+	case ONE_DAD_PHONE_3:
+		return "I was trying to call you, is everything ok?";
+		case ONE_DAD_PHONE_3_A:
+			return "Yes and you?";
+			case ONE_DAD_PHONE_3_A_1:
+				return "*cough* *cough*";
+			case ONE_DAD_PHONE_3_A_2:
+				return "The usual...";
+				case ONE_DAD_PHONE_3_A_2_A:
+					return "But any news?";
+				case ONE_DAD_PHONE_3_A_2_B:
+					return "What else?";
+				case ONE_DAD_PHONE_3_A_2_C:
+					return "Something to tell me?";
+			case ONE_DAD_PHONE_3_A_3:
+				return "ROSTOV, stop it";
+			case ONE_DAD_PHONE_3_A_4:
+				return "If there's something you want to know, *cough*, just say it";
+		case ONE_DAD_PHONE_3_B:
+			return { "A solicitor called me", 10, HIGH_TENSION };
+			case ONE_DAD_PHONE_3_B_1:
+				return "Oh brilliant...";
+			case ONE_DAD_PHONE_3_B_2:
+				return "*cough* *cough*";
+			case ONE_DAD_PHONE_3_B_3:
+				return "Another one from the cult";
+				case ONE_DAD_PHONE_3_B_3_A:
+					return "They are all the same";
+				case ONE_DAD_PHONE_3_B_3_B:
+					return { "I hate them", 10, HIGH_TENSION };
+			case ONE_DAD_PHONE_3_B_4:
+				return "I know son, I know...";
+			case ONE_DAD_PHONE_3_B_5:
+				return { "But let's talk about something else", -5};
+		case ONE_DAD_PHONE_4:
+			return "...";
+			case ONE_DAD_PHONE_4_A:
+				return "How did your exam go?";
+			case ONE_DAD_PHONE_4_B:
+				return "Do you know the results already?";
+			case ONE_DAD_PHONE_4_C:
+				return { "I miss you pa", -100, LOW_TENSION };
+				case ONE_DAD_PHONE_4_C_1:
+					return "...";
+				case ONE_DAD_PHONE_4_C_2:
+					return "Cmon ROSTOV, you're going to make your old man cry";
+				case ONE_DAD_PHONE_4_C_3:
+					return "You know I can't have any visits...";
+		case ONE_DAD_PHONE_5:
+			return "Oh...";
+		case ONE_DAD_PHONE_6:
+			return { "No no news yet, it will still take a while", 5 };
+			case ONE_DAD_PHONE_6_A:
+				return "Are you sure?";
+			case ONE_DAD_PHONE_6_B:
+				return { "Be honest", 5 , HIGH_TENSION};
+		case ONE_DAD_PHONE_7:
+			return "ROSTOV, please *cough* cough*";
+		case ONE_DAD_PHONE_8:
+			return "With the money you send I'm getting the proper treatment";
+		case ONE_DAD_PHONE_9:
+			return "But the truth is the doctor told me that";
 	}
 
 	// Starting dialogue with Darwin
@@ -211,8 +211,23 @@ TextDTO getTextInfo(TextType textType)
 			return "Papa?";
 	case ONE_DARWIN_11:
 		return "Sorry the doctor is here *cough* *cough* I need to go";
+	case ONE_DARWIN_12:
+		return "Cmon ROSTOV don't worry... I'm sure he will recover";
+	case ONE_DARWIN_13:
+		return "And you are a good man, still working after all these years to help your Pa";
+		case ONE_DARWIN_13_A:
+			return "Thank you DARWIN";
+		case ONE_DARWIN_13_B:
+			return { "He's all I have", -5, LOW_TENSION};
+		case ONE_DARWIN_13_C:
+			return { "It is what it is", 5, HIGH_TENSION};
+	case ONE_DARWIN_14:
+		return "Well... your shift is over ROSTOV, you can go home when you want.";
+	case ONE_DARWIN_15:
+		return { "HEY!! STOP IT!!", 10 };
+	case ONE_DARWIN_16:
+		return { "WHAT ARE YOU DOING HERE??", 10 };
 	}
-
 	}
 	D_ASSERT(false, "Invalid text for type: %i", textType);
 	return "Invalid Text";
