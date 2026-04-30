@@ -1484,6 +1484,8 @@ float k_dialogueOutlineHeight = 0.75f;
 float k_secondsToFadeInEachCharacter = 0.3f;
 float k_secondsBetweenEachCharacter = 0.035f;
 
+Vec2 dialogueOptionsOuterPadding{ 5.f, 2.75f };
+
 // Characters details (may change at runtime)
 uint8_t k_pixelsBetweenCharacters = 1;
 uint8_t k_pixelsBetweenNewLine = 5;
@@ -1595,19 +1597,109 @@ void UISystem::update()
 	}
 
 	// Handle dialogue options
+	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+	if (doesDialogueHaveOptions)
 	{
-		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
-		if (!doesDialogueHaveOptions)
-		{
-			return;
-		}
-
 		static RectCollider mouseCollider{ {0,0}, {1, 1} };
 		bool isHoverOption = false;
 
 		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
 		{
 			DialogueOption& dialogueOption = _dialogueOptions[i];
+
+			// Dynamic colors + opacity for dialogue options
+			switch (dialogueOption.state)
+			{
+			case DIALOGUE_OPTION_IDLE_STATE:
+				switch (dialogueOption.optionTensionType)
+				{
+				case LOW_TENSION:
+				case NORMAL_TENSION:
+				case HIGH_TENSION:
+					dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+					break;
+				case FATAL_TENSION:
+					dialogueOption.backgroundSpriteColor = { 0, 0, 0 };
+					break;
+				default:
+					D_ASSERT(false, "Unsupported tension type");
+					break;
+				}
+				dialogueOption.opacity = 255.f;
+				// No need to set the hovered border color since it's not visible on idle
+				break;
+			case DIALOGUE_OPTION_HOVERED_STATE:
+				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
+				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
+				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
+
+				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+				break;
+			case DIALOGUE_OPTION_CHOSEN_STATE:
+				dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.02f);
+				dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.02f);
+				dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.02f);
+
+				dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
+				dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
+
+				dialogueOption.fadeOutTimer += k_deltaTime;
+				if (dialogueOption.fadeOutTimer >= 1.f)
+				{
+					dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
+				}
+				else
+				{
+					dialogueOption.opacity = 255.f;
+				}
+				break;
+			case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
+				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
+				dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
+				// No need to set the hovered border color since it's not visible on idle
+				break;
+			default:
+				D_ASSERT(false, "Unsupported tension type");
+				break;
+			}
+
+			// Dynamic dialogue box y size
+			{
+				float targetDialogueBoxYSize = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
+				if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
+				{
+					dialogueOption.dialogueBoxDynamicYSize = lerp(dialogueOption.dialogueBoxDynamicYSize, targetDialogueBoxYSize, 0.1f);
+				}
+				else
+				{
+					dialogueOption.dialogueBoxDynamicYSize = 0.f;
+				}
+			}
+
+			// Dialogue options characters
+			for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+			{
+				DialogueCharacter& c = dialogueOption.characters[i];
+
+				// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
+				// Since it means we reached the end of the dialogue
+				if (!c.isValid())
+				{
+					break;
+				}
+
+				if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
+				{
+					c.dynamicYSize = lerp(c.dynamicYSize, c.size.y, 0.25f);
+				}
+				else
+				{
+					c.dynamicYSize = 0.f;
+				}
+			}
 
 			Vec2 dialogueOptionPosition{ dialogueOption.colliderDest.x , dialogueOption.colliderDest.y };
 			RectCollider dialogueOptionCollider{ {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} };
@@ -1662,6 +1754,100 @@ void UISystem::update()
 		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 50 : 255;
 	}
 
+	// Handle dialogue logic that can't run on render(), since all game logic is capped at 60 fps
+	{
+		// Animate dialogue box size
+		float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+		float currentTargetXSize = (_currentDialogue.state == DIALOGUE_ENDED_STATE) ? 0.f : dialogueBoxTargetXSize;
+		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
+
+		// Animate main dialogue characters
+		bool hasDialogueFinished = false;
+		bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
+		uint16_t numberOfCharactersOnCurrentDialogue = 0;
+		for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+		{
+			DialogueCharacter& c = _currentDialogue.characters[i];
+
+			// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
+			// Since it means we reached the end of the dialogue
+			if (!c.isValid())
+			{
+				int lastValidCharacterIndex = max(i - 1, 0);
+				DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
+				hasDialogueFinished = lastValidCharacter.opacity > 200;
+				numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
+				break;
+			}
+
+			if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
+			{
+				float speed = 255.f / k_secondsToFadeInEachCharacter;
+				c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
+			}
+			else
+			{
+				c.opacity = 0.f;
+			}
+
+			if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
+			{
+				c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
+				c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
+				c.position.x += c.velocity.x;
+				c.position.y += c.velocity.y;
+
+				bool isOffscreen = c.position.y > 180.f;
+				if (!isOffscreen)
+				{
+					hasFinishedInterrupting = false;
+				}
+			}
+		}
+
+		_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
+		if (hasDialogueFinished)
+		{
+			// Incrase player tension once when dialogue ends
+			if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
+			{
+				s_playerTension += _currentDialogue.tensionDelta;
+			}
+
+			_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
+		}
+
+		// Destroy dialogue if has finished interrupting
+		if (hasFinishedInterrupting)
+		{
+			_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
+		}
+
+		// Auto skip dialogue if it doesn't have choices
+		if (_currentDialogue.state == DIALOGUE_BASE_STATE)
+		{
+			bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+			float secondsToSkipDialogue = 3.f;
+			if (numberOfCharactersOnCurrentDialogue < 10)
+			{
+				secondsToSkipDialogue = 2.f;
+			}
+
+			if (numberOfCharactersOnCurrentDialogue > 70)
+			{
+				secondsToSkipDialogue = 4.f;
+			}
+
+			if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
+			{
+				_currentDialogue.state = DIALOGUE_ENDED_STATE;
+			}
+		}
+
+		// Tension bar logic
+		s_playerTension = max(s_playerTension, 0);
+		_currentTensionSpriteXSize = lerp(_currentTensionSpriteXSize, s_playerTension, 0.2f);
+	}
 }
 
 void UISystem::skipDialogue()
@@ -1714,11 +1900,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 	static SDL_FRect src;
 	static SDL_FRect dest;
-
-	// Animate dialogue box size
-	float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
-	float currentTargetXSize = (_currentDialogue.state == DIALOGUE_ENDED_STATE) ? 0.f : dialogueBoxTargetXSize;
-	_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
 
 	// Dialogue base
 	{
@@ -1793,6 +1974,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 			case DIALOGUE_CENTER_ALIGNED:
 			{
+				float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
 				dest.x = textCenterXPos;
 				break;
@@ -1855,9 +2037,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 	}
 
 	// Main dialogue draw each character
-	bool hasDialogueFinished = false;
-	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
-	uint16_t numberOfCharactersOnCurrentDialogue = 0;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
 		DialogueCharacter& c = _currentDialogue.characters[i];
@@ -1866,10 +2045,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Since it means we reached the end of the dialogue
 		if (!c.isValid())
 		{
-			int lastValidCharacterIndex = max(i - 1, 0);
-			DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
-			hasDialogueFinished = lastValidCharacter.opacity > 200;
-			numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
 			break;
 		}
 
@@ -1890,33 +2065,18 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 
-		if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
+		if (_currentDialogue.timeSinceDialogueStarted < c.secondsToStartShowingCharacter)
 		{
-			float speed = 255.f / k_secondsToFadeInEachCharacter;
-			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
+			c.opacity = 0.f;
 		}
 		else
 		{
-			c.opacity = 0.f;
+			// Handled on update since it needs to lerp
 		}
 
 		if ((_currentDialogue.state == DIALOGUE_ENDED_STATE) && _currentDialogue.dialogueBoxDynamicXSize <= c.position.x + c.size.x + c.size.x - _currentDialogue.topLeftPosition.x)
 		{
 			c.opacity = 0.f;
-		}
-
-		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
-		{
-			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
-			c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
-			c.position.x += c.velocity.x;
-			c.position.y += c.velocity.y;
-
-			bool isOffscreen = c.position.y > 180.f;
-			if (!isOffscreen)
-			{
-				hasFinishedInterrupting = false;
-			}
 		}
 
 		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueColor.textColor.r, s_currentDialogueColor.textColor.g, s_currentDialogueColor.textColor.b);
@@ -1953,46 +2113,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// This will make it only visible when the last character is also visible
 
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
-	}
-
-	// Understand that dialogue ended
-	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
-	if (hasDialogueFinished)
-	{
-		// Incrase player tension once when dialogue ends
-		if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
-		{
-			s_playerTension += _currentDialogue.tensionDelta;
-		}
-
-		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
-	}
-
-	// Destroy dialogue if has finished interrupting
-	if (hasFinishedInterrupting)
-	{
-		_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
-	}
-
-	// Auto skip dialogue if it doesn't have choices
-	if(_currentDialogue.state == DIALOGUE_BASE_STATE)
-	{
-		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
-		float secondsToSkipDialogue = 3.f;
-		if (numberOfCharactersOnCurrentDialogue < 10)
-		{
-			secondsToSkipDialogue = 2.f;
-		}
-
-		if (numberOfCharactersOnCurrentDialogue > 70)
-		{
-			secondsToSkipDialogue = 4.f;
-		}
-
-		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
-		{
-			_currentDialogue.state = DIALOGUE_ENDED_STATE;
-		}
 	}
 		
 	// Tension bar
@@ -2040,9 +2160,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 	}
 
-	// Tension inside bar
-	s_playerTension = max(s_playerTension, 0);
-	_currentTensionSpriteXSize = lerp(_currentTensionSpriteXSize, s_playerTension, 0.2f);
+	// Draw tension bar
 	{
 		// Reuse the same texture since it's a white 1x1 pixel
 		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
@@ -2072,72 +2190,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		return;
 	}
 
-	Vec2 dialogueOptionsOuterPadding{ 5.f, 2.75f };
-
 	for (DialogueOption& dialogueOption : _dialogueOptions)
 	{
 		if (!dialogueOption.isValid())
 		{
 			continue;
-		}
-
-		// Dynamic colors + opacity for dialogue options
-		switch (dialogueOption.state)
-		{
-		case DIALOGUE_OPTION_IDLE_STATE:
-			switch (dialogueOption.optionTensionType)
-			{
-			case LOW_TENSION:
-			case NORMAL_TENSION:
-			case HIGH_TENSION:
-				dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
-				break;
-			case FATAL_TENSION:
-				dialogueOption.backgroundSpriteColor = { 0, 0, 0 };
-				break;
-			default:
-				D_ASSERT(false, "Unsupported tension type");
-				break;
-			}
-			dialogueOption.opacity = 255.f;
-			// No need to set the hovered border color since it's not visible on idle
-			break;
-		case DIALOGUE_OPTION_HOVERED_STATE:
-			dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.1f);
-			dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.1f);
-			dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.1f);
-
-			dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
-			dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
-			dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
-			break;
-		case DIALOGUE_OPTION_CHOSEN_STATE:
-			dialogueOption.backgroundSpriteColor.r = lerp(dialogueOption.backgroundSpriteColor.r, 81, 0.02f);
-			dialogueOption.backgroundSpriteColor.g = lerp(dialogueOption.backgroundSpriteColor.g, 34, 0.02f);
-			dialogueOption.backgroundSpriteColor.b = lerp(dialogueOption.backgroundSpriteColor.b, 43, 0.02f);
-
-			dialogueOption.hoveredBorderSpriteColor.r = lerp(dialogueOption.hoveredBorderSpriteColor.r, 209, 0.05f);
-			dialogueOption.hoveredBorderSpriteColor.g = lerp(dialogueOption.hoveredBorderSpriteColor.g, 209, 0.05f);
-			dialogueOption.hoveredBorderSpriteColor.b = lerp(dialogueOption.hoveredBorderSpriteColor.b, 209, 0.05f);
-
-			dialogueOption.fadeOutTimer += k_deltaTime;
-			if(dialogueOption.fadeOutTimer >= 1.f)
-			{
-				dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
-			}
-			else
-			{
-				dialogueOption.opacity = 255.f;
-			}
-			break;
-		case DIALOGUE_OPTION_NOT_CHOSEN_STATE:
-			dialogueOption.backgroundSpriteColor = { 23, 9, 31 };
-			dialogueOption.opacity = max(dialogueOption.opacity - (1500.f * k_deltaTime), 0.f);
-			// No need to set the hovered border color since it's not visible on idle
-			break;
-		default:
-			D_ASSERT(false, "Unsupported tension type");
-			break;
 		}
 
 		// Take the position of the first character since it's where we start
@@ -2147,17 +2204,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 			// Reuse the same texture since it's a white 1x1 pixel
 			DialogueBoxSprite& speechBubbleSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
-
-			float targetDialogueBoxYSize = dialogueOption.dialogueBoxSize.y + (dialogueOptionsOuterPadding.y * 2.f);
-
-			if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
-			{
-				dialogueOption.dialogueBoxDynamicYSize = lerp(dialogueOption.dialogueBoxDynamicYSize, targetDialogueBoxYSize, 0.1f);
-			}
-			else
-			{
-				dialogueOption.dialogueBoxDynamicYSize = 0.f;
-			}
 
 			src.x = speechBubbleSprite.atlasOffset.x;
 			src.y = speechBubbleSprite.atlasOffset.y;
@@ -2308,15 +2354,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			dest.x = c.position.x;
 			dest.y = c.position.y;
 			dest.w = c.size.x;
-
-			if (_currentDialogue.timeSinceDialogueStarted >= dialogueOption.secondsToStartShowingOption)
-			{
-				c.dynamicYSize = lerp(c.dynamicYSize, c.size.y, 0.25f);
-			}
-			else
-			{
-				c.dynamicYSize = 0.f;
-			}
 
 			dest.h = c.dynamicYSize;
 			c.opacity = dialogueOption.opacity;
