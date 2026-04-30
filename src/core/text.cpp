@@ -247,8 +247,8 @@ void updateCurrentDialogueColors(DialogueColorsType dialogueColorsType)
 		break;
 	case DARWIN_TEXT_COLOR:
 		s_currentDialogueColor.dialogueBoxColor = { 25, 11, 13 };
-		s_currentDialogueColor.outlineColor = { 84, 23, 35 };
-		s_currentDialogueColor.textColor = { 224, 61, 69 };
+		s_currentDialogueColor.outlineColor = { 224, 61, 69 };
+		s_currentDialogueColor.textColor = { 255, 193, 165 };
 		break;
 	}
 }

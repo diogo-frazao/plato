@@ -1559,25 +1559,6 @@ void UISystem::update()
 		D_LOG(WARNING, "Dialogue destroyed")
 	}
 
-#ifndef RELEASE_BUILD
-
-	// Reconstruct current dialogue
-	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
-	{
-		DialogueOptionsDTO currentDialogueOptions;
-		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
-		{
-			if (_dialogueOptions[i].isValid())
-			{
-				currentDialogueOptions.options[i] = _dialogueOptions[i].dialogueType;
-			}
-		}
-
-		pushCellphoneDialogue(_currentDialogue.dialogueType, currentDialogueOptions);
-	}
-
-#endif // !RELEASE_BUILD
-
 	// Skip dialogue
 	if (wasSkipDialogueKeyPressedThisFrame())
 	{
@@ -1754,100 +1735,120 @@ void UISystem::update()
 		CrosshairSystem::s_corsshairOpacity = isHoverOption ? 50 : 255;
 	}
 
-	// Handle dialogue logic that can't run on render(), since all game logic is capped at 60 fps
+	// Dynamic dialogue box X size
 	{
-		// Animate dialogue box size
 		float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 		float currentTargetXSize = (_currentDialogue.state == DIALOGUE_ENDED_STATE) ? 0.f : dialogueBoxTargetXSize;
 		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
+	}
 
-		// Animate main dialogue characters
-		bool hasDialogueFinished = false;
-		bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
-		uint16_t numberOfCharactersOnCurrentDialogue = 0;
-		for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+	// Main dialogue characters logic + animate
+	bool hasDialogueFinished = false;
+	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
+	uint16_t numberOfCharactersOnCurrentDialogue = 0;
+	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
+	{
+		DialogueCharacter& c = _currentDialogue.characters[i];
+
+		// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
+		// Since it means we reached the end of the dialogue
+		if (!c.isValid())
 		{
-			DialogueCharacter& c = _currentDialogue.characters[i];
-
-			// Check if it causes issues. The thought process is that if we find a not valid character, we stop printing
-			// Since it means we reached the end of the dialogue
-			if (!c.isValid())
-			{
-				int lastValidCharacterIndex = max(i - 1, 0);
-				DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
-				hasDialogueFinished = lastValidCharacter.opacity > 200;
-				numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
-				break;
-			}
-
-			if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
-			{
-				float speed = 255.f / k_secondsToFadeInEachCharacter;
-				c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
-			}
-			else
-			{
-				c.opacity = 0.f;
-			}
-
-			if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
-			{
-				c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
-				c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
-				c.position.x += c.velocity.x;
-				c.position.y += c.velocity.y;
-
-				bool isOffscreen = c.position.y > 180.f;
-				if (!isOffscreen)
-				{
-					hasFinishedInterrupting = false;
-				}
-			}
+			int lastValidCharacterIndex = max(i - 1, 0);
+			DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
+			hasDialogueFinished = lastValidCharacter.opacity > 200;
+			numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
+			break;
 		}
 
-		_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
-		if (hasDialogueFinished)
+		if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
 		{
-			// Incrase player tension once when dialogue ends
-			if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
-			{
-				s_playerTension += _currentDialogue.tensionDelta;
-			}
-
-			_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
+			float speed = 255.f / k_secondsToFadeInEachCharacter;
+			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
+		}
+		else
+		{
+			c.opacity = 0.f;
 		}
 
-		// Destroy dialogue if has finished interrupting
-		if (hasFinishedInterrupting)
+		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 		{
-			_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
-		}
+			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
+			c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
+			c.position.x += c.velocity.x;
+			c.position.y += c.velocity.y;
 
-		// Auto skip dialogue if it doesn't have choices
-		if (_currentDialogue.state == DIALOGUE_BASE_STATE)
-		{
-			bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
-			float secondsToSkipDialogue = 3.f;
-			if (numberOfCharactersOnCurrentDialogue < 10)
+			bool isOffscreen = c.position.y > 180.f;
+			if (!isOffscreen)
 			{
-				secondsToSkipDialogue = 2.f;
-			}
-
-			if (numberOfCharactersOnCurrentDialogue > 70)
-			{
-				secondsToSkipDialogue = 4.f;
-			}
-
-			if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
-			{
-				_currentDialogue.state = DIALOGUE_ENDED_STATE;
+				hasFinishedInterrupting = false;
 			}
 		}
+	}
 
-		// Tension bar logic
+	_currentDialogue.timeSinceDialogueStarted += k_deltaTime;
+	if (hasDialogueFinished)
+	{
+		// Incrase player tension once when dialogue ends
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn < 0.001f)
+		{
+			s_playerTension += _currentDialogue.tensionDelta;
+		}
+
+		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
+	}
+
+	// Destroy dialogue if has finished interrupting
+	if (hasFinishedInterrupting)
+	{
+		_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
+	}
+
+	// Auto skip dialogue if it doesn't have choices
+	if (_currentDialogue.state == DIALOGUE_BASE_STATE)
+	{
+		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
+		float secondsToSkipDialogue = 3.f;
+		if (numberOfCharactersOnCurrentDialogue < 10)
+		{
+			secondsToSkipDialogue = 2.f;
+		}
+
+		if (numberOfCharactersOnCurrentDialogue > 70)
+		{
+			secondsToSkipDialogue = 4.f;
+		}
+
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
+		{
+			_currentDialogue.state = DIALOGUE_ENDED_STATE;
+		}
+	}
+
+	// Tension bar logic
+	{
 		s_playerTension = max(s_playerTension, 0);
 		_currentTensionSpriteXSize = lerp(_currentTensionSpriteXSize, s_playerTension, 0.2f);
 	}
+
+#ifndef RELEASE_BUILD
+
+	// Reconstruct current dialogue
+	if (_wasKeyPressedThisFrame(SDL_SCANCODE_J))
+	{
+		DialogueOptionsDTO currentDialogueOptions;
+		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
+		{
+			if (_dialogueOptions[i].isValid())
+			{
+				currentDialogueOptions.options[i] = _dialogueOptions[i].dialogueType;
+			}
+		}
+
+		pushCellphoneDialogue(_currentDialogue.dialogueType, currentDialogueOptions);
+	}
+
+#endif // !RELEASE_BUILD
 }
 
 void UISystem::skipDialogue()

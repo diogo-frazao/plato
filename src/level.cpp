@@ -348,6 +348,17 @@ void ECSLevel::start()
     }
 }
 
+enum LevelStages
+{
+    MARKETING_PHONE_STAGE,
+    FIRST_DAD_PHONE_STAGE,
+    DARWIN_CONVERSATION_STAGE,
+    LEVEL_STAGES_COUNT,
+};
+
+static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE" };
+static LevelStages s_currentLevelStage = MARKETING_PHONE_STAGE;
+
 void ECSLevel::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -378,19 +389,10 @@ void ECSLevel::update()
         _uiSystem.update();
     }
 
-    enum LevelStages
-    {
-        MARKETING_PHONE_STAGE,
-        FIRST_DAD_PHONE_STAGE,
-        DARWIN_CONVERSATION_STAGE,
-    };
-
-    static LevelStages s_levelStage = MARKETING_PHONE_STAGE;
-
     UISystem& u = _uiSystem;
 
     // Level logic
-    switch (s_levelStage)
+    switch (s_currentLevelStage)
     {
         case MARKETING_PHONE_STAGE:
         {
@@ -548,7 +550,7 @@ void ECSLevel::update()
                 _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
             {
                 _uiSystem.hangupPhone();
-                s_levelStage = FIRST_DAD_PHONE_STAGE;
+                s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
                 startTimer(s_multiPurpuseTimer);
             }
 
@@ -678,7 +680,7 @@ void ECSLevel::update()
                 if (s_multiPurpuseTimer >= 3.1f)
                 {
                     u.interruptCurrentDialogue();
-                    s_levelStage = DARWIN_CONVERSATION_STAGE;
+                    s_currentLevelStage = DARWIN_CONVERSATION_STAGE;
                     invalidateTimer(s_multiPurpuseTimer);
                 }
             }
@@ -941,7 +943,7 @@ void ECSLevel::update()
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
             _uiSystem.pushCellphoneDialogue(ONE_DARWIN_13);
-            s_levelStage = DARWIN_CONVERSATION_STAGE;
+            s_currentLevelStage = DARWIN_CONVERSATION_STAGE;
             //startTimer(s_multiPurpuseTimer);
 
             Entity& darwin = getEntityById(s_darwinEntityId);
@@ -1034,6 +1036,33 @@ void ECSLevel::imguiRender()
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
     ImGui::SeparatorText("Levels");
+
+    static int s_levelStageToChangeTo = MARKETING_PHONE_STAGE;
+    ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
+    if (ImGui::Button("Change to selected level stage"))
+    {
+        switch (s_levelStageToChangeTo)
+        {
+        case MARKETING_PHONE_STAGE:
+            s_currentLevelStage = MARKETING_PHONE_STAGE;
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
+            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+            s_playerTension = 0;
+            break;
+        case FIRST_DAD_PHONE_STAGE:
+            s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+            s_playerTension = 80;
+            break;
+        case DARWIN_CONVERSATION_STAGE:
+            s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
+            startTimer(s_multiPurpuseTimer);
+            s_playerTension = 20;
+            break;
+        }
+    }
 
     if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
     {
