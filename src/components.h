@@ -89,7 +89,7 @@ struct SpriteComponent
 
 	// To have more control per sprite basis, allow having a collider offset override.
 	// This will override the RectColliderComponent collider.topLeftPointOffset of the entity
-	IVec2 collidertopLeftPointOffset = {0,0};
+	IVec2 collidertopLeftPointOffset = { 0,0 };
 
 	// Whether the sprite is horizontally flipped or not.
 	bool flipX = false;

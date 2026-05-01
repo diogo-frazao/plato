@@ -290,7 +290,9 @@ void setupInsideRestaurantScene()
     Entity& darwin = addEntity({ 415.f, 117.f });
     addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, IN_FRONT_CHAR_LAYER);
     addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({0,0}, {13, 18});
-    //addComponentToEntity<MovementComponent>(darwin);
+    auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
+    darwinM->maxHorizontalSpeed = 0.3f;
+    darwinM->runAcceleration = 0.3f;
     s_darwinEntityId = darwin.id;
 }
 
@@ -346,6 +348,22 @@ void ECSLevel::start()
         _renderingSystem.setAmbientColor(138, 138, 138);
         _levelCamera.position = { 510.f, 90.f };
     }
+}
+
+bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, SpriteComponent* s, float targetXPosition)
+{
+    bool shouldMoveLeft = targetXPosition < t->position.x;
+
+    if (abs(t->position.x - targetXPosition) < 1.f)
+    {
+        m->isMovingOnFloor = false;
+        return true;
+    }
+    
+    m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
+    s->flipX = shouldMoveLeft;
+    m->isMovingOnFloor = true;
+    return false;
 }
 
 enum LevelStages
@@ -693,13 +711,13 @@ void ECSLevel::update()
             Entity& darwin = getEntityById(s_darwinEntityId);
             auto* darwinT = getComponentFromEntity<TransformComponent>(darwin);
             auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
+            auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
 
             static bool canMoveFromDoor = false;
 
             if (canMoveFromDoor)
             {
-                darwinT->position.x = min(darwinT->position.x + 0.30f, 427.f);
-                if (abs(darwinT->position.x - 427.f) < 0.1f)
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 427.f))
                 {
                     canMoveFromDoor = false;
                 }
@@ -733,8 +751,7 @@ void ECSLevel::update()
 
             if (canGetNearTable)
             {
-                darwinT->position.x = min(darwinT->position.x + 0.30f, 440.f);
-                if (abs(darwinT->position.x - 440.f) < 0.1f)
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
                 {
                     canGetNearTable = false;
                 }
@@ -762,8 +779,7 @@ void ECSLevel::update()
 
             if (canGetEvenNearTable)
             {
-                darwinT->position.x = min(darwinT->position.x + 0.30f, 480.f);
-                if (abs(darwinT->position.x - 480.f) < 0.1f)
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 480.f))
                 {
                     canGetEvenNearTable = false;
                 }
@@ -849,9 +865,7 @@ void ECSLevel::update()
 
             if (canMoveBack)
             {
-                darwinT->position.x = max(darwinT->position.x - 0.30f, 440.f);
-                darwinS->flipX = true;
-                if (abs(darwinT->position.x - 440.f) < 0.1f)
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
                 {
                     Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
                     u.pushDialogue(ONE_DARWIN_15, { darwinPos.x + 6.5f, darwinPos.y }, DARWIN_TEXT_COLOR);
@@ -875,9 +889,8 @@ void ECSLevel::update()
 
             if (canMoveToKitchen)
             {
-                darwinT->position.x = max(darwinT->position.x - 0.60f, 320.f);
-                darwinS->flipX = true;
-                if (abs(darwinT->position.x - 320.f) < 0.1f)
+                darwinM->maxHorizontalSpeed = 0.6f;
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 320.f))
                 {
                     canMoveToKitchen = false;
                 }
@@ -1063,6 +1076,8 @@ void ECSLevel::imguiRender()
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
             startTimer(s_multiPurpuseTimer);
             s_playerTension = 20;
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            getComponentFromEntity<TransformComponent>(darwin)->position = { 415.f, 117.f };
             break;
         }
     }
