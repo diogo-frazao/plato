@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "constants.h"
+#include "lib.h"
 #include <SDL3/SDL_pixels.h>
 
 enum TextType
@@ -123,15 +124,24 @@ enum TextTensionType
 	FATAL_TENSION,
 };
 
+enum DialogueEntityType
+{
+	INVALID_DIALOGUE_ENTITY,
+	CELLPHONE_DIALOGUE,
+	DARWIN_DIALOGUE,
+};
+
 struct TextDTO
 {
 	char* text = nullptr;
 	int8_t playerTensionDelta = 0;
 	TextTensionType tensionType = NORMAL_TENSION;
+	DialogueEntityType entityTalking = INVALID_DIALOGUE_ENTITY;
 
-	TextDTO(char* text, int8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
+	TextDTO(char* text, DialogueEntityType entity = CELLPHONE_DIALOGUE, int8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
 	{
 		this->text = text;
+		this->entityTalking = entity;
 		this->playerTensionDelta = playerTensionDelta;
 		this->tensionType = tensionType;
 	}
@@ -139,20 +149,14 @@ struct TextDTO
 
 TextDTO getTextInfo(TextType textTye);
 
-
-enum DialogueColorsType
-{
-	INVALID_TEXT_COLOR,
-	CELLPHONE_TEXT_COLOR,
-	DARWIN_TEXT_COLOR,
-};
-
-struct DialogueColor
+struct DialogueEntityDTO
 {
 	SDL_Color dialogueBoxColor;
 	SDL_Color outlineColor;
 	SDL_Color textColor;
+
+	Vec2 dialoguePositionOffset{ 0.f, 0.f };
 };
 
-inline DialogueColor s_currentDialogueColor{};
-void updateCurrentDialogueColors(DialogueColorsType textColorsType);
+inline DialogueEntityDTO s_currentDialogueEntityDTO{};
+void updateDialogueColorsAndOffsetForEntity(DialogueEntityType entityTalking);

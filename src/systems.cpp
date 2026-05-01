@@ -1993,7 +1993,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, s_currentDialogueColor.dialogueBoxColor.r, s_currentDialogueColor.dialogueBoxColor.g, s_currentDialogueColor.dialogueBoxColor.b);
+		SDL_SetTextureColorMod(atlas, s_currentDialogueEntityDTO.dialogueBoxColor.r, s_currentDialogueEntityDTO.dialogueBoxColor.g, s_currentDialogueEntityDTO.dialogueBoxColor.b);
 
 		uint8_t opacity = 255;
 		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
@@ -2028,7 +2028,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechBubbleSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, s_currentDialogueColor.outlineColor.r, s_currentDialogueColor.outlineColor.g, s_currentDialogueColor.outlineColor.b);
+		SDL_SetTextureColorMod(atlas, s_currentDialogueEntityDTO.outlineColor.r, s_currentDialogueEntityDTO.outlineColor.g, s_currentDialogueEntityDTO.outlineColor.b);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
@@ -2072,7 +2072,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		//dest = convertWorldRectToCameraSpace(dest);
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, s_currentDialogueColor.dialogueBoxColor.r, s_currentDialogueColor.dialogueBoxColor.g, s_currentDialogueColor.dialogueBoxColor.b);
+		SDL_SetTextureColorMod(atlas, s_currentDialogueEntityDTO.dialogueBoxColor.r, s_currentDialogueEntityDTO.dialogueBoxColor.g, s_currentDialogueEntityDTO.dialogueBoxColor.b);
 
 		float opacity = 255.f;
 		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
@@ -2104,7 +2104,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Share everything since this sprite has the same size
 
 		SDL_Texture* atlas = renderingSystem->loadAtlas(speechIndicatorOutlineSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, s_currentDialogueColor.outlineColor.r, s_currentDialogueColor.outlineColor.g, s_currentDialogueColor.outlineColor.b);
+		SDL_SetTextureColorMod(atlas, s_currentDialogueEntityDTO.outlineColor.r, s_currentDialogueEntityDTO.outlineColor.g, s_currentDialogueEntityDTO.outlineColor.b);
 		SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
 	}
 
@@ -2151,7 +2151,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
-		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueColor.textColor.r, s_currentDialogueColor.textColor.g, s_currentDialogueColor.textColor.b);
+		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueEntityDTO.textColor.r, s_currentDialogueEntityDTO.textColor.g, s_currentDialogueEntityDTO.textColor.b);
 		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 	}
@@ -2175,7 +2175,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
-		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueColor.textColor.r, s_currentDialogueColor.textColor.g, s_currentDialogueColor.textColor.b);
+		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueEntityDTO.textColor.r, s_currentDialogueEntityDTO.textColor.g, s_currentDialogueEntityDTO.textColor.b);
 
 		if (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
 		{
@@ -2505,10 +2505,10 @@ void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOp
 	Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
 	Vec2 bottomLeftPosForCellphoneDialogue{ playerPos.x + 22, playerPos.y + 9 };
 
-	pushDialogue(dialogueTextType, bottomLeftPosForCellphoneDialogue, CELLPHONE_TEXT_COLOR, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
+	pushEntityDialogue(dialogueTextType, &player, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
 }
 
-void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, DialogueColorsType dialogueColors, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAttachDialogue, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	TextDTO textInfo = getTextInfo(dialogueTextType);
 	const char* textToShow = textInfo.text;
@@ -2520,8 +2520,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, DialogueCo
 
 	_currentDialogue.destroyDialoge();
 
-	// Update current dialogue colors
-	updateCurrentDialogueColors(dialogueColors);
+	updateDialogueColorsAndOffsetForEntity(textInfo.entityTalking);
 
 	static SDL_FRect src;
 	static SDL_FRect dest;
@@ -2534,7 +2533,12 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, DialogueCo
 	uint8_t maxCharactersPerLine = 35;
 
 	_isTensionBarVisible = true;
-	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType, maxCharactersPerLine);
+
+	Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*entityToAttachDialogue)->position;
+	Vec2 positionToDrawText = { entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x,
+							   entityPosition.y + s_currentDialogueEntityDTO.dialoguePositionOffset.y };
+
+	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, positionToDrawText, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;
 	_currentDialogue.dialogueType = dialogueTextType;

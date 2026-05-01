@@ -1,5 +1,6 @@
 #include "text.h"
 #include "log.h"
+#include "systems.h"
 
 TextDTO getTextInfo(TextType textType)
 {
@@ -24,25 +25,25 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_A_1:
 				return "PERFECT! I call you with good news sir";
 		case MARKETING_PHONE_2_B:
-			return { "Who are you?", 10 , HIGH_TENSION };
+			return { "Who are you?", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
 			case MARKETING_PHONE_2_B_1:
 				return "Oh";
 			case MARKETING_PHONE_2_B_2:
 				return "My name is FREDERICO from KELIA's marketing department";
 		case MARKETING_PHONE_2_C:
-			return { "Shut the fuck up", 20, HIGH_TENSION };
+			return { "Shut the fuck up", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_1:
-				return { "What did you just say to me?", 10, HIGH_TENSION };
+				return { "What did you just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_2:
-				return { "DO YOU KNOW WHO I AM", 10, HIGH_TENSION };
+				return { "DO YOU KNOW WHO I AM", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_3:
-				return { "I BRING TO YOU THE HOLY TECHNOLOGY FROM FATHER EDWARD HIMSELF", 10, HIGH_TENSION };
+				return { "I BRING TO YOU THE HOLY TECHNOLOGY FROM FATHER EDWARD HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_4:
-				return { "AND YOU HAVE THE AUDACITY TO RECEIVE IT LIKE THIS?", 10, HIGH_TENSION };
+				return { "AND YOU HAVE THE AUDACITY TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 				case MARKETING_PHONE_2_C_4_A:
-					return {"YES < HANG UP >", 10, FATAL_TENSION };
+					return {"YES < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
 				case MARKETING_PHONE_2_C_4_B:
-					return { "FUCK YOU < HANG UP >", 20, FATAL_TENSION };
+					return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 	case MARKETING_PHONE_3:
 		return "I bring to you a deal too good to miss!";
 		case MARKETING_PHONE_3_A:
@@ -50,7 +51,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_A_1:
 				return "PERFECT";
 		case MARKETING_PHONE_3_B:
-			return { "I don't care", 10 , HIGH_TENSION};
+			return { "I don't care", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION};
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
@@ -58,9 +59,9 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_4:
 		return "(clears throath)";
 	case MARKETING_PHONE_5:
-		return { "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at KELIA", 5};
+		return { "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
-		return { "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT", 5 };
+		return { "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
@@ -68,39 +69,39 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_7_A_1:
 				return "Wait sir now I'm sure you'll be interested";
 		case MARKETING_PHONE_7_B:
-			return { "I didn't ask shit", 20 , HIGH_TENSION };
+			return { "I didn't ask shit", CELLPHONE_DIALOGUE, 20 , HIGH_TENSION };
 		case MARKETING_PHONE_7_C_LOW_TENSION:
 			return "...";
 		case MARKETING_PHONE_7_C_HIGH_TENSION:
-			return { "< HANG UP >", 5, FATAL_TENSION };
+			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_8:
-		return { "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME", 10 };
+		return { "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_9:
-		return { "NO MORE WAITING", 5 };
+		return { "NO MORE WAITING", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_10:
-		return { "NO MORE MISSING TRAINS", 5 };
+		return { "NO MORE MISSING TRAINS", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_11:
 		return "ALL OF THIS... for only 499D";
 		case MARKETING_PHONE_11_A:
 			return "I don't have the money";
 			case MARKETING_PHONE_11_A_1:
-				return { "What do you mean you don't have the money?", 10 };
+				return { "What do you mean you don't have the money?", CELLPHONE_DIALOGUE, 10 };
 		case MARKETING_PHONE_11_B_LOW_TENSION:
-			return { "STOP YELLING", 10, HIGH_TENSION };
+			return { "STOP YELLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_11_B_1:
-				return { "What did you just say?", 10 };
+				return { "What did you just say?", CELLPHONE_DIALOGUE, 10 };
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
-			return { "< HANG UP >", 5, FATAL_TENSION };
+			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_12:
-		return { "I bring you the holy technology from FATHER EDWARD himself", 10 };
+		return { "I bring you the holy technology from FATHER EDWARD himself", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_13:
-		return { "A man so humble that still helps those that live outside of KELIA!", 10 };
+		return { "A man so humble that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_14:
 		return "and you receive it like this?";
 		case MARKETING_PHONE_14_A:
-			return { "FUCK YOU < HANG UP >", 20, FATAL_TENSION };
+			return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 		case MARKETING_PHONE_14_B:
-			return { "GOODBYE < HANG UP >", 10, FATAL_TENSION };
+			return { "GOODBYE < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
 	}
 
 	// Starting dialogue with dad
@@ -110,9 +111,9 @@ TextDTO getTextInfo(TextType textType)
 	case ONE_DAD_PHONE_2:
 		return "Can you hear me son?";
 		case ONE_DAD_PHONE_2_A:
-			return { "Oh, it's you Pa", -100 , LOW_TENSION};
+			return { "Oh, it's you Pa", CELLPHONE_DIALOGUE, -100 , LOW_TENSION};
 		case ONE_DAD_PHONE_2_B:
-			return { "Yes Pa", - 100 , LOW_TENSION};
+			return { "Yes Pa", CELLPHONE_DIALOGUE, - 100 , LOW_TENSION};
 	case ONE_DAD_PHONE_3:
 		return "I was trying to call you, is everything ok?";
 		case ONE_DAD_PHONE_3_A:
@@ -132,7 +133,7 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_3_A_4:
 				return "If there's something you want to know, *cough*, just say it";
 		case ONE_DAD_PHONE_3_B:
-			return { "A solicitor called me", 10, HIGH_TENSION };
+			return { "A solicitor called me", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case ONE_DAD_PHONE_3_B_1:
 				return "Oh brilliant...";
 			case ONE_DAD_PHONE_3_B_2:
@@ -142,11 +143,11 @@ TextDTO getTextInfo(TextType textType)
 				case ONE_DAD_PHONE_3_B_3_A:
 					return "They are all the same";
 				case ONE_DAD_PHONE_3_B_3_B:
-					return { "I hate them", 10, HIGH_TENSION };
+					return { "I hate them", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case ONE_DAD_PHONE_3_B_4:
 				return "I know son, I know...";
 			case ONE_DAD_PHONE_3_B_5:
-				return { "But let's talk about something else", -5};
+				return { "But let's talk about something else", CELLPHONE_DIALOGUE, -5};
 		case ONE_DAD_PHONE_4:
 			return "...";
 			case ONE_DAD_PHONE_4_A:
@@ -154,7 +155,7 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_4_B:
 				return "Do you know the results already?";
 			case ONE_DAD_PHONE_4_C:
-				return { "I miss you pa", -100, LOW_TENSION };
+				return { "I miss you pa", CELLPHONE_DIALOGUE , -100, LOW_TENSION };
 				case ONE_DAD_PHONE_4_C_1:
 					return "...";
 				case ONE_DAD_PHONE_4_C_2:
@@ -164,11 +165,11 @@ TextDTO getTextInfo(TextType textType)
 		case ONE_DAD_PHONE_5:
 			return "Oh...";
 		case ONE_DAD_PHONE_6:
-			return { "No no news yet, it will still take a while", 5 };
+			return { "No no news yet, it will still take a while", CELLPHONE_DIALOGUE, 5 };
 			case ONE_DAD_PHONE_6_A:
 				return "Are you sure?";
 			case ONE_DAD_PHONE_6_B:
-				return { "Be honest", 5 , HIGH_TENSION};
+				return { "Be honest", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
 		case ONE_DAD_PHONE_7:
 			return "ROSTOV, please *cough* cough*";
 		case ONE_DAD_PHONE_8:
@@ -180,9 +181,9 @@ TextDTO getTextInfo(TextType textType)
 	// Starting dialogue with Darwin
 	{
 	case ONE_DARWIN_1:
-		return "ROSTOV your shift is o-";
+		return { "ROSTOV your shift is o-", DARWIN_DIALOGUE };
 	case ONE_DARWIN_2:
-		return "Oh. I'm sorry, I didn't know you were on the phone.";
+		return {"Oh. I'm sorry, I didn't know you were on the phone.", DARWIN_DIALOGUE };
 		case ONE_DARWIN_2_A:
 			return "No worries DARWIN";
 		case ONE_DARWIN_2_B:
@@ -192,17 +193,17 @@ TextDTO getTextInfo(TextType textType)
 	case ONE_DARWIN_4:
 		return "Did ROSTOV do a good job today?";
 	case ONE_DARWIN_5:
-		return { "I hope he didn't fell asleep again", 10 };
+		return { "I hope he didn't fell asleep again", CELLPHONE_DIALOGUE, 10 };
 	case ONE_DARWIN_6:
-		return "Ahahah. Don't worry MISTER";
+		return { "Ahahah. Don't worry MISTER", DARWIN_DIALOGUE };
 	case ONE_DARWIN_7:
-		return { "ROSTOV works very hard and helps me every day", -10 };
+		return { "ROSTOV works very hard and helps me every day", DARWIN_DIALOGUE, -10 };
 	case ONE_DARWIN_8:
-		return "...";
+		return { "...", DARWIN_DIALOGUE };
 	case ONE_DARWIN_9:
-		return "MISTER what did the doctors say about your exam?";
+		return { "MISTER what did the doctors say about your exam?", DARWIN_DIALOGUE };
 	case ONE_DARWIN_10:
-		return "Can he hear me?";
+		return { "Can he hear me?", DARWIN_DIALOGUE };
 		case ONE_DARWIN_10_A:
 			return "Pa are you there?";
 		case ONE_DARWIN_10_B:
@@ -212,43 +213,45 @@ TextDTO getTextInfo(TextType textType)
 	case ONE_DARWIN_11:
 		return "Sorry the doctor is here *cough* *cough* I need to go";
 	case ONE_DARWIN_12:
-		return "Cmon ROSTOV don't worry... I'm sure he will recover";
+		return { "Cmon ROSTOV don't worry... I'm sure he will recover", DARWIN_DIALOGUE };
 	case ONE_DARWIN_13:
-		return "And you are a good man, still working after all these years to help your Pa";
+		return {"And you are a good man, still working after all these years to help your Pa", DARWIN_DIALOGUE };
 		case ONE_DARWIN_13_A:
 			return "Thank you DARWIN";
 		case ONE_DARWIN_13_B:
-			return { "He's all I have", -5, LOW_TENSION};
+			return { "He's all I have", CELLPHONE_DIALOGUE , -5, LOW_TENSION};
 		case ONE_DARWIN_13_C:
-			return { "It is what it is", 5, HIGH_TENSION};
+			return { "It is what it is", CELLPHONE_DIALOGUE, 5, HIGH_TENSION};
 	case ONE_DARWIN_14:
-		return "Well... your shift is over ROSTOV, you can go home when you want.";
+		return { "Well... your shift is over ROSTOV, you can go home when you want.", DARWIN_DIALOGUE };
 	case ONE_DARWIN_15:
-		return { "HEY!! STOP IT!!", 10 };
+		return { "HEY!! STOP IT!!", DARWIN_DIALOGUE, 10 };
 	case ONE_DARWIN_16:
-		return { "WHAT ARE YOU DOING HERE??", 10 };
+		return { "WHAT ARE YOU DOING HERE??", DARWIN_DIALOGUE, 10 };
 	}
 	}
 	D_ASSERT(false, "Invalid text for type: %i", textType);
 	return "Invalid Text";
 }
 
-void updateCurrentDialogueColors(DialogueColorsType dialogueColorsType)
+void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsType)
 {
 	switch (dialogueColorsType)
 	{
-	case INVALID_TEXT_COLOR:
+	case INVALID_DIALOGUE_ENTITY:
 		D_ASSERT(false, "Invalid color");
 		break;
-	case CELLPHONE_TEXT_COLOR:
-		s_currentDialogueColor.dialogueBoxColor = { 9, 7, 19 };
-		s_currentDialogueColor.outlineColor = { 27, 52, 45 };
-		s_currentDialogueColor.textColor = { 145, 210, 104 };
+	case CELLPHONE_DIALOGUE:
+		s_currentDialogueEntityDTO.dialogueBoxColor = { 9, 7, 19 };
+		s_currentDialogueEntityDTO.outlineColor = { 27, 52, 45 };
+		s_currentDialogueEntityDTO.textColor = { 145, 210, 104 };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 22.f, 9.f };
 		break;
-	case DARWIN_TEXT_COLOR:
-		s_currentDialogueColor.dialogueBoxColor = { 25, 11, 13 };
-		s_currentDialogueColor.outlineColor = { 160, 63, 39 };
-		s_currentDialogueColor.textColor = { 210, 104, 104 };
+	case DARWIN_DIALOGUE:
+		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
+		s_currentDialogueEntityDTO.outlineColor = { 160, 63, 39 };
+		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 10.f, 0.f };
 		break;
 	}
 }
