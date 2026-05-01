@@ -372,4 +372,8 @@ public:
 	void hangupPhone();
 
 	Cellphone _cellphone;
+
+	bool _isTensionBarVisible = false;
+	void pushTensionBar() { _isTensionBarVisible = true; }
+	void popTensionBar() { _isTensionBarVisible = false; }
 };

@@ -1893,14 +1893,85 @@ void UISystem::interruptCurrentDialogue()
 
 void UISystem::render(RenderingSystem* renderingSystem)
 {
+
+	static SDL_FRect src;
+	static SDL_FRect dest;
+
+	// Tension bar
+	float tensionBarXSize = 90.f;
+	if(_isTensionBarVisible)
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+
+		src.x = baseSprite.atlasOffset.x;
+		src.y = baseSprite.atlasOffset.y;
+		src.w = baseSprite.spriteSize.x;
+		src.h = baseSprite.spriteSize.y;
+
+		dest.x = (k_baseGameWidth * 0.5f) - (tensionBarXSize * 0.5f);
+		dest.y = 144.f;
+		dest.w = tensionBarXSize;
+		dest.h = 1.85f;
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 98, 85, 101);
+		SDL_SetTextureAlphaMod(atlas, 255);
+
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+
+		// Fade out left and right
+		{
+			DialogueBoxSprite& fadeSprite = k_dialogueSpeechSprites[DIALOGUE_TENSION_FADE_SPRITE];
+
+			src.x = fadeSprite.atlasOffset.x;
+			src.y = fadeSprite.atlasOffset.y;
+			src.w = fadeSprite.spriteSize.x;
+			src.h = fadeSprite.spriteSize.y;
+
+			dest.x = dest.x - (k_tensionFadeSize.x);
+			dest.w = k_tensionFadeSize.x;
+
+			SDL_Texture* atlas = renderingSystem->loadAtlas(fadeSprite.atlasType);
+			SDL_SetTextureColorMod(atlas, 98, 85, 101);
+			SDL_SetTextureAlphaMod(atlas, 255);
+
+			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+
+			dest.x = dest.x + (k_tensionFadeSize.x) + tensionBarXSize;
+			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
+		}
+	}
+
+	// Draw tension inside bar
+	if (_isTensionBarVisible)
+	{
+		// Reuse the same texture since it's a white 1x1 pixel
+		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
+		src.x = baseSprite.atlasOffset.x;
+		src.y = baseSprite.atlasOffset.y;
+		src.w = baseSprite.spriteSize.x;
+		src.h = baseSprite.spriteSize.y;
+
+		dest.x = (k_baseGameWidth * 0.5f) - (_currentTensionSpriteXSize * 0.5f);
+		dest.w = _currentTensionSpriteXSize;
+
+		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
+		SDL_SetTextureColorMod(atlas, 255, 0, 0);
+
+		// current * maxOpacity / maxTensionSize. Make sure doesn't go below min allowed opacity
+		float minOpacity = 150.f;
+		float opacity = min(minOpacity + _currentTensionSpriteXSize, 255.f);
+		SDL_SetTextureAlphaMod(atlas, opacity);
+
+		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
+	}
+
 	// Prevent executing any code if there's nothing to print
 	if (!_currentDialogue.characters[0].isValid())
 	{
 		return;
 	}
-
-	static SDL_FRect src;
-	static SDL_FRect dest;
 
 	// Dialogue base
 	{
@@ -2114,74 +2185,6 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// This will make it only visible when the last character is also visible
 
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
-	}
-		
-	// Tension bar
-	float tensionBarXSize = 90.f;
-	{
-		// Reuse the same texture since it's a white 1x1 pixel
-		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
-
-		src.x = baseSprite.atlasOffset.x;
-		src.y = baseSprite.atlasOffset.y;
-		src.w = baseSprite.spriteSize.x;
-		src.h = baseSprite.spriteSize.y;
-
-		dest.x = (k_baseGameWidth * 0.5f) - (tensionBarXSize * 0.5f);
-		dest.y = 144.f;
-		dest.w = tensionBarXSize;
-		dest.h = 1.85f;
-
-		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, 98, 85, 101);
-		SDL_SetTextureAlphaMod(atlas, 255);
-
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
-
-		// Fade out left and right
-		{
-			DialogueBoxSprite& fadeSprite = k_dialogueSpeechSprites[DIALOGUE_TENSION_FADE_SPRITE];
-
-			src.x = fadeSprite.atlasOffset.x;
-			src.y = fadeSprite.atlasOffset.y;
-			src.w = fadeSprite.spriteSize.x;
-			src.h = fadeSprite.spriteSize.y;
-
-			dest.x = dest.x - (k_tensionFadeSize.x);
-			dest.w = k_tensionFadeSize.x;
-
-			SDL_Texture* atlas = renderingSystem->loadAtlas(fadeSprite.atlasType);
-			SDL_SetTextureColorMod(atlas, 98, 85, 101);
-			SDL_SetTextureAlphaMod(atlas, 255);
-
-			SDL_RenderTexture(s_renderer, atlas, &src, &dest);
-
-			dest.x = dest.x + (k_tensionFadeSize.x) + tensionBarXSize;
-			SDL_RenderTextureRotated(s_renderer, atlas, &src, &dest, 0, nullptr, SDL_FLIP_HORIZONTAL);
-		}
-	}
-
-	// Draw tension bar
-	{
-		// Reuse the same texture since it's a white 1x1 pixel
-		DialogueBoxSprite& baseSprite = k_dialogueSpeechSprites[DIALOGUE_BASE_SPRITE];
-		src.x = baseSprite.atlasOffset.x;
-		src.y = baseSprite.atlasOffset.y;
-		src.w = baseSprite.spriteSize.x;
-		src.h = baseSprite.spriteSize.y;
-
-		dest.x = (k_baseGameWidth * 0.5f) - (_currentTensionSpriteXSize * 0.5f);
-		dest.w = _currentTensionSpriteXSize;
-
-		SDL_Texture* atlas = renderingSystem->loadAtlas(baseSprite.atlasType);
-		SDL_SetTextureColorMod(atlas, 255, 0, 0);
-
-		// current * maxOpacity / maxTensionSize. Make sure doesn't go below min allowed opacity
-		float minOpacity = 150.f;
-		float opacity = min(minOpacity + _currentTensionSpriteXSize, 255.f);
-		SDL_SetTextureAlphaMod(atlas, opacity);
-
-		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
 	}
 
 	// Dialogue Options
@@ -2530,6 +2533,7 @@ void UISystem::pushDialogue(TextType dialogueTextType, Vec2 position, DialogueCo
 
 	uint8_t maxCharactersPerLine = 35;
 
+	_isTensionBarVisible = true;
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, position, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;

@@ -813,6 +813,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_11))
             {
+                u.hangupPhone();
                 startTimer(waitAfterCallEndsTimer);
             }
 
@@ -869,6 +870,7 @@ void ECSLevel::update()
             if (u.hasDialogueFinihsed(ONE_DARWIN_16))
             {
                 canMoveToKitchen = true;
+                u.popTensionBar();
             }
 
             if (canMoveToKitchen)
@@ -1058,6 +1060,7 @@ void ECSLevel::imguiRender()
         case DARWIN_CONVERSATION_STAGE:
             s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
+            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
             startTimer(s_multiPurpuseTimer);
             s_playerTension = 20;
             break;
