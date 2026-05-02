@@ -251,7 +251,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 160, 63, 39 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
-		s_currentDialogueEntityDTO.dialoguePositionOffset = { 10.f, 0.f };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
 		break;
 	}
 }

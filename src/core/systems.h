@@ -295,6 +295,7 @@ public:
 		float dialogueBoxDynamicXSize = 0.f;
 		// Only matters if the current dialogue has options
 		TextType dialogueOptionChosen = INVALID_TEXT;
+		Entity* entityTalking = nullptr;
 
 		void destroyDialoge()
 		{
@@ -318,6 +319,7 @@ public:
 			this->dialogueType = INVALID_TEXT;
 			this->dialogueOptionChosen = INVALID_TEXT;
 			this->tensionDelta = 0;
+			this->entityTalking = nullptr;
 		}
 	};
 

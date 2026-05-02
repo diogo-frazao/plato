@@ -2042,25 +2042,52 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.h = speechIndicatorSprite.spriteSize.y;
 
 		// Since the last thing drawn was the dialogue outline, use dest directly
+		float xPositionToDrawSpeechIndicator = 0.f;
 		switch (_currentDialogue.alignmentType)
 		{
 			case DIALOGUE_CENTER_ALIGNED:
 			{
 				float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
 				float textCenterXPos = dest.x + (dialogueBoxTargetXSize / 2);
-				dest.x = textCenterXPos;
+				xPositionToDrawSpeechIndicator = textCenterXPos;
 				break;
 			}
 			case DIALOGUE_LEFT_ALIGNED:
 			{
 				float textLeftAlignedXPos = dest.x + 3;
-				dest.x = textLeftAlignedXPos;
+				xPositionToDrawSpeechIndicator = textLeftAlignedXPos;
 				break;
 			}
 			default:
 				D_ASSERT(false, "Alignment type not supported");
 				break;
 		}
+
+		// Calculate X Position for speech indicator.
+		// If needed, move move it (only neeed when the entity moved during the dialogue)
+		{
+			Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*_currentDialogue.entityTalking)->position;
+			SDL_FRect positionWhereDialogueStartsDrawing;
+			positionWhereDialogueStartsDrawing.x = entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x;
+			positionWhereDialogueStartsDrawing.y = entityPosition.y + s_currentDialogueEntityDTO.dialoguePositionOffset.y;
+			positionWhereDialogueStartsDrawing.w = positionWhereDialogueStartsDrawing.h = 1.f;
+			SDL_FRect screenPositionWhereDialogueStartsDrawing = convertWorldRectToCameraSpace(positionWhereDialogueStartsDrawing);
+
+			if (screenPositionWhereDialogueStartsDrawing.x > xPositionToDrawSpeechIndicator)
+			{
+				// Only allow movement until 90% of the dialogue box
+				float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+				float dialogueBoxEndPosition = dest.x + dialogueBoxTargetXSize;
+				float maxAllowedPositionForSpeechIndicator = dialogueBoxEndPosition * 0.9f;
+
+				dest.x = min(screenPositionWhereDialogueStartsDrawing.x, maxAllowedPositionForSpeechIndicator);
+			}
+			else
+			{
+				dest.x = xPositionToDrawSpeechIndicator;
+			}
+		}
+		
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
@@ -2544,6 +2571,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAtt
 	_currentDialogue.dialogueType = dialogueTextType;
 	_currentDialogue.timeSinceDialogueStarted = 0.f;
 	_currentDialogue.tensionDelta = textInfo.playerTensionDelta;
+	_currentDialogue.entityTalking = entityToAttachDialogue;
 
 	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
