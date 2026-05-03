@@ -900,8 +900,12 @@ void ECSLevel::update()
         _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
         _levelCamera.maxX = s_isInsideRestaurant ? 540 : 0;
         _levelCamera.followTargetRatio = 0.06f;
-        _levelCamera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
-        _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+
+        if (_levelCamera.canFollowTarget)
+        {
+            _levelCamera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
+            _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+        }
 
         if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f)
         {
@@ -1111,12 +1115,14 @@ void ECSLevel::imguiRender()
                                          _renderingSystem._debugAmbientColorPicker[2] * 255);
     }
     
-    ImGui::DragFloat("Camera Pos X", &_levelCamera.position.x);
-    ImGui::DragFloat("Camera Pos Y", &_levelCamera.position.y);
+
+    ImGui::Checkbox("Toogle Camera Follow Player", &_levelCamera.canFollowTarget);
+    ImGui::DragFloat("Camera Pos X", &_levelCamera.targetPosition.x);
+    ImGui::DragFloat("Camera Pos Y", &_levelCamera.targetPosition.y);
     ImGui::DragFloat("Camera zoom", &_levelCamera.zoom, 0.01f, 1.f, 2.f);
     if (ImGui::Button("Reset camera"))
     {
-        _levelCamera.position = { k_baseGameWidth / 2.f, k_baseGameHeight / 2.f };
+        _levelCamera.canFollowTarget = true;
         _levelCamera.zoom = 1.f;
     }
 

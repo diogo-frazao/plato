@@ -22,6 +22,8 @@ struct Camera
 	Vec2 position = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
 	float zoom = 1.f;
 
+	bool canFollowTarget = true;
+
 	// Point where the zoom will be focused on. By default it's the center of the screen.
 	Vec2 zoomFocusPoint = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
 };
