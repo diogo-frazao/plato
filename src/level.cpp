@@ -294,6 +294,10 @@ void setupInsideRestaurantScene()
     darwinM->maxHorizontalSpeed = 0.3f;
     darwinM->runAcceleration = 0.3f;
     s_darwinEntityId = darwin.id;
+
+    Entity& golfWeapon = addEntity();
+    addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
+    addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
 }
 
 void createDummyEntities(int amount)
@@ -320,7 +324,7 @@ void ECSLevel::start()
     Entity& player = addEntity({ 490, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
-    addComponentToEntity<AttackingComponent>(player)->weaponInHand = GOLF_WEAPON_TYPE;
+    addComponentToEntity<AttackingComponent>(player)->weaponInHand;
     getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
     player.entityState = ON_PHONE_STATE;
 
@@ -334,7 +338,8 @@ void ECSLevel::start()
     cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, CELLPHONE_LAYER);
     cellphoneSprite->drawnAtScreenSpace = true;
 
-    playerSprite->setupSpriteForLayer(CHARACTER_IDLE_SPRITE, CHARACTER_LAYER);
+    // We don't need to set the sprite since the player's sprite is handled on the movement system
+    playerSprite->setLayer(CHARACTER_LAYER);
     playerSprite->flipX = true;
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
@@ -371,10 +376,11 @@ enum LevelStages
     MARKETING_PHONE_STAGE,
     FIRST_DAD_PHONE_STAGE,
     DARWIN_CONVERSATION_STAGE,
+    GANGSTER_CONFRONTATION_SAGE,
     LEVEL_STAGES_COUNT,
 };
 
-static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE" };
+static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE" };
 static LevelStages s_currentLevelStage = MARKETING_PHONE_STAGE;
 
 void ECSLevel::update()
@@ -872,6 +878,11 @@ void ECSLevel::update()
 
             if (canMoveToKitchen)
             {
+                if (player.entityState == ON_PHONE_STATE)
+                {
+                    player.entityState = IDLE_STATE;
+                }
+
                 darwinM->maxHorizontalSpeed = 0.6f;
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 320.f))
                 {
@@ -1033,6 +1044,19 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
+    if (ImGui::Button("Add Entity"))
+    {
+        Entity& entity = addEntity(getComponentFromEntity<TransformComponent>(player)->position);
+        addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
+    }
+
+    if (ImGui::Button("Iterate on last added entity"))
+    {
+        Entity& entity = getLastAddedEntity();
+        getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
+        getComponentFromEntity<TransformComponent>(entity)->position = { 383.f, 124.f };
+    }
+
     ImGui::SeparatorText("Levels");
 
     static int s_levelStageToChangeTo = MARKETING_PHONE_STAGE;
@@ -1054,6 +1078,7 @@ void ECSLevel::imguiRender()
             s_playerTension = 80;
             break;
         case DARWIN_CONVERSATION_STAGE:
+        {
             s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
@@ -1062,6 +1087,20 @@ void ECSLevel::imguiRender()
             Entity& darwin = getEntityById(s_darwinEntityId);
             getComponentFromEntity<TransformComponent>(darwin)->position = { 415.f, 117.f };
             break;
+        }
+        case GANGSTER_CONFRONTATION_SAGE:
+        {
+            s_currentLevelStage = GANGSTER_CONFRONTATION_SAGE;
+            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            getComponentFromEntity<TransformComponent>(darwin)->position = { 320.f, 117.f };
+
+            Entity& player = getEntityById(k_playerEntityId);
+            player.entityState = IDLE_STATE;
+
+            break;
+        }
         }
     }
 

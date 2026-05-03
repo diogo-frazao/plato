@@ -45,6 +45,5 @@ public:
 	}
 
 	std::array<Entity, k_maxNumberOfEntities> _entities;
-private:
 	int32_t _lastValidEntityId = k_invalidId;
 };

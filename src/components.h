@@ -38,6 +38,12 @@ struct AnimationData
 struct SpriteComponent
 {
 	void setSpriteData(SpriteType sprite);
+
+	void setLayer(LayerType layer)
+	{
+		this->layer = layer;
+	}
+
 	void setupSpriteForLayer(SpriteType sprite, LayerType layer)
 	{
 		setSpriteData(sprite);

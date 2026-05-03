@@ -769,7 +769,7 @@ void MovementSystem::processMainCharacterMovement()
 	//TODO: Implement random x scale while running, almost like a wave effect
 
 	//TODO: remove later
-	static bool hasGolf = true;
+	static bool hasGolf = false;
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
 	{
 		hasGolf = !hasGolf;

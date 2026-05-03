@@ -84,6 +84,12 @@ T* getComponentFromEntity(Entity& entity)
 	return LevelManager::getCurrentLevel()->_componentManager.getComponentFromEntity<T>(entity);
 }
 
+inline Entity& getLastAddedEntity()
+{
+	EntityManager& entityManager = LevelManager::getCurrentLevel()->_entityManager;
+	return entityManager._entities[entityManager._lastValidEntityId];
+}
+
 inline Entity& addEntity(Vec2 position = Vec2())
 {
 	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
