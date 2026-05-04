@@ -287,18 +287,38 @@ void setupInsideRestaurantScene()
         t->position = { 24, k_restaurantBaseY + 75.f };
     }
 
-    Entity& darwin = addEntity({ 415.f, 117.f });
-    addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, IN_FRONT_CHAR_LAYER);
-    addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({0,0}, {13, 18});
-    auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
-    darwinM->maxHorizontalSpeed = 0.3f;
-    darwinM->runAcceleration = 0.3f;
-    s_darwinEntityId = darwin.id;
+    {
+        Entity& darwin = addEntity({ 415.f, 117.f });
+        addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTER_LAYER);
+        addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
+        auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
+        darwinM->maxHorizontalSpeed = 0.3f;
+        darwinM->runAcceleration = 0.3f;
+        s_darwinEntityId = darwin.id;
+    }
+
+    {
+        Entity& hugo = addEntity({ 230.f, 117.f });
+        addComponentToEntity<SpriteComponent>(hugo)->setupSpriteForLayer(GANGSTER_HUGO_SPRITE, CHARACTER_LAYER);
+        addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 0,0 }, { 13, 21 });
+        auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
+        hugoM->maxHorizontalSpeed = 0.3f;
+        hugoM->runAcceleration = 0.3f;
+    }
+
+    {
+        Entity& oskar = addEntity({ 270.f, 117.f });
+        addComponentToEntity<SpriteComponent>(oskar)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
+        addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 0,0 }, { 13, 19 });
+        auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
+        oskarM->maxHorizontalSpeed = 0.3f;
+        oskarM->runAcceleration = 0.3f;
+    }
 
     Entity& golfWeapon = addEntity();
     addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
     addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
-}
+}   
 
 void createDummyEntities(int amount)
 {
@@ -884,7 +904,7 @@ void ECSLevel::update()
                 }
 
                 darwinM->maxHorizontalSpeed = 0.6f;
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 320.f))
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 293.f))
                 {
                     canMoveToKitchen = false;
                 }
@@ -1048,7 +1068,7 @@ void ECSLevel::imguiRender()
     ImGui::Text("Average %.1f FPS", io.Framerate);
     ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
 
-    if (ImGui::Button("Add Entity"))
+    if (ImGui::Button("Add Debug White Entity"))
     {
         Entity& entity = addEntity(getComponentFromEntity<TransformComponent>(player)->position);
         addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
@@ -1057,8 +1077,14 @@ void ECSLevel::imguiRender()
     if (ImGui::Button("Iterate on last added entity"))
     {
         Entity& entity = getLastAddedEntity();
-        getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
-        getComponentFromEntity<TransformComponent>(entity)->position = { 383.f, 124.f };
+        getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
+        addComponentToEntity<MovementComponent>(entity);
+        addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
+        getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
+
+        //Entity& darwin = getEntityById(s_darwinEntityId);
+        //getComponentFromEntity<TransformComponent>(darwin)->position = {293.f, 117.f };
+        //getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
     }
 
     ImGui::SeparatorText("Levels");
@@ -1098,7 +1124,8 @@ void ECSLevel::imguiRender()
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
 
             Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = { 320.f, 117.f };
+            getComponentFromEntity<TransformComponent>(darwin)->position = { 293.f, 117.f };
+            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
 
             Entity& player = getEntityById(k_playerEntityId);
             player.entityState = IDLE_STATE;
