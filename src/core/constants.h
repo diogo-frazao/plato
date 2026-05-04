@@ -10,6 +10,8 @@ inline constexpr uint32_t k_playerEntityId = 0;
 inline constexpr uint32_t k_crosshairEntityId = 1;
 inline constexpr uint32_t k_cellphoneEntityId = 2;
 
+inline constexpr uint8_t k_maxNumberOfMovementAnimations = 1;
+
 // General
 inline constexpr int32_t k_invalidId = -1;
 inline constexpr float k_invalidTime = -1.f;

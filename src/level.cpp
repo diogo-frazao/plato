@@ -291,28 +291,39 @@ void setupInsideRestaurantScene()
         Entity& darwin = addEntity({ 415.f, 117.f });
         addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTER_LAYER);
         addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
+
         auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
         darwinM->maxHorizontalSpeed = 0.3f;
         darwinM->runAcceleration = 0.3f;
+
+        SpriteType darwinAnimations[k_maxNumberOfMovementAnimations] = { DARWIN_PLACEHOLDER_SPRITE };
+        darwinM->setupMovementAnimations(darwinAnimations);
+
         s_darwinEntityId = darwin.id;
     }
 
     {
-        Entity& hugo = addEntity({ 230.f, 117.f });
+        Entity& hugo = addEntity({ 230.f, 110.f });
         addComponentToEntity<SpriteComponent>(hugo)->setupSpriteForLayer(GANGSTER_HUGO_SPRITE, CHARACTER_LAYER);
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 0,0 }, { 13, 21 });
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         hugoM->runAcceleration = 0.3f;
+
+        SpriteType hugoAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_HUGO_SPRITE };
+        hugoM->setupMovementAnimations(hugoAnimations);
     }
 
     {
-        Entity& oskar = addEntity({ 270.f, 117.f });
+        Entity& oskar = addEntity({ 270.f, 110.f });
         addComponentToEntity<SpriteComponent>(oskar)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 0,0 }, { 13, 19 });
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
         oskarM->maxHorizontalSpeed = 0.3f;
         oskarM->runAcceleration = 0.3f;
+
+        SpriteType oskarAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_OSKAR_SPRITE };
+        oskarM->setupMovementAnimations(oskarAnimations);
     }
 
     Entity& golfWeapon = addEntity();

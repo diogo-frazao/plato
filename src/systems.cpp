@@ -863,16 +863,7 @@ void MovementSystem::update()
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
-			if (entityHasComponent<AttackingComponent>(entity))
-			{
-				getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_IDLE_SPRITE, true, 70, 70);
-
-			}
-			else
-			{
-				getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(DARWIN_PLACEHOLDER_SPRITE, true, 70, 70);
-			}
-			break;
+			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[0], true, 70, 70);
 		}
 	}
 	
