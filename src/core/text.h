@@ -114,6 +114,39 @@ enum TextType
 	ONE_DARWIN_14,
 	ONE_DARWIN_15,
 	ONE_DARWIN_16,
+	C_1,
+	C_2,
+	C_3,
+	C_4,
+	C_4_A,
+	C_4_B,
+	C_4_AB_1,
+	C_4_AB_2,
+	C_4_AB_2_A,
+	C_4_AB_2_B,
+	C_4_AB_2_B_1,
+	C_4_AB_2_B_2,
+	C_4_AB_2_C,
+	C_4_AB_2_C_CUE_1,
+	C_4_AB_2_C_CUE_2,
+	C_4_AB_2_C_CUE_3,
+	C_4_AB_2_C_1,
+	C_4_AB_2_C_2,
+	C_4_AB_2_C_3,
+	C_4_AB_2_C_4,
+	C_4_AB_2_C_5,
+	C_4_C,
+	C_4_C_1,
+	C_4_C_2,
+	C_4_C_3,
+	C_4_C_4,
+	C_4_C_5,
+	C_4_C_6,
+	C_4_C_6_A,
+	C_4_C_6_B,
+	C_4_C_6_C,
+	C_4_C_6_AB_1,
+	C_4_C_6_AB_2,
 };
 
 enum TextTensionType
@@ -127,8 +160,11 @@ enum TextTensionType
 enum DialogueEntityType
 {
 	INVALID_DIALOGUE_ENTITY,
+	CHOICE_DIALOGUE,
 	CELLPHONE_DIALOGUE,
 	DARWIN_DIALOGUE,
+	OSKAR_DIALOGUE,
+	HUGO_DIALOGUE,
 };
 
 struct TextDTO

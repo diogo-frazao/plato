@@ -228,6 +228,77 @@ TextDTO getTextInfo(TextType textType)
 		return { "HEY!! STOP IT!!", DARWIN_DIALOGUE, 10 };
 	case ONE_DARWIN_16:
 		return { "WHAT ARE YOU DOING HERE??", DARWIN_DIALOGUE, 10 };
+
+	}
+
+	// Starting confrontation with hugo and oskar
+	{
+	case C_1:
+		return { "That's right, if BIG DIESEL says you owe money, YOU DO", OSKAR_DIALOGUE };
+	case C_2:
+		return { "It can't be... Maybe you are mistaken?", DARWIN_DIALOGUE };
+	case C_3:
+		return { "ahahHAHAH", HUGO_DIALOGUE };
+	case C_4:
+		return { "ROSTOV, please don't get involved", DARWIN_DIALOGUE };
+		case C_4_A:
+			return { "What are these wannabe gangsters doing here?", CHOICE_DIALOGUE };
+		case C_4_B:
+			return { "I already did", CHOICE_DIALOGUE };
+			case C_4_AB_1:
+				return { "ahahAHAHAHah", HUGO_DIALOGUE };
+			case C_4_AB_2:
+				return { "OSKAR, make sure this PIG doesn't get in the way of our money", HUGO_DIALOGUE };
+				case C_4_AB_2_A:
+					return { "We don't have your money", CHOICE_DIALOGUE };
+				case C_4_AB_2_B:
+					return { "I can feel your breath", CHOICE_DIALOGUE };
+					case C_4_AB_2_B_1:
+						return { "ahAHAHAHA", HUGO_DIALOGUE };
+					case C_4_AB_2_B_2:
+						return { "SHUT THE FUCK UP ROSTOV", OSKAR_DIALOGUE };
+				case C_4_AB_2_C:
+					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE };
+					case C_4_AB_2_C_CUE_1:
+						return { "Asking for what heh?", OSKAR_DIALOGUE };
+					case C_4_AB_2_C_CUE_2:
+						return { "Be careful with that golf cue ROSTOV, your arm might fall off", HUGO_DIALOGUE };
+					case C_4_AB_2_C_CUE_3:
+						return { "AHAHAHA", OSKAR_DIALOGUE };
+					case C_4_AB_2_C_1:
+						return { "Asking for what heh?", OSKAR_DIALOGUE };
+					case C_4_AB_2_C_2:
+						return { "ROSTOV grab that golf cue near the table", DARWIN_DIALOGUE };
+					case C_4_AB_2_C_3:
+						return { "But be careful ROSTOV, your arm might fall off trying to pick it up", HUGO_DIALOGUE };
+					case C_4_AB_2_C_4:
+						return { "AHAHAHAH", OSKAR_DIALOGUE };
+					case C_4_AB_2_C_5:
+						return { "That was a good one brother", OSKAR_DIALOGUE };
+		case C_4_C:
+			return { "What's going on?", CHOICE_DIALOGUE };
+			case C_4_C_1:
+				return { "Isn't it obvious you OLD PIG?!", OSKAR_DIALOGUE };
+			case C_4_C_2:
+				return { "BIG DIESEL sent us to collect OUR money", OSKAR_DIALOGUE };
+			case C_4_C_3:
+				return { "Because SR.DARWIN here is owes us some", OSKAR_DIALOGUE };
+			case C_4_C_4:
+				return { "That is not true and we all know it", DARWIN_DIALOGUE };
+			case C_4_C_5:
+				return { "WHAT did you just say old man?", HUGO_DIALOGUE };
+			case C_4_C_6:
+				return { "Are YOU calling BIG DIESEL A LIAR?", HUGO_DIALOGUE };
+				case C_4_C_6_A:
+					return { "< Say nothing >", CHOICE_DIALOGUE };
+				case C_4_C_6_B:
+					return { "I am", CHOICE_DIALOGUE };
+					case C_4_C_6_AB_1:
+						return { "AHAHAHAH", HUGO_DIALOGUE };
+					case C_4_C_6_AB_2:
+						return { "I'm here to get our money, not to talk", OSKAR_DIALOGUE };
+				case C_4_C_6_C:
+					return { "I'VE HEARD ENOUGH < LEAVE DIALOGUE >", CHOICE_DIALOGUE };
 	}
 	}
 	D_ASSERT(false, "Invalid text for type: %i", textType);
@@ -252,6 +323,21 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 160, 63, 39 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		break;
+	case OSKAR_DIALOGUE:
+		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
+		s_currentDialogueEntityDTO.outlineColor = { 61, 49, 63 };
+		s_currentDialogueEntityDTO.textColor = { 193, 138, 106 };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		break;
+	case HUGO_DIALOGUE:
+		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
+		s_currentDialogueEntityDTO.outlineColor = { 79, 38, 32 };
+		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		break;
+	default:
+		D_ASSERT(false, "Unsupported dialogue entity type");
 		break;
 	}
 }

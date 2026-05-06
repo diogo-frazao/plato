@@ -923,6 +923,12 @@ void ECSLevel::update()
 
             break;
         }
+
+        case GANGSTER_CONFRONTATION_SAGE:
+        {
+
+            break;
+        }
     }
 
     static float cameraOffsetXFromPlayer = 20.f;
