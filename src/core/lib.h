@@ -62,7 +62,7 @@ inline const char* getEntityStateAsString(EntityState state)
 	case ATTACKING_STATE:
 		return "Attacking";
 	case ON_CUTSCENE_STATE:
-		return "On the Phone";
+		return "On cutscene";
 	case HURT_ONE_STATE:
 		return "Hurt One";
 	case HURT_ONE_RECOVER_STATE:

@@ -2643,7 +2643,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAtt
 		return;
 	}
 
-	maxCharactersPerLine = 35;
+	maxCharactersPerLine = 50;
 
 	float screenCenterX = k_baseGameWidth * 0.5f;
 	Vec2 dialogueOptionsStartPosition[k_maxDialogueOptions] = { { screenCenterX - 15.f, 162.f } , { screenCenterX + 15.f, 162.f } , { screenCenterX, 174.f } };

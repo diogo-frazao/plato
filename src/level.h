@@ -62,11 +62,17 @@ struct GangsterConfrontationStageData
 {
 	bool hasStartedConfrontationDialogue = false;
 	bool hasToldRostovToNotGetInvolved = false;
+	bool rostovHasGrabbedCue = false;
+	bool canOskarMoveClose = false;
+	bool hasRostovAttackedEnemy = false;
 
 	void reset()
 	{
 		hasStartedConfrontationDialogue = false;
 		hasToldRostovToNotGetInvolved = false;
+		canOskarMoveClose = false;
+		rostovHasGrabbedCue = false;
+		hasRostovAttackedEnemy = false;
 	}
 };
 

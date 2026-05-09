@@ -934,9 +934,91 @@ void ECSLevel::update()
             // Tell rostov to not get involved when he gets near
             if (playerTransform->position.x <= 315.f && !_gangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
             {
-                u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B , C_4_C });
+                u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B, C_4_C });
                 _gangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
                 player.entityState = ON_CUTSCENE_STATE;
+            }
+
+            if (u.hasChosenOption(C_4_A))
+            {
+                u.pushEntityDialogue(C_4_A_1, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_1))
+            {
+                u.pushEntityDialogue(C_4_A_2, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_2))
+            {
+                u.pushEntityDialogue(C_4_A_3, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_3))
+            {
+                u.pushEntityDialogue(C_4_A_4, &darwin);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_4))
+            {
+                u.pushEntityDialogue(C_4_A_5, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_5))
+            {
+                u.pushEntityDialogue(C_4_A_6, &hugo, { C_4_A_6_A, C_4_A_6_B, C_4_A_6_C });
+            }
+
+            if (u.hasChosenOption(C_4_A_6_A) || u.hasChosenOption(C_4_A_6_B))
+            {
+                u.pushEntityDialogue(C_4_A_6_AB_1, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_6_AB_1))
+            {
+                _gangsterConfrontationStageData.canOskarMoveClose = true;
+            }
+
+            if (_gangsterConfrontationStageData.canOskarMoveClose)
+            {
+                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(oskar), getComponentFromEntity<MovementComponent>(oskar),
+                    getComponentFromEntity<SpriteComponent>(oskar), 310.f))
+                {
+                    u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                    _gangsterConfrontationStageData.canOskarMoveClose = false;
+
+                }
+            }
+
+            if (u.hasDialogueFinihsed(C_4_A_6_AB_2))
+            {
+                u.pushEntityDialogue(C_4_A_6_AB_3, &oskar);
+            }
+
+            if (u.hasChosenOption(C_4_A_6_C))
+            {
+                u.popTensionBar();
+                player.entityState = IDLE_STATE;
+
+                if (!_gangsterConfrontationStageData.rostovHasGrabbedCue)
+                {
+                    u.pushEntityDialogue(C_4_BC_2_C_2, &darwin);
+                }
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_C_2))
+            {
+                u.pushEntityDialogue(C_4_BC_2_C_3, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_C_3))
+            {
+                u.pushEntityDialogue(C_4_BC_2_C_4, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_C_4))
+            {
+                u.pushEntityDialogue(C_4_BC_2_C_5, &oskar);
             }
 
             break;
