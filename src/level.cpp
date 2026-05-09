@@ -408,18 +408,6 @@ bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, Sprit
     return false;
 }
 
-enum LevelStages
-{
-    MARKETING_PHONE_STAGE,
-    FIRST_DAD_PHONE_STAGE,
-    DARWIN_CONVERSATION_STAGE,
-    GANGSTER_CONFRONTATION_SAGE,
-    LEVEL_STAGES_COUNT,
-};
-
-static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE" };
-static LevelStages s_currentLevelStage = MARKETING_PHONE_STAGE;
-
 void ECSLevel::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -453,7 +441,7 @@ void ECSLevel::update()
     UISystem& u = _uiSystem;
 
     // Level logic
-    switch (s_currentLevelStage)
+    switch (_currentLevelStage)
     {
         case MARKETING_PHONE_STAGE:
         {
@@ -611,7 +599,7 @@ void ECSLevel::update()
                 _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
             {
                 _uiSystem.hangupPhone();
-                s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+                _currentLevelStage = FIRST_DAD_PHONE_STAGE;
                 startTimer(s_multiPurpuseTimer);
             }
 
@@ -741,7 +729,7 @@ void ECSLevel::update()
                 if (s_multiPurpuseTimer >= 3.1f)
                 {
                     u.interruptCurrentDialogue();
-                    s_currentLevelStage = DARWIN_CONVERSATION_STAGE;
+                    _currentLevelStage = DARWIN_CONVERSATION_STAGE;
                     invalidateTimer(s_multiPurpuseTimer);
                 }
             }
@@ -756,20 +744,18 @@ void ECSLevel::update()
             auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
             auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
 
-            static bool canMoveFromDoor = false;
-
-            if (canMoveFromDoor)
-            {
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 427.f))
-                {
-                    canMoveFromDoor = false;
-                }
-            }
-
             if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9))
             {
                 u.pushEntityDialogue(ONE_DARWIN_1, &darwin);
-                canMoveFromDoor = true;
+                _darwinConversationStageData.canMoveFromDoor = true;
+            }
+
+            if (_darwinConversationStageData.canMoveFromDoor)
+            {
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 427.f))
+                {
+                    _darwinConversationStageData.canMoveFromDoor = false;
+                }
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_1))
@@ -777,12 +763,10 @@ void ECSLevel::update()
                 u.pushEntityDialogue(ONE_DARWIN_2, &darwin, { ONE_DARWIN_2_A, ONE_DARWIN_2_B });
             }
 
-            static bool canGetNearTable = false;
-
             if (u.hasDialogueFinihsed(ONE_DARWIN_2))
             {
                 u.pushCellphoneDialogue(ONE_DARWIN_3);
-                canGetNearTable = true;
+                _darwinConversationStageData.canGetNearTable = true;
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_3))
@@ -790,11 +774,11 @@ void ECSLevel::update()
                 u.pushCellphoneDialogue(ONE_DARWIN_4);
             }
 
-            if (canGetNearTable)
+            if (_darwinConversationStageData.canGetNearTable)
             {
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
                 {
-                    canGetNearTable = false;
+                    _darwinConversationStageData.canGetNearTable = false;
                 }
             }
 
@@ -808,19 +792,17 @@ void ECSLevel::update()
                 u.pushEntityDialogue(ONE_DARWIN_6, &darwin);
             }
 
-            static bool canGetEvenNearTable = false;
-
             if (u.hasDialogueFinihsed(ONE_DARWIN_6))
             {
                 u.pushEntityDialogue(ONE_DARWIN_7, &darwin);
-                canGetEvenNearTable = true;
+                _darwinConversationStageData.canGetEvenNearTable = true;
             }
 
-            if (canGetEvenNearTable)
+            if (_darwinConversationStageData.canGetEvenNearTable)
             {
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 480.f))
                 {
-                    canGetEvenNearTable = false;
+                    _darwinConversationStageData.canGetEvenNearTable = false;
                 }
             }
 
@@ -849,8 +831,6 @@ void ECSLevel::update()
                 }
             }
 
-            static float waitAfterCallEndsTimer = k_invalidTime;
-
             if (u.hasDialogueFinihsed(ONE_DARWIN_10))
             {
                 Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
@@ -860,16 +840,16 @@ void ECSLevel::update()
             if (u.hasDialogueFinihsed(ONE_DARWIN_11))
             {
                 u.hangupPhone();
-                startTimer(waitAfterCallEndsTimer);
+                startTimer(_darwinConversationStageData.waitAfterCallEndsTimer);
             }
 
-            if (isTimerOngoing(waitAfterCallEndsTimer))
+            if (isTimerOngoing(_darwinConversationStageData.waitAfterCallEndsTimer))
             {
-                waitAfterCallEndsTimer += k_deltaTime;
-                if (waitAfterCallEndsTimer >= 2.f)
+                _darwinConversationStageData.waitAfterCallEndsTimer += k_deltaTime;
+                if (_darwinConversationStageData.waitAfterCallEndsTimer >= 2.f)
                 {
                     u.pushEntityDialogue(ONE_DARWIN_12, &darwin);
-                    invalidateTimer(waitAfterCallEndsTimer);
+                    invalidateTimer(_darwinConversationStageData.waitAfterCallEndsTimer);
                 }
             }
 
@@ -883,19 +863,17 @@ void ECSLevel::update()
                 u.pushEntityDialogue(ONE_DARWIN_14, &darwin);
             }
 
-            static bool canMoveBack = false;
-
             if (u.hasDialogueFinihsed(ONE_DARWIN_14))
             {
-                canMoveBack = true;
+                _darwinConversationStageData.canMoveBack = true;
             }
 
-            if (canMoveBack)
+            if (_darwinConversationStageData.canMoveBack)
             {
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
                 {
                     u.pushEntityDialogue(ONE_DARWIN_15, &darwin);
-                    canMoveBack = false;
+                    _darwinConversationStageData.canMoveBack = false;
                 }
             }
 
@@ -905,15 +883,13 @@ void ECSLevel::update()
 
             }
 
-            static bool canMoveToKitchen = false;
-
             if (u.hasDialogueFinihsed(ONE_DARWIN_16))
             {
-                canMoveToKitchen = true;
+                _darwinConversationStageData.canMoveToKitchen = true;
                 u.popTensionBar();
             }
 
-            if (canMoveToKitchen)
+            if (_darwinConversationStageData.canMoveToKitchen)
             {
                 if (player.entityState == ON_CUTSCENE_STATE)
                 {
@@ -923,7 +899,7 @@ void ECSLevel::update()
                 darwinM->maxHorizontalSpeed = 0.6f;
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 293.f))
                 {
-                    canMoveToKitchen = false;
+                    _darwinConversationStageData.canMoveToKitchen = false;
                 }
             }
 
@@ -937,12 +913,11 @@ void ECSLevel::update()
             Entity& oskar = getEntityById(s_oskarEntityId);
 
             // As soon as we move, push the dialogue
-            static bool canStartConfrontationDialogue = true;
 
-            if (playerTransform->position.x < 488.f && canStartConfrontationDialogue)
+            if (playerTransform->position.x < 488.f && !_gangsterConfrontationStageData.hasStartedConfrontationDialogue)
             {
                 u.pushEntityDialogue(C_1, &oskar);
-                canStartConfrontationDialogue = false;
+                _gangsterConfrontationStageData.hasStartedConfrontationDialogue = true;
                 D_LOG(MINI, "Started confrontation dialogue");
             }
 
@@ -951,17 +926,16 @@ void ECSLevel::update()
                 u.pushEntityDialogue(C_2, &darwin);
             }
 
-            static bool canTellRostovToNotGetInvolved = true;
             if (u.hasDialogueFinihsed(C_2))
             {
                 u.pushEntityDialogue(C_3, &hugo);
             }
 
             // Tell rostov to not get involved when he gets near
-            if (playerTransform->position.x <= 315.f && canTellRostovToNotGetInvolved)
+            if (playerTransform->position.x <= 315.f && !_gangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
             {
                 u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B , C_4_C });
-                canTellRostovToNotGetInvolved = false;
+                _gangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
                 player.entityState = ON_CUTSCENE_STATE;
             }
 
@@ -1031,7 +1005,7 @@ void ECSLevel::update()
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
             _uiSystem.pushCellphoneDialogue(ONE_DARWIN_13);
-            s_currentLevelStage = DARWIN_CONVERSATION_STAGE;
+            _currentLevelStage = DARWIN_CONVERSATION_STAGE;
             //startTimer(s_multiPurpuseTimer);
 
             Entity& darwin = getEntityById(s_darwinEntityId);
@@ -1148,34 +1122,38 @@ void ECSLevel::imguiRender()
     ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
     if (ImGui::Button("Change to selected level stage"))
     {
+        _uiSystem._currentDialogue.destroyDialoge();
+        _uiSystem.popTensionBar();
+
         switch (s_levelStageToChangeTo)
         {
         case MARKETING_PHONE_STAGE:
-            s_currentLevelStage = MARKETING_PHONE_STAGE;
+            _currentLevelStage = MARKETING_PHONE_STAGE;
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
             s_playerTension = 0;
             break;
         case FIRST_DAD_PHONE_STAGE:
-            s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
             s_playerTension = 80;
             break;
         case DARWIN_CONVERSATION_STAGE:
         {
-            s_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
             _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
             startTimer(s_multiPurpuseTimer);
             s_playerTension = 20;
             Entity& darwin = getEntityById(s_darwinEntityId);
             getComponentFromEntity<TransformComponent>(darwin)->position = { 415.f, 117.f };
+            _darwinConversationStageData.reset();
             break;
         }
         case GANGSTER_CONFRONTATION_SAGE:
         {
-            s_currentLevelStage = GANGSTER_CONFRONTATION_SAGE;
+            _currentLevelStage = GANGSTER_CONFRONTATION_SAGE;
             _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
 
             Entity& darwin = getEntityById(s_darwinEntityId);
@@ -1183,7 +1161,10 @@ void ECSLevel::imguiRender()
             getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
 
             Entity& player = getEntityById(k_playerEntityId);
+            getComponentFromEntity<TransformComponent>(player)->position.x = 490.f;
             player.entityState = IDLE_STATE;
+
+            _gangsterConfrontationStageData.reset();
 
             break;
         }

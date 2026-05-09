@@ -28,6 +28,48 @@ struct Camera
 	Vec2 zoomFocusPoint = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
 };
 
+enum LevelStages
+{
+    MARKETING_PHONE_STAGE,
+    FIRST_DAD_PHONE_STAGE,
+    DARWIN_CONVERSATION_STAGE,
+    GANGSTER_CONFRONTATION_SAGE,
+    LEVEL_STAGES_COUNT,
+};
+static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE" };
+
+struct DarwinConfrontationStageData
+{
+    bool canMoveFromDoor = false;
+	bool canGetNearTable = false;
+	bool canGetEvenNearTable = false;
+	float waitAfterCallEndsTimer = k_invalidTime;
+	bool canMoveBack = false;
+	bool canMoveToKitchen = false;
+
+	void reset()
+	{
+		canMoveFromDoor = false;
+		canGetNearTable = false;
+		canGetEvenNearTable = false;
+		waitAfterCallEndsTimer = k_invalidTime;
+		canMoveBack = false;
+		canMoveToKitchen = false;
+	}
+};
+
+struct GangsterConfrontationStageData
+{
+	bool hasStartedConfrontationDialogue = false;
+	bool hasToldRostovToNotGetInvolved = false;
+
+	void reset()
+	{
+		hasStartedConfrontationDialogue = false;
+		hasToldRostovToNotGetInvolved = false;
+	}
+};
+
 class ECSLevel
 {
 public:
@@ -49,6 +91,11 @@ public:
 	CrosshairSystem _crosshairSystem;
 	AttackingSystem _attackingSystem;
 	UISystem _uiSystem;
+
+private:
+	LevelStages _currentLevelStage = MARKETING_PHONE_STAGE;
+	DarwinConfrontationStageData _darwinConversationStageData;
+	GangsterConfrontationStageData _gangsterConfrontationStageData;
 };
 
 struct LevelManager
