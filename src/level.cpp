@@ -6,11 +6,15 @@
 #include <SDL3/SDL_render.h>
 
 int lightThatFollowsPlayerEntityId = k_invalidId;
-int32_t s_darwinEntityId = k_invalidId;
 
 static bool s_isInsideRestaurant = false;
 static float s_multiPurpuseTimer = 0.f;
 float k_restaurantBaseY = 60.f;
+
+// Level entities
+int32_t s_darwinEntityId = k_invalidId;
+int32_t s_hugoEntityId = k_invalidId;
+int32_t s_oskarEntityId = k_invalidId;
 
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
@@ -309,6 +313,7 @@ void setupInsideRestaurantScene()
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         hugoM->runAcceleration = 0.3f;
+        s_hugoEntityId = hugo.id;
 
         SpriteType hugoAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_HUGO_SPRITE };
         hugoM->setupMovementAnimations(hugoAnimations);
@@ -321,6 +326,7 @@ void setupInsideRestaurantScene()
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
         oskarM->maxHorizontalSpeed = 0.3f;
         oskarM->runAcceleration = 0.3f;
+        s_oskarEntityId = oskar.id;
 
         SpriteType oskarAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_OSKAR_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
@@ -357,7 +363,7 @@ void ECSLevel::start()
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand;
     getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
-    player.entityState = ON_PHONE_STATE;
+    player.entityState = ON_CUTSCENE_STATE;
 
     Entity& crosshair = addEntity();
     auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
@@ -909,7 +915,7 @@ void ECSLevel::update()
 
             if (canMoveToKitchen)
             {
-                if (player.entityState == ON_PHONE_STATE)
+                if (player.entityState == ON_CUTSCENE_STATE)
                 {
                     player.entityState = IDLE_STATE;
                 }
@@ -926,6 +932,38 @@ void ECSLevel::update()
 
         case GANGSTER_CONFRONTATION_SAGE:
         {
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            Entity& hugo = getEntityById(s_hugoEntityId);
+            Entity& oskar = getEntityById(s_oskarEntityId);
+
+            // As soon as we move, push the dialogue
+            static bool canStartConfrontationDialogue = true;
+
+            if (playerTransform->position.x < 488.f && canStartConfrontationDialogue)
+            {
+                u.pushEntityDialogue(C_1, &oskar);
+                canStartConfrontationDialogue = false;
+                D_LOG(MINI, "Started confrontation dialogue");
+            }
+
+            if (u.hasDialogueFinihsed(C_1))
+            {
+                u.pushEntityDialogue(C_2, &darwin);
+            }
+
+            static bool canTellRostovToNotGetInvolved = true;
+            if (u.hasDialogueFinihsed(C_2))
+            {
+                u.pushEntityDialogue(C_3, &hugo);
+            }
+
+            // Tell rostov to not get involved when he gets near
+            if (playerTransform->position.x <= 315.f && canTellRostovToNotGetInvolved)
+            {
+                u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B , C_4_C });
+                canTellRostovToNotGetInvolved = false;
+                player.entityState = ON_CUTSCENE_STATE;
+            }
 
             break;
         }

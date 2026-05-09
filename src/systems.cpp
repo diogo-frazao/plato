@@ -611,7 +611,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
+	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
@@ -634,7 +634,7 @@ void MovementSystem::processMainCharacterMovement()
 		spriteComponent->flipX = true;
 	}
 
-	bool canJumpFromCurrentState = player.entityState != ON_PHONE_STATE;
+	bool canJumpFromCurrentState = player.entityState != ON_CUTSCENE_STATE;
 
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
@@ -686,7 +686,7 @@ void MovementSystem::processMainCharacterMovement()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
+	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
 
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
 	if (isGroundedAndNotMoving && canChangeFromCurrentStateToIdle)
@@ -754,7 +754,7 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->resetScaleLerp = 0.1f;
 	}
 
-	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE && player.entityState != ON_PHONE_STATE;
+	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
 	if (canChangeToFallingState)
 	{
 		player.entityState = FALLING_STATE;
@@ -780,7 +780,7 @@ void MovementSystem::processMainCharacterMovement()
 	switch (player.entityState)
 	{
 	case IDLE_STATE:
-	case ON_PHONE_STATE:
+	case ON_CUTSCENE_STATE:
 		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_IDLE_SPRITE : CHARACTER_IDLE_SPRITE, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
@@ -1201,7 +1201,7 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 	}
 
 	// Attack based on state
-	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_PHONE_STATE;
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE;
 	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
 	if (!canAttack)
 	{

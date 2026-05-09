@@ -242,9 +242,9 @@ TextDTO getTextInfo(TextType textType)
 	case C_4:
 		return { "ROSTOV, please don't get involved", DARWIN_DIALOGUE };
 		case C_4_A:
-			return { "What are these wannabe gangsters doing here?", CHOICE_DIALOGUE };
+			return { "What are these kids doing here?", CHOICE_DIALOGUE , 10, HIGH_TENSION};
 		case C_4_B:
-			return { "I already did", CHOICE_DIALOGUE };
+			return { "I already did", CHOICE_DIALOGUE, 5, HIGH_TENSION };
 			case C_4_AB_1:
 				return { "ahahAHAHAHah", HUGO_DIALOGUE };
 			case C_4_AB_2:

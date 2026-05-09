@@ -19,7 +19,7 @@ enum EntityState
 	FALLING_STATE,
 
 	//General
-	ON_PHONE_STATE,
+	ON_CUTSCENE_STATE,
 
 	// Attack
 	ATTACKING_STATE,
@@ -61,7 +61,7 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Falling";
 	case ATTACKING_STATE:
 		return "Attacking";
-	case ON_PHONE_STATE:
+	case ON_CUTSCENE_STATE:
 		return "On the Phone";
 	case HURT_ONE_STATE:
 		return "Hurt One";
