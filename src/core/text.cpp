@@ -266,7 +266,7 @@ TextDTO getTextInfo(TextType textType)
 					case C_4_A_6_AB_3:
 						return { "I'm here to get our money, not to talk", OSKAR_DIALOGUE };
 				case C_4_A_6_C:
-					return { "I'VE HEARD ENOUGH < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 20, FATAL_TENSION};
+					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 20, FATAL_TENSION};
 		case C_4_B:
 			return { "I already did", CHOICE_DIALOGUE, 5, HIGH_TENSION };
 		case C_4_C:
@@ -286,13 +286,13 @@ TextDTO getTextInfo(TextType textType)
 				case C_4_BC_2_C:
 					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE };
 					case C_4_BC_2_C_CUE_1:
-						return { "Asking for what heh?", OSKAR_DIALOGUE };
+						return { "Asked for what heh?", OSKAR_DIALOGUE };
 					case C_4_BC_2_C_CUE_2:
 						return { "Be careful with that golf cue ROSTOV, your arm might fall off", HUGO_DIALOGUE };
 					case C_4_BC_2_C_CUE_3:
 						return { "AHAHAHA", OSKAR_DIALOGUE };
 					case C_4_BC_2_C_1:
-						return { "Asking for what heh?", OSKAR_DIALOGUE };
+						return { "Asked for what heh?", OSKAR_DIALOGUE };
 					case C_4_BC_2_C_2:
 						return { "ROSTOV grab that golf cue near the table", DARWIN_DIALOGUE };
 					case C_4_BC_2_C_3:
@@ -330,7 +330,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 61, 49, 63 };
 		s_currentDialogueEntityDTO.textColor = { 193, 138, 106 };
-		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
 		break;
 	case HUGO_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };

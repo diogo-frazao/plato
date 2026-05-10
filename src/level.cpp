@@ -320,19 +320,21 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& oskar = addEntity({ 270.f, 110.f });
-        addComponentToEntity<SpriteComponent>(oskar)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
-        addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 0,0 }, { 13, 19 });
+        Entity& oskar = addEntity({ 242.f, 95.f });
+        addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
+        addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+        addComponentToEntity<AttackingComponent>(oskar);
+        getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
         oskarM->maxHorizontalSpeed = 0.3f;
         oskarM->runAcceleration = 0.3f;
         s_oskarEntityId = oskar.id;
 
-        SpriteType oskarAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_OSKAR_SPRITE };
+        SpriteType oskarAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_SMALL_IDLE_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
     }
 
-    Entity& golfWeapon = addEntity();
+    Entity& golfWeapon = addEntity();   
     addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
     addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
 }   
@@ -939,6 +941,16 @@ void ECSLevel::update()
                 player.entityState = ON_CUTSCENE_STATE;
             }
 
+            if (u.hasChosenOption(C_4_B) || u.hasChosenOption(C_4_C))
+            {
+                u.pushEntityDialogue(C_4_BC_1, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_1))
+            {
+                u.pushEntityDialogue(C_4_BC_2, &hugo);
+            }
+
             if (u.hasChosenOption(C_4_A))
             {
                 u.pushEntityDialogue(C_4_A_1, &oskar);
@@ -982,9 +994,20 @@ void ECSLevel::update()
             if (_gangsterConfrontationStageData.canOskarMoveClose)
             {
                 if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(oskar), getComponentFromEntity<MovementComponent>(oskar),
-                    getComponentFromEntity<SpriteComponent>(oskar), 310.f))
+                    getComponentFromEntity<SpriteComponent>(oskar), 290.f))
                 {
-                    u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                    switch (u._lastDialogueType)
+                    {
+                    case C_4_A_6_AB_1:
+                        u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                        break;
+                    case C_4_A_6:
+                        u.pushEntityDialogue(C_4_BC_2_C_1, &oskar);
+                        break;
+                    default:
+                        break;
+                    }
+
                     _gangsterConfrontationStageData.canOskarMoveClose = false;
 
                 }
@@ -1000,25 +1023,42 @@ void ECSLevel::update()
                 u.popTensionBar();
                 player.entityState = IDLE_STATE;
 
-                if (!_gangsterConfrontationStageData.rostovHasGrabbedCue)
+                _gangsterConfrontationStageData.canOskarMoveClose = true;
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_C_1))
+            {
+                u.pushEntityDialogue(C_4_BC_2_C_2, &darwin);
+            }
+
+            // If rostov attacks oskar stop the dialogues
+            auto* oskarA = getComponentFromEntity<AttackingComponent>(oskar);
+            if (oskarA->damageCounter > 0 && !_gangsterConfrontationStageData.hasRostovAttackedEnemy)
+            {
+                _gangsterConfrontationStageData.hasRostovAttackedEnemy = true;
+
+                if (u.isCurrentDialogue(C_4_BC_2_C_3) || u.isCurrentDialogue(C_4_BC_2_C_4) || u.isCurrentDialogue(C_4_BC_2_C_5))
                 {
-                    u.pushEntityDialogue(C_4_BC_2_C_2, &darwin);
+                    u.destroyCurrentDialogue();
                 }
             }
 
-            if (u.hasDialogueFinihsed(C_4_BC_2_C_2))
+            if (!_gangsterConfrontationStageData.hasRostovAttackedEnemy)
             {
-                u.pushEntityDialogue(C_4_BC_2_C_3, &hugo);
-            }
+                if (u.hasDialogueFinihsed(C_4_BC_2_C_2))
+                {
+                    u.pushEntityDialogue(C_4_BC_2_C_3, &hugo);
+                }
 
-            if (u.hasDialogueFinihsed(C_4_BC_2_C_3))
-            {
-                u.pushEntityDialogue(C_4_BC_2_C_4, &oskar);
-            }
+                if (u.hasDialogueFinihsed(C_4_BC_2_C_3))
+                {
+                    u.pushEntityDialogue(C_4_BC_2_C_4, &oskar);
+                }
 
-            if (u.hasDialogueFinihsed(C_4_BC_2_C_4))
-            {
-                u.pushEntityDialogue(C_4_BC_2_C_5, &oskar);
+                if (u.hasDialogueFinihsed(C_4_BC_2_C_4))
+                {
+                    u.pushEntityDialogue(C_4_BC_2_C_5, &oskar);
+                }
             }
 
             break;
@@ -1187,11 +1227,11 @@ void ECSLevel::imguiRender()
 
     if (ImGui::Button("Iterate on last added entity"))
     {
-        Entity& entity = getLastAddedEntity();
-        getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
-        addComponentToEntity<MovementComponent>(entity);
-        addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
-        getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
+        //Entity& entity = getLastAddedEntity();
+        //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
+        //addComponentToEntity<MovementComponent>(entity);
+        //addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
+        //getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
 
         //Entity& darwin = getEntityById(s_darwinEntityId);
         //getComponentFromEntity<TransformComponent>(darwin)->position = {293.f, 117.f };
@@ -1204,7 +1244,7 @@ void ECSLevel::imguiRender()
     ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
     if (ImGui::Button("Change to selected level stage"))
     {
-        _uiSystem._currentDialogue.destroyDialoge();
+        _uiSystem.destroyCurrentDialogue();
         _uiSystem.popTensionBar();
 
         switch (s_levelStageToChangeTo)

@@ -297,6 +297,7 @@ public:
 		TextType dialogueOptionChosen = INVALID_TEXT;
 		Entity* entityTalking = nullptr;
 
+		// Don't use directly, call destroyCurrentDialogue() instead
 		void destroyDialoge()
 		{
 			for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
@@ -347,6 +348,7 @@ public:
 
 	void skipDialogue();
 	void interruptCurrentDialogue();
+	void destroyCurrentDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
 	// For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
@@ -356,6 +358,7 @@ public:
 	Dialogue _currentDialogue;
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
 	float _currentTensionSpriteXSize = 0.f;
+	TextType _lastDialogueType = INVALID_TEXT;
 
 	enum CellphoneState
 	{

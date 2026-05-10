@@ -1546,7 +1546,7 @@ void UISystem::update()
 	// Destroy dialogue if has ended and it's not visible anymore
 	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.state == DIALOGUE_ENDED_STATE)
 	{
-		_currentDialogue.destroyDialoge();
+		destroyCurrentDialogue();
 		D_LOG(WARNING, "Dialogue destroyed")
 	}
 
@@ -1880,6 +1880,12 @@ void UISystem::interruptCurrentDialogue()
 
 		c.velocity.y = SDL_randf() * 4.f * -1.f;
 	}
+}
+
+void UISystem::destroyCurrentDialogue()
+{
+	_lastDialogueType = _currentDialogue.dialogueType;
+	_currentDialogue.destroyDialoge();
 }
 
 void UISystem::render(RenderingSystem* renderingSystem)
@@ -2536,7 +2542,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAtt
 		return;
 	}
 
-	_currentDialogue.destroyDialoge();
+	destroyCurrentDialogue();
 
 	updateDialogueColorsAndOffsetForEntity(textInfo.entityTalking);
 
