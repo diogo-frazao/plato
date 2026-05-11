@@ -275,31 +275,35 @@ TextDTO getTextInfo(TextType textType)
 				return { "ahahAHAHAHah", HUGO_DIALOGUE };
 			case C_4_BC_2:
 				return { "OSKAR, make sure this PIG doesn't get in the way of our money", HUGO_DIALOGUE };
-				case C_4_BC_2_A:
+			case C_4_BC_3:
+				return { "ahAHAHAH... So, what do you have to say now?", OSKAR_DIALOGUE };
+				case C_4_BC_3_A:
 					return { "We don't have your money", CHOICE_DIALOGUE };
-				case C_4_BC_2_B:
-					return { "I can feel your breath", CHOICE_DIALOGUE };
-					case C_4_BC_2_B_1:
+				case C_4_BC_3_B:
+					return { "I can feel your breath", CHOICE_DIALOGUE, 10, HIGH_TENSION};
+					case C_4_BC_2_3_1:
 						return { "ahAHAHAHA", HUGO_DIALOGUE };
-					case C_4_BC_2_B_2:
+					case C_4_BC_2_3_2:
+						return { "HE IS MOCKING YOU OSKAR", HUGO_DIALOGUE };
+					case C_4_BC_2_3_3:
 						return { "SHUT THE FUCK UP ROSTOV", OSKAR_DIALOGUE };
-				case C_4_BC_2_C:
-					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE };
-					case C_4_BC_2_C_CUE_1:
+				case C_4_BC_3_C:
+					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 20, FATAL_TENSION};
+					case C_4_BC_3_C_CUE_1:
 						return { "Asked for what heh?", OSKAR_DIALOGUE };
-					case C_4_BC_2_C_CUE_2:
+					case C_4_BC_3_C_CUE_2:
 						return { "Be careful with that golf cue ROSTOV, your arm might fall off", HUGO_DIALOGUE };
-					case C_4_BC_2_C_CUE_3:
+					case C_4_BC_3_C_CUE_3:
 						return { "AHAHAHA", OSKAR_DIALOGUE };
-					case C_4_BC_2_C_1:
+					case C_4_BC_3_C_1:
 						return { "Asked for what heh?", OSKAR_DIALOGUE };
-					case C_4_BC_2_C_2:
+					case C_4_BC_3_C_2:
 						return { "ROSTOV grab that golf cue near the table", DARWIN_DIALOGUE };
-					case C_4_BC_2_C_3:
+					case C_4_BC_3_C_3:
 						return { "But be careful ROSTOV, your arm might fall off trying to pick it up", HUGO_DIALOGUE };
-					case C_4_BC_2_C_4:
+					case C_4_BC_3_C_4:
 						return { "AHAHAHAH", OSKAR_DIALOGUE };
-					case C_4_BC_2_C_5:
+					case C_4_BC_3_C_5:
 						return { "That was a good one brother", OSKAR_DIALOGUE };
 	}
 	}

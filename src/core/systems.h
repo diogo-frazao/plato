@@ -359,6 +359,7 @@ public:
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
 	float _currentTensionSpriteXSize = 0.f;
 	TextType _lastDialogueType = INVALID_TEXT;
+	TextType _lastOptionChosen = INVALID_TEXT;
 
 	enum CellphoneState
 	{

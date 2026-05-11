@@ -951,6 +951,42 @@ void ECSLevel::update()
                 u.pushEntityDialogue(C_4_BC_2, &hugo);
             }
 
+            if (u.hasDialogueFinihsed(C_4_BC_2))
+            {
+                _gangsterConfrontationStageData.canOskarMoveClose = true;
+            }
+
+            if (u.hasChosenOption(C_4_BC_3_A))
+            {
+                u.pushEntityDialogue(C_4_A_5, &hugo);
+            }
+            else if (u.hasChosenOption(C_4_BC_3_B))
+            {
+                u.pushEntityDialogue(C_4_BC_2_3_1, &hugo);
+            }
+            else if (u.hasChosenOption(C_4_BC_3_C))
+            {
+                u.popTensionBar();
+                player.entityState = IDLE_STATE;
+
+                u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_3_1))
+            {
+                u.pushEntityDialogue(C_4_BC_2_3_2, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_3_2))
+            {
+                u.pushEntityDialogue(C_4_BC_2_3_3, &oskar);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_BC_2_3_3))
+            {
+                u.pushEntityDialogue(C_4_A_6_AB_3, &oskar);
+            }
+
             if (u.hasChosenOption(C_4_A))
             {
                 u.pushEntityDialogue(C_4_A_1, &oskar);
@@ -1002,7 +1038,17 @@ void ECSLevel::update()
                         u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
                         break;
                     case C_4_A_6:
-                        u.pushEntityDialogue(C_4_BC_2_C_1, &oskar);
+                        if (u._lastOptionChosen == C_4_A_6_B || u._lastOptionChosen == C_4_A_6_A)
+                        {
+                            u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                        }
+                        else if (u._lastOptionChosen == C_4_A_6_C)
+                        {
+                            u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+                        }
+                        break;
+                    case C_4_BC_2:
+                        u.pushEntityDialogue(C_4_BC_3, &oskar, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C});
                         break;
                     default:
                         break;
@@ -1018,6 +1064,12 @@ void ECSLevel::update()
                 u.pushEntityDialogue(C_4_A_6_AB_3, &oskar);
             }
 
+            if (u.hasDialogueFinihsed(C_4_A_6_AB_3))
+            {
+                u.popTensionBar();
+                player.entityState = IDLE_STATE;
+            }
+
             if (u.hasChosenOption(C_4_A_6_C))
             {
                 u.popTensionBar();
@@ -1026,9 +1078,9 @@ void ECSLevel::update()
                 _gangsterConfrontationStageData.canOskarMoveClose = true;
             }
 
-            if (u.hasDialogueFinihsed(C_4_BC_2_C_1))
+            if (u.hasDialogueFinihsed(C_4_BC_3_C_1))
             {
-                u.pushEntityDialogue(C_4_BC_2_C_2, &darwin);
+                u.pushEntityDialogue(C_4_BC_3_C_2, &darwin);
             }
 
             // If rostov attacks oskar stop the dialogues
@@ -1037,7 +1089,7 @@ void ECSLevel::update()
             {
                 _gangsterConfrontationStageData.hasRostovAttackedEnemy = true;
 
-                if (u.isCurrentDialogue(C_4_BC_2_C_3) || u.isCurrentDialogue(C_4_BC_2_C_4) || u.isCurrentDialogue(C_4_BC_2_C_5))
+                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5))
                 {
                     u.destroyCurrentDialogue();
                 }
@@ -1045,19 +1097,19 @@ void ECSLevel::update()
 
             if (!_gangsterConfrontationStageData.hasRostovAttackedEnemy)
             {
-                if (u.hasDialogueFinihsed(C_4_BC_2_C_2))
+                if (u.hasDialogueFinihsed(C_4_BC_3_C_2))
                 {
-                    u.pushEntityDialogue(C_4_BC_2_C_3, &hugo);
+                    u.pushEntityDialogue(C_4_BC_3_C_3, &hugo);
                 }
 
-                if (u.hasDialogueFinihsed(C_4_BC_2_C_3))
+                if (u.hasDialogueFinihsed(C_4_BC_3_C_3))
                 {
-                    u.pushEntityDialogue(C_4_BC_2_C_4, &oskar);
+                    u.pushEntityDialogue(C_4_BC_3_C_4, &oskar);
                 }
 
-                if (u.hasDialogueFinihsed(C_4_BC_2_C_4))
+                if (u.hasDialogueFinihsed(C_4_BC_3_C_4))
                 {
-                    u.pushEntityDialogue(C_4_BC_2_C_5, &oskar);
+                    u.pushEntityDialogue(C_4_BC_3_C_5, &oskar);
                 }
             }
 
@@ -1285,6 +1337,9 @@ void ECSLevel::imguiRender()
             Entity& player = getEntityById(k_playerEntityId);
             getComponentFromEntity<TransformComponent>(player)->position.x = 490.f;
             player.entityState = IDLE_STATE;
+
+            Entity& oskar = getEntityById(s_oskarEntityId);
+            getComponentFromEntity<TransformComponent>(oskar)->position = { 242.f, 95.f };
 
             _gangsterConfrontationStageData.reset();
 

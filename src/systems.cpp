@@ -1885,6 +1885,7 @@ void UISystem::interruptCurrentDialogue()
 void UISystem::destroyCurrentDialogue()
 {
 	_lastDialogueType = _currentDialogue.dialogueType;
+	_lastOptionChosen = _currentDialogue.dialogueOptionChosen;
 	_currentDialogue.destroyDialoge();
 }
 
