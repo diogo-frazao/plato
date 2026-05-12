@@ -410,6 +410,22 @@ bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, Sprit
     return false;
 }
 
+void pushGolfCueControntationDialogue(UISystem& u)
+{
+    Entity& player = getEntityById(k_playerEntityId);
+    auto* a = getComponentFromEntity<AttackingComponent>(player);
+
+    Entity& oskar = getEntityById(s_oskarEntityId);
+    if (a->weaponInHand == NO_WEAPON_TYPE)
+    {
+        u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+    }
+    else
+    {
+        u.pushEntityDialogue(C_4_BC_3_C_CUE_1, &oskar);
+    }
+}
+
 void ECSLevel::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -969,7 +985,7 @@ void ECSLevel::update()
                 u.popTensionBar();
                 player.entityState = IDLE_STATE;
 
-                u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+                pushGolfCueControntationDialogue(u);
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_2_3_1))
@@ -1044,7 +1060,7 @@ void ECSLevel::update()
                         }
                         else if (u._lastOptionChosen == C_4_A_6_C)
                         {
-                            u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+                            pushGolfCueControntationDialogue(u);
                         }
                         break;
                     case C_4_BC_2:
@@ -1089,7 +1105,8 @@ void ECSLevel::update()
             {
                 _gangsterConfrontationStageData.hasRostovAttackedEnemy = true;
 
-                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5))
+                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5) || 
+                    u.isCurrentDialogue(C_4_BC_3_C_CUE_1) || u.isCurrentDialogue(C_4_BC_3_C_CUE_2) || u.isCurrentDialogue(C_4_BC_3_C_CUE_3))
                 {
                     u.destroyCurrentDialogue();
                 }
@@ -1110,6 +1127,16 @@ void ECSLevel::update()
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_4))
                 {
                     u.pushEntityDialogue(C_4_BC_3_C_5, &oskar);
+                }
+
+                if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_1))
+                {
+                    u.pushEntityDialogue(C_4_BC_3_C_CUE_2, &hugo);
+                }
+
+                if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_2))
+                {
+                    u.pushEntityDialogue(C_4_BC_3_C_CUE_3, &oskar);
                 }
             }
 
