@@ -115,9 +115,9 @@ TextDTO getTextInfo(TextType textType)
 		case ONE_DAD_PHONE_2_B:
 			return { "Yes Pa", CELLPHONE_DIALOGUE, - 100 , LOW_TENSION};
 	case ONE_DAD_PHONE_3:
-		return "I was trying to call you, is everything ok?";
+		return "I was trying to call you, is everything ok son?";
 		case ONE_DAD_PHONE_3_A:
-			return "Yes and you?";
+			return "Yes, you?";
 			case ONE_DAD_PHONE_3_A_1:
 				return "*cough* *cough*";
 			case ONE_DAD_PHONE_3_A_2:

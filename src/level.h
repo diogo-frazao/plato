@@ -33,7 +33,7 @@ enum LevelStages
     MARKETING_PHONE_STAGE,
     FIRST_DAD_PHONE_STAGE,
     DARWIN_CONVERSATION_STAGE,
-    GANGSTER_CONFRONTATION_SAGE,
+    GANGSTER_CONFRONTATION_STAGE,
     LEVEL_STAGES_COUNT,
 };
 static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE" };
@@ -43,23 +43,24 @@ struct DarwinConfrontationStageData
     bool canMoveFromDoor = false;
 	bool canGetNearTable = false;
 	bool canGetEvenNearTable = false;
+	float waitToAskIfPaHeardUs = k_invalidTime;
 	float waitAfterCallEndsTimer = k_invalidTime;
 	bool canMoveBack = false;
-	bool canMoveToKitchen = false;
 
 	void reset()
 	{
 		canMoveFromDoor = false;
 		canGetNearTable = false;
 		canGetEvenNearTable = false;
+		waitToAskIfPaHeardUs = k_invalidTime;
 		waitAfterCallEndsTimer = k_invalidTime;
 		canMoveBack = false;
-		canMoveToKitchen = false;
 	}
 };
 
 struct GangsterConfrontationStageData
 {
+	bool canDarwinMoveToKitchen = true;
 	bool hasStartedConfrontationDialogue = false;
 	bool hasToldRostovToNotGetInvolved = false;
 	bool rostovHasGrabbedCue = false;
@@ -68,6 +69,7 @@ struct GangsterConfrontationStageData
 
 	void reset()
 	{
+		canDarwinMoveToKitchen = true;
 		hasStartedConfrontationDialogue = false;
 		hasToldRostovToNotGetInvolved = false;
 		canOskarMoveClose = false;
