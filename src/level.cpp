@@ -1367,6 +1367,8 @@ void ECSLevel::imguiRender()
 
             Entity& oskar = getEntityById(s_oskarEntityId);
             getComponentFromEntity<TransformComponent>(oskar)->position = { 242.f, 95.f };
+            getComponentFromEntity<AttackingComponent>(oskar)->damageCounter = 0;
+            oskar.entityState = IDLE_STATE;
 
             _gangsterConfrontationStageData.reset();
 

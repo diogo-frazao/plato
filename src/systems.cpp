@@ -1298,7 +1298,16 @@ void AttackingSystem::handleMainCharacter()
 		auto* aTarget = getComponentFromEntity<AttackingComponent>(target);
 		auto* tTarget = getComponentFromEntity<TransformComponent>(target);
 
-		Vec2 attackStartingLocation = { t->position.x + 35, t->position.y + 18 };
+		Vec2 attackStartingLocation{ t->position.x, t->position.y + 18 };
+		if (s->flipX)
+		{
+			attackStartingLocation.x += 8.f;
+		}
+		else
+		{
+			attackStartingLocation.x += 35.f;
+		}
+
 		RectCollider attackCollider = { {0,0}, {17, 10} };
 
 		Vec2 targetPos = tTarget->position;
@@ -1326,37 +1335,38 @@ void AttackingSystem::handleMainCharacter()
 		bool wasUpHit = mouseWorldPosition.y < targetTransform->position.y;
 
 		auto* mTarget = getComponentFromEntity<MovementComponent>(target);
+		int8_t hitDirection = s->flipX ? -1 : 1;
 
 		bool targetWillRemainStanding = aTarget->damageCounter < aTarget->numberOfHitsToFall;
 		if (targetWillRemainStanding)
 		{
 			target.entityState = HURT_ONE_STATE;
-			mTarget->currentSpeed = { 3.f, 0.f };
+			mTarget->currentSpeed = { 3.f * hitDirection, 0.f };
 		}
 		else if (aTarget->damageCounter == aTarget->numberOfHitsToFall)
 		{
 			if (target.entityState == IDLE_STATE)
 			{
 				target.entityState = HURT_ONE_STATE;
-				mTarget->currentSpeed = { 3.f, 0.f };
+				mTarget->currentSpeed = { 3.f * hitDirection, 0.f };
 			}
 			else
 			{
 				target.entityState = HURT_TWO_STATE;
-				mTarget->currentSpeed = { 3.f, -1.f };
+				mTarget->currentSpeed = { 3.f * hitDirection, -1.f };
 			}
 		}
 		else
 		{
 			if (canKillyEntityFromCurrentState(target.entityState))
 			{
-				mTarget->currentSpeed = { 4.5f, 0.f };
+				mTarget->currentSpeed = { 4.5f * hitDirection, 0.f };
 				target.entityState = DEAD_STATE;
 			}
 			else
 			{
 				target.entityState = HURT_TWO_STATE;
-				mTarget->currentSpeed = { 3.f, -1.f };
+				mTarget->currentSpeed = { 3.f * hitDirection, -1.f };
 			}
 		}
 
@@ -1891,7 +1901,6 @@ void UISystem::destroyCurrentDialogue()
 
 void UISystem::render(RenderingSystem* renderingSystem)
 {
-
 	static SDL_FRect src;
 	static SDL_FRect dest;
 
