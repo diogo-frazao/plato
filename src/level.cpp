@@ -410,6 +410,25 @@ bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, Sprit
     return false;
 }
 
+void entityLookAtAnother(Entity* source, Entity* target)
+{
+    float sourceXPos = getComponentFromEntity<TransformComponent>(*source)->position.x;
+    float targetXPos = getComponentFromEntity<TransformComponent>(*target)->position.x;
+
+    SpriteComponent* sourceS = getComponentFromEntity<SpriteComponent>(*source);
+
+    bool shouldLookRight = (targetXPos > sourceXPos) && sourceS->flipX;
+    bool shouldLookLeft = (sourceXPos > targetXPos) && !sourceS->flipX;
+    bool shouldLookAtSprite = shouldLookRight || shouldLookLeft;
+
+    if (!shouldLookAtSprite)
+    {
+        return;
+    }
+
+    sourceS->flipX = !sourceS->flipX;
+}
+
 void pushGolfCueControntationDialogue(UISystem& u)
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -1063,7 +1082,7 @@ void ECSLevel::update()
                         }
                         break;
                     case C_4_BC_2:
-                        u.pushEntityDialogue(C_4_BC_3, &oskar, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C});
+                        u.pushEntityDialogue(C_4_BC_3, &oskar, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C });
                         break;
                     default:
                         break;
@@ -1104,7 +1123,7 @@ void ECSLevel::update()
             {
                 _gangsterConfrontationStageData.hasRostovAttackedEnemy = true;
 
-                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5) || 
+                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5) ||
                     u.isCurrentDialogue(C_4_BC_3_C_CUE_1) || u.isCurrentDialogue(C_4_BC_3_C_CUE_2) || u.isCurrentDialogue(C_4_BC_3_C_CUE_3))
                 {
                     u.destroyCurrentDialogue();
@@ -1136,6 +1155,73 @@ void ECSLevel::update()
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_2))
                 {
                     u.pushEntityDialogue(C_4_BC_3_C_CUE_3, &oskar);
+                }
+            }
+
+            if (oskar.entityState == DEAD_STATE && !_gangsterConfrontationStageData.hasHugoHelpedBrother)
+            {
+                u.pushEntityDialogue(D_1, &hugo);
+                _gangsterConfrontationStageData.hasHugoHelpedBrother = true;
+            }
+
+            if (u.hasDialogueFinihsed(D_1))
+            {
+                entityLookAtAnother(&hugo, &oskar);
+                u.pushEntityDialogue(D_2, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(D_2))
+            {
+                _gangsterConfrontationStageData.canHugoReachBrother = true;
+            }
+
+            if (_gangsterConfrontationStageData.canHugoReachBrother)
+            {
+                // Move hugo until where brother died
+                float oskarXPos = getComponentFromEntity<TransformComponent>(oskar)->position.x + 30.f;
+                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+                    getComponentFromEntity<SpriteComponent>(hugo), oskarXPos))
+                {
+                    u.pushEntityDialogue(D_3, &hugo);
+                    _gangsterConfrontationStageData.canHugoReachBrother = false;
+                }
+            }
+
+            if (u.hasDialogueFinihsed(D_3))
+            {
+                startTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+            }
+
+            if (isTimerOngoing(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead))
+            {
+                _gangsterConfrontationStageData.waitToCheckIfOskarIsDead += k_deltaTime;
+                if (_gangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
+                {
+                    entityLookAtAnother(&hugo, &player);
+                    u.pushEntityDialogue(D_4, &hugo);
+                    invalidateTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                }
+            }
+
+            if (u.hasDialogueFinihsed(D_4))
+            {
+                u.pushEntityDialogue(D_5, &hugo);
+            }
+
+            if (u.hasDialogueFinihsed(D_5))
+            {
+                u.pushEntityDialogue(D_6, &hugo);
+                _gangsterConfrontationStageData.canHugoReachRostov = true;
+            }
+
+            if (_gangsterConfrontationStageData.canHugoReachRostov)
+            {
+                // Move hugo until rostov x pos
+                float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
+                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+                    getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
+                {
+                    _gangsterConfrontationStageData.canHugoReachRostov = false;
                 }
             }
 
@@ -1368,6 +1454,10 @@ void ECSLevel::imguiRender()
             getComponentFromEntity<TransformComponent>(oskar)->position = { 242.f, 95.f };
             getComponentFromEntity<AttackingComponent>(oskar)->damageCounter = 0;
             oskar.entityState = IDLE_STATE;
+
+            Entity& hugo = getEntityById(s_hugoEntityId);
+            getComponentFromEntity<TransformComponent>(hugo)->position = { 230.f, 110.f };
+            getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
 
             _gangsterConfrontationStageData.reset();
 

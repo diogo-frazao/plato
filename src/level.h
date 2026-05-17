@@ -67,6 +67,11 @@ struct GangsterConfrontationStageData
 	bool canOskarMoveClose = false;
 	bool hasRostovAttackedEnemy = false;
 
+	bool hasHugoHelpedBrother = false;
+	bool canHugoReachBrother = false;
+	bool canHugoReachRostov = false;
+	float waitToCheckIfOskarIsDead = k_invalidTime;
+
 	void reset()
 	{
 		canDarwinMoveToKitchen = true;
@@ -75,6 +80,10 @@ struct GangsterConfrontationStageData
 		canOskarMoveClose = false;
 		rostovHasGrabbedCue = false;
 		hasRostovAttackedEnemy = false;
+		hasHugoHelpedBrother = false;
+		canHugoReachBrother = false;
+		canHugoReachRostov = false;
+		waitToCheckIfOskarIsDead = k_invalidTime;
 	}
 };
 

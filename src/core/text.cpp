@@ -306,6 +306,23 @@ TextDTO getTextInfo(TextType textType)
 					case C_4_BC_3_C_5:
 						return { "That was a good one brother", OSKAR_DIALOGUE };
 	}
+
+	// Hugo confrontation after oskar is killed
+	{
+	case D_1:
+		return { "WHAT. THE. FUCK.", HUGO_DIALOGUE };
+	case D_2:
+		return { "OSKAR??", HUGO_DIALOGUE };
+	case D_3:
+		return { "OSKAR... Can you hear me? It's HUGO", HUGO_DIALOGUE };
+	case D_4:
+		return { "YOU KILLED MY BROTHER", HUGO_DIALOGUE };
+	case D_5:
+		return { "You're a FUCKING MURDERER", HUGO_DIALOGUE };
+	case D_6:
+		return { "YOU OLD PIG I WILL MAKE YOU PAY", HUGO_DIALOGUE };
+	}
+
 	}
 	D_ASSERT(false, "Invalid text for type: %i", textType);
 	return "Invalid Text";

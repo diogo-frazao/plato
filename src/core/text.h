@@ -150,6 +150,12 @@ enum TextType
 	C_4_A_6_AB_1,
 	C_4_A_6_AB_2,
 	C_4_A_6_AB_3,
+	D_1,
+	D_2,
+	D_3,
+	D_4,
+	D_5,
+	D_6,
 };
 
 enum TextTensionType
