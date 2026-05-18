@@ -199,6 +199,7 @@ struct DialogueEntityDTO
 	SDL_Color dialogueBoxColor;
 	SDL_Color outlineColor;
 	SDL_Color textColor;
+	int32_t entityId = k_invalidId;
 
 	Vec2 dialoguePositionOffset{ 0.f, 0.f };
 };

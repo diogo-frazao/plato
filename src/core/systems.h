@@ -336,7 +336,7 @@ public:
 		}
 	};
 
-	void pushEntityDialogue(TextType dialogueTextType, Entity* entityToAttachDialogue, const DialogueOptionsDTO dialogueOptions = {},
+	void pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {},
 					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);

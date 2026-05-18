@@ -2535,15 +2535,11 @@ void UISystem::hangupPhone()
 
 void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
-	Entity& player = getEntityById(k_playerEntityId);
-	Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
-	Vec2 bottomLeftPosForCellphoneDialogue{ playerPos.x + 22, playerPos.y + 9 };
-
 	pushTensionBar();
-	pushEntityDialogue(dialogueTextType, &player, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
+	pushEntityDialogue(dialogueTextType, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
 }
 
-void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAttachDialogue, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	TextDTO textInfo = getTextInfo(dialogueTextType);
 	const char* textToShow = textInfo.text;
@@ -2566,6 +2562,13 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAtt
 	float maxXDialogueSize = 0;
 
 	uint8_t maxCharactersPerLine = 35;
+
+	Entity* entityToAttachDialogue = &getEntityById(s_currentDialogueEntityDTO.entityId);
+	if (entityToAttachDialogue->id == k_invalidId)
+	{
+		D_ASSERT(false, "Trying to create dialogue on invalid entity, fallback to player");
+		entityToAttachDialogue = &getEntityById(k_playerEntityId);
+	}
 
 	Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*entityToAttachDialogue)->position;
 	Vec2 positionToDrawText = { entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x,

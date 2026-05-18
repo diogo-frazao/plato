@@ -11,11 +11,6 @@ static bool s_isInsideRestaurant = false;
 static float s_multiPurpuseTimer = 0.f;
 float k_restaurantBaseY = 60.f;
 
-// Level entities
-int32_t s_darwinEntityId = k_invalidId;
-int32_t s_hugoEntityId = k_invalidId;
-int32_t s_oskarEntityId = k_invalidId;
-
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
     Entity& block = addEntity();
@@ -437,11 +432,11 @@ void pushGolfCueControntationDialogue(UISystem& u)
     Entity& oskar = getEntityById(s_oskarEntityId);
     if (a->weaponInHand == NO_WEAPON_TYPE)
     {
-        u.pushEntityDialogue(C_4_BC_3_C_1, &oskar);
+        u.pushEntityDialogue(C_4_BC_3_C_1);
     }
     else
     {
-        u.pushEntityDialogue(C_4_BC_3_C_CUE_1, &oskar);
+        u.pushEntityDialogue(C_4_BC_3_C_CUE_1);
     }
 }
 
@@ -783,7 +778,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9))
             {
-                u.pushEntityDialogue(ONE_DARWIN_1, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_1);
                 _darwinConversationStageData.canMoveFromDoor = true;
             }
 
@@ -797,7 +792,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_1))
             {
-                u.pushEntityDialogue(ONE_DARWIN_2, &darwin, { ONE_DARWIN_2_A, ONE_DARWIN_2_B });
+                u.pushEntityDialogue(ONE_DARWIN_2, { ONE_DARWIN_2_A, ONE_DARWIN_2_B });
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_2))
@@ -826,12 +821,12 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_5))
             {
-                u.pushEntityDialogue(ONE_DARWIN_6, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_6);
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_6))
             {
-                u.pushEntityDialogue(ONE_DARWIN_7, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_7);
                 _darwinConversationStageData.canGetEvenNearTable = true;
             }
 
@@ -845,12 +840,12 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_7))
             {
-                u.pushEntityDialogue(ONE_DARWIN_8, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_8);
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_8))
             {
-                u.pushEntityDialogue(ONE_DARWIN_9, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_9);
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_9))
@@ -863,7 +858,7 @@ void ECSLevel::update()
                 _darwinConversationStageData.waitToAskIfPaHeardUs += k_deltaTime;
                 if (_darwinConversationStageData.waitToAskIfPaHeardUs >= 2.f)
                 {
-                    u.pushEntityDialogue(ONE_DARWIN_10, &darwin, { ONE_DARWIN_10_A, ONE_DARWIN_10_B, ONE_DARWIN_10_C });
+                    u.pushEntityDialogue(ONE_DARWIN_10, { ONE_DARWIN_10_A, ONE_DARWIN_10_B, ONE_DARWIN_10_C });
                     invalidateTimer(_darwinConversationStageData.waitToAskIfPaHeardUs);
                 }
             }
@@ -885,19 +880,19 @@ void ECSLevel::update()
                 _darwinConversationStageData.waitAfterCallEndsTimer += k_deltaTime;
                 if (_darwinConversationStageData.waitAfterCallEndsTimer >= 2.f)
                 {
-                    u.pushEntityDialogue(ONE_DARWIN_12, &darwin);
+                    u.pushEntityDialogue(ONE_DARWIN_12);
                     invalidateTimer(_darwinConversationStageData.waitAfterCallEndsTimer);
                 }
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_12))
             {
-                u.pushEntityDialogue(ONE_DARWIN_13, &darwin, { ONE_DARWIN_13_A, ONE_DARWIN_13_B, ONE_DARWIN_13_C });
+                u.pushEntityDialogue(ONE_DARWIN_13, { ONE_DARWIN_13_A, ONE_DARWIN_13_B, ONE_DARWIN_13_C });
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_13))
             {
-                u.pushEntityDialogue(ONE_DARWIN_14, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_14);
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_14))
@@ -909,14 +904,14 @@ void ECSLevel::update()
             {
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
                 {
-                    u.pushEntityDialogue(ONE_DARWIN_15, &darwin);
+                    u.pushEntityDialogue(ONE_DARWIN_15);
                     _darwinConversationStageData.canMoveBack = false;
                 }
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_15))
             {
-                u.pushEntityDialogue(ONE_DARWIN_16, &darwin);
+                u.pushEntityDialogue(ONE_DARWIN_16);
 
             }
 
@@ -952,38 +947,38 @@ void ECSLevel::update()
             // As soon as we move, push the dialogue
             if (playerTransform->position.x < 488.f && !_gangsterConfrontationStageData.hasStartedConfrontationDialogue)
             {
-                u.pushEntityDialogue(C_1, &oskar);
+                u.pushEntityDialogue(C_1);
                 _gangsterConfrontationStageData.hasStartedConfrontationDialogue = true;
                 D_LOG(MINI, "Started confrontation dialogue");
             }
 
             if (u.hasDialogueFinihsed(C_1))
             {
-                u.pushEntityDialogue(C_2, &darwin);
+                u.pushEntityDialogue(C_2);
             }
 
             if (u.hasDialogueFinihsed(C_2))
             {
-                u.pushEntityDialogue(C_3, &hugo);
+                u.pushEntityDialogue(C_3);
             }
 
             // Tell rostov to not get involved when he gets near
             if (playerTransform->position.x <= 315.f && !_gangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
             {
                 u.pushTensionBar();
-                u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B, C_4_C });
+                u.pushEntityDialogue(C_4, {C_4_A, C_4_B, C_4_C });
                 _gangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
                 player.entityState = ON_CUTSCENE_STATE;
             }
 
             if (u.hasChosenOption(C_4_B) || u.hasChosenOption(C_4_C))
             {
-                u.pushEntityDialogue(C_4_BC_1, &hugo);
+                u.pushEntityDialogue(C_4_BC_1);
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_1))
             {
-                u.pushEntityDialogue(C_4_BC_2, &hugo);
+                u.pushEntityDialogue(C_4_BC_2);
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_2))
@@ -993,11 +988,11 @@ void ECSLevel::update()
 
             if (u.hasChosenOption(C_4_BC_3_A))
             {
-                u.pushEntityDialogue(C_4_A_5, &hugo);
+                u.pushEntityDialogue(C_4_A_5);
             }
             else if (u.hasChosenOption(C_4_BC_3_B))
             {
-                u.pushEntityDialogue(C_4_BC_2_3_1, &hugo);
+                u.pushEntityDialogue(C_4_BC_2_3_1);
             }
             else if (u.hasChosenOption(C_4_BC_3_C))
             {
@@ -1009,52 +1004,52 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(C_4_BC_2_3_1))
             {
-                u.pushEntityDialogue(C_4_BC_2_3_2, &hugo);
+                u.pushEntityDialogue(C_4_BC_2_3_2);
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_2_3_2))
             {
-                u.pushEntityDialogue(C_4_BC_2_3_3, &oskar);
+                u.pushEntityDialogue(C_4_BC_2_3_3);
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_2_3_3))
             {
-                u.pushEntityDialogue(C_4_A_6_AB_3, &oskar);
+                u.pushEntityDialogue(C_4_A_6_AB_3);
             }
 
             if (u.hasChosenOption(C_4_A))
             {
-                u.pushEntityDialogue(C_4_A_1, &oskar);
+                u.pushEntityDialogue(C_4_A_1);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_1))
             {
-                u.pushEntityDialogue(C_4_A_2, &oskar);
+                u.pushEntityDialogue(C_4_A_2);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_2))
             {
-                u.pushEntityDialogue(C_4_A_3, &oskar);
+                u.pushEntityDialogue(C_4_A_3);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_3))
             {
-                u.pushEntityDialogue(C_4_A_4, &darwin);
+                u.pushEntityDialogue(C_4_A_4);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_4))
             {
-                u.pushEntityDialogue(C_4_A_5, &hugo);
+                u.pushEntityDialogue(C_4_A_5);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_5))
             {
-                u.pushEntityDialogue(C_4_A_6, &hugo, { C_4_A_6_A, C_4_A_6_B, C_4_A_6_C });
+                u.pushEntityDialogue(C_4_A_6, { C_4_A_6_A, C_4_A_6_B, C_4_A_6_C });
             }
 
             if (u.hasChosenOption(C_4_A_6_A) || u.hasChosenOption(C_4_A_6_B))
             {
-                u.pushEntityDialogue(C_4_A_6_AB_1, &hugo);
+                u.pushEntityDialogue(C_4_A_6_AB_1);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_6_AB_1))
@@ -1070,12 +1065,12 @@ void ECSLevel::update()
                     switch (u._lastDialogueType)
                     {
                     case C_4_A_6_AB_1:
-                        u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                        u.pushEntityDialogue(C_4_A_6_AB_2);
                         break;
                     case C_4_A_6:
                         if (u._lastOptionChosen == C_4_A_6_B || u._lastOptionChosen == C_4_A_6_A)
                         {
-                            u.pushEntityDialogue(C_4_A_6_AB_2, &oskar);
+                            u.pushEntityDialogue(C_4_A_6_AB_2);
                         }
                         else if (u._lastOptionChosen == C_4_A_6_C)
                         {
@@ -1083,7 +1078,7 @@ void ECSLevel::update()
                         }
                         break;
                     case C_4_BC_2:
-                        u.pushEntityDialogue(C_4_BC_3, &oskar, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C });
+                        u.pushEntityDialogue(C_4_BC_3, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C });
                         break;
                     default:
                         break;
@@ -1096,7 +1091,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(C_4_A_6_AB_2))
             {
-                u.pushEntityDialogue(C_4_A_6_AB_3, &oskar);
+                u.pushEntityDialogue(C_4_A_6_AB_3);
             }
 
             if (u.hasDialogueFinihsed(C_4_A_6_AB_3))
@@ -1115,7 +1110,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(C_4_BC_3_C_1))
             {
-                u.pushEntityDialogue(C_4_BC_3_C_2, &darwin);
+                u.pushEntityDialogue(C_4_BC_3_C_2);
             }
 
             // If rostov attacks oskar stop the dialogues
@@ -1135,40 +1130,40 @@ void ECSLevel::update()
             {
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_2))
                 {
-                    u.pushEntityDialogue(C_4_BC_3_C_3, &hugo);
+                    u.pushEntityDialogue(C_4_BC_3_C_3);
                 }
 
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_3))
                 {
-                    u.pushEntityDialogue(C_4_BC_3_C_4, &oskar);
+                    u.pushEntityDialogue(C_4_BC_3_C_4);
                 }
 
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_4))
                 {
-                    u.pushEntityDialogue(C_4_BC_3_C_5, &oskar);
+                    u.pushEntityDialogue(C_4_BC_3_C_5);
                 }
 
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_1))
                 {
-                    u.pushEntityDialogue(C_4_BC_3_C_CUE_2, &hugo);
+                    u.pushEntityDialogue(C_4_BC_3_C_CUE_2);
                 }
 
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_2))
                 {
-                    u.pushEntityDialogue(C_4_BC_3_C_CUE_3, &oskar);
+                    u.pushEntityDialogue(C_4_BC_3_C_CUE_3);
                 }
             }
 
             if (oskar.entityState == DEAD_STATE && !_gangsterConfrontationStageData.hasHugoHelpedBrother)
             {
-                u.pushEntityDialogue(D_1, &hugo);
+                u.pushEntityDialogue(D_1);
                 _gangsterConfrontationStageData.hasHugoHelpedBrother = true;
             }
 
             if (u.hasDialogueFinihsed(D_1))
             {
                 entityLookAtAnother(&hugo, &oskar);
-                u.pushEntityDialogue(D_2, &hugo);
+                u.pushEntityDialogue(D_2);
             }
 
             if (u.hasDialogueFinihsed(D_2))
@@ -1183,7 +1178,7 @@ void ECSLevel::update()
                 if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
                     getComponentFromEntity<SpriteComponent>(hugo), oskarXPos))
                 {
-                    u.pushEntityDialogue(D_3, &hugo);
+                    u.pushEntityDialogue(D_3);
                     _gangsterConfrontationStageData.canHugoReachBrother = false;
                 }
             }
@@ -1199,19 +1194,19 @@ void ECSLevel::update()
                 if (_gangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
                 {
                     entityLookAtAnother(&hugo, &player);
-                    u.pushEntityDialogue(D_4, &hugo);
+                    u.pushEntityDialogue(D_4);
                     invalidateTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
                 }
             }
 
             if (u.hasDialogueFinihsed(D_4))
             {
-                u.pushEntityDialogue(D_5, &hugo);
+                u.pushEntityDialogue(D_5);
             }
 
             if (u.hasDialogueFinihsed(D_5))
             {
-                u.pushEntityDialogue(D_6, &hugo);
+                u.pushEntityDialogue(D_6);
                 _gangsterConfrontationStageData.canHugoReachRostov = true;
             }
 

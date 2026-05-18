@@ -3,6 +3,13 @@
 #include <stdint.h>
 #include <string>
 
+// General
+inline constexpr int32_t k_invalidId = -1;
+inline constexpr float k_invalidTime = -1.f;
+inline constexpr uint16_t k_maxAtlasFiles = 3;
+inline constexpr uint16_t k_maxLevels = 1;
+inline bool s_isImGuiOpen = true;
+
 // ECS Related
 inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
@@ -10,14 +17,13 @@ inline constexpr uint32_t k_playerEntityId = 0;
 inline constexpr uint32_t k_crosshairEntityId = 1;
 inline constexpr uint32_t k_cellphoneEntityId = 2;
 
-inline constexpr uint8_t k_maxNumberOfMovementAnimations = 1;
+// These entities ids change at runtime depending on the level
+// When the entities are created, we must update these values to point to the correct entity
+inline int32_t s_darwinEntityId = k_invalidId;
+inline int32_t s_oskarEntityId = k_invalidId;
+inline int32_t s_hugoEntityId = k_invalidId;
 
-// General
-inline constexpr int32_t k_invalidId = -1;
-inline constexpr float k_invalidTime = -1.f;
-inline constexpr uint16_t k_maxAtlasFiles = 3;
-inline constexpr uint16_t k_maxLevels = 1;
-inline bool s_isImGuiOpen = true;
+inline constexpr uint8_t k_maxNumberOfMovementAnimations = 1;
 
 // Dialogue
 // Expand as we support more languages/characters

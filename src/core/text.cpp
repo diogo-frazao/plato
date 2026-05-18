@@ -340,24 +340,28 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 27, 52, 45 };
 		s_currentDialogueEntityDTO.textColor = { 145, 210, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 22.f, 9.f };
+		s_currentDialogueEntityDTO.entityId = k_playerEntityId;
 		break;
 	case DARWIN_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 160, 63, 39 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.entityId = s_darwinEntityId;
 		break;
 	case OSKAR_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 61, 49, 63 };
 		s_currentDialogueEntityDTO.textColor = { 193, 138, 106 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.entityId = s_oskarEntityId;
 		break;
 	case HUGO_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 79, 38, 32 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;
 	default:
 		D_ASSERT(false, "Unsupported dialogue entity type");
