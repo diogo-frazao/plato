@@ -159,8 +159,10 @@ inline Entity& getLastAddedEntity()
 inline Entity& addEntity(Vec2 position = Vec2())
 {
 	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
-	addComponentToEntity<TransformComponent>(entity)->position = position;
-	getComponentFromEntity<TransformComponent>(entity)->previousPosition = position;
+	auto* t = addComponentToEntity<TransformComponent>(entity);
+	t->position = position;
+	t->previousPosition = position;
+	t->startingPosition = position;
 	return entity;
 }
 

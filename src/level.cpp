@@ -360,7 +360,7 @@ void ECSLevel::start()
 	_renderingSystem.createLightsBuffers();
     _uiSystem.start();
 
-    Entity& player = addEntity({ 490, k_restaurantBaseY + 48.f });
+    Entity& player = addEntity({ 490.f, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand;
@@ -1433,7 +1433,7 @@ void ECSLevel::imguiRender()
             startTimer(s_multiPurpuseTimer);
             s_playerTension = 20;
             Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = { 415.f, 117.f };
+            getComponentFromEntity<TransformComponent>(darwin)->position = getComponentFromEntity<TransformComponent>(darwin)->startingPosition;
             _darwinConversationStageData.reset();
             break;
         }
@@ -1447,16 +1447,16 @@ void ECSLevel::imguiRender()
             getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
 
             Entity& player = getEntityById(k_playerEntityId);
-            getComponentFromEntity<TransformComponent>(player)->position.x = 490.f;
+            getComponentFromEntity<TransformComponent>(player)->position.x = getComponentFromEntity<TransformComponent>(player)->startingPosition.x;
             player.entityState = IDLE_STATE;
 
             Entity& oskar = getEntityById(s_oskarEntityId);
-            getComponentFromEntity<TransformComponent>(oskar)->position = { 242.f, 95.f };
+            getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
             getComponentFromEntity<AttackingComponent>(oskar)->damageCounter = 0;
             oskar.entityState = IDLE_STATE;
 
             Entity& hugo = getEntityById(s_hugoEntityId);
-            getComponentFromEntity<TransformComponent>(hugo)->position = { 230.f, 110.f };
+            getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
             getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
 
             _gangsterConfrontationStageData.reset();

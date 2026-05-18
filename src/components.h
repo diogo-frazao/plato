@@ -12,6 +12,9 @@ struct TransformComponent
 	Vec2 previousPosition;
 	Vec2 scale = { 1.f, 1.f };
 
+	// If entity is created with a default pos addEntity(pos), startingPosition is assigned to that.
+	Vec2 startingPosition;
+
 	// Used every frame to reset the current scale back to {1,1}. Changed at runtime to have slow/fast scale effects
 	float resetScaleLerp = 1.f;
 	bool useDynamicScale = false;
