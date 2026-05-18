@@ -2539,6 +2539,7 @@ void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOp
 	Vec2 playerPos = getComponentFromEntity<TransformComponent>(player)->position;
 	Vec2 bottomLeftPosForCellphoneDialogue{ playerPos.x + 22, playerPos.y + 9 };
 
+	pushTensionBar();
 	pushEntityDialogue(dialogueTextType, &player, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
 }
 
@@ -2565,8 +2566,6 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, Entity* entityToAtt
 	float maxXDialogueSize = 0;
 
 	uint8_t maxCharactersPerLine = 35;
-
-	_isTensionBarVisible = true;
 
 	Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*entityToAttachDialogue)->position;
 	Vec2 positionToDrawText = { entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x,

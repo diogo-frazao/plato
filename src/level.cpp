@@ -970,6 +970,7 @@ void ECSLevel::update()
             // Tell rostov to not get involved when he gets near
             if (playerTransform->position.x <= 315.f && !_gangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
             {
+                u.pushTensionBar();
                 u.pushEntityDialogue(C_4, &darwin, {C_4_A, C_4_B, C_4_C });
                 _gangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
                 player.entityState = ON_CUTSCENE_STATE;
