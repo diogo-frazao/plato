@@ -360,7 +360,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 79, 38, 32 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
-		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;
 	default:

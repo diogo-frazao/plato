@@ -182,6 +182,9 @@ struct AttackingComponent
 
 	// Receive Damage related
 
+	// Whether or not this entity can be attacked/damaged
+	bool canBeAttacked = true;
+
 	// If damageCounter is equal or greater than this, the character will fall and go to HURT_STATE_TWO
 	uint8_t numberOfHitsToFall = 2;
 

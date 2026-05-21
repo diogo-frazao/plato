@@ -1319,6 +1319,11 @@ void AttackingSystem::handleMainCharacter()
 			continue;
 		}
 
+		if (!aTarget->canBeAttacked)
+		{
+			continue;
+		}
+
 		// If we get here, we hit the target
 		registerPlayerAttackToEntity(&target);
 		aTarget->damageCounter++;

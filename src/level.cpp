@@ -302,15 +302,17 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& hugo = addEntity({ 230.f, 110.f });
-        addComponentToEntity<SpriteComponent>(hugo)->setupSpriteForLayer(GANGSTER_HUGO_SPRITE, CHARACTER_LAYER);
-        addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 0,0 }, { 13, 21 });
+        Entity& hugo = addEntity({ 179.f, 106.f });
+        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
+        addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+        // We can't attack hugo until oskar dies
+        addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         hugoM->runAcceleration = 0.3f;
         s_hugoEntityId = hugo.id;
 
-        SpriteType hugoAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_HUGO_SPRITE };
+        SpriteType hugoAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_SMALL_IDLE_SPRITE };
         hugoM->setupMovementAnimations(hugoAnimations);
     }
 
@@ -1169,57 +1171,76 @@ void ECSLevel::update()
             if (u.hasDialogueFinihsed(D_2))
             {
                 _gangsterConfrontationStageData.canHugoReachBrother = true;
+                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
             }
 
-            if (_gangsterConfrontationStageData.canHugoReachBrother)
+            bool hasRostovAttackedHugo = getComponentFromEntity<AttackingComponent>(hugo)->damageCounter > 0;
+
+            // Interrupt dialogue if we attack hugo
+            if (hasRostovAttackedHugo)
             {
-                // Move hugo until where brother died
-                float oskarXPos = getComponentFromEntity<TransformComponent>(oskar)->position.x + 30.f;
-                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
-                    getComponentFromEntity<SpriteComponent>(hugo), oskarXPos))
+                getComponentFromEntity<MovementComponent>(hugo)->isMovingOnFloor = false;
+                if (u.isCurrentDialogue(D_2) || u.isCurrentDialogue(D_3) || u.isCurrentDialogue(D_4) || u.isCurrentDialogue(D_5) || u.isCurrentDialogue(D_6))
                 {
-                    u.pushEntityDialogue(D_3);
-                    _gangsterConfrontationStageData.canHugoReachBrother = false;
+                    u.destroyCurrentDialogue();
                 }
             }
 
-            if (u.hasDialogueFinihsed(D_3))
+            if (!hasRostovAttackedHugo)
             {
-                startTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
-            }
-
-            if (isTimerOngoing(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead))
-            {
-                _gangsterConfrontationStageData.waitToCheckIfOskarIsDead += k_deltaTime;
-                if (_gangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
+                if (_gangsterConfrontationStageData.canHugoReachBrother)
                 {
-                    entityLookAtAnother(&hugo, &player);
-                    u.pushEntityDialogue(D_4);
-                    invalidateTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                    // Move hugo until where brother died
+                    float oskarXPos = getComponentFromEntity<TransformComponent>(oskar)->position.x + 10.f;
+                    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+                        getComponentFromEntity<SpriteComponent>(hugo), oskarXPos))
+                    {
+                        u.pushEntityDialogue(D_3);
+                        _gangsterConfrontationStageData.canHugoReachBrother = false;
+                    }
+                }
+
+                if (u.hasDialogueFinihsed(D_3))
+                {
+                    startTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                }
+
+                if (isTimerOngoing(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead))
+                {
+                    _gangsterConfrontationStageData.waitToCheckIfOskarIsDead += k_deltaTime;
+                    if (_gangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
+                    {
+                        entityLookAtAnother(&hugo, &player);
+                        u.pushEntityDialogue(D_4);
+                        invalidateTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                    }
+                }
+
+                if (u.hasDialogueFinihsed(D_4))
+                {
+                    u.pushEntityDialogue(D_5);
+                }
+
+                if (u.hasDialogueFinihsed(D_5))
+                {
+                    u.pushEntityDialogue(D_6);
+                    _gangsterConfrontationStageData.canHugoReachRostov = true;
+                }
+
+                if (_gangsterConfrontationStageData.canHugoReachRostov)
+                {
+                    // Move hugo until rostov x pos
+                    float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
+                    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+                        getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
+                    {
+                        _gangsterConfrontationStageData.canHugoReachRostov = false;
+                    }
                 }
             }
 
-            if (u.hasDialogueFinihsed(D_4))
-            {
-                u.pushEntityDialogue(D_5);
-            }
 
-            if (u.hasDialogueFinihsed(D_5))
-            {
-                u.pushEntityDialogue(D_6);
-                _gangsterConfrontationStageData.canHugoReachRostov = true;
-            }
-
-            if (_gangsterConfrontationStageData.canHugoReachRostov)
-            {
-                // Move hugo until rostov x pos
-                float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
-                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
-                    getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
-                {
-                    _gangsterConfrontationStageData.canHugoReachRostov = false;
-                }
-            }
+            
 
             break;
         }
@@ -1387,13 +1408,14 @@ void ECSLevel::imguiRender()
 
     if (ImGui::Button("Iterate on last added entity"))
     {
+        //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
         //Entity& entity = getLastAddedEntity();
         //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
         //addComponentToEntity<MovementComponent>(entity);
         //addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
         //getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
 
-        //Entity& darwin = getEntityById(s_darwinEntityId);
+          //Entity& darwin = getEntityById(s_darwinEntityId);
         //getComponentFromEntity<TransformComponent>(darwin)->position = {293.f, 117.f };
         //getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
     }
@@ -1404,7 +1426,7 @@ void ECSLevel::imguiRender()
     ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
     if (ImGui::Button("Change to selected level stage"))
     {
-        _uiSystem.destroyCurrentDialogue();
+          _uiSystem.destroyCurrentDialogue();
         _uiSystem.popTensionBar();
 
         switch (s_levelStageToChangeTo)
@@ -1454,6 +1476,9 @@ void ECSLevel::imguiRender()
             Entity& hugo = getEntityById(s_hugoEntityId);
             getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
             getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+            getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
+            getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
+            hugo.entityState = IDLE_STATE;
 
             _gangsterConfrontationStageData.reset();
 
