@@ -321,6 +321,8 @@ TextDTO getTextInfo(TextType textType)
 		return { "You're a FUCKING MURDERER", HUGO_DIALOGUE };
 	case D_6:
 		return { "YOU OLD PIG I WILL MAKE YOU PAY", HUGO_DIALOGUE };
+	case D_7:
+		return { "ROSTOV STOP IT", DARWIN_DIALOGUE };
 	}
 
 	}

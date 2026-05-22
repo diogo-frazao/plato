@@ -182,6 +182,9 @@ struct AttackingComponent
 
 	// Receive Damage related
 
+	// If true, instead of crawling, the entity will be on the same spot. Used for cutscenes when we will talk with someone as we are about to kill them
+	bool shouldWaitToDie = false;
+
 	// Whether or not this entity can be attacked/damaged
 	bool canBeAttacked = true;
 

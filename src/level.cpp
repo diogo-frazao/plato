@@ -461,15 +461,9 @@ void ECSLevel::update()
         getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = targetPos;
     }
 
-    // Update systems
+    // Update save position system
     {
         _savePositionSystem.update();
-        overrideColliderOffsetsBasedOnCurrentSprite();
-        _characterMovementSystem.update();
-        _attackingSystem.update();
-        _animationSystem.update();
-        _crosshairSystem.update();
-        _uiSystem.update();
     }
 
     UISystem& u = _uiSystem;
@@ -1239,11 +1233,36 @@ void ECSLevel::update()
                 }
             }
 
+            if (!_gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo)
+            {
+                bool willHugoDieOnNextHit = canKillyEntityFromCurrentState(hugo.entityState);
+                if (willHugoDieOnNextHit)
+                {
+                    getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
+                }
 
-            
+                bool isCloseToPretendKillHugo = abs(getComponentFromEntity<TransformComponent>(player)->position.x - getComponentFromEntity<TransformComponent>(hugo)->position.x) < 40.f;
+                if (wasAttackKeyPressedThisFrame() && willHugoDieOnNextHit && isCloseToPretendKillHugo)
+                {
+                    u.pushTensionBar();
+                    player.entityState = ON_CUTSCENE_STATE;
+                    u.pushEntityDialogue(D_7);
+                    _gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo = true;
+                }
+            }
 
             break;
         }
+    }
+
+    // Update systems
+    {
+        overrideColliderOffsetsBasedOnCurrentSprite();
+        _characterMovementSystem.update();
+        _attackingSystem.update();
+        _animationSystem.update();
+        _crosshairSystem.update();
+        _uiSystem.update();
     }
 
     static float cameraOffsetXFromPlayer = 20.f;
@@ -1478,6 +1497,7 @@ void ECSLevel::imguiRender()
             getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
             getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
             getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
+            getComponentFromEntity<AttackingComponent>(hugo)->shouldWaitToDie = true;
             hugo.entityState = IDLE_STATE;
 
             _gangsterConfrontationStageData.reset();

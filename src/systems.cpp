@@ -1172,6 +1172,13 @@ void AttackingSystem::update()
 				crawlMovementDirection = 1;
 			}
 
+			//TODO: For now, if we can't crawl, reuse the same state. This should be improved and have a new state associated
+			if (a->shouldWaitToDie)
+			{
+				s->setSpriteData(GANGSTER_SMALL_CRAWL_SPRITE);
+				break;
+			}
+
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
 
 			// TODO: Improve to move alongside animation
