@@ -325,6 +325,40 @@ TextDTO getTextInfo(TextType textType)
 		return { "ROSTOV DON'T DO IT", DARWIN_DIALOGUE };
 	case D_8:
 		return { "Please calm down... Take a deep breath", DARWIN_DIALOGUE };
+	case D_9:
+		return { "...", DARWIN_DIALOGUE };
+	case D_10:
+		return { "I don't want you to kill him... I want to know who's behind this", DARWIN_DIALOGUE };
+	case D_11:
+		return { "So he better start talking", DARWIN_DIALOGUE };
+	case D_12:
+		return { "ahahAHAHAHAH. I have NOTHING to say", HUGO_DIALOGUE };
+		case D_12_A:
+			return { "Stop laughing", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+			case D_12_A_1:
+				return { "OR WHAT?", HUGO_DIALOGUE };
+			case D_12_A_2:
+				return { "ahahAHAHAHAH.", HUGO_DIALOGUE, 5 };
+				case D_12_A_2_A:
+					return { "Or you end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+				case D_12_A_2_B:
+					return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
+		case D_12_B:
+			return { "I promise if you talk we'll let you go", CHOICE_DIALOGUE, 0, LOW_TENSION };
+			case D_12_B_1:
+				return { "ahahAHAHAHAH", HUGO_DIALOGUE };
+			case D_12_B_2:
+				return { "Besides being OLD and a MURDERER, you're also a LIAR", HUGO_DIALOGUE, 5 };
+				case D_12_B_2_A:
+					return { "Talk or end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+				case D_12_B_2_B:
+					return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
+	case D_13_LOW_TENSION:
+		return { "...", HUGO_DIALOGUE };
+	case D_13_HIGH_TENSION:
+		return { "...", HUGO_DIALOGUE };
+	case D_14:
+		return { "FUCK. YOU.", HUGO_DIALOGUE, 5 };
 	}
 
 	}

@@ -158,7 +158,23 @@ enum TextType
 	D_6,
 	D_7,
 	D_8,
-
+	D_9,
+	D_10,
+	D_11,
+	D_12,
+	D_12_A,
+	D_12_A_1,
+	D_12_A_2,
+	D_12_A_2_A,
+	D_12_A_2_B,
+	D_12_B,
+	D_12_B_1,
+	D_12_B_2,
+	D_12_B_2_A,
+	D_12_B_2_B,
+	D_13_LOW_TENSION,
+	D_13_HIGH_TENSION,
+	D_14,
 };
 
 enum TextTensionType

@@ -1213,27 +1213,27 @@ void ECSLevel::update()
                     }
                 }
 
-                if (u.hasDialogueFinihsed(D_4))
-                {
-                    u.pushEntityDialogue(D_5);
-                }
+if (u.hasDialogueFinihsed(D_4))
+{
+    u.pushEntityDialogue(D_5);
+}
 
-                if (u.hasDialogueFinihsed(D_5))
-                {
-                    u.pushEntityDialogue(D_6);
-                    _gangsterConfrontationStageData.canHugoReachRostov = true;
-                }
+if (u.hasDialogueFinihsed(D_5))
+{
+    u.pushEntityDialogue(D_6);
+    _gangsterConfrontationStageData.canHugoReachRostov = true;
+}
 
-                if (_gangsterConfrontationStageData.canHugoReachRostov)
-                {
-                    // Move hugo until rostov x pos
-                    float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
-                    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
-                        getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
-                    {
-                        _gangsterConfrontationStageData.canHugoReachRostov = false;
-                    }
-                }
+if (_gangsterConfrontationStageData.canHugoReachRostov)
+{
+    // Move hugo until rostov x pos
+    float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
+    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+        getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
+    {
+        _gangsterConfrontationStageData.canHugoReachRostov = false;
+    }
+}
             }
 
             if (!_gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo)
@@ -1281,7 +1281,59 @@ void ECSLevel::update()
                 }
             }
 
+            if (u.hasDialogueFinihsed(D_8))
+            {
+                u.pushEntityDialogue(D_9);
+            }
 
+            if (u.hasDialogueFinihsed(D_9))
+            {
+                u.pushEntityDialogue(D_10);
+            }
+
+            if (u.hasDialogueFinihsed(D_10))
+            {
+                u.pushEntityDialogue(D_11);
+            }
+
+            if (u.hasDialogueFinihsed(D_11))
+            {
+                u.pushEntityDialogue(D_12, { D_12_A, D_12_B });
+            }
+
+            if (u.hasChosenOption(D_12_A))
+            {
+                u.pushEntityDialogue(D_12_A_1);
+            }
+            else if (u.hasChosenOption(D_12_B))
+            {
+                u.pushEntityDialogue(D_12_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(D_12_A_1))
+            {
+                u.pushEntityDialogue(D_12_A_2, { D_12_A_2_A, D_12_A_2_B });
+            }
+
+            if (u.hasDialogueFinihsed(D_12_B_1))
+            {
+                u.pushEntityDialogue(D_12_B_2, { D_12_B_2_A, D_12_B_2_B });
+            }
+
+            if (u.hasChosenOption(D_12_A_2_A) || u.hasChosenOption(D_12_B_2_A))
+            {
+                u.pushEntityDialogue(D_13_HIGH_TENSION);
+            }
+
+            if (u.hasChosenOption(D_12_A_2_B) || u.hasChosenOption(D_12_B_2_B))
+            {
+                u.pushEntityDialogue(D_13_LOW_TENSION);
+            }
+
+            if (u.hasDialogueFinihsed(D_13_HIGH_TENSION))
+            {
+                u.pushEntityDialogue(D_14);
+            }
 
             break;
         }
