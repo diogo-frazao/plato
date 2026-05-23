@@ -157,6 +157,8 @@ enum TextType
 	D_5,
 	D_6,
 	D_7,
+	D_8,
+
 };
 
 enum TextTensionType

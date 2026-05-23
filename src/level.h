@@ -73,6 +73,7 @@ struct GangsterConfrontationStageData
 	float waitToCheckIfOskarIsDead = k_invalidTime;
 	bool hasRostovAttackedHugo = false;
 	bool hasDarwinAskedToNotKillHugo = false;
+	bool canDarwinComeClose = false;
 
 	void reset()
 	{
@@ -88,6 +89,7 @@ struct GangsterConfrontationStageData
 		waitToCheckIfOskarIsDead = k_invalidTime;
 		hasRostovAttackedHugo = false;
 		hasDarwinAskedToNotKillHugo = false;
+		canDarwinComeClose = false;
 	}
 };
 

@@ -322,7 +322,9 @@ TextDTO getTextInfo(TextType textType)
 	case D_6:
 		return { "YOU OLD PIG I WILL MAKE YOU PAY", HUGO_DIALOGUE };
 	case D_7:
-		return { "ROSTOV STOP IT", DARWIN_DIALOGUE };
+		return { "ROSTOV DON'T DO IT", DARWIN_DIALOGUE };
+	case D_8:
+		return { "Please calm down... Take a deep breath", DARWIN_DIALOGUE };
 	}
 
 	}

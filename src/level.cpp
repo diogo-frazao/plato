@@ -925,6 +925,8 @@ void ECSLevel::update()
         {
             Entity& darwin = getEntityById(s_darwinEntityId);
             Entity& hugo = getEntityById(s_hugoEntityId);
+            auto* hugoT = getComponentFromEntity<TransformComponent>(hugo);
+
             Entity& oskar = getEntityById(s_oskarEntityId);
 
             // Move darwin close to gangsters
@@ -936,6 +938,7 @@ void ECSLevel::update()
                 darwinM->maxHorizontalSpeed = 0.6f;
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 293.f))
                 {
+                    darwinM->maxHorizontalSpeed = 0.3f;
                     _gangsterConfrontationStageData.canDarwinMoveToKitchen = false;
                 }
             }
@@ -1241,15 +1244,44 @@ void ECSLevel::update()
                     getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
                 }
 
-                bool isCloseToPretendKillHugo = abs(getComponentFromEntity<TransformComponent>(player)->position.x - getComponentFromEntity<TransformComponent>(hugo)->position.x) < 40.f;
+                bool isCloseToPretendKillHugo = abs(playerTransform->position.x - hugoT->position.x) < 40.f;
                 if (wasAttackKeyPressedThisFrame() && willHugoDieOnNextHit && isCloseToPretendKillHugo)
                 {
                     u.pushTensionBar();
                     player.entityState = ON_CUTSCENE_STATE;
                     u.pushEntityDialogue(D_7);
                     _gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo = true;
+
+                    // Darwin should walk near us
+                    _gangsterConfrontationStageData.canDarwinComeClose = true;
                 }
             }
+
+            // This ensures that darwin moves to a correct spot to talk, taking into consideration if hugo is in front or behind darwin
+            if (_gangsterConfrontationStageData.canDarwinComeClose)
+            {
+                bool shouldWalkRight = playerTransform->position.x > darwinT->position.x;
+                float offsetFromTarget = shouldWalkRight ? 0.f : 45.f;
+
+                float targetPosition = 0.f;
+                if (shouldWalkRight)
+                {
+                    targetPosition = (hugoT->position.x > playerTransform->position.x) ? playerTransform->position.x : hugoT->position.x;
+                }
+                else
+                {
+                    targetPosition = (hugoT->position.x > playerTransform->position.x) ? hugoT->position.x : playerTransform->position.x;
+                }
+
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, targetPosition + offsetFromTarget))
+                {
+                    darwinS->flipX = true;
+                    u.pushEntityDialogue(D_8);
+                    _gangsterConfrontationStageData.canDarwinComeClose = false;
+                }
+            }
+
+
 
             break;
         }
@@ -1427,6 +1459,12 @@ void ECSLevel::imguiRender()
 
     if (ImGui::Button("Iterate on last added entity"))
     {
+        _gangsterConfrontationStageData.canDarwinComeClose = true;
+
+        player.entityState = IDLE_STATE;
+        Entity& hugo = getEntityById(s_hugoEntityId);
+        //getComponentFromEntity<TransformComponent>(hugo)->position.x = getComponentFromEntity<TransformComponent>(player)->position.x;
+
         //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
         //Entity& entity = getLastAddedEntity();
         //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
