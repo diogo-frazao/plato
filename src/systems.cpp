@@ -1146,7 +1146,15 @@ void AttackingSystem::update()
 			a->recoverTimer += k_deltaTime;
 			if (a->recoverTimer >= a->timeToStartCrawling)
 			{
-				entity.entityState = CRAWL_STATE;
+				if (a->shouldWaitToDie)
+				{
+					entity.entityState = WAIT_TO_DIE_STATE;
+				}
+				else
+				{
+					entity.entityState = CRAWL_STATE;
+				}
+
 				invalidateTimer(a->recoverTimer);
 			}
 
@@ -1172,13 +1180,6 @@ void AttackingSystem::update()
 				crawlMovementDirection = 1;
 			}
 
-			//TODO: For now, if we can't crawl, reuse the same state. This should be improved and have a new state associated
-			if (a->shouldWaitToDie)
-			{
-				s->setSpriteData(GANGSTER_SMALL_CRAWL_SPRITE);
-				break;
-			}
-
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
 
 			// TODO: Improve to move alongside animation
@@ -1187,6 +1188,10 @@ void AttackingSystem::update()
 
 			break;
 		}
+		case WAIT_TO_DIE_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_WAIT_TO_DIE_SPRITE, true, 400, 400);
+			break;
+			break;
 		case DEAD_STATE:
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_DEAD_SPRITE, false, 70, 70);
 			break;

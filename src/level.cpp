@@ -1213,27 +1213,27 @@ void ECSLevel::update()
                     }
                 }
 
-if (u.hasDialogueFinihsed(D_4))
-{
-    u.pushEntityDialogue(D_5);
-}
+                if (u.hasDialogueFinihsed(D_4))
+                {
+                    u.pushEntityDialogue(D_5);
+                }
 
-if (u.hasDialogueFinihsed(D_5))
-{
-    u.pushEntityDialogue(D_6);
-    _gangsterConfrontationStageData.canHugoReachRostov = true;
-}
+                if (u.hasDialogueFinihsed(D_5))
+                {
+                    u.pushEntityDialogue(D_6);
+                    _gangsterConfrontationStageData.canHugoReachRostov = true;
+                }
 
-if (_gangsterConfrontationStageData.canHugoReachRostov)
-{
-    // Move hugo until rostov x pos
-    float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
-    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
-        getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
-    {
-        _gangsterConfrontationStageData.canHugoReachRostov = false;
-    }
-}
+                if (_gangsterConfrontationStageData.canHugoReachRostov)
+                {
+                    // Move hugo until rostov x pos
+                    float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
+                    if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
+                        getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
+                    {
+                        _gangsterConfrontationStageData.canHugoReachRostov = false;
+                    }
+                }
             }
 
             if (!_gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo)
@@ -1333,6 +1333,56 @@ if (_gangsterConfrontationStageData.canHugoReachRostov)
             if (u.hasDialogueFinihsed(D_13_HIGH_TENSION))
             {
                 u.pushEntityDialogue(D_14);
+            }
+
+            if (u.hasDialogueFinihsed(D_14))
+            {
+                _currentLevelStage = PHONE_CONFRONTATION_STAGE;
+            }
+
+            break;
+        }
+
+        case PHONE_CONFRONTATION_STAGE:
+        {
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            Entity& hugo = getEntityById(s_hugoEntityId);
+
+            if (isTimerOngoing(_phoneConfrontationStageData.waitForHugoCallTimer) && !_phoneConfrontationStageData.hasHugoPhoneStartedRinging)
+            {
+                _phoneConfrontationStageData.waitForHugoCallTimer += k_deltaTime;
+                if (_phoneConfrontationStageData.waitForHugoCallTimer >= 3.f)
+                {
+                    _phoneConfrontationStageData.hasHugoPhoneStartedRinging = true;
+                    invalidateTimer(_phoneConfrontationStageData.waitForHugoCallTimer);
+                    startTimer(_phoneConfrontationStageData.lookAtDarwinTimer);
+                }
+            }
+
+            if (isTimerOngoing(_phoneConfrontationStageData.lookAtDarwinTimer))
+            {
+                _phoneConfrontationStageData.lookAtDarwinTimer += k_deltaTime;
+                if (_phoneConfrontationStageData.lookAtDarwinTimer >= 0.5f)
+                {
+                    entityLookAtAnother(&player, &darwin);
+                    
+                    if (_phoneConfrontationStageData.lookAtDarwinTimer >= 1.5f)
+                    {
+                        u.pushEntityDialogue(E_1);
+                        invalidateTimer(_phoneConfrontationStageData.lookAtDarwinTimer);
+                    }
+                }
+            }
+
+            if (u.hasDialogueFinihsed(E_1))
+            {
+                u.pushEntityDialogue(E_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_2))
+            {
+                entityLookAtAnother(&player, &hugo);
+                u.pushEntityDialogue(E_3);
             }
 
             break;
@@ -1535,7 +1585,7 @@ void ECSLevel::imguiRender()
     ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
     if (ImGui::Button("Change to selected level stage"))
     {
-          _uiSystem.destroyCurrentDialogue();
+        _uiSystem.destroyCurrentDialogue();
         _uiSystem.popTensionBar();
 
         switch (s_levelStageToChangeTo)
@@ -1592,6 +1642,34 @@ void ECSLevel::imguiRender()
 
             _gangsterConfrontationStageData.reset();
 
+            break;
+        }
+        case PHONE_CONFRONTATION_STAGE:
+        {
+            _currentLevelStage = PHONE_CONFRONTATION_STAGE;
+
+            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+            _uiSystem.pushTensionBar();
+
+            Entity& player = getEntityById(k_playerEntityId);
+            getComponentFromEntity<TransformComponent>(player)->position.x = 200.f;
+            getComponentFromEntity<SpriteComponent>(player)->flipX = true;
+            player.entityState = ON_CUTSCENE_STATE;
+
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            getComponentFromEntity<TransformComponent>(darwin)->position = { 245.f, 117.f };
+            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+
+            Entity& oskar = getEntityById(s_oskarEntityId);
+            getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
+            oskar.entityState = DEAD_STATE;
+
+            Entity& hugo = getEntityById(s_hugoEntityId);
+            getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
+            getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+            hugo.entityState = WAIT_TO_DIE_STATE;
+
+            _phoneConfrontationStageData.reset();
             break;
         }
         }

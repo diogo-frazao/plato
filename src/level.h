@@ -34,9 +34,10 @@ enum LevelStages
     FIRST_DAD_PHONE_STAGE,
     DARWIN_CONVERSATION_STAGE,
     GANGSTER_CONFRONTATION_STAGE,
+	PHONE_CONFRONTATION_STAGE,
     LEVEL_STAGES_COUNT,
 };
-static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE" };
+static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0DARWIN_CONVERSATION_STAGE\0GANGSTER_CONFRONTATION_SAGE\0PHONE_CONFRONTATION_STAGE" };
 
 struct DarwinConfrontationStageData
 {
@@ -93,6 +94,20 @@ struct GangsterConfrontationStageData
 	}
 };
 
+struct PhoneConfrontationStage
+{
+	float waitForHugoCallTimer = 0.f;
+	bool hasHugoPhoneStartedRinging = false;
+	float lookAtDarwinTimer = k_invalidTime;
+
+	void reset()
+	{
+		waitForHugoCallTimer = 0.f;
+		hasHugoPhoneStartedRinging = false;
+		lookAtDarwinTimer = k_invalidTime;
+	}
+};
+
 class ECSLevel
 {
 public:
@@ -119,6 +134,7 @@ private:
 	LevelStages _currentLevelStage = MARKETING_PHONE_STAGE;
 	DarwinConfrontationStageData _darwinConversationStageData;
 	GangsterConfrontationStageData _gangsterConfrontationStageData;
+	PhoneConfrontationStage _phoneConfrontationStageData;
 };
 
 struct LevelManager

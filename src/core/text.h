@@ -175,6 +175,9 @@ enum TextType
 	D_13_LOW_TENSION,
 	D_13_HIGH_TENSION,
 	D_14,
+	E_1,
+	E_2,
+	E_3,
 };
 
 enum TextTensionType

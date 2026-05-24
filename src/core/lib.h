@@ -28,6 +28,7 @@ enum EntityState
 	HURT_TWO_STATE,
 	HURT_TWO_RECOVER_STATE,
 	CRAWL_STATE,
+	WAIT_TO_DIE_STATE,
 	DEAD_STATE
 };
 
@@ -35,12 +36,12 @@ inline bool isEntityInCombatState(EntityState state)
 {
 	return state == ATTACKING_STATE || state == HURT_ONE_STATE || state == HURT_ONE_RECOVER_STATE ||
 		state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE ||
-		state == CRAWL_STATE || state == DEAD_STATE;
+		state == CRAWL_STATE || state == WAIT_TO_DIE_STATE || state == DEAD_STATE;
 }
 
 inline bool canKillyEntityFromCurrentState(EntityState state)
 {
-	return state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE || state == CRAWL_STATE;
+	return state == HURT_TWO_STATE || state == HURT_TWO_RECOVER_STATE || state == WAIT_TO_DIE_STATE || state == CRAWL_STATE;
 }
 
 inline const char* getEntityStateAsString(EntityState state)
@@ -73,6 +74,8 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Hurt Two Recover";
 	case CRAWL_STATE:
 		return "Crawl";
+	case WAIT_TO_DIE_STATE:
+		return "Wait to Die";
 	case DEAD_STATE:
 		return "Dead";
 	}
@@ -149,6 +152,7 @@ enum SpriteType
 	GANGSTER_SMALL_HURT_TOP_TOP_SPRITE,
 	GANGSTER_SMALL_HURT_TOP_TOP_RECOVER_SPRITE,
 	GANGSTER_SMALL_CRAWL_SPRITE,
+	GANGSTER_SMALL_WAIT_TO_DIE_SPRITE,
 	GANGSTER_SMALL_DEAD_SPRITE,
 	GANGSTER_HUGO_SPRITE,
 	GANGSTER_OSKAR_SPRITE,

@@ -360,6 +360,15 @@ TextDTO getTextInfo(TextType textType)
 	case D_14:
 		return { "FUCK. YOU.", HUGO_DIALOGUE, 5 };
 	}
+	// Phone confrontation with big diesel
+	{
+	case E_1:
+		return { "Don't look at me, it's not mine either", DARWIN_DIALOGUE };
+	case E_2:
+		return { "Relax, it's mine", HUGO_DIALOGUE };
+	case E_3:
+		return { "It's probably BIG DIESEL, he just wants to know if the job is done", HUGO_DIALOGUE };
+	}
 
 	}
 	D_ASSERT(false, "Invalid text for type: %i", textType);
