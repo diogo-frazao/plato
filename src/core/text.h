@@ -178,6 +178,19 @@ enum TextType
 	E_1,
 	E_2,
 	E_3,
+	E_4,
+	E_5,
+	E_6,
+	E_7,
+	E_7_A,
+	E_7_B,
+	E_N_1,
+	E_N_2,
+	E_N_2_A,
+	E_N_2_A_1,
+	E_N_2_A_1_A,
+	E_N_2_A_1_B,
+	E_N_2_B,
 };
 
 enum TextTensionType

@@ -1385,6 +1385,51 @@ void ECSLevel::update()
                 u.pushEntityDialogue(E_3);
             }
 
+            if (u.hasDialogueFinihsed(E_3))
+            {
+                u.pushEntityDialogue(E_4);
+            }
+
+            if (u.hasDialogueFinihsed(E_4))
+            {
+                u.pushEntityDialogue(E_5);
+            }
+
+            if (u.hasDialogueFinihsed(E_5))
+            {
+                u.pushEntityDialogue(E_6);
+            }
+
+            if (u.hasDialogueFinihsed(E_6))
+            {
+                u.pushEntityDialogue(E_7, {E_7_A, E_7_B });
+            }
+
+            if (u.hasChosenOption(E_7_A))
+            {
+                // TODO: phone convo
+            }
+            else if (u.hasChosenOption(E_7_B))
+            {
+                u.pushEntityDialogue(E_N_1);
+            }
+
+            if (u.hasDialogueFinihsed(E_N_1))
+            {
+                u.pushEntityDialogue(E_N_2, { E_N_2_A, E_N_2_B });
+            }
+
+            if (u.hasChosenOption(E_N_2_A))
+            {
+                u.pushEntityDialogue(E_N_2_A_1, { E_N_2_A_1_A, E_N_2_A_1_B });
+            }
+
+            if (u.hasChosenOption(E_N_2_B) || u.hasChosenOption(E_N_2_A_1_A) || u.hasChosenOption(E_N_2_A_1_B))
+            {
+                u.popTensionBar();
+                player.entityState = IDLE_STATE;
+            }
+
             break;
         }
     }

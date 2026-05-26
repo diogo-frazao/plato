@@ -368,6 +368,32 @@ TextDTO getTextInfo(TextType textType)
 		return { "Relax, it's mine", HUGO_DIALOGUE };
 	case E_3:
 		return { "It's probably BIG DIESEL, he just wants to know if the job is done", HUGO_DIALOGUE };
+	case E_4:
+		return { "Don't you dare pick up the call! I know you will call for backup", DARWIN_DIALOGUE };
+	case E_5:
+		return { "ahAHAHAH", HUGO_DIALOGUE };
+	case E_6:
+		return { "Don't you want to know 'who's behind this'? This is your chance", HUGO_DIALOGUE };
+	case E_7:
+		return { "God dammit... What do we do ROSTOV?", DARWIN_DIALOGUE };
+		case E_7_A:
+			return { "Pick up the call now", CHOICE_DIALOGUE };
+		case E_7_B:
+			return { "Don't you dare move", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+			case E_N_1:
+				return { "Well... Too bad", HUGO_DIALOGUE };
+			case E_N_2:
+				return { "I guess you'll never know", HUGO_DIALOGUE };
+				case E_N_2_A:
+					return { "This is your last chance", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+					case E_N_2_A_1:
+						return { "ahAHAHAHAH", HUGO_DIALOGUE };
+						case E_N_2_A_1_A:
+							return { "I'll make you stop laughing < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+						case E_N_2_A_1_B:
+							return { "You will end up like your brother < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+				case E_N_2_B:
+					return { "Then you know what happens next < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 	}
 
 	}
