@@ -1426,8 +1426,127 @@ void ECSLevel::update()
 
             if (u.hasChosenOption(E_N_2_B) || u.hasChosenOption(E_N_2_A_1_A) || u.hasChosenOption(E_N_2_A_1_B))
             {
+                u.interruptCurrentDialogue();
+            }
+            
+            if (u.hasDialogueFinishedInterrupting(E_N_2) || u.hasDialogueFinishedInterrupting(E_N_2_A_1))
+            {
+                u.pushEntityDialogue(E_8);
+            }
+
+            if (u.hasDialogueFinihsed(E_8))
+            {
+                u.pushEntityDialogue(E_9);
+            }
+
+            if (u.hasDialogueFinihsed(E_9))
+            {
+                u.pushEntityDialogue(E_10);
+            }
+
+            if (u.hasDialogueFinihsed(E_10))
+            {
+                u.pushEntityDialogue(E_11);
                 u.popTensionBar();
                 player.entityState = IDLE_STATE;
+                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
+            }
+
+            if (u._lastDialogueType == E_11)
+            {
+                float doorXPos = 70.f;
+                auto* hugoTransform = getComponentFromEntity<TransformComponent>(hugo);
+                bool isRostovCloseToDoor = hugoTransform->position.x - playerTransform->position.x >= 70.f;
+
+                if (isRostovCloseToDoor)
+                {
+                    u.pushEntityDialogue(E_12);
+                }
+            }
+
+            if (u.hasDialogueFinihsed(E_12))
+            {
+                u.pushEntityDialogue(E_13);
+            }
+
+            if (u.hasDialogueFinihsed(E_13))
+            {
+                u.pushEntityDialogue(E_14);
+            }
+
+            if (u.hasDialogueFinihsed(E_14))
+            {
+                u.pushEntityDialogue(E_15);
+            }
+
+            if (u.hasDialogueFinihsed(E_15))
+            {
+                u.pushEntityDialogue(E_16);
+            }
+
+            if (u.hasDialogueFinihsed(E_16))
+            {
+                u.pushEntityDialogue(E_17);
+            }
+
+            if (u.hasDialogueFinihsed(E_17))
+            {
+                u.pushEntityDialogue(E_18);
+            }
+
+            if (u.hasDialogueFinihsed(E_18))
+            {
+                u.pushEntityDialogue(E_19);
+            }
+
+            if (u.hasDialogueFinihsed(E_19))
+            {
+                u.pushEntityDialogue(E_20);
+            }
+
+            if (u.hasDialogueFinihsed(E_20))
+            {
+                u.pushEntityDialogue(E_21);
+            }
+
+            bool isHugoDead = hugo.entityState == DEAD_STATE;
+            if (isHugoDead && !_phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo)
+            {
+                if (u.isCurrentDialogue(E_21))
+                {
+                    u.interruptCurrentDialogue();
+                }
+                else
+                {
+                    u.pushEntityDialogue(E_22);
+                    _phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
+                }
+
+                if (u.hasDialogueFinishedInterrupting(E_21))
+                {
+                    u.pushEntityDialogue(E_22);
+                    _phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
+                }
+            }
+
+            if (u.hasDialogueFinihsed(E_22))
+            {
+                u.pushEntityDialogue(E_23);
+            }
+
+            if (u.hasDialogueFinihsed(E_23))
+            {
+                startTimer(_phoneConfrontationStageData.darwinFinalDialogueTimer);
+            }
+
+            if (isTimerOngoing(_phoneConfrontationStageData.darwinFinalDialogueTimer))
+            {
+                _phoneConfrontationStageData.darwinFinalDialogueTimer += k_deltaTime;
+                if (_phoneConfrontationStageData.darwinFinalDialogueTimer >= 3.f)
+                {
+                    u.pushEntityDialogue(E_24);
+                    invalidateTimer(_phoneConfrontationStageData.darwinFinalDialogueTimer);
+                }
             }
 
             break;
@@ -1712,6 +1831,7 @@ void ECSLevel::imguiRender()
             Entity& hugo = getEntityById(s_hugoEntityId);
             getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
             getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+            getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = getComponentFromEntity<AttackingComponent>(hugo)->numberOfHitsToFall + 1;
             hugo.entityState = WAIT_TO_DIE_STATE;
 
             _phoneConfrontationStageData.reset();

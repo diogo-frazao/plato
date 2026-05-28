@@ -2539,6 +2539,11 @@ bool UISystem::hasDialogueFinishedInterrupting(TextType dialogueType)
 	return (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueType == dialogueType);
 }
 
+bool UISystem::hasAnyDialogueOngoing()
+{
+	return (_currentDialogue.dialogueType != INVALID_TEXT);
+}
+
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
 {
 	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;

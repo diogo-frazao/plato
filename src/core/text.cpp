@@ -373,9 +373,9 @@ TextDTO getTextInfo(TextType textType)
 	case E_5:
 		return { "ahAHAHAH", HUGO_DIALOGUE };
 	case E_6:
-		return { "Don't you want to know 'who's behind this'? This is your chance", HUGO_DIALOGUE };
+		return { "Don't you want to know 'who's behind this'?", HUGO_DIALOGUE };
 	case E_7:
-		return { "God dammit... What do we do ROSTOV?", DARWIN_DIALOGUE };
+		return { "This is your chance", HUGO_DIALOGUE };
 		case E_7_A:
 			return { "Pick up the call now", CHOICE_DIALOGUE };
 		case E_7_B:
@@ -391,9 +391,43 @@ TextDTO getTextInfo(TextType textType)
 						case E_N_2_A_1_A:
 							return { "I'll make you stop laughing < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 						case E_N_2_A_1_B:
-							return { "You will end up like your brother < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+							return { "You will end up like your brother < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 				case E_N_2_B:
-					return { "Then you know what happens next < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+					return { "Then you know what happens next < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+	case E_8:
+		return { "GOD DAMMIT ROSTOV!", DARWIN_DIALOGUE, 5 };
+	case E_9:
+		return { "I don't want to see another dead body in here", DARWIN_DIALOGUE, 5 };
+	case E_10:
+		return { "Please leave for today, I'll call DAISY and get this mess sorted", DARWIN_DIALOGUE };
+	case E_11:
+		return { "We open tomorrow at the usual time", DARWIN_DIALOGUE };
+	case E_12:
+		return { "Good boy, do as you're told", HUGO_DIALOGUE };
+	case E_13:
+		return { "Just ignore him ROSTOV", DARWIN_DIALOGUE };
+	case E_14:
+		return { "ahahAHAAH. What happened ROSTOV? Are you RUNNING AWAY?", HUGO_DIALOGUE };
+	case E_15:
+		return { "Just like you ran from your sick DAD", HUGO_DIALOGUE };
+	case E_16:
+		return { "SHUT UP", DARWIN_DIALOGUE };
+	case E_17:
+		return { "The old fuck's a talking vegetable at this point", HUGO_DIALOGUE };
+	case E_18:
+		return { "A dead man with a cellphone ", HUGO_DIALOGUE };
+	case E_19:
+		return { "ahaAHAHAhah", HUGO_DIALOGUE };
+	case E_20:
+		return { "ROSTOV, please go", DARWIN_DIALOGUE };
+	case E_21:
+		return { "ahaAHAHAhah", HUGO_DIALOGUE };
+	case E_22:
+		return { "FUCKING HELL ROSTOV", DARWIN_DIALOGUE };
+	case E_23:
+		return { "I can't believe this...", DARWIN_DIALOGUE };
+	case E_24:
+		return { "Please, just leave...", DARWIN_DIALOGUE };
 	}
 
 	}
@@ -431,7 +465,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		break;
 	case HUGO_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
-		s_currentDialogueEntityDTO.outlineColor = { 79, 38, 32 };
+		s_currentDialogueEntityDTO.outlineColor = { 60, 60, 60 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;

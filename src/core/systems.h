@@ -345,6 +345,7 @@ public:
 	bool hasDialogueFinihsed(TextType dialogueType);
 	bool hasChosenOption(TextType dialogueType);
 	bool hasDialogueFinishedInterrupting(TextType dialogueType);
+	bool hasAnyDialogueOngoing();
 
 	void skipDialogue();
 	void interruptCurrentDialogue();
