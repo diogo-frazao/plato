@@ -442,6 +442,14 @@ void pushGolfCueControntationDialogue(UISystem& u)
     }
 }
 
+void finishHugoConversation(UISystem& u, Entity& player, Entity& hugo, bool& canHugoProvokeDarwin)
+{
+    u.popTensionBar();
+    player.entityState = IDLE_STATE;
+    getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
+    canHugoProvokeDarwin = true;
+}
+
 void ECSLevel::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -1407,13 +1415,139 @@ void ECSLevel::update()
 
             if (u.hasChosenOption(E_7_A))
             {
-                // TODO: phone convo
+                u.pushEntityDialogue(E_7_A_1);
             }
             else if (u.hasChosenOption(E_7_B))
             {
                 u.pushEntityDialogue(E_N_1);
             }
 
+            // Picked up call
+            if (u.hasDialogueFinihsed(E_7_A_1))
+            {
+                u.pushEntityDialogue(E_7_A_2, {E_7_A_2_A, E_7_A_2_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_1);
+            }
+            else if (u.hasChosenOption(E_7_A_2_B))
+            {
+                u.pushEntityDialogue(E_7_A_2_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_1))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_2))
+            {
+                startTimer(_phoneConfrontationStageData.askForDieselRepeatTimer);
+            }
+
+            if (isTimerOngoing(_phoneConfrontationStageData.askForDieselRepeatTimer))
+            {
+                _phoneConfrontationStageData.askForDieselRepeatTimer += k_deltaTime;
+                if (_phoneConfrontationStageData.askForDieselRepeatTimer >= 2.f)
+                {
+                    u.pushEntityDialogue(E_7_A_2_A_3, { E_7_A_2_A_3_A, E_7_A_2_A_3_B });
+                    invalidateTimer(_phoneConfrontationStageData.askForDieselRepeatTimer);
+                }
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_A))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_1);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_1))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_2))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_3);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_3))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_4);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_4))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5, { E_7_A_2_A_3_A_5_A, E_7_A_2_A_3_A_5_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_1);
+            }
+            else if (u.hasChosenOption(E_7_A_2_A_3_A_5_B))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_1))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_2))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_3);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_3))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_4);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_4))
+            {
+                u.pushEntityDialogue(E_7_1);
+                finishHugoConversation(u, player, hugo, _phoneConfrontationStageData.canHugoProvokeDarwin);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_1))
+            {
+                u.pushEntityDialogue(E_11);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_1))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_2))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_3, { E_7_A_2_A_3_A_5_A_3_A, E_7_A_2_A_3_A_5_A_3_B, E_7_A_2_A_3_A_5_A_3_C });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_B) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_C))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_4);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_4))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_5, { E_7_A_2_A_3_A_5_A_5_A, E_7_A_2_A_3_A_5_A_5_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_B))
+            {
+                u.interruptCurrentDialogue();
+            }
+
+            if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_A_5_A_5))
+            {
+                u.pushEntityDialogue(E_8);
+            }
+
+            // Not picked up call
             if (u.hasDialogueFinihsed(E_N_1))
             {
                 u.pushEntityDialogue(E_N_2, { E_N_2_A, E_N_2_B });
@@ -1447,12 +1581,10 @@ void ECSLevel::update()
             if (u.hasDialogueFinihsed(E_10))
             {
                 u.pushEntityDialogue(E_11);
-                u.popTensionBar();
-                player.entityState = IDLE_STATE;
-                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
+                finishHugoConversation(u, player, hugo, _phoneConfrontationStageData.canHugoProvokeDarwin);
             }
 
-            if (u._lastDialogueType == E_11)
+            if (_phoneConfrontationStageData.canHugoProvokeDarwin)
             {
                 float doorXPos = 70.f;
                 auto* hugoTransform = getComponentFromEntity<TransformComponent>(hugo);
@@ -1461,6 +1593,7 @@ void ECSLevel::update()
                 if (isRostovCloseToDoor)
                 {
                     u.pushEntityDialogue(E_12);
+                    _phoneConfrontationStageData.canHugoProvokeDarwin = false;
                 }
             }
 

@@ -99,8 +99,10 @@ struct PhoneConfrontationStage
 	float waitForHugoCallTimer = 0.f;
 	bool hasHugoPhoneStartedRinging = false;
 	float lookAtDarwinTimer = k_invalidTime;
+	float askForDieselRepeatTimer = k_invalidTime;
 	bool hasDarwinComplainedAboutKillingHugo = false;
 	float darwinFinalDialogueTimer = k_invalidTime;
+	bool canHugoProvokeDarwin = false;
 
 	void reset()
 	{
@@ -109,6 +111,8 @@ struct PhoneConfrontationStage
 		lookAtDarwinTimer = k_invalidTime;
 		hasDarwinComplainedAboutKillingHugo = false;
 		darwinFinalDialogueTimer = k_invalidTime;
+		askForDieselRepeatTimer = k_invalidTime;
+		canHugoProvokeDarwin = false;
 	}
 };
 

@@ -309,125 +309,99 @@ TextDTO getTextInfo(TextType textType)
 
 	// Hugo confrontation after oskar is killed
 	{
-	case D_1:
-		return { "WHAT. THE. FUCK.", HUGO_DIALOGUE };
-	case D_2:
-		return { "OSKAR??", HUGO_DIALOGUE };
-	case D_3:
-		return { "OSKAR... Can you hear me? It's HUGO", HUGO_DIALOGUE };
-	case D_4:
-		return { "YOU KILLED MY BROTHER", HUGO_DIALOGUE };
-	case D_5:
-		return { "You're a FUCKING MURDERER", HUGO_DIALOGUE };
-	case D_6:
-		return { "YOU OLD PIG I WILL MAKE YOU PAY", HUGO_DIALOGUE };
-	case D_7:
-		return { "ROSTOV DON'T DO IT", DARWIN_DIALOGUE };
-	case D_8:
-		return { "Please calm down... Take a deep breath", DARWIN_DIALOGUE };
-	case D_9:
-		return { "...", DARWIN_DIALOGUE };
-	case D_10:
-		return { "I don't want you to kill him... I want to know who's behind this", DARWIN_DIALOGUE };
-	case D_11:
-		return { "So he better start talking", DARWIN_DIALOGUE };
-	case D_12:
-		return { "ahahAHAHAHAH. I have NOTHING to say", HUGO_DIALOGUE };
-		case D_12_A:
-			return { "Stop laughing", CHOICE_DIALOGUE, 0, HIGH_TENSION };
-			case D_12_A_1:
-				return { "OR WHAT?", HUGO_DIALOGUE };
-			case D_12_A_2:
-				return { "ahahAHAHAHAH.", HUGO_DIALOGUE, 5 };
-				case D_12_A_2_A:
-					return { "Or you end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
-				case D_12_A_2_B:
-					return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
-		case D_12_B:
-			return { "I promise if you talk we'll let you go", CHOICE_DIALOGUE, 0, LOW_TENSION };
-			case D_12_B_1:
-				return { "ahahAHAHAHAH", HUGO_DIALOGUE };
-			case D_12_B_2:
-				return { "Besides being OLD and a MURDERER, you're also a LIAR", HUGO_DIALOGUE, 5 };
-				case D_12_B_2_A:
-					return { "Talk or end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
-				case D_12_B_2_B:
-					return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
-	case D_13_LOW_TENSION:
-		return { "...", HUGO_DIALOGUE };
-	case D_13_HIGH_TENSION:
-		return { "...", HUGO_DIALOGUE };
-	case D_14:
-		return { "FUCK. YOU.", HUGO_DIALOGUE, 5 };
+	case D_1: return { "WHAT. THE. FUCK.", HUGO_DIALOGUE };
+	case D_2: return { "OSKAR??", HUGO_DIALOGUE };
+	case D_3: return { "OSKAR... Can you hear me? It's HUGO", HUGO_DIALOGUE };
+	case D_4: return { "YOU KILLED MY BROTHER", HUGO_DIALOGUE };
+	case D_5: return { "You're a FUCKING MURDERER", HUGO_DIALOGUE };
+	case D_6: return { "YOU OLD PIG I WILL MAKE YOU PAY", HUGO_DIALOGUE };
+	case D_7: return { "ROSTOV DON'T DO IT", DARWIN_DIALOGUE };
+	case D_8: return { "Please calm down... Take a deep breath", DARWIN_DIALOGUE };
+	case D_9: return { "...", DARWIN_DIALOGUE };
+	case D_10: return { "I don't want you to kill him... I want to know who's behind this", DARWIN_DIALOGUE };
+	case D_11: return { "So he better start talking", DARWIN_DIALOGUE };
+	case D_12: return { "ahahAHAHAHAH. I have NOTHING to say", HUGO_DIALOGUE };
+		case D_12_A: return { "Stop laughing", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+			case D_12_A_1: return { "OR WHAT?", HUGO_DIALOGUE };
+			case D_12_A_2: return { "ahahAHAHAHAH.", HUGO_DIALOGUE, 5 };
+				case D_12_A_2_A: return { "Or you end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+				case D_12_A_2_B: return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
+		case D_12_B: return { "I promise if you talk we'll let you go", CHOICE_DIALOGUE, 0, LOW_TENSION };
+			case D_12_B_1: return { "ahahAHAHAHAH", HUGO_DIALOGUE };
+			case D_12_B_2: return { "Besides being OLD and a MURDERER, you're also a LIAR", HUGO_DIALOGUE, 5 };
+				case D_12_B_2_A: return { "Talk or end up like your brother", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+				case D_12_B_2_B: return { "Don't make this harder than it needs to be", CHOICE_DIALOGUE, 0, LOW_TENSION };
+	case D_13_LOW_TENSION: return { "...", HUGO_DIALOGUE };
+	case D_13_HIGH_TENSION: return { "...", HUGO_DIALOGUE };
+	case D_14: return { "FUCK. YOU.", HUGO_DIALOGUE, 5 };
 	}
 	// Phone confrontation with big diesel
 	{
-	case E_1:
-		return { "Don't look at me, it's not mine either", DARWIN_DIALOGUE };
-	case E_2:
-		return { "Relax, it's mine", HUGO_DIALOGUE };
-	case E_3:
-		return { "It's probably BIG DIESEL, he just wants to know if the job is done", HUGO_DIALOGUE };
-	case E_4:
-		return { "Don't you dare pick up the call! I know you will call for backup", DARWIN_DIALOGUE };
-	case E_5:
-		return { "ahAHAHAH", HUGO_DIALOGUE };
-	case E_6:
-		return { "Don't you want to know 'who's behind this'?", HUGO_DIALOGUE };
-	case E_7:
-		return { "This is your chance", HUGO_DIALOGUE };
-		case E_7_A:
-			return { "Pick up the call now", CHOICE_DIALOGUE };
-		case E_7_B:
-			return { "Don't you dare move", CHOICE_DIALOGUE, 10, HIGH_TENSION };
-			case E_N_1:
-				return { "Well... Too bad", HUGO_DIALOGUE };
-			case E_N_2:
-				return { "I guess you'll never know", HUGO_DIALOGUE };
-				case E_N_2_A:
-					return { "This is your last chance", CHOICE_DIALOGUE, 10, HIGH_TENSION };
-					case E_N_2_A_1:
-						return { "ahAHAHAHAH", HUGO_DIALOGUE };
-						case E_N_2_A_1_A:
-							return { "I'll make you stop laughing < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
-						case E_N_2_A_1_B:
-							return { "You will end up like your brother < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
-				case E_N_2_B:
-					return { "Then you know what happens next < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
-	case E_8:
-		return { "GOD DAMMIT ROSTOV!", DARWIN_DIALOGUE, 5 };
-	case E_9:
-		return { "I don't want to see another dead body in here", DARWIN_DIALOGUE, 5 };
-	case E_10:
-		return { "Please leave for today, I'll call DAISY and get this mess sorted", DARWIN_DIALOGUE };
-	case E_11:
-		return { "We open tomorrow at the usual time", DARWIN_DIALOGUE };
-	case E_12:
-		return { "Good boy, do as you're told", HUGO_DIALOGUE };
-	case E_13:
-		return { "Just ignore him ROSTOV", DARWIN_DIALOGUE };
-	case E_14:
-		return { "ahahAHAAH. What happened ROSTOV? Are you RUNNING AWAY?", HUGO_DIALOGUE };
-	case E_15:
-		return { "Just like you ran from your sick DAD", HUGO_DIALOGUE };
-	case E_16:
-		return { "SHUT UP", DARWIN_DIALOGUE };
-	case E_17:
-		return { "The old fuck's a talking vegetable at this point", HUGO_DIALOGUE };
-	case E_18:
-		return { "A dead man with a cellphone ", HUGO_DIALOGUE };
-	case E_19:
-		return { "ahaAHAHAhah", HUGO_DIALOGUE };
-	case E_20:
-		return { "ROSTOV, please go", DARWIN_DIALOGUE };
-	case E_21:
-		return { "ahaAHAHAhah", HUGO_DIALOGUE };
-	case E_22:
-		return { "FUCKING HELL ROSTOV", DARWIN_DIALOGUE };
-	case E_23:
-		return { "I can't believe this...", DARWIN_DIALOGUE };
-	case E_24:
-		return { "Please, just leave...", DARWIN_DIALOGUE };
+	case E_1: return { "Don't look at me, it's not mine either", DARWIN_DIALOGUE };
+	case E_2: return { "Relax, it's mine", HUGO_DIALOGUE };
+	case E_3: return { "It's probably BIG DIESEL, he just wants to know if the job is done", HUGO_DIALOGUE };
+	case E_4: return { "Don't you dare pick up the call! I know you will call for backup", DARWIN_DIALOGUE };
+	case E_5: return { "ahAHAHAH", HUGO_DIALOGUE };
+	case E_6: return { "Don't you want to know 'who's behind this'?", HUGO_DIALOGUE };
+	case E_7: return { "This is your chance", HUGO_DIALOGUE };
+		case E_7_A: return { "Pick up the call now", CHOICE_DIALOGUE };
+			case E_7_A_1: return { "Yoooo", BIG_DISEL_DIALOGUE };
+			case E_7_A_2: return { "Yo", HUGO_DIALOGUE };
+				case E_7_A_2_A: return { "< Stay silent >", CHOICE_DIALOGUE };
+					case E_7_A_2_A_1: return { "I don't even need to ask, right?", BIG_DISEL_DIALOGUE };
+					case E_7_A_2_A_2: return { "A gangster like you always gets the job done", BIG_DISEL_DIALOGUE };
+					case E_7_A_2_A_3: return { "Did you hear me?", BIG_DISEL_DIALOGUE };
+						case E_7_A_2_A_3_A: return { "< Stay silent >", CHOICE_DIALOGUE };
+							case E_7_A_2_A_3_A_1: return { "Yes, it's done", HUGO_DIALOGUE };
+							case E_7_A_2_A_3_A_2: return { "THAT'S MY G!", BIG_DISEL_DIALOGUE };
+							case E_7_A_2_A_3_A_3: return { "What are you waiting for then? Meet us in 2 behind the restaurant", BIG_DISEL_DIALOGUE };
+							case E_7_A_2_A_3_A_4: return { "Wait!", HUGO_DIALOGUE };
+							case E_7_A_2_A_3_A_5: return { "Hm, what's up?", BIG_DISEL_DIALOGUE };
+								case E_7_A_2_A_3_A_5_A: return { "< Stay silent >", CHOICE_DIALOGUE };
+									case E_7_A_2_A_3_A_5_A_1: return { "Triple cheeseburger", HUGO_DIALOGUE, 5 };
+									case E_7_A_2_A_3_A_5_A_2: return { "Tsc. I see", BIG_DISEL_DIALOGUE, 5 };
+									case E_7_A_2_A_3_A_5_A_3: return { "ahAHAHAH", HUGO_DIALOGUE };
+										case E_7_A_2_A_3_A_5_A_3_A: return { "I trusted you", CHOICE_DIALOGUE };
+										case E_7_A_2_A_3_A_5_A_3_B: return { "I know that's some kind of code", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+										case E_7_A_2_A_3_A_5_A_3_C: return { "You think I'm dumb?", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+									case E_7_A_2_A_3_A_5_A_4: return { "If you're curious then go meet BIG DIESEL and see", HUGO_DIALOGUE };
+									case E_7_A_2_A_3_A_5_A_5: return { "ahAHAHAH", HUGO_DIALOGUE };
+										case E_7_A_2_A_3_A_5_A_5_A: return { "I'll make you stop laughing for all < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 0, FATAL_TENSION };
+										case E_7_A_2_A_3_A_5_A_5_B: return { "I'll make you end up like your brother < LEAVE DiALOGUE >", CHOICE_DIALOGUE, 0, FATAL_TENSION };
+								case E_7_A_2_A_3_A_5_B: return { "< Hang up >", CHOICE_DIALOGUE, 0, HIGH_TENSION };
+									case E_7_A_2_A_3_A_5_B_1: return { "You OLD PIG", HUGO_DIALOGUE, 5 };
+									case E_7_A_2_A_3_A_5_B_2: return { "You might have fooled me, but BIG DIESEL will take care of you", HUGO_DIALOGUE, 5 };
+									case E_7_A_2_A_3_A_5_B_3: return { "Just shut up already", DARWIN_DIALOGUE, -5 };
+									case E_7_A_2_A_3_A_5_B_4: return { "ROSTOV, go meet BIG DIESEL, but please be careful", DARWIN_DIALOGUE};
+						case E_7_A_2_A_3_B: return { "For sure it's not done", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+				case E_7_A_2_B: return { "What's up BIG DIESEL", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+					case E_7_A_2_B_1: return { "HUGO? Is this you? Did you get the job done my G?", BIG_DISEL_DIALOGUE };
+		case E_7_B: return { "Don't you dare move", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+			case E_N_1: return { "Well... Too bad", HUGO_DIALOGUE };
+			case E_N_2: return { "I guess you'll never know", HUGO_DIALOGUE };
+				case E_N_2_A: return { "This is your last chance", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+					case E_N_2_A_1: return { "ahAHAHAHAH", HUGO_DIALOGUE };
+						case E_N_2_A_1_A: return { "I'll make you stop laughing < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+						case E_N_2_A_1_B: return { "You will end up like your brother < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+				case E_N_2_B: return { "Then you know what happens next < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+	case E_7_1: return { "Oh, and forget these two... I'll call DAISY and get this mess sorted", DARWIN_DIALOGUE };
+	case E_8: return { "GOD DAMMIT ROSTOV!", DARWIN_DIALOGUE, 5 };
+	case E_9: return { "I don't want to see another dead body in here", DARWIN_DIALOGUE, 5 };
+	case E_10: return { "Please leave for today, I'll call DAISY and get this mess sorted", DARWIN_DIALOGUE };
+	case E_11: return { "We open tomorrow at the usual time", DARWIN_DIALOGUE };
+	case E_12: return { "Good boy, do as you're told", HUGO_DIALOGUE };
+	case E_13: return { "Just ignore him ROSTOV", DARWIN_DIALOGUE };
+	case E_14: return { "ahahAHAAH. What happened ROSTOV? Are you RUNNING AWAY?", HUGO_DIALOGUE };
+	case E_15: return { "Just like you ran from your sick DAD", HUGO_DIALOGUE };
+	case E_16: return { "SHUT UP", DARWIN_DIALOGUE };
+	case E_17: return { "The old fuck's a talking vegetable at this point", HUGO_DIALOGUE };
+	case E_18: return { "A dead man with a cellphone ", HUGO_DIALOGUE };
+	case E_19: return { "ahaAHAHAhah", HUGO_DIALOGUE };
+	case E_20: return { "ROSTOV, please go", DARWIN_DIALOGUE };
+	case E_21: return { "ahaAHAHAhah", HUGO_DIALOGUE };
+	case E_22: return { "FUCKING HELL ROSTOV", DARWIN_DIALOGUE };
+	case E_23: return { "I can't believe this...", DARWIN_DIALOGUE };
+	case E_24: return { "Please, just leave...", DARWIN_DIALOGUE };
 	}
 
 	}
@@ -466,6 +440,13 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 	case HUGO_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 60, 60, 60 };
+		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
+		break;
+	case BIG_DISEL_DIALOGUE:
+		s_currentDialogueEntityDTO.dialogueBoxColor = { 24, 11, 25 };
+		s_currentDialogueEntityDTO.outlineColor = { 85, 38, 67 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
