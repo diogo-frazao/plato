@@ -1442,7 +1442,7 @@ void ECSLevel::update()
                 u.pushEntityDialogue(E_7_A_2_A_2);
             }
 
-            if (u.hasDialogueFinihsed(E_7_A_2_A_2))
+            if (u.hasDialogueFinihsed(E_7_A_2_A_2) || u.hasDialogueFinihsed(E_7_A_2_B_1))
             {
                 startTimer(_phoneConfrontationStageData.askForDieselRepeatTimer);
             }
@@ -1460,6 +1460,80 @@ void ECSLevel::update()
             if (u.hasChosenOption(E_7_A_2_A_3_A))
             {
                 u.pushEntityDialogue(E_7_A_2_A_3_A_1);
+            }
+            else if (u.hasChosenOption(E_7_A_2_A_3_B))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_1))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_2);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_2))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_3);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_3))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_4, { E_7_A_2_A_3_B_4_A, E_7_A_2_A_3_B_4_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_B_4_A) || u.hasChosenOption(E_7_A_2_A_3_B_4_B))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_5);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_5))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_6);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_6))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_7);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_7))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_8, { E_7_A_2_A_3_B_8_A, E_7_A_2_A_3_B_8_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_B_8_A) || u.hasChosenOption(E_7_A_2_A_3_B_8_B))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_9);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_9))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_10);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_10))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_11);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_11))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_12);
+            }
+
+            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_12))
+            {
+                u.pushEntityDialogue(E_7_A_2_A_3_B_13, { E_7_A_2_A_3_B_13_A, E_7_A_2_A_3_B_13_B });
+            }
+
+            if (u.hasChosenOption(E_7_A_2_A_3_B_13_A) || u.hasChosenOption(E_7_A_2_A_3_B_13_B))
+            {
+                u.interruptCurrentDialogue();
+            }
+
+            if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_B_13))
+            {
+                u.pushEntityDialogue(E_8);
             }
 
             if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_1))
