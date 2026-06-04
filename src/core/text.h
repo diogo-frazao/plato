@@ -310,3 +310,11 @@ struct DialogueEntityDTO
 
 inline DialogueEntityDTO s_currentDialogueEntityDTO{};
 void updateDialogueColorsAndOffsetForEntity(DialogueEntityType entityTalking);
+
+enum TextEffectType
+{
+	INVALID_EFFECT,
+	YELLOW_EFFECT,
+};
+
+TextEffectType getTextEffectTypeFromName(char* effectName);

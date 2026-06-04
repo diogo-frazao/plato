@@ -182,6 +182,7 @@ public:
 		Vec2 position{ 0.f, 0.f };
 		Vec2 size{ 0.f, 0.f };
 		float secondsToStartShowingCharacter = 0.f;
+		SDL_Color overrideColor = { 0, 0, 0, 0 };
 
 		// Changed at runtime
 		float opacity = 0.f;
@@ -202,6 +203,7 @@ public:
 			this->opacity = 0.f;
 			this->dynamicYSize = 0.f;
 			this->velocity = { 0.f, 0.f };
+			this->overrideColor = { 0, 0,0 };
 		}
 	};
 

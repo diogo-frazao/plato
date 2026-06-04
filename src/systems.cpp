@@ -14,6 +14,12 @@ static bool isAmbientColorValid(SDL_Color color)
 	return color.r != k_whiteColor.r || color.g != k_whiteColor.g || color.b != k_whiteColor.b;
 }
 
+static bool isColorValid(SDL_Color color)
+{
+	static constexpr SDL_Color k_blackColor = { 0, 0, 0, 0 };
+	return color.r != k_blackColor.r || color.g != k_blackColor.g || color.b != k_blackColor.b;
+}
+
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
 	SDL_Texture* atlas = _loadedAtlasFiles[type];
@@ -2202,7 +2208,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			c.opacity = 0.f;
 		}
 
-		SDL_SetTextureColorMod(fontAtlas, s_currentDialogueEntityDTO.textColor.r, s_currentDialogueEntityDTO.textColor.g, s_currentDialogueEntityDTO.textColor.b);
+		if (isColorValid(c.overrideColor))
+		{
+			SDL_SetTextureColorMod(fontAtlas, c.overrideColor.r, c.overrideColor.g, c.overrideColor.b);
+		}
+		else
+		{
+			SDL_SetTextureColorMod(fontAtlas, s_currentDialogueEntityDTO.textColor.r, s_currentDialogueEntityDTO.textColor.g, s_currentDialogueEntityDTO.textColor.b);
+		}
+
 		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 	}
@@ -2456,10 +2470,29 @@ Vec2 getPositionToStartDrawingText(const char* textToShow, Vec2 position, Dialog
 
 	float maxXDialogueSize = 0;
 
+	bool isTextEffectSyntax = false;
+
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{
 		char c = textToShow[i];
 		bool isSpaceCharacter = (c == 32);
+
+		if (c == '[')
+		{
+			isTextEffectSyntax = true;
+			continue;
+		}
+
+		if (c == ']')
+		{
+			isTextEffectSyntax = false;
+			continue;
+		}
+
+		if (isTextEffectSyntax)
+		{
+			continue;
+		}
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);
@@ -2604,6 +2637,15 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	_currentDialogue.tensionDelta = textInfo.playerTensionDelta;
 	_currentDialogue.entityTalking = entityToAttachDialogue;
 
+	bool isCheckingEffectName = false;
+	TextEffectType textEffectApplying = INVALID_EFFECT;
+
+	char effectToApplyName[64] = "";
+	uint8_t effectNameLength = 0;
+
+	// Same as i inside the for loop but ignores everything that's text effects syntax
+	uint16_t currentCharacterIndex = 0;
+
 	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
 	{
@@ -2615,6 +2657,43 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		{
 			D_LOG(ERROR, "Trying to print unsupported character: %c", c);
 			// Continue to prevent printing unsupported characters as a space character
+			continue;
+		}
+
+		// The character [ is reserved for text effects (start and end)
+		// We also continue since we don't want to draw to the text the effect code
+		// Ex: [yellow] Hello [yellow] should only be printed to the user as Hello.
+		
+		if (c == '[')
+		{
+			isCheckingEffectName = true;
+			continue;
+		}
+
+		if (isCheckingEffectName)
+		{
+			// This character ] is reserved for text effetcs [yellow] <- it means we should stop reading the effect name
+			// and check what to apply until we see [yellow] again
+			if (c == ']')
+			{
+				// Stop applying effet
+				if (textEffectApplying != INVALID_EFFECT)
+				{
+					textEffectApplying = INVALID_EFFECT;
+					D_LOG(MINI, "Stopped applying text effect: %s", effectToApplyName);
+				}
+				else
+				{
+					textEffectApplying = getTextEffectTypeFromName(effectToApplyName);
+				}
+
+				isCheckingEffectName = false;
+				effectToApplyName[0] = '\0';
+				effectNameLength = 0;
+				continue;
+			}
+
+			effectToApplyName[effectNameLength++] = c;
 			continue;
 		}
 
@@ -2631,11 +2710,18 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		dest.w = k_characterSize.x;
 		dest.h = k_characterSize.y;
 
-		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[i];
+		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[currentCharacterIndex];
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.position = { dest.x, dest.y };
 		dialogueCharacter.size = { k_characterSize };
-		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * i);
+		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
+
+		if (textEffectApplying == YELLOW_EFFECT)
+		{
+			dialogueCharacter.overrideColor = { 255, 255, 0 };
+		}
+
+		currentCharacterIndex++;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);

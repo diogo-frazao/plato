@@ -17,7 +17,7 @@ TextDTO getTextInfo(TextType textType)
 	case ETC_TEXT:
 		return "...";
 	case MARKETING_PHONE_1:
-		return "Goooooood afternoon";
+		return "[yellow]Goooooood[yellow] afternoon";
 	case MARKETING_PHONE_2:
 		return "Do I have the pleasure of speaking with Mr.ROSTOV?";
 		case MARKETING_PHONE_2_A:
@@ -474,4 +474,17 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		D_ASSERT(false, "Unsupported dialogue entity type");
 		break;
 	}
+}
+
+TextEffectType getTextEffectTypeFromName(char* effectName)
+{
+	D_LOG(MINI, "Trying to apply text effect for %s", effectName);
+
+	if (strcmp(effectName, "yellow") == 0)
+	{
+		return YELLOW_EFFECT;
+	}
+
+	D_LOG(ERROR, "No text effect found for %s", effectName);
+	return INVALID_EFFECT;
 }
