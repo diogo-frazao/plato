@@ -1785,16 +1785,28 @@ void UISystem::update()
 			break;
 		}
 
-		if (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter)
+		// Fade in each character
+		bool canCharacterFadeIn = (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter);
+		if (canCharacterFadeIn)
 		{
 			float speed = 255.f / k_secondsToFadeInEachCharacter;
 			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
+			c.timeSinceCharacterAppeared += k_deltaTime;
 		}
 		else
 		{
 			c.opacity = 0.f;
 		}
 
+		// Wave text effect movement
+		if (c.textEffectToApply == WAVE_EFFECT && canCharacterFadeIn)
+		{
+			// offset * sin(time * speed)
+			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
+			c.position.y = c.startingPosition.y + sinMovementOffset;
+		}
+
+		// Physics for dialogue interrupted smash
 		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 		{
 			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
@@ -1829,7 +1841,7 @@ void UISystem::update()
 	}
 
 	// Auto skip dialogue if it doesn't have choices
-	if (_currentDialogue.state == DIALOGUE_BASE_STATE)
+	/*if (_currentDialogue.state == DIALOGUE_BASE_STATE)
 	{
 		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 		float secondsToSkipDialogue = 3.f;
@@ -1847,7 +1859,7 @@ void UISystem::update()
 		{
 			_currentDialogue.state = DIALOGUE_ENDED_STATE;
 		}
-	}
+	}*/
 
 	// Tension bar logic
 	{
@@ -2640,7 +2652,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	bool isCheckingEffectName = false;
 	TextEffectType textEffectApplying = INVALID_EFFECT;
 
-	char effectToApplyName[64] = "";
+	static char effectToApplyName[64] = "";
 	uint8_t effectNameLength = 0;
 
 	// Same as i inside the for loop but ignores everything that's text effects syntax
@@ -2712,14 +2724,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[currentCharacterIndex];
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
+		dialogueCharacter.startingPosition = { dest.x, dest.y };
 		dialogueCharacter.position = { dest.x, dest.y };
 		dialogueCharacter.size = { k_characterSize };
 		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
-
-		if (textEffectApplying == YELLOW_EFFECT)
-		{
-			dialogueCharacter.overrideColor = { 255, 255, 0 };
-		}
+		dialogueCharacter.textEffectToApply = textEffectApplying;
 
 		currentCharacterIndex++;
 

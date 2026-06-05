@@ -17,7 +17,7 @@ TextDTO getTextInfo(TextType textType)
 	case ETC_TEXT:
 		return "...";
 	case MARKETING_PHONE_1:
-		return "[yellow]Goooooood[yellow] afternoon";
+		return "[wave]Goooooood[wave] afternoon";
 	case MARKETING_PHONE_2:
 		return "Do I have the pleasure of speaking with Mr.ROSTOV?";
 		case MARKETING_PHONE_2_A:
@@ -483,6 +483,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "yellow") == 0)
 	{
 		return YELLOW_EFFECT;
+	}
+
+	if (strcmp(effectName, "wave") == 0)
+	{
+		return WAVE_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);

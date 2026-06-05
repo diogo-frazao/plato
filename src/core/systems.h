@@ -179,15 +179,18 @@ public:
 	struct DialogueCharacter
 	{
 		IVec2 atlasOffset{ 0,0 };
-		Vec2 position{ 0.f, 0.f };
 		Vec2 size{ 0.f, 0.f };
+		Vec2 startingPosition{ 0.f, 0.f };
 		float secondsToStartShowingCharacter = 0.f;
 		SDL_Color overrideColor = { 0, 0, 0, 0 };
+		TextEffectType textEffectToApply = INVALID_EFFECT;
 
-		// Changed at runtime
+		// Changed at runtime if needed
+		Vec2 position{ 0.f, 0.f };
 		float opacity = 0.f;
 		float dynamicYSize = 0.f;
 		Vec2 velocity = { 0.f, 0.f };
+		float timeSinceCharacterAppeared = 0.f;
 
 		bool isValid()
 		{
@@ -197,6 +200,7 @@ public:
 		void reset()
 		{
 			this->atlasOffset = { 0,0 };
+			this->startingPosition = { 0.f, 0.f };
 			this->position = { 0.f, 0.f };
 			this->size = { 0.f, 0.f };
 			this->secondsToStartShowingCharacter = 0.f;
@@ -204,6 +208,8 @@ public:
 			this->dynamicYSize = 0.f;
 			this->velocity = { 0.f, 0.f };
 			this->overrideColor = { 0, 0,0 };
+			this->timeSinceCharacterAppeared = 0.f;
+			this->textEffectToApply = INVALID_EFFECT;
 		}
 	};
 
