@@ -1766,9 +1766,16 @@ void UISystem::update()
 		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
 	}
 
-	// Dynamic speech indicator x size
+	// Dynamic speech indicator y size
 	{
-		_currentDialogue.speechIndicatorDynamicXSize = lerp(_currentDialogue.speechIndicatorDynamicXSize, k_speechIndicatorSize.x, 0.1f);
+		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
+		{
+			_currentDialogue.speechIndicatorDynamicYSize = lerp(_currentDialogue.speechIndicatorDynamicYSize, 0.f, 0.2f);
+		}
+		else
+		{
+			_currentDialogue.speechIndicatorDynamicYSize = lerp(_currentDialogue.speechIndicatorDynamicYSize, k_speechIndicatorSize.y, 0.1f);
+		}
 	}
 
 	// Main dialogue characters logic + animate
@@ -2047,6 +2054,12 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		{
 			opacity = 0;
 		}
+		else if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
+		{
+			const float dialogueBoxSizeXToOpacityRatio = 255.f / _currentDialogue.dialogueBoxSize.x;
+			float test = _currentDialogue.dialogueBoxDynamicXSize * dialogueBoxSizeXToOpacityRatio;
+			opacity = min(test, 255.f);
+		}
 
 		SDL_SetTextureAlphaMod(atlas, opacity);
 		SDL_RenderTexture(s_renderer, atlas, &src, &dest);
@@ -2137,8 +2150,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
-		dest.w = _currentDialogue.speechIndicatorDynamicXSize;
-		dest.h = k_speechIndicatorSize.y;
+		dest.w = k_speechIndicatorSize.x;
+		dest.h = _currentDialogue.speechIndicatorDynamicYSize;
 
 		// Since the speech indicator has its X and Y pos defined by the previous value, we shouldn't convert to camera space
 		// as it's already in camera space
@@ -2150,10 +2163,8 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		float opacity = 255.f;
 		if (_currentDialogue.state == DIALOGUE_ENDED_STATE)
 		{
-			if (_currentDialogue.dialogueBoxDynamicXSize <= 3.f + k_speechIndicatorSize.x)
-			{
-				opacity = 0.f;
-			}
+			const float k_speechIndicatorSizeToOpacityRatio = 255.f / k_speechIndicatorSize.y;
+			opacity = _currentDialogue.speechIndicatorDynamicYSize * k_speechIndicatorSizeToOpacityRatio;
 		}
 		else if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
 		{
