@@ -314,7 +314,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType entityTalking);
 enum TextEffectType
 {
 	INVALID_EFFECT,
-	YELLOW_EFFECT,
+	PINK_EFFECT,
 	WAVE_EFFECT,
 };
 

@@ -2730,6 +2730,14 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
 		dialogueCharacter.textEffectToApply = textEffectApplying;
 
+		// Apply text effects that don't require update-based changes
+		{
+			if (dialogueCharacter.textEffectToApply == PINK_EFFECT)
+			{
+				dialogueCharacter.overrideColor = { 240, 79, 210 };
+			}
+		}
+
 		currentCharacterIndex++;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
