@@ -1572,6 +1572,12 @@ void UISystem::update()
 			break;
 		}
 	}
+
+	// Prevent executing any code if there's no dialogue
+	if (!_currentDialogue.characters[0].isValid())
+	{
+		return;
+	}
 	
 	// Destroy dialogue if has ended and it's not visible anymore
 	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.state == DIALOGUE_ENDED_STATE)
@@ -1863,16 +1869,16 @@ void UISystem::update()
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
 
+
 	// Destroy dialogue if has finished interrupting
 	if (hasFinishedInterrupting)
 	{
 		_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
 	}
 
-	// Auto skip dialogue if it doesn't have choices
-	/*if (_currentDialogue.state == DIALOGUE_BASE_STATE)
+	// Animate dialogue outline (auto skip)
+	if (!doesDialogueHaveOptions &&_currentDialogue.state == DIALOGUE_BASE_STATE)
 	{
-		bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 		float secondsToSkipDialogue = 3.f;
 		if (numberOfCharactersOnCurrentDialogue < 10)
 		{
@@ -1884,11 +1890,27 @@ void UISystem::update()
 			secondsToSkipDialogue = 4.f;
 		}
 
-		if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToSkipDialogue && !doesDialogueHaveOptions)
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f)
+		{
+			float amountToShrinkPerSecond = _currentDialogue.dialogueBoxDynamicXSize / secondsToSkipDialogue;
+			float amountToShrinkPerFrame = amountToShrinkPerSecond / k_targetFrameRateForGameLogic;
+			_currentDialogue.dialogueOutlineDynamicXSize = max(_currentDialogue.dialogueOutlineDynamicXSize - amountToShrinkPerFrame, 0.f);
+		}
+		else
+		{
+			_currentDialogue.dialogueOutlineDynamicXSize = _currentDialogue.dialogueBoxDynamicXSize;
+		}
+
+		if (_currentDialogue.dialogueOutlineDynamicXSize <= 0.f)
 		{
 			_currentDialogue.state = DIALOGUE_ENDED_STATE;
 		}
-	}*/
+	}
+
+	if (doesDialogueHaveOptions)
+	{
+		_currentDialogue.dialogueOutlineDynamicXSize = _currentDialogue.dialogueBoxDynamicXSize;
+	}
 
 	// Tension bar logic
 	{
@@ -2096,7 +2118,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Since the last thing drawn was the dialogue box, use dest directly
 		float dialogueBoxEndYPosition = dest.y + dest.h;
 		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
-		dest.w = _currentDialogue.dialogueBoxDynamicXSize;
+		dest.w = _currentDialogue.dialogueOutlineDynamicXSize;
 		dest.h = k_dialogueOutlineHeight;
 
 		if (!_currentDialogue.isScreenSpace)
@@ -2806,8 +2828,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	{
 		bool doesDialogueHaveMoreThanOneLine = currentVerticalSpaceBetweenCharacters > 0;
 		_currentDialogue.dialogueBoxSize.x = doesDialogueHaveMoreThanOneLine ? maxXDialogueSize : currentHorizontalSpaceBetweenCharacters;
+
 		// Add offset to the end to fit dialogue ended indicator
 		_currentDialogue.dialogueBoxSize.x += 3;
+
+		_currentDialogue.dialogueOutlineDynamicXSize = _currentDialogue.dialogueBoxSize.x;
 
 		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
 		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;

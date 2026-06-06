@@ -34,7 +34,8 @@ inline const uint8_t k_maxDialogueOptions = 3;
 
 // Frame rate related
 // Milliseconds divided by target frame rate for physics/game logic
-constexpr float k_targetMillisecondsBetweenFrames = 1000.f / 60.f;
+constexpr float k_targetFrameRateForGameLogic = 60.f;
+constexpr float k_targetMillisecondsBetweenFrames = 1000.f / k_targetFrameRateForGameLogic;
 // Delta time in seconds, convert from ms to s
 constexpr float k_deltaTime = k_targetMillisecondsBetweenFrames / 1000.f;
 // Even if two frames take too long to render, never go above 250 milliseconds to avoid spiral of death
