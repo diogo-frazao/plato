@@ -1766,6 +1766,11 @@ void UISystem::update()
 		_currentDialogue.dialogueBoxDynamicXSize = lerp(_currentDialogue.dialogueBoxDynamicXSize, currentTargetXSize, 6.25 * k_deltaTime);
 	}
 
+	// Dynamic speech indicator x size
+	{
+		_currentDialogue.speechIndicatorDynamicXSize = lerp(_currentDialogue.speechIndicatorDynamicXSize, k_speechIndicatorSize.x, 0.1f);
+	}
+
 	// Main dialogue characters logic + animate
 	bool hasDialogueFinished = false;
 	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
@@ -2129,11 +2134,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				dest.x = xPositionToDrawSpeechIndicator;
 			}
 		}
-		
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
-		dest.w = k_speechIndicatorSize.x;
+		dest.w = _currentDialogue.speechIndicatorDynamicXSize;
 		dest.h = k_speechIndicatorSize.y;
 
 		// Since the speech indicator has its X and Y pos defined by the previous value, we shouldn't convert to camera space
@@ -2384,7 +2388,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			}
 		}
 
-		// Custom characters colors
+		// Custom characters colors for options
 		SDL_Color optionTextColor;
 		{
 			switch (dialogueOption.optionTensionType)

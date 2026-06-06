@@ -301,6 +301,7 @@ public:
 		DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED;
 		// Used to animate the dialogue box from left to right
 		float dialogueBoxDynamicXSize = 0.f;
+		float speechIndicatorDynamicXSize = 0.f;
 		// Only matters if the current dialogue has options
 		TextType dialogueOptionChosen = INVALID_TEXT;
 		Entity* entityTalking = nullptr;
@@ -329,6 +330,7 @@ public:
 			this->dialogueOptionChosen = INVALID_TEXT;
 			this->tensionDelta = 0;
 			this->entityTalking = nullptr;
+			this->speechIndicatorDynamicXSize = 0.f;
 		}
 	};
 
