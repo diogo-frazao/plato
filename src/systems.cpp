@@ -1505,9 +1505,6 @@ Vec2 k_dialogueOuterPadding = { 3.f, 3.f };
 float k_secondsToStartShowingFirstCharacter = 0.3f;
 float k_dialogueOutlineHeight = 0.75f;
 
-float k_secondsToFadeInEachCharacter = 0.3f;
-float k_secondsBetweenEachCharacter = 0.035f;
-
 Vec2 dialogueOptionsOuterPadding{ 5.f, 2.75f };
 
 // Characters details (may change at runtime)
@@ -1801,6 +1798,7 @@ void UISystem::update()
 		bool canCharacterFadeIn = (_currentDialogue.timeSinceDialogueStarted >= c.secondsToStartShowingCharacter);
 		if (canCharacterFadeIn)
 		{
+			float k_secondsToFadeInEachCharacter = 0.3f;
 			float speed = 255.f / k_secondsToFadeInEachCharacter;
 			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
 			c.timeSinceCharacterAppeared += k_deltaTime;
@@ -1816,6 +1814,25 @@ void UISystem::update()
 			// offset * sin(time * speed)
 			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
 			c.position.y = c.startingPosition.y + sinMovementOffset;
+		}
+
+		// Fade in animations
+		bool canAnimateCharacterDuringFadeIn = (c.textEffectToApply != WAVE_EFFECT);
+		if (canAnimateCharacterDuringFadeIn)
+		{
+			if (canCharacterFadeIn)
+			{
+				c.position.x = lerp(c.position.x, c.startingPosition.x, 0.2f);
+				c.size.x = lerp(c.size.x, k_characterSize.x, 0.4f);
+				c.size.y = lerp(c.size.y, k_characterSize.y, 0.4f);
+			}
+		}
+		else
+		{
+			// If the current text effect will change the position, snap directly without fade in animation
+			c.position.x = c.startingPosition.x;
+			c.size.x = k_characterSize.x;
+			c.size.y = k_characterSize.y;
 		}
 
 		// Physics for dialogue interrupted smash
@@ -2740,10 +2757,14 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[currentCharacterIndex];
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.startingPosition = { dest.x, dest.y };
-		dialogueCharacter.position = { dest.x, dest.y };
-		dialogueCharacter.size = { k_characterSize };
-		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
 		dialogueCharacter.textEffectToApply = textEffectApplying;
+		float k_secondsBetweenEachCharacter = 0.035f;
+		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
+
+		// Offset character and make it a bit smaller to animate during fade in
+		dialogueCharacter.position = { dest.x + 2.f, dest.y };
+		dialogueCharacter.size.x = { k_characterSize.x / 2.f };
+		dialogueCharacter.size.y = { k_characterSize.y / 2.f };
 
 		// Apply text effects that don't require update-based changes
 		{
