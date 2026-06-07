@@ -2496,7 +2496,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 
 			SDL_Texture* fontAtlas = renderingSystem->loadAtlas(FONT_ATLAS);
 
-			SDL_SetTextureColorMod(fontAtlas, optionTextColor.r, optionTextColor.g, optionTextColor.b);
+			if (isColorValid(c.overrideColor))
+			{
+				SDL_SetTextureColorMod(fontAtlas, c.overrideColor.r, c.overrideColor.g, c.overrideColor.b);
+			}
+			else
+			{
+				SDL_SetTextureColorMod(fontAtlas, optionTextColor.r, optionTextColor.g, optionTextColor.b);
+			}
+
 			SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
 			SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
 		}
@@ -2661,6 +2669,23 @@ void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOp
 	pushEntityDialogue(dialogueTextType, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
 }
 
+void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
+{
+	// Apply text effects that don't require update-based changes
+	switch (dialogueCharacter.textEffectToApply)
+	{
+	case PINK_EFFECT:
+	case PINK_WAVE_EFFECT:
+		dialogueCharacter.overrideColor = { 240, 79, 210 };
+		break;
+	case BLUE_EFFECT:
+		dialogueCharacter.overrideColor = { 77, 101, 180 };
+		break;
+	default:
+		break;
+	}
+}
+
 void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
 {
 	TextDTO textInfo = getTextInfo(dialogueTextType);
@@ -2706,10 +2731,8 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 	bool isCheckingEffectName = false;
 	TextEffectType textEffectApplying = INVALID_EFFECT;
-
-	static char effectToApplyName[64] = "";
-
 	uint8_t effectNameLength = 0;
+	static char effectToApplyName[64] = "";
 
 	// Same as i inside the for loop but ignores everything that's text effects syntax
 	uint16_t mainDialogueCurrentCharacterIndex = 0;
@@ -2731,7 +2754,6 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		// The character [ is reserved for text effects (start and end)
 		// We also continue since we don't want to draw to the text the effect code
 		// Ex: [yellow] Hello [yellow] should only be printed to the user as Hello.
-		
 		if (c == '[')
 		{
 			isCheckingEffectName = true;
@@ -2790,21 +2812,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		dialogueCharacter.size.x = { k_characterSize.x / 2.f };
 		dialogueCharacter.size.y = { k_characterSize.y / 2.f };
 
-		// Apply text effects that don't require update-based changes
-		{
-			switch (dialogueCharacter.textEffectToApply)
-			{
-			case PINK_EFFECT:
-			case PINK_WAVE_EFFECT:
-				dialogueCharacter.overrideColor = { 240, 79, 210 };
-				break;
-			case BLUE_EFFECT:
-				dialogueCharacter.overrideColor = { 77, 101, 180 };
-				break;
-			default:
-				break;
-			}
-		}
+		applyStaticTextEffect(dialogueCharacter);
 
 		mainDialogueCurrentCharacterIndex++;
 
@@ -2887,6 +2895,9 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		const char* optionText = optionInfo.text;
 		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsStartPosition[optionIndex], dialogueOptionsAlignmentType[optionIndex], maxCharactersPerLine);
 
+		// Same as i inside the for loop but ignores everything that's text effects syntax
+		uint16_t optionsTextCurrentCharacterIndex = 0;
+
 		for (int i = 0; optionText[i] != '\0'; ++i)
 		{
 			char c = optionText[i];
@@ -2897,6 +2908,42 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			{
 				D_LOG(ERROR, "Trying to print unsupported character: %c", c);
 				// Continue to prevent printing unsupported characters as a space character
+				continue;
+			}
+
+			// The character [ is reserved for text effects (start and end)
+			// We also continue since we don't want to draw to the text the effect code
+			// Ex: [yellow] Hello [yellow] should only be printed to the user as Hello.
+			if (c == '[')
+			{
+				isCheckingEffectName = true;
+				continue;
+			}
+
+			if (isCheckingEffectName)
+			{
+				// This character ] is reserved for text effetcs [yellow] <- it means we should stop reading the effect name
+				// and check what to apply until we see [yellow] again
+				if (c == ']')
+				{
+					// Stop applying effet
+					if (textEffectApplying != INVALID_EFFECT)
+					{
+						textEffectApplying = INVALID_EFFECT;
+						D_LOG(MINI, "Stopped applying options text effect: %s", effectToApplyName);
+					}
+					else
+					{
+						textEffectApplying = getTextEffectTypeFromName(effectToApplyName);
+					}
+
+					isCheckingEffectName = false;
+					memset(effectToApplyName, 0, effectNameLength);
+					effectNameLength = 0;
+					continue;
+				}
+
+				effectToApplyName[effectNameLength++] = c;
 				continue;
 			}
 
@@ -2913,11 +2960,15 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			dest.w = k_characterSize.x;
 			dest.h = k_characterSize.y;
 
-			DialogueCharacter& dialogueCharacter = _dialogueOptions[optionIndex].characters[i];
+			DialogueCharacter& dialogueCharacter = _dialogueOptions[optionIndex].characters[optionsTextCurrentCharacterIndex];
 			dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 			dialogueCharacter.position = { dest.x, dest.y };
 			dialogueCharacter.size = { k_characterSize };
 			dialogueCharacter.dynamicYSize = 0.f;
+			dialogueCharacter.textEffectToApply = textEffectApplying;
+			applyStaticTextEffect(dialogueCharacter);
+
+			optionsTextCurrentCharacterIndex++;
 
 			// We only break to a new line if it's a space character. This avoids breaking words in half
 			bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);

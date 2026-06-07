@@ -31,7 +31,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_B_2:
 				return "My name is FREDERICO from KELIA's marketing department";
 		case MARKETING_PHONE_2_C:
-			return { "Shut the fuck up", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
+			return { "Just shut up", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_1:
 				return { "What did you just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_2:
@@ -47,7 +47,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_3:
 		return "I bring to you a [blue]deal[blue] too good to miss!";
 		case MARKETING_PHONE_3_A:
-			return "A deal?";
+			return "A [blue]deal[blue]?";
 			case MARKETING_PHONE_3_A_1:
 				return "Yes sir, a [blue]deal[blue]";
 		case MARKETING_PHONE_3_B:
