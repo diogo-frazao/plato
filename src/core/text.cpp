@@ -45,11 +45,11 @@ TextDTO getTextInfo(TextType textType)
 				case MARKETING_PHONE_2_C_4_B:
 					return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 	case MARKETING_PHONE_3:
-		return "I bring to you a deal too good to miss!";
+		return "I bring to you a [blue]deal[blue] too good to miss!";
 		case MARKETING_PHONE_3_A:
-			return "I'm listning";
+			return "A deal?";
 			case MARKETING_PHONE_3_A_1:
-				return "PERFECT";
+				return "Yes sir, a [blue]deal[blue]";
 		case MARKETING_PHONE_3_B:
 			return { "I don't care", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION};
 			case MARKETING_PHONE_3_B_1:
@@ -57,7 +57,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_2:
 				return "Mr.ROSTOV please listen, I'm sure you'll be interested";
 	case MARKETING_PHONE_4:
-		return "(clears throath)";
+		return " *Ahem*";
 	case MARKETING_PHONE_5:
 		return { "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
@@ -65,7 +65,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
-			return "I'm not interested";
+			return "I'm not really interested";
 			case MARKETING_PHONE_7_A_1:
 				return "Wait sir now I'm sure you'll be interested";
 		case MARKETING_PHONE_7_B:
@@ -493,6 +493,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "pinkwave") == 0)
 	{
 		return PINK_WAVE_EFFECT;
+	}
+
+	if (strcmp(effectName, "blue") == 0)
+	{
+		return BLUE_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);

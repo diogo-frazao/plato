@@ -2712,7 +2712,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	uint8_t effectNameLength = 0;
 
 	// Same as i inside the for loop but ignores everything that's text effects syntax
-	uint16_t currentCharacterIndex = 0;
+	uint16_t mainDialogueCurrentCharacterIndex = 0;
 
 	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
@@ -2778,12 +2778,12 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		dest.w = k_characterSize.x;
 		dest.h = k_characterSize.y;
 
-		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[currentCharacterIndex];
+		DialogueCharacter& dialogueCharacter = _currentDialogue.characters[mainDialogueCurrentCharacterIndex];
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.startingPosition = { dest.x, dest.y };
 		dialogueCharacter.textEffectToApply = textEffectApplying;
 		float k_secondsBetweenEachCharacter = 0.035f;
-		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * currentCharacterIndex);
+		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * mainDialogueCurrentCharacterIndex);
 
 		// Offset character and make it a bit smaller to animate during fade in
 		dialogueCharacter.position = { dest.x + 2.f, dest.y };
@@ -2798,12 +2798,15 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			case PINK_WAVE_EFFECT:
 				dialogueCharacter.overrideColor = { 240, 79, 210 };
 				break;
+			case BLUE_EFFECT:
+				dialogueCharacter.overrideColor = { 77, 101, 180 };
+				break;
 			default:
 				break;
 			}
 		}
 
-		currentCharacterIndex++;
+		mainDialogueCurrentCharacterIndex++;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);
@@ -2844,7 +2847,6 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		float yPosWhereLastLineEnds = currentVerticalSpaceBetweenCharacters + k_characterSize.y;
 		_currentDialogue.dialogueBoxSize.y = yPosWhereLastLineEnds;
 	}
-
 
 	for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
 	// Dialogue options
@@ -2947,7 +2949,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			dialogueOption.dialogueBoxDynamicYSize = 0.f;
 
 			// Dialogue options appear close to the finishing of the main dialogue
-			int mainDialogueLength = int(strlen(textToShow));
+			uint16_t mainDialogueLength = mainDialogueCurrentCharacterIndex;
 			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 3);
 			float baseSecondsToWaitBeforeShowingOptions = _currentDialogue.characters[characterIndexToStartShowingOptions].secondsToStartShowingCharacter;
 
