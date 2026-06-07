@@ -1815,7 +1815,8 @@ void UISystem::update()
 		}
 
 		// Wave text effect movement
-		if (c.textEffectToApply == WAVE_EFFECT && canCharacterFadeIn)
+		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
+		if (isWaveEffect && canCharacterFadeIn)
 		{
 			// offset * sin(time * speed)
 			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
@@ -1823,7 +1824,7 @@ void UISystem::update()
 		}
 
 		// Fade in animations
-		bool canAnimateCharacterDuringFadeIn = (c.textEffectToApply != WAVE_EFFECT);
+		bool canAnimateCharacterDuringFadeIn = !isWaveEffect;
 		if (canAnimateCharacterDuringFadeIn)
 		{
 			if (canCharacterFadeIn)
@@ -2707,6 +2708,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	TextEffectType textEffectApplying = INVALID_EFFECT;
 
 	static char effectToApplyName[64] = "";
+
 	uint8_t effectNameLength = 0;
 
 	// Same as i inside the for loop but ignores everything that's text effects syntax
@@ -2754,7 +2756,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 				}
 
 				isCheckingEffectName = false;
-				effectToApplyName[0] = '\0';
+				memset(effectToApplyName, 0, effectNameLength);
 				effectNameLength = 0;
 				continue;
 			}
@@ -2790,9 +2792,14 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		// Apply text effects that don't require update-based changes
 		{
-			if (dialogueCharacter.textEffectToApply == PINK_EFFECT)
+			switch (dialogueCharacter.textEffectToApply)
 			{
+			case PINK_EFFECT:
+			case PINK_WAVE_EFFECT:
 				dialogueCharacter.overrideColor = { 240, 79, 210 };
+				break;
+			default:
+				break;
 			}
 		}
 

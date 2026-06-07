@@ -316,6 +316,7 @@ enum TextEffectType
 	INVALID_EFFECT,
 	PINK_EFFECT,
 	WAVE_EFFECT,
+	PINK_WAVE_EFFECT,
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);

@@ -23,7 +23,7 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_2_A:
 			return "Yes...";
 			case MARKETING_PHONE_2_A_1:
-				return "PERFECT! I call you with good news sir";
+				return "[pinkwave]PERFECT![pinkwave] I call you with good news sir";
 		case MARKETING_PHONE_2_B:
 			return { "Who are you?", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
 			case MARKETING_PHONE_2_B_1:
@@ -488,6 +488,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "wave") == 0)
 	{
 		return WAVE_EFFECT;
+	}
+
+	if (strcmp(effectName, "pinkwave") == 0)
+	{
+		return PINK_WAVE_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);
