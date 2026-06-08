@@ -2681,6 +2681,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case BLUE_EFFECT:
 		dialogueCharacter.overrideColor = { 77, 101, 180 };
 		break;
+	case YELLOW_EFFECT:
+		dialogueCharacter.overrideColor = { 249, 194, 43 };
+		break;
 	default:
 		break;
 	}
@@ -2736,6 +2739,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 	// Same as i inside the for loop but ignores everything that's text effects syntax
 	uint16_t mainDialogueCurrentCharacterIndex = 0;
+
+	// Some text effects (example WAIT) will make the next character wait a bit more before showing
+	float extraSecondsToStartShowingCharacter = 0.f;
+
+	float secondsToShowPreviousCharacter = 0.f;
 
 	// Main dialogue characters
 	for (int i = 0; textToShow[i] != '\0'; ++i)
@@ -2804,8 +2812,17 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		dialogueCharacter.atlasOffset = { (int)src.x, (int)src.y };
 		dialogueCharacter.startingPosition = { dest.x, dest.y };
 		dialogueCharacter.textEffectToApply = textEffectApplying;
+
 		float k_secondsBetweenEachCharacter = 0.035f;
-		dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * mainDialogueCurrentCharacterIndex);
+		if (mainDialogueCurrentCharacterIndex == 0)
+		{
+			dialogueCharacter.secondsToStartShowingCharacter = (k_secondsToStartShowingFirstCharacter * 0.5f) + (k_secondsBetweenEachCharacter * mainDialogueCurrentCharacterIndex);
+		}
+		else
+		{
+			dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + k_secondsBetweenEachCharacter + extraSecondsToStartShowingCharacter;
+		}
+		secondsToShowPreviousCharacter = dialogueCharacter.secondsToStartShowingCharacter;
 
 		// Offset character and make it a bit smaller to animate during fade in
 		dialogueCharacter.position = { dest.x + 2.f, dest.y };
@@ -2815,6 +2832,9 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		applyStaticTextEffect(dialogueCharacter);
 
 		mainDialogueCurrentCharacterIndex++;
+
+		bool canApplyExtraSecondsToShowNextCharacter = (c == '?') || (c == '!') || (c == ',') || (c == '.');
+		extraSecondsToStartShowingCharacter = canApplyExtraSecondsToShowNextCharacter ? 0.5f : 0.f;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
 		bool shouldBreakToNewLine = (++charactersOnCurrentLineCounter >= maxCharactersPerLine && isSpaceCharacter);

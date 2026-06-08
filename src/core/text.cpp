@@ -59,7 +59,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_4:
 		return " *Ahem*";
 	case MARKETING_PHONE_5:
-		return { "It's with great honor that I present to you sir, the newest creation from FATHER EDWARD'S Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
+		return { "It's with [pink]great honor[pink] that I present to you sir, [blue]the newest creation[blue] from [yellow]FATHER EDWARD'S Research Department team[yellow], here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
 		return { "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
@@ -498,6 +498,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "blue") == 0)
 	{
 		return BLUE_EFFECT;
+	}
+
+	if (strcmp(effectName, "yellow") == 0)
+	{
+		return YELLOW_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);
