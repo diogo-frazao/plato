@@ -321,8 +321,6 @@ enum TextEffectType
 	//Wave
 	WAVE_EFFECT,
 	PINK_WAVE_EFFECT,
-	// Wait
-	WAIT_EFFECT, // This effect applied automatically after a '?' '!' or ',' .The purpose is to separate two different phrases on the same dialogue
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);
