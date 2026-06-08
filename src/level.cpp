@@ -1834,7 +1834,7 @@ void ECSLevel::update()
             _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
             _currentLevelStage = MARKETING_PHONE_STAGE;
             //startTimer(s_multiPurpuseTimer);
-            //s_playerTension = 90;
+            s_playerTension = 0;
         }
 
         // Debug to not have to wait x seconds for things to happen

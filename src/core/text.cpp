@@ -19,7 +19,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_1:
 		return "[wave]Heloooooooooo[wave]";
 	case MARKETING_PHONE_2:
-		return "Do I have the [pink]pleasure[pink] of speaking with Mr.ROSTOV?";
+		return "Do I have the [pink]pleasure[pink] of speaking with Mr ROSTOV?";
 		case MARKETING_PHONE_2_A:
 			return "Yes...";
 			case MARKETING_PHONE_2_A_1:
@@ -31,7 +31,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_B_2:
 				return "My name is FREDERICO from KELIA's marketing department";
 		case MARKETING_PHONE_2_C:
-			return { "Just shut up", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
+			return { "No, fuck you", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_1:
 				return { "What did you just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_2:
@@ -55,33 +55,33 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
-				return "Mr.ROSTOV please listen, I'm sure you'll be interested";
+				return "Mr ROSTOV please listen, [yellow]I'm sure[yellow] you'll be interested";
 	case MARKETING_PHONE_4:
 		return " *Ahem*";
 	case MARKETING_PHONE_5:
 		return { "It's with [pink]great honor[pink] that I present to you sir, [blue]the newest creation[blue] from [yellow]FATHER EDWARD'S Research Department team[yellow], here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
-		return { "AND FOR ONLY 499D, MR.ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
+		return { "AND FOR [yellow]ONLY[yellow] 499D, MR ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
 			return "I'm not really interested";
 			case MARKETING_PHONE_7_A_1:
-				return "Wait sir now I'm sure you'll be interested";
+				return "Wait sir now [yellow]I'm sure[yellow] you'll be interested";
 		case MARKETING_PHONE_7_B:
-			return { "I didn't ask shit", CELLPHONE_DIALOGUE, 20 , HIGH_TENSION };
+			return { "You're annoying me", CELLPHONE_DIALOGUE, 20 , HIGH_TENSION };
 		case MARKETING_PHONE_7_C_LOW_TENSION:
 			return "...";
 		case MARKETING_PHONE_7_C_HIGH_TENSION:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_8:
-		return { "WITH THIS NEW APPLICATION EVERYONE CAN TRACK THE CITY TRAINS IN REAL TIME", CELLPHONE_DIALOGUE, 10 };
+		return { "WITH THIS [blue]NEW APPLICATION[blue] EVERYONE CAN [blue]TRACK THE CITY TRAINS IN REAL TIME[blue]", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_9:
-		return { "NO MORE WAITING", CELLPHONE_DIALOGUE, 5 };
+		return { "NO. MORE. WAITING.", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_10:
-		return { "NO MORE MISSING TRAINS", CELLPHONE_DIALOGUE, 5 };
+		return { "NO. MORE. MISSING. TRAINS.", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_11:
-		return "ALL OF THIS... for only 499D";
+		return "ALL OF THIS... [pinkwave]FOR ONLY 499D[pinkwave]";
 		case MARKETING_PHONE_11_A:
 			return "I don't have the money";
 			case MARKETING_PHONE_11_A_1:
@@ -503,6 +503,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "yellow") == 0)
 	{
 		return YELLOW_EFFECT;
+	}
+
+	if (strcmp(effectName, "redshake") == 0)
+	{
+		return RED_SHAKE_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);

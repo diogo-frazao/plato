@@ -319,8 +319,10 @@ enum TextEffectType
 	BLUE_EFFECT, // Important things
 	YELLOW_EFFECT, // Also important things
 	//Wave
-	WAVE_EFFECT,
-	PINK_WAVE_EFFECT,
+	WAVE_EFFECT, // Playful
+	PINK_WAVE_EFFECT, // Playful + love/happiness
+	//Shake
+	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections 
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);

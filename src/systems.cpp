@@ -2805,6 +2805,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		dest.x = _currentDialogue.topLeftPosition.x + currentHorizontalSpaceBetweenCharacters;
 		dest.y = _currentDialogue.topLeftPosition.y + currentVerticalSpaceBetweenCharacters;
+		if (c == ',')
+		{
+			dest.y += 1.f;
+		}
+
 		dest.w = k_characterSize.x;
 		dest.h = k_characterSize.y;
 
@@ -2977,6 +2982,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 			dest.x = positionToDrawOptionText.x + currentHorizontalSpaceBetweenCharacters;
 			dest.y = positionToDrawOptionText.y + currentVerticalSpaceBetweenCharacters;
+			if (c == ',')
+			{
+				dest.y += 1.f;
+			}
+
 			dest.w = k_characterSize.x;
 			dest.h = k_characterSize.y;
 
