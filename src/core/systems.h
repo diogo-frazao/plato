@@ -191,6 +191,8 @@ public:
 		float dynamicYSize = 0.f;
 		Vec2 velocity = { 0.f, 0.f };
 		float timeSinceCharacterAppeared = 0.f;
+		// Used to run code only once per character
+		bool wasInitialized = false;
 
 		bool isValid()
 		{
@@ -210,6 +212,7 @@ public:
 			this->overrideColor = { 0, 0,0 };
 			this->timeSinceCharacterAppeared = 0.f;
 			this->textEffectToApply = INVALID_EFFECT;
+			this->wasInitialized = false;
 		}
 	};
 
@@ -306,6 +309,8 @@ public:
 		TextType dialogueOptionChosen = INVALID_TEXT;
 		Entity* entityTalking = nullptr;
 		float dialogueOutlineDynamicXSize = 0.f;
+		// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
+		bool hasAppliedShakeForCurrentWord = false;
 
 		// Don't use directly, call destroyCurrentDialogue() instead
 		void destroyDialoge()
@@ -333,6 +338,7 @@ public:
 			this->entityTalking = nullptr;
 			this->speechIndicatorDynamicYSize = 0.f;
 			this->dialogueOutlineDynamicXSize = 0.f;
+			this->hasAppliedShakeForCurrentWord = false;
 		}
 	};
 

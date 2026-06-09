@@ -1854,7 +1854,7 @@ void ECSLevel::update()
         {
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
             _currentLevelStage = MARKETING_PHONE_STAGE;
             //startTimer(s_multiPurpuseTimer);
             s_playerTension = 0;

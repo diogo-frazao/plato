@@ -323,9 +323,8 @@ enum TextEffectType
 	PINK_WAVE_EFFECT, // Playful + love/happiness
 	//Shake
 	SHAKE_EFFECT, // *cough* *ahem*, etc
-	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections 
+	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
+
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);
-// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
-inline bool s_hasAppliedShakeForCurrentTextEffect = false;

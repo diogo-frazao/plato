@@ -1747,6 +1747,19 @@ void UISystem::update()
 					dialogueOption.hoveredBorderSpriteColor = { 108, 26, 86, 255 };
 					startTimer(dialogueOption.fadeOutTimer);
 
+					// Apply camera shake based on the type of option
+					switch (dialogueOption.optionTensionType)
+					{
+					case HIGH_TENSION:
+						LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = LIGHT_SHAKE;
+						break;
+					case FATAL_TENSION:
+						LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = MEDIUM_SHAKE;
+						break;
+					default:
+						break;
+					}
+
 					s_playerTension += dialogueOption.tensionDelta;
 
 					// Change all the other options to be NOT_CHOSEN
@@ -1814,23 +1827,34 @@ void UISystem::update()
 			c.opacity = 0.f;
 		}
 
-		// Dynamic text effects
-		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
+		// Run code only once per character
+		if (canCharacterFadeIn && !c.wasInitialized)
 		{
-			// Wave movement
-			if (isWaveEffect && canCharacterFadeIn)
+			// Reset camera shake flag. If it's a space character it means we're going for a new word, and therefore we can apply a new camera shake if wanted
+			bool isSpaceCharacter = (c.atlasOffset.x == k_firstCharacterOnAtlasOffset.x) && (c.atlasOffset.y == k_firstCharacterOnAtlasOffset.y);
+			if (isSpaceCharacter)
 			{
-				// offset * sin(time * speed)
-				float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
-				c.position.y = c.startingPosition.y + sinMovementOffset;
+				_currentDialogue.hasAppliedShakeForCurrentWord = false;
 			}
 
+			// Camera shake text effect
 			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == SHAKE_EFFECT);
-			if (isShakeEffect && canCharacterFadeIn && !s_hasAppliedShakeForCurrentTextEffect)
+			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
 			{
 				LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE;
-				s_hasAppliedShakeForCurrentTextEffect = true;
+				_currentDialogue.hasAppliedShakeForCurrentWord = true;
 			}
+
+			c.wasInitialized = true;
+		}
+
+		// Wave movement effect
+		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
+		if (isWaveEffect && canCharacterFadeIn)
+		{
+			// offset * sin(time * speed)
+			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
+			c.position.y = c.startingPosition.y + sinMovementOffset;
 		}
 
 		// Fade in animations
@@ -2789,7 +2813,6 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 				if (textEffectApplying != INVALID_EFFECT)
 				{
 					textEffectApplying = INVALID_EFFECT;
-					s_hasAppliedShakeForCurrentTextEffect = false;
 					D_LOG(MINI, "Stopped applying text effect: %s", effectToApplyName);
 				}
 				else

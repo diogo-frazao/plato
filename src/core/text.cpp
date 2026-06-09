@@ -27,19 +27,19 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_2_B:
 			return { "Who are you?", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
 			case MARKETING_PHONE_2_B_1:
-				return "Oh";
+				return "Oh...";
 			case MARKETING_PHONE_2_B_2:
-				return "My name is FREDERICO from KELIA's marketing department";
+				return "I am [pinkwave]FREDERICO[pinkwave] from [yellow]KELIA's marketing department[yellow]";
 		case MARKETING_PHONE_2_C:
 			return { "No, fuck you", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_1:
-				return { "What did you just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "What did [redshake]you[redshake] just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_2:
-				return { "DO YOU KNOW WHO I AM", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_3:
-				return { "I BRING TO YOU THE HOLY TECHNOLOGY FROM FATHER EDWARD HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "I BRING TO YOU THE [yellow]HOLY TECHNOLOGY[yellow] FROM [pink]FATHER EDWARD HIMSELF[pink]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_4:
-				return { "AND YOU HAVE THE AUDACITY TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "AND YOU HAVE THE [redshake]AUDACITY[redshake] TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 				case MARKETING_PHONE_2_C_4_A:
 					return {"YES < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
 				case MARKETING_PHONE_2_C_4_B:
@@ -59,9 +59,9 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_4:
 		return "[shake]*Ahem*[shake]";
 	case MARKETING_PHONE_5:
-		return { "It's with [pink]great honor[pink] that I present to you sir, [blue]the newest creation[blue] from [yellow]FATHER EDWARD'S Research Department team[yellow], here at KELIA", CELLPHONE_DIALOGUE, 5};
+		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [pink]FATHER EDWARD'S Research Department team[pink], here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
-		return { "AND FOR [yellow]ONLY[yellow] 499D, MR ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
+		return { "AND FOR [yellow]ONLY 499D[yellow], MR ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
@@ -75,7 +75,7 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_7_C_HIGH_TENSION:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_8:
-		return { "WITH THIS [blue]NEW APPLICATION[blue] EVERYONE CAN [blue]TRACK THE CITY TRAINS IN REAL TIME[blue]", CELLPHONE_DIALOGUE, 10 };
+		return { "WITH THIS [blue]NEW APPLICATION[blue] EVERYONE CAN [blue]TRACK THE CITY'S TRAINS IN REAL TIME[blue]", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_9:
 		return { "NO. MORE. WAITING.", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_10:
@@ -89,11 +89,11 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_11_B_LOW_TENSION:
 			return { "STOP YELLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_11_B_1:
-				return { "What did you just say?", CELLPHONE_DIALOGUE, 10 };
+				return { "What did [redshake]you[redshake] just say?", CELLPHONE_DIALOGUE, 10 };
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_12:
-		return { "I bring you the [yellow]holy technology[yellow] from FATHER EDWARD himself", CELLPHONE_DIALOGUE, 10 };
+		return { "I bring you the [yellow]holy technology[yellow] from [pink]FATHER EDWARD himself[pink]", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_13:
 		return { "A man [pink]so humble[pink] that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_14:
