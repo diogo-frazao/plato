@@ -1771,6 +1771,12 @@ void ECSLevel::update()
     }
 
     static float cameraOffsetXFromPlayer = 20.f;
+    static bool testShake = false;
+    if (_wasKeyPressedThisFrame(SDL_SCANCODE_T))
+    {
+        _levelCamera.cameraShakeToPerform = LIGHT_SHAKE;
+    }
+
     // After all systems, update camera
     {
         _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
@@ -1783,7 +1789,24 @@ void ECSLevel::update()
             _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
         }
 
-        if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f)
+        // Camera shake
+        switch (_levelCamera.cameraShakeToPerform)
+        {
+        case NO_SHAKE:
+            break;
+        case LIGHT_SHAKE:
+            _levelCamera.targetPosition.x += 5.f;
+            _levelCamera.targetPosition.y += 10.f;
+            break;
+        case MEDIUM_SHAKE:
+            _levelCamera.targetPosition.x += 20.f;
+            _levelCamera.targetPosition.y += 40.f;
+            break;
+        }
+        _levelCamera.cameraShakeToPerform = NO_SHAKE;
+
+        // Try to catch up with target position
+        if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f || abs(_levelCamera.targetPosition.y - _levelCamera.position.y) > 0.f)
         {
             _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
         }
@@ -1831,7 +1854,7 @@ void ECSLevel::update()
         {
             D_LOG(LOG, "Dialogue recreated");
             _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
+            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
             _currentLevelStage = MARKETING_PHONE_STAGE;
             //startTimer(s_multiPurpuseTimer);
             s_playerTension = 0;

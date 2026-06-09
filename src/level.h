@@ -10,6 +10,13 @@
 
 #include <SDL3/SDL_rect.h>
 
+enum CameraShakeType
+{
+	NO_SHAKE,
+	LIGHT_SHAKE,
+	MEDIUM_SHAKE,
+};
+
 struct Camera
 {
 	// 0 = will never move, 1 = exactly at target posInScreenSpace
@@ -23,6 +30,8 @@ struct Camera
 	float zoom = 1.f;
 
 	bool canFollowTarget = true;
+
+	CameraShakeType cameraShakeToPerform = NO_SHAKE;
 
 	// Point where the zoom will be focused on. By default it's the center of the screen.
 	Vec2 zoomFocusPoint = { k_baseGameWidth / 2, k_baseGameHeight / 2 };

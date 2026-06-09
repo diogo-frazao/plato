@@ -1814,13 +1814,23 @@ void UISystem::update()
 			c.opacity = 0.f;
 		}
 
-		// Wave text effect movement
+		// Dynamic text effects
 		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
-		if (isWaveEffect && canCharacterFadeIn)
 		{
-			// offset * sin(time * speed)
-			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
-			c.position.y = c.startingPosition.y + sinMovementOffset;
+			// Wave movement
+			if (isWaveEffect && canCharacterFadeIn)
+			{
+				// offset * sin(time * speed)
+				float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
+				c.position.y = c.startingPosition.y + sinMovementOffset;
+			}
+
+			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == SHAKE_EFFECT);
+			if (isShakeEffect && canCharacterFadeIn && !s_hasAppliedShakeForCurrentTextEffect)
+			{
+				LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE;
+				s_hasAppliedShakeForCurrentTextEffect = true;
+			}
 		}
 
 		// Fade in animations
@@ -2116,9 +2126,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		src.h = speechBubbleSprite.spriteSize.y;
 
 		dest.x = _currentDialogue.topLeftPosition.x - k_dialogueOuterPadding.x;
-		// Since the last thing drawn was the dialogue box, use dest directly
-		float dialogueBoxEndYPosition = dest.y + dest.h;
-		dest.y = dialogueBoxEndYPosition - k_dialogueOutlineHeight;
+		dest.y = _currentDialogue.topLeftPosition.y + _currentDialogue.dialogueBoxSize.y + k_dialogueOuterPadding.y;
 		dest.w = _currentDialogue.dialogueOutlineDynamicXSize;
 		dest.h = k_dialogueOutlineHeight;
 
@@ -2684,6 +2692,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case YELLOW_EFFECT:
 		dialogueCharacter.overrideColor = { 249, 194, 43 };
 		break;
+	case RED_SHAKE_EFFECT:
+		dialogueCharacter.overrideColor = { 198, 35, 35 };
+		break;
 	default:
 		break;
 	}
@@ -2770,14 +2781,15 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		if (isCheckingEffectName)
 		{
-			// This character ] is reserved for text effetcs [yellow] <- it means we should stop reading the effect name
-			// and check what to apply until we see [yellow] again
+			// Character ] is reserved for text effetcs [yellow] <- it means we should stop reading the effect name
+			// and check what to apply until we see [yellow] again, or stop the effect that's being applied
 			if (c == ']')
 			{
 				// Stop applying effet
 				if (textEffectApplying != INVALID_EFFECT)
 				{
 					textEffectApplying = INVALID_EFFECT;
+					s_hasAppliedShakeForCurrentTextEffect = false;
 					D_LOG(MINI, "Stopped applying text effect: %s", effectToApplyName);
 				}
 				else
@@ -2826,6 +2838,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		else
 		{
 			dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + k_secondsBetweenEachCharacter + extraSecondsToStartShowingCharacter;
+
+			if (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == SHAKE_EFFECT)
+			{
+				dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + 0.01f;
+			}
 		}
 		secondsToShowPreviousCharacter = dialogueCharacter.secondsToStartShowingCharacter;
 

@@ -57,7 +57,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_2:
 				return "Mr ROSTOV please listen, [yellow]I'm sure[yellow] you'll be interested";
 	case MARKETING_PHONE_4:
-		return " *Ahem*";
+		return "[shake]*Ahem*[shake]";
 	case MARKETING_PHONE_5:
 		return { "It's with [pink]great honor[pink] that I present to you sir, [blue]the newest creation[blue] from [yellow]FATHER EDWARD'S Research Department team[yellow], here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
@@ -85,7 +85,7 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_11_A:
 			return "I don't have the money";
 			case MARKETING_PHONE_11_A_1:
-				return { "What do you mean you don't have the money?", CELLPHONE_DIALOGUE, 10 };
+				return { "What do you mean you [redshake]don't[redshake] have the money?", CELLPHONE_DIALOGUE, 10 };
 		case MARKETING_PHONE_11_B_LOW_TENSION:
 			return { "STOP YELLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_11_B_1:
@@ -93,11 +93,11 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_12:
-		return { "I bring you the holy technology from FATHER EDWARD himself", CELLPHONE_DIALOGUE, 10 };
+		return { "I bring you the [yellow]holy technology[yellow] from FATHER EDWARD himself", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_13:
-		return { "A man so humble that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
+		return { "A man [pink]so humble[pink] that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_14:
-		return "and you receive it like this?";
+		return "And [redshake]YOU[redshake] receive it like this?";
 		case MARKETING_PHONE_14_A:
 			return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 		case MARKETING_PHONE_14_B:
@@ -503,6 +503,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "yellow") == 0)
 	{
 		return YELLOW_EFFECT;
+	}
+
+	if (strcmp(effectName, "shake") == 0)
+	{
+		return SHAKE_EFFECT;
 	}
 
 	if (strcmp(effectName, "redshake") == 0)
