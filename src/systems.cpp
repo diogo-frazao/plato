@@ -2472,30 +2472,22 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			}
 		}
 
-		// Custom characters colors for options
+		// Custom colors for options depending on tension
 		SDL_Color optionTextColor;
 		{
 			switch (dialogueOption.optionTensionType)
 			{
 			case LOW_TENSION:
-				optionTextColor.r = 240;
-				optionTextColor.g = 79;
-				optionTextColor.b = 120;
+				optionTextColor = { 240, 79, 120 };
 				break;
 			case NORMAL_TENSION:
-				optionTextColor.r = 209;
-				optionTextColor.g = 209;
-				optionTextColor.b = 209;
+				optionTextColor = { 209, 209, 209 };
 				break;
 			case HIGH_TENSION:
-				optionTextColor.r = 255;
-				optionTextColor.g = 0;
-				optionTextColor.b = 0;
+				optionTextColor = { 255, 0, 0 };
 				break;
 			case FATAL_TENSION:
-				optionTextColor.r = 255;
-				optionTextColor.g = 0;
-				optionTextColor.b = 0;
+				optionTextColor = { 255, 0, 0 };
 				break;
 			default:
 				D_ASSERT(false, "Unsupported tension type");
@@ -2707,6 +2699,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	// Apply text effects that don't require update-based changes
 	switch (dialogueCharacter.textEffectToApply)
 	{
+	case LIGHT_PINK_EFFECT:
+		dialogueCharacter.overrideColor = { 240, 79, 120 };
+		break;
 	case PINK_EFFECT:
 	case PINK_WAVE_EFFECT:
 		dialogueCharacter.overrideColor = { 240, 79, 210 };
@@ -2717,6 +2712,7 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case YELLOW_EFFECT:
 		dialogueCharacter.overrideColor = { 249, 194, 43 };
 		break;
+	case RED_EFFECT:
 	case RED_SHAKE_EFFECT:
 		dialogueCharacter.overrideColor = { 198, 35, 35 };
 		break;

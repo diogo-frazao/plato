@@ -63,11 +63,6 @@ enum TextType
 	ONE_DAD_PHONE_3_A,
 	ONE_DAD_PHONE_3_A_1,
 	ONE_DAD_PHONE_3_A_2,
-	ONE_DAD_PHONE_3_A_2_A,
-	ONE_DAD_PHONE_3_A_2_B,
-	ONE_DAD_PHONE_3_A_2_C,
-	ONE_DAD_PHONE_3_A_3,
-	ONE_DAD_PHONE_3_A_4,
 	ONE_DAD_PHONE_3_B,
 	ONE_DAD_PHONE_3_B_1,
 	ONE_DAD_PHONE_3_B_2,
@@ -75,14 +70,12 @@ enum TextType
 	ONE_DAD_PHONE_3_B_3_A,
 	ONE_DAD_PHONE_3_B_3_B,
 	ONE_DAD_PHONE_3_B_4,
-	ONE_DAD_PHONE_3_B_5,
 	ONE_DAD_PHONE_4,
 	ONE_DAD_PHONE_4_A,
 	ONE_DAD_PHONE_4_B,
 	ONE_DAD_PHONE_4_C,
 	ONE_DAD_PHONE_4_C_1,
 	ONE_DAD_PHONE_4_C_2,
-	ONE_DAD_PHONE_4_C_3,
 	ONE_DAD_PHONE_5,
 	ONE_DAD_PHONE_6,
 	ONE_DAD_PHONE_6_A,
@@ -316,8 +309,10 @@ enum TextEffectType
 	INVALID_EFFECT,
 	//Colors
 	PINK_EFFECT, // Love/happiness
+	LIGHT_PINK_EFFECT, // Use for Rostov - Dad relationship
 	BLUE_EFFECT, // Important things
 	YELLOW_EFFECT, // Also important things
+	RED_EFFECT, // Negative but not necessarily mad
 	//Wave
 	WAVE_EFFECT, // Playful
 	PINK_WAVE_EFFECT, // Playful + love/happiness

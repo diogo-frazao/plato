@@ -107,47 +107,35 @@ TextDTO getTextInfo(TextType textType)
 	// Starting dialogue with dad
 	{
 	case ONE_DAD_PHONE_1:
-		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] ROSTOV?";
+		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [lightpink]ROSTOV?[lightpink]";
 	case ONE_DAD_PHONE_2:
-		return "Can you hear me son?";
+		return "Can you hear me [lightpink]son?[lightpink]";
 		case ONE_DAD_PHONE_2_A:
 			return { "Oh, it's you Pa", CELLPHONE_DIALOGUE, -100 , LOW_TENSION};
 		case ONE_DAD_PHONE_2_B:
 			return { "Yes Pa", CELLPHONE_DIALOGUE, - 100 , LOW_TENSION};
 	case ONE_DAD_PHONE_3:
-		return "I was trying to call you, is everything ok son?";
+		return "I was trying to call you, is everything ok?";
 		case ONE_DAD_PHONE_3_A:
-			return "Yes, you?";
+			return "Yes, and you?";
 			case ONE_DAD_PHONE_3_A_1:
-				return "*cough* *cough*";
+				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection]";
 			case ONE_DAD_PHONE_3_A_2:
 				return "The usual...";
-				case ONE_DAD_PHONE_3_A_2_A:
-					return "But any news?";
-				case ONE_DAD_PHONE_3_A_2_B:
-					return "What else?";
-				case ONE_DAD_PHONE_3_A_2_C:
-					return "Something to tell me?";
-			case ONE_DAD_PHONE_3_A_3:
-				return "ROSTOV, stop it";
-			case ONE_DAD_PHONE_3_A_4:
-				return "If there's something you want to know, *cough*, just say it";
 		case ONE_DAD_PHONE_3_B:
 			return { "A solicitor called me", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case ONE_DAD_PHONE_3_B_1:
 				return "Oh brilliant...";
 			case ONE_DAD_PHONE_3_B_2:
-				return "*cough* *cough*";
+				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection]";
 			case ONE_DAD_PHONE_3_B_3:
-				return "Another one from the cult";
+				return "Another one from the [red]cult?[red]";
 				case ONE_DAD_PHONE_3_B_3_A:
-					return "They are all the same";
+					return "Yes...";
 				case ONE_DAD_PHONE_3_B_3_B:
-					return { "I hate them", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+					return { "As always", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case ONE_DAD_PHONE_3_B_4:
 				return "I know son, I know...";
-			case ONE_DAD_PHONE_3_B_5:
-				return { "But let's talk about something else", CELLPHONE_DIALOGUE, -5};
 		case ONE_DAD_PHONE_4:
 			return "...";
 			case ONE_DAD_PHONE_4_A:
@@ -155,13 +143,11 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_4_B:
 				return "Do you know the results already?";
 			case ONE_DAD_PHONE_4_C:
-				return { "I miss you pa", CELLPHONE_DIALOGUE , -100, LOW_TENSION };
+				return { "I miss you [lightpink]Pa[lightpink]", CELLPHONE_DIALOGUE , -100, LOW_TENSION };
 				case ONE_DAD_PHONE_4_C_1:
-					return "...";
+					return "[lightpink]I miss you too son[lightpink]";
 				case ONE_DAD_PHONE_4_C_2:
-					return "Cmon ROSTOV, you're going to make your old man cry";
-				case ONE_DAD_PHONE_4_C_3:
-					return "You know I can't have any visits...";
+					return "You just need to [blue]wait[blue] a bit more, I still [red]can't[red] have any visits...";
 		case ONE_DAD_PHONE_5:
 			return "Oh...";
 		case ONE_DAD_PHONE_6:
@@ -169,13 +155,13 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_6_A:
 				return "Are you sure?";
 			case ONE_DAD_PHONE_6_B:
-				return { "Be honest", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
+				return { "Be honest Pa", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
 		case ONE_DAD_PHONE_7:
-			return "ROSTOV, please *cough* cough*";
+			return "[lightpink]ROSTOV[lightpink], please [interjection]*cough*[interjection] [interjection]*cough*[interjection]";
 		case ONE_DAD_PHONE_8:
-			return "With the money you send I'm getting the proper treatment";
+			return "With the [yellow]money you send[yellow] I'm getting the [lightpink]proper treatment[lightpink]";
 		case ONE_DAD_PHONE_9:
-			return "But the truth is the doctor told me that";
+			return "[red]But the truth is the doctor told me that[red]";
 	}
 
 	// Starting dialogue with Darwin
@@ -485,6 +471,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 		return PINK_EFFECT;
 	}
 
+	if (strcmp(effectName, "lightpink") == 0)
+	{
+		return LIGHT_PINK_EFFECT;
+	}
+
 	if (strcmp(effectName, "wave") == 0)
 	{
 		return WAVE_EFFECT;
@@ -503,6 +494,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "yellow") == 0)
 	{
 		return YELLOW_EFFECT;
+	}
+
+	if (strcmp(effectName, "red") == 0)
+	{
+		return RED_EFFECT;
 	}
 
 	if (strcmp(effectName, "interjection") == 0)
