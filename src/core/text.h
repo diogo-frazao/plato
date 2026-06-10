@@ -322,7 +322,7 @@ enum TextEffectType
 	WAVE_EFFECT, // Playful
 	PINK_WAVE_EFFECT, // Playful + love/happiness
 	//Shake
-	SHAKE_EFFECT, // *cough* *ahem*, etc
+	INTERJECTION_EFFECT, // *cough* *ahem*, etc. Camera shake + show all characters at the same time + small delay at the end
 	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
 };
 

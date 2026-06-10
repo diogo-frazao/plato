@@ -57,7 +57,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_2:
 				return "Mr ROSTOV please listen, [yellow]I'm sure[yellow] you'll be interested";
 	case MARKETING_PHONE_4:
-		return "[shake]*Ahem*[shake]";
+		return "[interjection]*Ahem*[interjection]";
 	case MARKETING_PHONE_5:
 		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [pink]FATHER EDWARD'S Research Department team[pink], here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
@@ -107,7 +107,7 @@ TextDTO getTextInfo(TextType textType)
 	// Starting dialogue with dad
 	{
 	case ONE_DAD_PHONE_1:
-		return "Halo? *cough* *cough* ROSTOV?";
+		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] ROSTOV?";
 	case ONE_DAD_PHONE_2:
 		return "Can you hear me son?";
 		case ONE_DAD_PHONE_2_A:
@@ -505,9 +505,9 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 		return YELLOW_EFFECT;
 	}
 
-	if (strcmp(effectName, "shake") == 0)
+	if (strcmp(effectName, "interjection") == 0)
 	{
-		return SHAKE_EFFECT;
+		return INTERJECTION_EFFECT;
 	}
 
 	if (strcmp(effectName, "redshake") == 0)

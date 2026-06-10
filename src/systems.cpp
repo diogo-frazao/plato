@@ -1838,7 +1838,7 @@ void UISystem::update()
 			}
 
 			// Camera shake text effect
-			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == SHAKE_EFFECT);
+			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == INTERJECTION_EFFECT);
 			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
 			{
 				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
@@ -2841,6 +2841,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		dest.x = _currentDialogue.topLeftPosition.x + currentHorizontalSpaceBetweenCharacters;
 		dest.y = _currentDialogue.topLeftPosition.y + currentVerticalSpaceBetweenCharacters;
+		// Draw comma below where it should. Otherwise it looks weird since every character is 8x8
 		if (c == ',')
 		{
 			dest.y += 1.f;
@@ -2863,9 +2864,12 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		{
 			dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + k_secondsBetweenEachCharacter + extraSecondsToStartShowingCharacter;
 
-			if (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == SHAKE_EFFECT)
+			// Some text effects show every character in a word at the same time
+			bool canShowAllCharacterAtSameTime = (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == INTERJECTION_EFFECT);
+			if (canShowAllCharacterAtSameTime)
 			{
-				dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + 0.01f;
+				float extraTimeFromLastCharacter = dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT ? 0.01f : 0.f;
+				dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + extraTimeFromLastCharacter;
 			}
 		}
 		secondsToShowPreviousCharacter = dialogueCharacter.secondsToStartShowingCharacter;
@@ -2879,7 +2883,8 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		mainDialogueCurrentCharacterIndex++;
 
-		bool canApplyExtraSecondsToShowNextCharacter = (c == '?') || (c == '!') || (c == ',') || (c == '.');
+		// These characters will always delay the next character to pretend it's an actual speech with punctuation
+		bool canApplyExtraSecondsToShowNextCharacter = (c == '?') || (c == '!') || (c == ',') || (c == '.') || (dialogueCharacter.textEffectToApply == INTERJECTION_EFFECT);
 		extraSecondsToStartShowingCharacter = canApplyExtraSecondsToShowNextCharacter ? 0.5f : 0.f;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
