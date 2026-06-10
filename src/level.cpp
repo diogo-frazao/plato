@@ -450,6 +450,41 @@ void finishHugoConversation(UISystem& u, Entity& player, Entity& hugo, bool& can
     canHugoProvokeDarwin = true;
 }
 
+void handleCameraShake(Camera& camera)
+{
+    if (camera.cameraShakeToPerform == NO_SHAKE)
+    {
+        return;
+    }
+
+    if (isTimerOngoing(camera.delayToShakeTimer))
+    {
+        camera.delayToShakeTimer += k_deltaTime;
+        if (camera.delayToShakeTimer >= camera.delayToShake)
+        {
+            camera.delayToShake = 0.f;
+            invalidateTimer(camera.delayToShakeTimer);
+        }
+
+        return;
+    }
+
+    switch (camera.cameraShakeToPerform)
+    {
+    case NO_SHAKE:
+        break;
+    case LIGHT_SHAKE:
+        camera.targetPosition.x += 5.f;
+        camera.targetPosition.y += 10.f;
+        break;
+    case MEDIUM_SHAKE:
+        camera.targetPosition.x += 20.f;
+        camera.targetPosition.y += 40.f;
+        break;
+    }
+    camera.cameraShakeToPerform = NO_SHAKE;
+}
+
 void ECSLevel::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
@@ -1789,21 +1824,7 @@ void ECSLevel::update()
             _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
         }
 
-        // Camera shake
-        switch (_levelCamera.cameraShakeToPerform)
-        {
-        case NO_SHAKE:
-            break;
-        case LIGHT_SHAKE:
-            _levelCamera.targetPosition.x += 5.f;
-            _levelCamera.targetPosition.y += 10.f;
-            break;
-        case MEDIUM_SHAKE:
-            _levelCamera.targetPosition.x += 20.f;
-            _levelCamera.targetPosition.y += 40.f;
-            break;
-        }
-        _levelCamera.cameraShakeToPerform = NO_SHAKE;
+        handleCameraShake(_levelCamera);
 
         // Try to catch up with target position
         if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f || abs(_levelCamera.targetPosition.y - _levelCamera.position.y) > 0.f)

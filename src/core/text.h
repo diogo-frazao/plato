@@ -324,7 +324,6 @@ enum TextEffectType
 	//Shake
 	SHAKE_EFFECT, // *cough* *ahem*, etc
 	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
-
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);

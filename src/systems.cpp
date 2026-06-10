@@ -1751,10 +1751,10 @@ void UISystem::update()
 					switch (dialogueOption.optionTensionType)
 					{
 					case HIGH_TENSION:
-						LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = LIGHT_SHAKE;
+						LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_SHAKE, 0.f);
 						break;
 					case FATAL_TENSION:
-						LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = MEDIUM_SHAKE;
+						LevelManager::getCurrentLevel()->_levelCamera.doShake(MEDIUM_SHAKE, 0.f);
 						break;
 					default:
 						break;
@@ -1841,7 +1841,8 @@ void UISystem::update()
 			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == SHAKE_EFFECT);
 			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
 			{
-				LevelManager::getCurrentLevel()->_levelCamera.cameraShakeToPerform = c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE;
+				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
+				LevelManager::getCurrentLevel()->_levelCamera.doShake(shakeToPerform, 0.1f);
 				_currentDialogue.hasAppliedShakeForCurrentWord = true;
 			}
 

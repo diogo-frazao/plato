@@ -32,9 +32,18 @@ struct Camera
 	bool canFollowTarget = true;
 
 	CameraShakeType cameraShakeToPerform = NO_SHAKE;
+	float delayToShake = 0.f;
+	float delayToShakeTimer = k_invalidTime;
 
 	// Point where the zoom will be focused on. By default it's the center of the screen.
 	Vec2 zoomFocusPoint = { k_baseGameWidth / 2, k_baseGameHeight / 2 };
+
+	void doShake(CameraShakeType type, float delay)
+	{
+		cameraShakeToPerform = type;
+		delayToShake = delay;
+		startTimer(delayToShakeTimer);
+	}
 };
 
 enum LevelStages
