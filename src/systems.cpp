@@ -1860,30 +1860,36 @@ void UISystem::update()
 
 		// Fade in animations
 		bool canAnimateCharacterDuringFadeIn = !isWaveEffect;
-		if (canAnimateCharacterDuringFadeIn)
+		if (_currentDialogue.state == DIALOGUE_BASE_STATE)
 		{
-			if (canCharacterFadeIn)
+			if (canAnimateCharacterDuringFadeIn)
 			{
-				c.position.x = lerp(c.position.x, c.startingPosition.x, 0.2f);
-				c.size.x = lerp(c.size.x, k_characterSize.x, 0.4f);
-				c.size.y = lerp(c.size.y, k_characterSize.y, 0.4f);
+				if (canCharacterFadeIn)
+				{
+					c.position.x = lerp(c.position.x, c.startingPosition.x, 0.2f);
+					c.size.x = lerp(c.size.x, k_characterSize.x, 0.4f);
+					c.size.y = lerp(c.size.y, k_characterSize.y, 0.4f);
+				}
 			}
-		}
-		else
-		{
-			// If the current text effect will change the position, snap directly without fade in animation
-			c.position.x = c.startingPosition.x;
-			c.size.x = k_characterSize.x;
-			c.size.y = k_characterSize.y;
+			else
+			{
+				// If the current text effect will change the position, snap directly without fade in animation
+				c.position.x = c.startingPosition.x;
+				c.size.x = k_characterSize.x;
+				c.size.y = k_characterSize.y;
+			}
 		}
 
 		// Physics for dialogue interrupted smash
 		if (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 		{
-			c.velocity.x = approach(c.velocity.x, 0.4f * sign(c.velocity.x), 1.f * k_deltaTime);
-			c.velocity.y = approach(c.velocity.y, 2.5f, 10.f * k_deltaTime);
+			c.velocity.x *= 0.96f;
+			c.velocity.y += 12.f * k_deltaTime;
+
 			c.position.x += c.velocity.x;
 			c.position.y += c.velocity.y;
+
+			c.rotationAngle += c.angularVelocity * k_deltaTime;
 
 			bool isOffscreen = c.position.y > 180.f;
 			if (!isOffscreen)
@@ -1995,7 +2001,13 @@ void UISystem::interruptCurrentDialogue()
 	_currentDialogue.dialogueBoxDynamicXSize = 0.f;
 	_currentDialogue.state = DIALOGUE_INTERRUPTED_STATE;
 
-	// Launch every character in a random direction
+	Vec2 dialogueCenterPosition = { _currentDialogue.topLeftPosition.x + (_currentDialogue.dialogueBoxSize.x * 0.5f),
+									_currentDialogue.topLeftPosition.y + (_currentDialogue.dialogueBoxSize.y * 0.5f) };
+
+
+	LevelManager::getCurrentLevel()->_levelCamera.doShake(MEDIUM_SHAKE, 0.f);
+
+	// Launch every character away from center
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
 	{
 		DialogueCharacter& c = _currentDialogue.characters[i];
@@ -2005,12 +2017,25 @@ void UISystem::interruptCurrentDialogue()
 			break;
 		}
 		
-		// Rand 0 or 1
-		bool shouldInvertXSpeed = SDL_rand(2);
-		c.velocity.x = SDL_randf() * 2.f;
-		c.velocity.x *= shouldInvertXSpeed ? -1.f : 1.f;
+		Vec2 direction = { c.position.x - dialogueCenterPosition.x, c.position.y - dialogueCenterPosition.y };
 
-		c.velocity.y = SDL_randf() * 4.f * -1.f;
+		// Normalize
+		float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
+		direction.x /= length;
+		direction.y /= length;
+
+		// Small random variation so it doesn't look perfectly radial
+		direction.x += (SDL_randf() * 0.4f) - 0.2f;
+		direction.y += (SDL_randf() * 0.4f) - 0.2f;
+
+		c.velocity.x = direction.x * 4.f;
+		c.velocity.y = direction.y * 4.f;
+
+		// Give everything a slight upward kick
+		c.velocity.y -= 1.f;
+
+		// Random spin
+		c.angularVelocity = (SDL_randf() * 360.f);
 	}
 }
 
@@ -2318,7 +2343,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		}
 
 		SDL_SetTextureAlphaMod(fontAtlas, c.opacity);
-		SDL_RenderTexture(s_renderer, fontAtlas, &src, &dest);
+		SDL_RenderTextureRotated(s_renderer, fontAtlas, &src, &dest, c.rotationAngle, nullptr, SDL_FLIP_NONE);
 	}
 
 	// Draw dialogue ended indicator

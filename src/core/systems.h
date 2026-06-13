@@ -193,6 +193,8 @@ public:
 		float timeSinceCharacterAppeared = 0.f;
 		// Used to run code only once per character
 		bool wasInitialized = false;
+		float angularVelocity = 0.f;
+		float rotationAngle = 0.f;
 
 		bool isValid()
 		{
@@ -213,6 +215,8 @@ public:
 			this->timeSinceCharacterAppeared = 0.f;
 			this->textEffectToApply = INVALID_EFFECT;
 			this->wasInitialized = false;
+			this->rotationAngle = 0.f;
+			this->angularVelocity = 0.f;
 		}
 	};
 
