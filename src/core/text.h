@@ -319,6 +319,8 @@ enum TextEffectType
 	//Shake
 	INTERJECTION_EFFECT, // *cough* *ahem*, etc. Camera shake + show all characters at the same time + small delay at the end
 	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
+	//No Wait
+	NO_WAIT_EFFECT, // If the last word didn't end ex: "Rostov your shift is o-". The wait time to move to the next dialogue is 0.5
 };
 
 TextEffectType getTextEffectTypeFromName(char* effectName);

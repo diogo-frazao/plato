@@ -167,7 +167,7 @@ TextDTO getTextInfo(TextType textType)
 	// Starting dialogue with Darwin
 	{
 	case ONE_DARWIN_1:
-		return { "ROSTOV your shift is o-", DARWIN_DIALOGUE };
+		return { "[nowait]ROSTOV your shift is o-[nowait]", DARWIN_DIALOGUE };
 	case ONE_DARWIN_2:
 		return {"Oh. I'm sorry, I didn't know you were on the phone.", DARWIN_DIALOGUE };
 		case ONE_DARWIN_2_A:
@@ -509,6 +509,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "redshake") == 0)
 	{
 		return RED_SHAKE_EFFECT;
+	}
+
+	if (strcmp(effectName, "nowait") == 0)
+	{
+		return NO_WAIT_EFFECT;
 	}
 
 	D_LOG(ERROR, "No text effect found for %s", effectName);

@@ -1931,6 +1931,10 @@ void UISystem::update()
 		{
 			secondsToSkipDialogue = 4.f;
 		}
+		
+		// Apply the no wait effect - make time to skip to next dialogue faster
+		bool isApplyingNoWaitEffect = _currentDialogue.characters[0].textEffectToApply == NO_WAIT_EFFECT;
+		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f);
 
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f)
 		{
@@ -1943,7 +1947,7 @@ void UISystem::update()
 			_currentDialogue.dialogueOutlineDynamicXSize = _currentDialogue.dialogueBoxDynamicXSize;
 		}
 
-		if (_currentDialogue.dialogueOutlineDynamicXSize <= 0.f)
+		if (_currentDialogue.dialogueOutlineDynamicXSize <= 0.f || canSkipFromNoWaitDialogue)
 		{
 			_currentDialogue.state = DIALOGUE_ENDED_STATE;
 		}
