@@ -1794,6 +1794,13 @@ void UISystem::update()
 		}
 	}
 
+	// Move speech indicator x
+	bool shouldLerpSpeechIndicatorXPosition = (_currentDialogue.speechIndicatorTargetXPosition > 0.1f && _currentDialogue.speechIndicatorCurrentXPosition > 0.1f);
+	if (shouldLerpSpeechIndicatorXPosition)
+	{
+		_currentDialogue.speechIndicatorCurrentXPosition = lerp(_currentDialogue.speechIndicatorCurrentXPosition, _currentDialogue.speechIndicatorTargetXPosition, 0.1f);
+	}
+
 	// Main dialogue characters logic + animate
 	bool hasDialogueFinished = false;
 	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
@@ -1934,9 +1941,9 @@ void UISystem::update()
 		
 		// Apply the no wait effect - make time to skip to next dialogue faster
 		bool isApplyingNoWaitEffect = _currentDialogue.characters[0].textEffectToApply == NO_WAIT_EFFECT;
-		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f);
+		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 1.5f);
 
-		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f)
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f && !isApplyingNoWaitEffect)
 		{
 			float amountToShrinkPerSecond = _currentDialogue.dialogueBoxDynamicXSize / secondsToSkipDialogue;
 			float amountToShrinkPerFrame = amountToShrinkPerSecond / k_targetFrameRateForGameLogic;
@@ -2225,8 +2232,15 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				break;
 		}
 
+		// Initialize for the first time
+		if (_currentDialogue.speechIndicatorCurrentXPosition < 0.1f)
+		{
+			_currentDialogue.speechIndicatorCurrentXPosition = xPositionToDrawSpeechIndicator;
+		}
+
 		// Calculate X Position for speech indicator.
 		// If needed, move move it (only neeed when the entity moved during the dialogue)
+		// On update, we take the current and target and just lerp.
 		{
 			Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*_currentDialogue.entityTalking)->position;
 			SDL_FRect positionWhereDialogueStartsDrawing;
@@ -2242,13 +2256,11 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				float dialogueBoxEndPosition = dest.x + dialogueBoxTargetXSize;
 				float maxAllowedPositionForSpeechIndicator = dialogueBoxEndPosition * 0.9f;
 
-				dest.x = min(screenPositionWhereDialogueStartsDrawing.x, maxAllowedPositionForSpeechIndicator);
-			}
-			else
-			{
-				dest.x = xPositionToDrawSpeechIndicator;
+				_currentDialogue.speechIndicatorTargetXPosition = min(screenPositionWhereDialogueStartsDrawing.x, maxAllowedPositionForSpeechIndicator);
 			}
 		}
+
+		dest.x = _currentDialogue.speechIndicatorCurrentXPosition;
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
 		dest.y = dialogueOutlineEndYPosition - k_dialogueOutlineHeight;
