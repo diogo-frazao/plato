@@ -1934,9 +1934,9 @@ void UISystem::update()
 		
 		// Apply the no wait effect - make time to skip to next dialogue faster
 		bool isApplyingNoWaitEffect = _currentDialogue.characters[0].textEffectToApply == NO_WAIT_EFFECT;
-		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f);
+		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 1.5f);
 
-		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f)
+		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.5f && !isApplyingNoWaitEffect)
 		{
 			float amountToShrinkPerSecond = _currentDialogue.dialogueBoxDynamicXSize / secondsToSkipDialogue;
 			float amountToShrinkPerFrame = amountToShrinkPerSecond / k_targetFrameRateForGameLogic;
