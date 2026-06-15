@@ -293,7 +293,6 @@ void setupInsideRestaurantScene()
 
         auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
         darwinM->maxHorizontalSpeed = 0.3f;
-        darwinM->runAcceleration = 0.3f;
 
         SpriteType darwinAnimations[k_maxNumberOfMovementAnimations] = { DARWIN_PLACEHOLDER_SPRITE };
         darwinM->setupMovementAnimations(darwinAnimations);
@@ -309,7 +308,6 @@ void setupInsideRestaurantScene()
         addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
-        hugoM->runAcceleration = 0.3f;
         s_hugoEntityId = hugo.id;
 
         SpriteType hugoAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_SMALL_IDLE_SPRITE };
@@ -324,7 +322,6 @@ void setupInsideRestaurantScene()
         getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
         oskarM->maxHorizontalSpeed = 0.3f;
-        oskarM->runAcceleration = 0.3f;
         s_oskarEntityId = oskar.id;
 
         SpriteType oskarAnimations[k_maxNumberOfMovementAnimations] = { GANGSTER_SMALL_IDLE_SPRITE };
