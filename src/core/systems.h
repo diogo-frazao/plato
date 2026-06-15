@@ -315,9 +315,6 @@ public:
 		float dialogueOutlineDynamicXSize = 0.f;
 		// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
 		bool hasAppliedShakeForCurrentWord = false;
-		// Needed to have frame rate independent lerp
-		float speechIndicatorCurrentXPosition = 0.f;
-		float speechIndicatorTargetXPosition = 0.f;
 
 		// Don't use directly, call destroyCurrentDialogue() instead
 		void destroyDialoge()
@@ -346,8 +343,6 @@ public:
 			this->speechIndicatorDynamicYSize = 0.f;
 			this->dialogueOutlineDynamicXSize = 0.f;
 			this->hasAppliedShakeForCurrentWord = false;
-			this->speechIndicatorCurrentXPosition = 0.f;
-			this->speechIndicatorTargetXPosition = 0.f;
 		}
 	};
 
