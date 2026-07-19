@@ -8,7 +8,7 @@
 #include <SDL3/SDL_pixels.h>
 #include <string>
 
-static bool isAmbientColorValid(SDL_Color color)
+static bool isAmbientColorValid(SDL_FColor color)
 {
 	static constexpr SDL_Color k_whiteColor = { 255, 255, 255, 255 };
 	return color.r != k_whiteColor.r || color.g != k_whiteColor.g || color.b != k_whiteColor.b;
@@ -223,10 +223,11 @@ SDL_Texture* RenderingSystem::getTargetLightsBuffer(LayerType layer)
 void RenderingSystem::renderLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight)
 {
 	SDL_Texture* targetBuffer = getTargetLightsBuffer(layer);
-	if (isAffectedByAmbientLight && isAmbientColorValid(_ambientColor))
+	if (isAffectedByAmbientLight && isAmbientColorValid(_currentAmbientColor))
 	{
 		SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_MUL);
 	}
+
 	SDL_RenderTexture(s_renderer, targetBuffer, nullptr, nullptr);
 }
 
@@ -238,9 +239,9 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmb
 	SDL_SetRenderTarget(s_renderer, targetBuffer);
 	SDL_SetTextureBlendMode(targetBuffer, SDL_BLENDMODE_ADD);
 
-	if (isAffectedByAmbientLight && isAmbientColorValid(_ambientColor))
+	if (isAffectedByAmbientLight && isAmbientColorValid(_currentAmbientColor))
 	{
-		SDL_SetRenderDrawColor(s_renderer, _ambientColor.r, _ambientColor.g, _ambientColor.b, 255);
+		SDL_SetRenderDrawColor(s_renderer, _currentAmbientColor.r, _currentAmbientColor.g, _currentAmbientColor.b, 255);
 	}
 	else
 	{

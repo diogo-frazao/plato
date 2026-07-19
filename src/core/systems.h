@@ -31,21 +31,23 @@ public:
 	void render(float renderAlpha);
 	void renderCrosshair(float renderAlpha);
 
-	SDL_Color _ambientColor = { 255, 255, 255, 255 };
+	SDL_Color _targetAmbientColor = { 255, 255, 255, 255 };
+	// FColor since we use float lerping for changing the ambient color at runtime
+	SDL_FColor _currentAmbientColor = { 0, 0, 0, 0 };
 	// Used only for debugging with imgui
 	float _debugAmbientColorPicker[4] = {255, 255, 255};
 
-	void setAmbientColor(uint8_t r, uint8_t g, uint8_t b)
+	void setTargetAmbientColor(uint8_t r, uint8_t g, uint8_t b)
 	{
-		_ambientColor.r = r;
-		_ambientColor.g = g;
-		_ambientColor.b = b;
-		_ambientColor.a = 255;
+		_targetAmbientColor.r = r;
+		_targetAmbientColor.g = g;
+		_targetAmbientColor.b = b;
+		_targetAmbientColor.a = 255;
 
 #ifndef RELEASE_BUILD
-		_debugAmbientColorPicker[0] = _ambientColor.r / 255.f;
-		_debugAmbientColorPicker[1] = _ambientColor.g / 255.f;
-		_debugAmbientColorPicker[2] = _ambientColor.b / 255.f;
+		_debugAmbientColorPicker[0] = _targetAmbientColor.r / 255.f;
+		_debugAmbientColorPicker[1] = _targetAmbientColor.g / 255.f;
+		_debugAmbientColorPicker[2] = _targetAmbientColor.b / 255.f;
 #endif // !RELEASE_BUILD
 	}
 

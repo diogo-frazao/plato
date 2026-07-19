@@ -259,26 +259,6 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& rightRoomLight = addEntity();
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(rightRoomLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(rightRoomLight);
-        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 215, 218, 143, 46 };
-        t->scale = { 1.25f, 1.25f };
-        t->position = { 463, k_restaurantBaseY + 16.f };
-    }
-
-    {
-        Entity& rightRoomHighlight = addEntity();
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(rightRoomHighlight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(rightRoomHighlight);
-        s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 253, 204, 106, 40 };
-        t->scale = { 0.25f, 0.25f };
-        t->position = { 495 + 2, k_restaurantBaseY + 34.f };
-    }
-
-    {
         Entity& floor = addEntity();
         TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
@@ -383,7 +363,7 @@ void ECSLevel::start()
     setupInsideRestaurantScene();
     if (s_isInsideRestaurant)
     {
-        _renderingSystem.setAmbientColor(138, 138, 138);
+        _renderingSystem.setTargetAmbientColor(64, 64, 64);
         _levelCamera.position = { 510.f, 90.f };
     }
 }
@@ -1771,6 +1751,36 @@ void ECSLevel::update()
         }
     }
 
+    // Dynamic ambient color
+    {
+        float xPositionWherePlayerIsInsidePantry = 407.f;
+
+        SDL_Color targetAmbientColor = { 0,0,0 };
+
+        if (playerTransform->position.x >= xPositionWherePlayerIsInsidePantry)
+        {
+            targetAmbientColor = { 64, 64, 64 };
+        }
+        else
+        {
+            targetAmbientColor = { 115, 115, 115 };
+        }
+
+        bool isCurrentColorDifferentFromTarget = targetAmbientColor.r != _renderingSystem._currentAmbientColor.r ||
+            targetAmbientColor.b != _renderingSystem._currentAmbientColor.b ||
+            targetAmbientColor.g != _renderingSystem._currentAmbientColor.g;
+
+        if (isCurrentColorDifferentFromTarget)
+        {
+            _renderingSystem.setTargetAmbientColor(targetAmbientColor.r, targetAmbientColor.g, targetAmbientColor.b);
+
+            float k_ambientColorChangeSpeed = 0.025f;
+            _renderingSystem._currentAmbientColor.r = lerp((float)_renderingSystem._currentAmbientColor.r, (float)_renderingSystem._targetAmbientColor.r, k_ambientColorChangeSpeed);
+            _renderingSystem._currentAmbientColor.b = lerp((float)_renderingSystem._currentAmbientColor.b, (float)_renderingSystem._targetAmbientColor.b, k_ambientColorChangeSpeed);
+            _renderingSystem._currentAmbientColor.g = lerp((float)_renderingSystem._currentAmbientColor.g, (float)_renderingSystem._targetAmbientColor.g, k_ambientColorChangeSpeed);
+        }
+    }
+
     // Update systems
     {
         overrideColliderOffsetsBasedOnCurrentSprite();
@@ -2065,9 +2075,9 @@ void ECSLevel::imguiRender()
 
     if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
     {
-        _renderingSystem.setAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
-                                         _renderingSystem._debugAmbientColorPicker[1] * 255,
-                                         _renderingSystem._debugAmbientColorPicker[2] * 255);
+        _renderingSystem.setTargetAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
+            _renderingSystem._debugAmbientColorPicker[1] * 255,
+            _renderingSystem._debugAmbientColorPicker[2] * 255);
     }
     
 
