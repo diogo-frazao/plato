@@ -1899,7 +1899,7 @@ void ECSLevel::imguiRender()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::Begin("Player");
+    ImGui::Begin("Misc");
 
     Entity& player = getEntityById(k_playerEntityId);
 
@@ -1958,10 +1958,13 @@ void ECSLevel::imguiRender()
 
     if (ImGui::Button("Iterate on last added entity"))
     {
-        _gangsterConfrontationStageData.canDarwinComeClose = true;
+        Entity& e = addEntity();
+        e.debugName = "Light";
 
-        player.entityState = IDLE_STATE;
-        Entity& hugo = getEntityById(s_hugoEntityId);
+        //_gangsterConfrontationStageData.canDarwinComeClose = true;
+
+        //player.entityState = IDLE_STATE;
+        //Entity& hugo = getEntityById(s_hugoEntityId);
         //getComponentFromEntity<TransformComponent>(hugo)->position.x = getComponentFromEntity<TransformComponent>(player)->position.x;
 
         //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
@@ -2093,26 +2096,51 @@ void ECSLevel::imguiRender()
 
     ImGui::End();
 
-    Entity* testEnemy = nullptr;
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Entity Looker");
+
+    static char* entityNameSerach;
+
+    ImGui::BeginChild("##tree", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened);
+
+    //ImGui::SetNextItemWidth(-FLT_MIN);
+    //ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F, ImGuiInputFlags_Tooltip);
+    //ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+    //if (ImGui::InputTextWithHint("##Filter", "incl,-excl", entityNameSerach, k_entityNameMaxCharacters, ImGuiInputTextFlags_EscapeClearsAll))
+    //{
+    //    //Filter.Build();
+    //}
+    //ImGui::PopItemFlag();
+
+    ImGui::BeginTable("##bg", 1, ImGuiTableFlags_RowBg);
+    
+    static char entityNameToShow[k_entityNameMaxCharacters] = { 0 };
+
     for (Entity& entity : getAllEntities())
     {
-        if (entity.id == k_invalidId || entity.id == player.id || !entityHasComponent<AttackingComponent>(entity))
+        if (entity.id == k_invalidId)
         {
             continue;
         }
 
-        testEnemy = &entity;
-        break;
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::PushID(entity.id);
+        ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+
+        memset(entityNameToShow, 0, k_entityNameMaxCharacters);
+        sprintf(entityNameToShow, "Entity Id: %i", entity.id);
+        ImGui::TreeNodeEx(entity.debugName == nullptr ? entityNameToShow : entity.debugName, treeFlags);
+
+        ImGui::PopID();
     }
 
-    if (!testEnemy)
-    {
-        return;
-    }
+        //for (ExampleTreeNode* node : root_node->Childs)
+        //    if (Filter.PassFilter(node->Name)) // Filter root node
+        //        DrawTreeNode(node);
+    ImGui::EndTable();
 
-    ImGui::Begin("Enemy");
-
-    ImGui::Text("Enemy state: %s", getEntityStateAsString(testEnemy->entityState));
+    ImGui::EndChild();
 
     ImGui::End();
 }

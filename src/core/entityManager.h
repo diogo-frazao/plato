@@ -8,6 +8,10 @@
 
 struct Entity
 {
+#ifndef RELEASE_BUILD
+	char* debugName = { 0 };
+#endif 
+
 	int32_t id = k_invalidId;
 	int32_t componentBitmask = 0;
 	EntityState entityState = NO_STATE;
