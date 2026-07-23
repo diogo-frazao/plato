@@ -204,9 +204,10 @@ inline Entity& getLastAddedEntity()
 	return entityManager._entities[entityManager._lastValidEntityId];
 }
 
-inline Entity& addEntity(Vec2 position = Vec2())
+inline Entity& addEntity(char* debugName, Vec2 position = Vec2())
 {
 	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
+	entity.debugName = debugName;
 	auto* t = addComponentToEntity<TransformComponent>(entity);
 	t->position = position;
 	t->previousPosition = position;
@@ -253,4 +254,20 @@ inline SDL_FRect convertWorldRectToCameraSpace(const SDL_FRect& worldRect)
 	Vec2 sizeInCameraSpace{ worldRect.w * camera.zoom, worldRect.h * camera.zoom };
 
 	return { posInCameraSpace.x, posInCameraSpace.y, sizeInCameraSpace.x, sizeInCameraSpace.y };
+}
+
+template<typename T>
+bool createInspectorComponentSeparator(Entity* entity)
+{
+	if (!entityHasComponent<T>(*entity))
+	{
+		return false;
+	}
+
+	ImGui::Separator();
+	ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+	ImGui::Text(typeid(T).name());
+	ImGui::PopStyleColor();
+
+	return true;
 }

@@ -13,7 +13,7 @@ float k_restaurantBaseY = 60.f;
 
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
-    Entity& block = addEntity();
+    Entity& block = addEntity("colliderInvisibleBlock");
     addComponentToEntity<SpriteComponent>(block)->setupSpriteForLayer(TODO_TEMOVE_INVISIBLE_SPRITE, LEVEL_GEOMETRY_LAYER);
     getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)pos.x, (float)pos.y };
     getComponentFromEntity<TransformComponent>(block)->position = { (float)pos.x, (float)pos.y };
@@ -23,7 +23,7 @@ void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 
 void createBlockAtPosition(IVec2 position)
 {
-    Entity& block = addEntity();
+    Entity& block = addEntity("colliderInvisibleBlock");
     addComponentToEntity<SpriteComponent>(block)->setupSpriteForLayer(TODO_TEMOVE_INVISIBLE_SPRITE, LEVEL_GEOMETRY_LAYER);
     getComponentFromEntity<TransformComponent>(block)->previousPosition = { (float)position.x, (float)position.y };
     getComponentFromEntity<TransformComponent>(block)->position = { (float)position.x, (float)position.y };
@@ -58,47 +58,47 @@ void setupOutsideRestaurantScene()
 {
     s_isInsideRestaurant = false;
 
-    Entity& bg = addEntity();
+    Entity& bg = addEntity("bg");
     addComponentToEntity<SpriteComponent>(bg)->setupSpriteForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
 
-    Entity& geometry = addEntity({ 0, 135 });
+    Entity& geometry = addEntity("geometry", { 0, 135 });
     addComponentToEntity<SpriteComponent>(geometry)->setupSpriteForLayer(TODO_REMOVE_LEVEL_GEOMETRY_SPRITE, LEVEL_GEOMETRY_LAYER);
 
-    Entity& fg = addEntity({ 34, 129 });
+    Entity& fg = addEntity("fg", { 34, 129 });
     addComponentToEntity<SpriteComponent>(fg)->setupSpriteForLayer(TODO_REMOVE_FG_SPRITE, IN_FRONT_CHAR_LAYER);
 
-    Entity& darwinLettersLight = addEntity();
+    Entity& darwinLettersLight = addEntity("darwinLettersLight");
     addComponentToEntity<SpriteComponent>(darwinLettersLight)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->position = { 220, 55 };
     getComponentFromEntity<TransformComponent>(darwinLettersLight)->scale = { 1.5f, 0.4f };
     getComponentFromEntity<SpriteComponent>(darwinLettersLight)->color = { 200, 0, 0 , 255 };
 
-    Entity& darwinLettersSmallGlow = addEntity();
+    Entity& darwinLettersSmallGlow = addEntity("darwinLettersSmallGlow");
     addComponentToEntity<SpriteComponent>(darwinLettersSmallGlow)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->position = { 225, 20 };
     getComponentFromEntity<TransformComponent>(darwinLettersSmallGlow)->scale = { 1.35f, 2.f };
     getComponentFromEntity<SpriteComponent>(darwinLettersSmallGlow)->color = { 80, 0, 0 , 255 };
 
-    Entity& streetLampLight = addEntity();
+    Entity& streetLampLight = addEntity("streetLampLight");
     addComponentToEntity<SpriteComponent>(streetLampLight)->setupSpriteForLayer(STREET_LAMP_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(streetLampLight)->position = { 24, 86 };
     getComponentFromEntity<TransformComponent>(streetLampLight)->scale = { 1.f, 1.f };
     getComponentFromEntity<SpriteComponent>(streetLampLight)->color = { 43, 15, 0 , 255 };
 
-    Entity& streetLampGlow = addEntity();
+    Entity& streetLampGlow = addEntity("streetLampGlow");
     addComponentToEntity<SpriteComponent>(streetLampGlow)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(streetLampGlow)->position = { 36, 88 };
     getComponentFromEntity<TransformComponent>(streetLampGlow)->scale = { 0.2f, 0.2f };
     getComponentFromEntity<SpriteComponent>(streetLampGlow)->color = { 125, 50, 0 , 200 };
 
-    Entity& lightThatFollowsPlayer = addEntity();
+    Entity& lightThatFollowsPlayer = addEntity("lightThatFollowsPlayer");
     addComponentToEntity<SpriteComponent>(lightThatFollowsPlayer)->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, BACK_LIGHTS_LAYER);
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->position = { 36, 88 };
     getComponentFromEntity<TransformComponent>(lightThatFollowsPlayer)->scale = { 0.5f, 0.5f };
     getComponentFromEntity<SpriteComponent>(lightThatFollowsPlayer)->color = { 87, 69, 50, 42 };
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
-    Entity& dummyEnemy = addEntity({ 160, 0 });
+    Entity& dummyEnemy = addEntity("dummyEnemy", { 160, 0 });
     addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
@@ -161,7 +161,7 @@ void setupInsideRestaurantScene()
     s_isInsideRestaurant = true;
 
     {
-        Entity& bgColor = addEntity();
+        Entity& bgColor = addEntity("bgColor");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
         s->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
@@ -172,14 +172,14 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& restaurant = addEntity({ 14, k_restaurantBaseY });
+        Entity& restaurant = addEntity("restaurant", { 14, k_restaurantBaseY });
         addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
         createBlockAtPositionWithSize({ 24, k_restaurantBaseY + 83.f }, { 81, 11 });
         createBlockAtPositionWithSize({ 104, k_restaurantBaseY + 75.f }, { 488, 18 });
     }
 
     {
-        Entity& ceilingLightLeft = addEntity();
+        Entity& ceilingLightLeft = addEntity("ceilingLightLeft");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightLeft);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightLeft);
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -189,7 +189,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& ceilingLightRight = addEntity();
+        Entity& ceilingLightRight = addEntity("ceilingLightRight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightRight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightRight);
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -199,7 +199,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& highlightCeilingLeft = addEntity();
+        Entity& highlightCeilingLeft = addEntity("highlightCeilingLeft");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingLeft);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingLeft);
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -209,7 +209,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& highlightCeilingRight = addEntity();
+        Entity& highlightCeilingRight = addEntity("highlightCeilingRight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingRight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingRight);
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -219,7 +219,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& exitLight = addEntity();
+        Entity& exitLight = addEntity("exitLight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(exitLight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(exitLight);
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -229,7 +229,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& tvLight = addEntity();
+        Entity& tvLight = addEntity("tvLight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -239,7 +239,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& brokenLight = addEntity();
+        Entity& brokenLight = addEntity("brokenLight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(brokenLight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(brokenLight);
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -249,7 +249,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& lampLight = addEntity();
+        Entity& lampLight = addEntity("lampLight");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(lampLight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(lampLight);
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -259,7 +259,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& floor = addEntity();
+        Entity& floor = addEntity("floor");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(floor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(floor);
         s->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_FLOOR_SPRITE, LEVEL_GEOMETRY_LAYER);
@@ -267,7 +267,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& darwin = addEntity({ 415.f, 117.f });
+        Entity& darwin = addEntity("darwin", { 415.f, 117.f });
         addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTER_LAYER);
         addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
 
@@ -281,7 +281,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& hugo = addEntity({ 179.f, 106.f });
+        Entity& hugo = addEntity("hugo", { 179.f, 106.f });
         addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         // We can't attack hugo until oskar dies
@@ -295,7 +295,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& oskar = addEntity({ 242.f, 95.f });
+        Entity& oskar = addEntity("oskar", { 242.f, 95.f });
         addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         addComponentToEntity<AttackingComponent>(oskar);
@@ -308,7 +308,7 @@ void setupInsideRestaurantScene()
         oskarM->setupMovementAnimations(oskarAnimations);
     }
 
-    Entity& golfWeapon = addEntity();   
+    Entity& golfWeapon = addEntity("golfWeapon");
     addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
     addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
 }   
@@ -317,7 +317,7 @@ void createDummyEntities(int amount)
 {
     for (int i = 0; i < amount; ++i)
     {
-        Entity& entity = addEntity();
+        Entity& entity = addEntity("dummyEntity");
         if (i == 0)
         {
             D_LOG(MINI, "Dummy Entities start at %i", entity.id);
@@ -334,19 +334,19 @@ void ECSLevel::start()
 	_renderingSystem.createLightsBuffers();
     _uiSystem.start();
 
-    Entity& player = addEntity({ 490.f, k_restaurantBaseY + 48.f });
+    Entity& player = addEntity("player", { 490.f, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player)->weaponInHand;
     getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
     player.entityState = ON_CUTSCENE_STATE;
 
-    Entity& crosshair = addEntity();
+    Entity& crosshair = addEntity("crosshair");
     auto* crosshairSprite = addComponentToEntity<SpriteComponent>(crosshair);
     crosshairSprite->setupSpriteForLayer(CROSSHAIR_MELEE_WEAPON_SPRITE, CROSSHAIR_LAYER);
     crosshairSprite->drawnAtScreenSpace = true;
 
-    Entity& cellphone = addEntity({10, 200});
+    Entity& cellphone = addEntity("cellphone", {10, 200});
     auto* cellphoneSprite = addComponentToEntity<SpriteComponent>(cellphone);
     cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, CELLPHONE_LAYER);
     cellphoneSprite->drawnAtScreenSpace = true;
@@ -1884,6 +1884,46 @@ void ECSLevel::render(float renderAlpha)
     _renderingSystem.renderCrosshair(renderAlpha);
 }
 
+template<typename T>
+bool startInspectorComponentSection(Entity* entity)
+{
+    if (!createInspectorComponentSeparator<T>(entity))
+    {
+        return false;
+    }
+
+    if (!ImGui::BeginTable("##properties", 2, ImGuiTableFlags_Resizable))
+    {
+        return false;
+    }
+
+    ImGui::PushID(entity->id);
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+    return true;
+}
+
+void endInspectorComponentSection()
+{
+    ImGui::PopID();
+    ImGui::EndTable();
+}
+
+void inspectFloatProperty(char* name, float* variable)
+{
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    ImGui::SliderFloat("##Editor", variable, *variable - 1.f, *variable + 1.f);
+
+    ImGui::PopID();
+}
+
 void ECSLevel::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
@@ -1899,248 +1939,306 @@ void ECSLevel::imguiRender()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::Begin("Misc");
-
-    Entity& player = getEntityById(k_playerEntityId);
-
-    auto* movement = getComponentFromEntity<MovementComponent>(player);
-    auto* collider = getComponentFromEntity<RectColliderComponent>(player);
-
-    ImGui::TextColored({ 255, 255, 0, 0.2 }, "Press [Tab] to close panel");
-
-    ImGui::SeparatorText("Horizontal");
-
-    ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
-    ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 20.f);
-    ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
-    ImGui::SliderFloat("Player Coyote time", &(movement->coyoteTime), 0.f, 1.f);
-
-    ImGui::SeparatorText("Vertical");
-
-    ImGui::SliderFloat("Player Max V Speed", &(movement->maxVerticalSpeed), 0.1f, 5.f);
-    ImGui::SliderFloat("Player Jump Speed", &(movement->jumpSpeed), 0.1f, 5.f);
-    ImGui::SliderFloat("Player Gravity", &(movement->gravity), 5.f, 20.f);
-    ImGui::SliderFloat("Air friction", &(movement->airFriction), 1.f, 5.f);
-
-    ImGui::SeparatorText("Misc");
-
-    ImGui::Text("Character state: %s", getEntityStateAsString(player.entityState));
-
-    ImGui::Text("Player is %s grounded", movement->isGrounded ? "" : "not");
-
-    ImGui::Text("Player Collider X Offset: %i", collider->collider.topLeftPointOffset.x);
-    ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
-
-    ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
-    ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
-    ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
-    ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
-    ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
-
-    Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
-    ImGui::Text("Mouse World X: %f", mouseWorldPosition.x);
-    ImGui::Text("Mouse World Y: %f", mouseWorldPosition.y);
-    ImGui::Text("Mouse Screen X: %f", s_mousePositionThisFrameInScreenSpace.x);
-    ImGui::Text("Mouse Screen Y: %f", s_mousePositionThisFrameInScreenSpace.y);
-
-    ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
-    ImGui::Checkbox("Debug UI colliders", &s_debugUICollidersEnabled);
-    ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
-
-    ImGui::Text("Average %.1f FPS", io.Framerate);
-    ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
-
-    if (ImGui::Button("Add Debug White Entity"))
+    // Misc panel
     {
-        Entity& entity = addEntity(getComponentFromEntity<TransformComponent>(player)->position);
-        addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
-    }
+        ImGui::Begin("Misc");
 
-    if (ImGui::Button("Iterate on last added entity"))
-    {
-        Entity& e = addEntity();
-        e.debugName = "Light";
+        Entity& player = getEntityById(k_playerEntityId);
 
-        //_gangsterConfrontationStageData.canDarwinComeClose = true;
+        auto* movement = getComponentFromEntity<MovementComponent>(player);
+        auto* collider = getComponentFromEntity<RectColliderComponent>(player);
 
-        //player.entityState = IDLE_STATE;
-        //Entity& hugo = getEntityById(s_hugoEntityId);
-        //getComponentFromEntity<TransformComponent>(hugo)->position.x = getComponentFromEntity<TransformComponent>(player)->position.x;
+        ImGui::TextColored({ 255, 255, 0, 0.2 }, "Press [Tab] to close panel");
 
-        //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
-        //Entity& entity = getLastAddedEntity();
-        //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
-        //addComponentToEntity<MovementComponent>(entity);
-        //addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
-        //getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
+        ImGui::SeparatorText("Horizontal");
 
-          //Entity& darwin = getEntityById(s_darwinEntityId);
-        //getComponentFromEntity<TransformComponent>(darwin)->position = {293.f, 117.f };
-        //getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
-    }
+        ImGui::SliderFloat("Player Acceleration", &(movement->runAcceleration), 1, 30);
+        ImGui::SliderFloat("Player Friction", &(movement->friction), 0.5f, 20.f);
+        ImGui::SliderFloat("Player Max Horizontal Speed", &(movement->maxHorizontalSpeed), 0.1f, 10.f);
+        ImGui::SliderFloat("Player Coyote time", &(movement->coyoteTime), 0.f, 1.f);
 
-    ImGui::SeparatorText("Levels");
+        ImGui::SeparatorText("Vertical");
 
-    static int s_levelStageToChangeTo = MARKETING_PHONE_STAGE;
-    ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
-    if (ImGui::Button("Change to selected level stage"))
-    {
-        _uiSystem.destroyCurrentDialogue();
-        _uiSystem.popTensionBar();
+        ImGui::SliderFloat("Player Max V Speed", &(movement->maxVerticalSpeed), 0.1f, 5.f);
+        ImGui::SliderFloat("Player Jump Speed", &(movement->jumpSpeed), 0.1f, 5.f);
+        ImGui::SliderFloat("Player Gravity", &(movement->gravity), 5.f, 20.f);
+        ImGui::SliderFloat("Air friction", &(movement->airFriction), 1.f, 5.f);
 
-        switch (s_levelStageToChangeTo)
+        ImGui::SeparatorText("Misc");
+
+        ImGui::Text("Character state: %s", getEntityStateAsString(player.entityState));
+
+        ImGui::Text("Player is %s grounded", movement->isGrounded ? "" : "not");
+
+        ImGui::Text("Player Collider X Offset: %i", collider->collider.topLeftPointOffset.x);
+        ImGui::Text("Player Collider Y Offset: %i", collider->collider.topLeftPointOffset.y);
+
+        ImGui::Text("Player timeSinceLeftPlatform: %f", movement->timeSinceLeftPlatform);
+        ImGui::Text("Player Speed X: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.x);
+        ImGui::Text("Player Speed Y: %f", getComponentFromEntity<MovementComponent>(player)->currentSpeed.y);
+        ImGui::Text("Player X: %f", getComponentFromEntity<TransformComponent>(player)->position.x);
+        ImGui::Text("Player Y: %f", getComponentFromEntity<TransformComponent>(player)->position.y);
+
+        Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
+        ImGui::Text("Mouse World X: %f", mouseWorldPosition.x);
+        ImGui::Text("Mouse World Y: %f", mouseWorldPosition.y);
+        ImGui::Text("Mouse Screen X: %f", s_mousePositionThisFrameInScreenSpace.x);
+        ImGui::Text("Mouse Screen Y: %f", s_mousePositionThisFrameInScreenSpace.y);
+
+        ImGui::Checkbox("Debug colliders", &s_debugCollidersEnabled);
+        ImGui::Checkbox("Debug UI colliders", &s_debugUICollidersEnabled);
+        ImGui::Checkbox("Debug grid", &s_debugGridEnabled);
+
+        ImGui::Text("Average %.1f FPS", io.Framerate);
+        ImGui::Text("V-sync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+
+        if (ImGui::Button("Add Debug White Entity"))
         {
-        case MARKETING_PHONE_STAGE:
-            _currentLevelStage = MARKETING_PHONE_STAGE;
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
-            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
-            s_playerTension = 0;
-            break;
-        case FIRST_DAD_PHONE_STAGE:
-            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
-            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
-            s_playerTension = 80;
-            break;
-        case DARWIN_CONVERSATION_STAGE:
-        {
-            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-            _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
-            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
-            startTimer(s_multiPurpuseTimer);
-            s_playerTension = 20;
-            Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = getComponentFromEntity<TransformComponent>(darwin)->startingPosition;
-            _darwinConversationStageData.reset();
-            break;
-        }
-        case GANGSTER_CONFRONTATION_STAGE:
-        {
-            _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
-            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
-
-            Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = { 293.f, 117.f };
-            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
-
-            Entity& player = getEntityById(k_playerEntityId);
-            getComponentFromEntity<TransformComponent>(player)->position.x = getComponentFromEntity<TransformComponent>(player)->startingPosition.x;
-            player.entityState = IDLE_STATE;
-
-            Entity& oskar = getEntityById(s_oskarEntityId);
-            getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
-            getComponentFromEntity<AttackingComponent>(oskar)->damageCounter = 0;
-            oskar.entityState = IDLE_STATE;
-
-            Entity& hugo = getEntityById(s_hugoEntityId);
-            getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
-            getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
-            getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
-            getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
-            getComponentFromEntity<AttackingComponent>(hugo)->shouldWaitToDie = true;
-            hugo.entityState = IDLE_STATE;
-
-            _gangsterConfrontationStageData.reset();
-
-            break;
-        }
-        case PHONE_CONFRONTATION_STAGE:
-        {
-            _currentLevelStage = PHONE_CONFRONTATION_STAGE;
-
-            _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
-            _uiSystem.pushTensionBar();
-
-            Entity& player = getEntityById(k_playerEntityId);
-            getComponentFromEntity<TransformComponent>(player)->position.x = 200.f;
-            getComponentFromEntity<SpriteComponent>(player)->flipX = true;
-            player.entityState = ON_CUTSCENE_STATE;
-
-            Entity& darwin = getEntityById(s_darwinEntityId);
-            getComponentFromEntity<TransformComponent>(darwin)->position = { 245.f, 117.f };
-            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
-
-            Entity& oskar = getEntityById(s_oskarEntityId);
-            getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
-            oskar.entityState = DEAD_STATE;
-
-            Entity& hugo = getEntityById(s_hugoEntityId);
-            getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
-            getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
-            getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = getComponentFromEntity<AttackingComponent>(hugo)->numberOfHitsToFall + 1;
-            hugo.entityState = WAIT_TO_DIE_STATE;
-
-            _phoneConfrontationStageData.reset();
-            break;
-        }
-        }
-    }
-
-    if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
-    {
-        _renderingSystem.setTargetAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
-            _renderingSystem._debugAmbientColorPicker[1] * 255,
-            _renderingSystem._debugAmbientColorPicker[2] * 255);
-    }
-    
-
-    ImGui::Checkbox("Toogle Camera Follow Player", &_levelCamera.canFollowTarget);
-    ImGui::DragFloat("Camera Pos X", &_levelCamera.targetPosition.x);
-    ImGui::DragFloat("Camera Pos Y", &_levelCamera.targetPosition.y);
-    ImGui::DragFloat("Camera zoom", &_levelCamera.zoom, 0.01f, 1.f, 2.f);
-    if (ImGui::Button("Reset camera"))
-    {
-        _levelCamera.canFollowTarget = true;
-        _levelCamera.zoom = 1.f;
-    }
-
-    ImGui::End();
-
-    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Entity Looker");
-
-    static char* entityNameSerach;
-
-    ImGui::BeginChild("##tree", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened);
-
-    //ImGui::SetNextItemWidth(-FLT_MIN);
-    //ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F, ImGuiInputFlags_Tooltip);
-    //ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
-    //if (ImGui::InputTextWithHint("##Filter", "incl,-excl", entityNameSerach, k_entityNameMaxCharacters, ImGuiInputTextFlags_EscapeClearsAll))
-    //{
-    //    //Filter.Build();
-    //}
-    //ImGui::PopItemFlag();
-
-    ImGui::BeginTable("##bg", 1, ImGuiTableFlags_RowBg);
-    
-    static char entityNameToShow[k_entityNameMaxCharacters] = { 0 };
-
-    for (Entity& entity : getAllEntities())
-    {
-        if (entity.id == k_invalidId)
-        {
-            continue;
+            Entity& entity = addEntity("debugEntity", getComponentFromEntity<TransformComponent>(player)->position);
+            addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
         }
 
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::PushID(entity.id);
-        ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+        if (ImGui::Button("Iterate on last added entity"))
+        {
+            Entity& e = addEntity("debugEntity");
+            e.debugName = "Light";
 
-        memset(entityNameToShow, 0, k_entityNameMaxCharacters);
-        sprintf(entityNameToShow, "Entity Id: %i", entity.id);
-        ImGui::TreeNodeEx(entity.debugName == nullptr ? entityNameToShow : entity.debugName, treeFlags);
+            //_gangsterConfrontationStageData.canDarwinComeClose = true;
 
-        ImGui::PopID();
+            //player.entityState = IDLE_STATE;
+            //Entity& hugo = getEntityById(s_hugoEntityId);
+            //getComponentFromEntity<TransformComponent>(hugo)->position.x = getComponentFromEntity<TransformComponent>(player)->position.x;
+
+            //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
+            //Entity& entity = getLastAddedEntity();
+            //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
+            //addComponentToEntity<MovementComponent>(entity);
+            //addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
+            //getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
+
+              //Entity& darwin = getEntityById(s_darwinEntityId);
+            //getComponentFromEntity<TransformComponent>(darwin)->position = {293.f, 117.f };
+            //getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+        }
+
+        ImGui::SeparatorText("Levels");
+
+        static int s_levelStageToChangeTo = MARKETING_PHONE_STAGE;
+        ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
+        if (ImGui::Button("Change to selected level stage"))
+        {
+            _uiSystem.destroyCurrentDialogue();
+            _uiSystem.popTensionBar();
+
+            switch (s_levelStageToChangeTo)
+            {
+            case MARKETING_PHONE_STAGE:
+                _currentLevelStage = MARKETING_PHONE_STAGE;
+                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
+                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                s_playerTension = 0;
+                break;
+            case FIRST_DAD_PHONE_STAGE:
+                _currentLevelStage = FIRST_DAD_PHONE_STAGE;
+                _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                s_playerTension = 80;
+                break;
+            case DARWIN_CONVERSATION_STAGE:
+            {
+                _currentLevelStage = FIRST_DAD_PHONE_STAGE;
+                _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
+                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                startTimer(s_multiPurpuseTimer);
+                s_playerTension = 20;
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position = getComponentFromEntity<TransformComponent>(darwin)->startingPosition;
+                _darwinConversationStageData.reset();
+                break;
+            }
+            case GANGSTER_CONFRONTATION_STAGE:
+            {
+                _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
+                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position = { 293.f, 117.f };
+                getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+
+                Entity& player = getEntityById(k_playerEntityId);
+                getComponentFromEntity<TransformComponent>(player)->position.x = getComponentFromEntity<TransformComponent>(player)->startingPosition.x;
+                player.entityState = IDLE_STATE;
+
+                Entity& oskar = getEntityById(s_oskarEntityId);
+                getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
+                getComponentFromEntity<AttackingComponent>(oskar)->damageCounter = 0;
+                oskar.entityState = IDLE_STATE;
+
+                Entity& hugo = getEntityById(s_hugoEntityId);
+                getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
+                getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+                getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
+                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
+                getComponentFromEntity<AttackingComponent>(hugo)->shouldWaitToDie = true;
+                hugo.entityState = IDLE_STATE;
+
+                _gangsterConfrontationStageData.reset();
+
+                break;
+            }
+            case PHONE_CONFRONTATION_STAGE:
+            {
+                _currentLevelStage = PHONE_CONFRONTATION_STAGE;
+
+                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+                _uiSystem.pushTensionBar();
+
+                Entity& player = getEntityById(k_playerEntityId);
+                getComponentFromEntity<TransformComponent>(player)->position.x = 200.f;
+                getComponentFromEntity<SpriteComponent>(player)->flipX = true;
+                player.entityState = ON_CUTSCENE_STATE;
+
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position = { 245.f, 117.f };
+                getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+
+                Entity& oskar = getEntityById(s_oskarEntityId);
+                getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
+                oskar.entityState = DEAD_STATE;
+
+                Entity& hugo = getEntityById(s_hugoEntityId);
+                getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
+                getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+                getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = getComponentFromEntity<AttackingComponent>(hugo)->numberOfHitsToFall + 1;
+                hugo.entityState = WAIT_TO_DIE_STATE;
+
+                _phoneConfrontationStageData.reset();
+                break;
+            }
+            }
+        }
+
+        if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
+        {
+            _renderingSystem.setTargetAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
+                _renderingSystem._debugAmbientColorPicker[1] * 255,
+                _renderingSystem._debugAmbientColorPicker[2] * 255);
+        }
+
+
+        ImGui::Checkbox("Toogle Camera Follow Player", &_levelCamera.canFollowTarget);
+        ImGui::DragFloat("Camera Pos X", &_levelCamera.targetPosition.x);
+        ImGui::DragFloat("Camera Pos Y", &_levelCamera.targetPosition.y);
+        ImGui::DragFloat("Camera zoom", &_levelCamera.zoom, 0.01f, 1.f, 2.f);
+        if (ImGui::Button("Reset camera"))
+        {
+            _levelCamera.canFollowTarget = true;
+            _levelCamera.zoom = 1.f;
+        }
+
+        ImGui::End();
     }
 
-        //for (ExampleTreeNode* node : root_node->Childs)
-        //    if (Filter.PassFilter(node->Name)) // Filter root node
-        //        DrawTreeNode(node);
-    ImGui::EndTable();
+    // Entity Inspector
+    {
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Entity Looker");
 
-    ImGui::EndChild();
+        static Entity* selectedEntityToInspect = nullptr;
+        static bool isSelectedEntityOutlineVisible = false;
 
-    ImGui::End();
+        // Left side -> entities tree
+        {
+            ImGui::BeginChild("##tree", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened);
+            if (ImGui::BeginTable("##bg", 1, ImGuiTableFlags_RowBg))
+            {
+                if (selectedEntityToInspect && isSelectedEntityOutlineVisible)
+                {
+                    Vec2 position = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect)->position;
+                    auto* s = getComponentFromEntity<SpriteComponent>(*selectedEntityToInspect);
+                    IVec2 debugSize = s ? s->getCurrentSize() : IVec2(1, 1);
+
+                    RectCollider outline = { {0,0}, debugSize };
+                    DebugSystem::debugRect(position, outline, { 255, 135, 0 });
+                }
+
+                for (Entity& entity : getAllEntities())
+                {
+                    if (entity.id == k_invalidId)
+                    {
+                        continue;
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::PushID(entity.id);
+
+                    ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+
+                    bool isSelectedEntity = selectedEntityToInspect && (selectedEntityToInspect->id == entity.id);
+                    if (isSelectedEntity)
+                    {
+                        treeFlags |= ImGuiTreeNodeFlags_Selected;
+                    }
+
+                    ImGui::TreeNodeEx(entity.debugName, treeFlags);
+
+                    if (ImGui::IsItemFocused())
+                    {
+                        selectedEntityToInspect = &entity;
+                        isSelectedEntityOutlineVisible = true;
+                    }
+
+                    ImGui::PopID();
+                }
+                ImGui::EndTable();
+            }
+            ImGui::EndChild();
+        }
+
+        ImGui::SameLine();
+
+        // Right Side -> Properties
+        ImGui::BeginGroup();
+        if (selectedEntityToInspect)
+        {
+            ImGui::Text("Entity: %s", selectedEntityToInspect->debugName);
+            ImGui::TextDisabled("Id: %i", selectedEntityToInspect->id);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5 / 7.0f, 0.6f, 0.6f));
+            if (ImGui::Button("Toggle Focus"))
+            {
+                _levelCamera.canFollowTarget = !_levelCamera.canFollowTarget;
+
+                if (!_levelCamera.canFollowTarget)
+                {
+                    _levelCamera.targetPosition.x = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect)->position.x;
+                }
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(6 / 7.0f, 0.6f, 0.6f));
+            if (ImGui::Button("Toggle Outline"))
+            {
+                isSelectedEntityOutlineVisible = !isSelectedEntityOutlineVisible;
+            }
+            ImGui::PopStyleColor();
+
+            if (startInspectorComponentSection<TransformComponent>(selectedEntityToInspect))
+            {
+                auto* t = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect);
+                inspectFloatProperty("position.x", &t->position.x);
+                inspectFloatProperty("position.y", &t->position.y);
+                inspectFloatProperty("scale.x", &t->scale.x);
+                inspectFloatProperty("scale.y", &t->scale.y);
+
+                endInspectorComponentSection();
+            }
+        }
+
+        ImGui::EndGroup();
+        ImGui::End();
+    }
 }

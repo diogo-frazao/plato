@@ -143,7 +143,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		bool isAnimatedSprite = spriteComponent->numberOfFrames > 0;
 		if (isAnimatedSprite)
 		{
-			frameSizeX = (spriteComponent->size.x / spriteComponent->numberOfFrames);
+			frameSizeX = spriteComponent->getCurrentSize().x;
 			currentOffsetX = spriteComponent->animationData.currentFrame * frameSizeX;
 		}
 
@@ -721,7 +721,7 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->scale.x = 1.3f;
 		transformComponent->resetScaleLerp = 1.f;
 
-		Entity& takeoffParticle = addEntity({ transformComponent->position.x + 10, transformComponent->position.y + 15 });
+		Entity& takeoffParticle = addEntity("takeoffParticle", { transformComponent->position.x + 10, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.6f, 0.6f };
@@ -746,7 +746,7 @@ void MovementSystem::processMainCharacterMovement()
 		(wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
 	if (changedDirectionThisFrame)
 	{
-		Entity& turnParticle = addEntity({ transformComponent->position.x + 12, transformComponent->position.y + 15 });
+		Entity& turnParticle = addEntity("turnParticle", { transformComponent->position.x + 12, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(turnParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.7f, 0.7f };

@@ -76,11 +76,22 @@ struct SpriteComponent
 		this->animationData.millisecondsToChangeToNextFrame = millisecondsToChangeToNextFrame;
 	}
 
+	// Size of the current sprite
+	IVec2 getCurrentSize()
+	{
+		if (numberOfFrames == 0)
+		{
+			return size;
+		}
+
+		return { (this->size.x / this->numberOfFrames), size.y };
+	}
+
 	// TODO: Improve if needed. Currently all animated sprites are expected to be on a single row
 
 	// Starting offset on the atlas
 	IVec2 atlasOffset;
-	// The size of each sprite (or just one if non animated)
+	// The total size the sprite (or just one if non animated)
 	IVec2 size;
 	// Atlas the sprite(s) belong to
 	AtlasType atlas = GAME_ATLAS;

@@ -99,19 +99,19 @@ void App::update()
             ImGui::ShowDemoWindow(&showDemoWindow);
         }
 
-        LevelManager::getCurrentLevel()->imguiRender();
-
         render(renderAlpha);
     }
 }
 
 void App::render(float renderAlpha)
 {
-    ImGui::Render();
     SDL_SetRenderDrawColor(s_renderer, 255, 255, 255, 255);
     SDL_RenderClear(s_renderer);
 
     LevelManager::getCurrentLevel()->render(renderAlpha);
+
+    LevelManager::getCurrentLevel()->imguiRender();
+    ImGui::Render();
 
     // TODO: improve this Disable logical size for ImGui rendering at native resolution
     int windowWidth = 0;
