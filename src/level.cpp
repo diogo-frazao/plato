@@ -1926,7 +1926,11 @@ void inspectFloatProperty(char* name, float* variable)
 
 void inspectColorProperty(char* name, SDL_Color* color)
 {
-    static float colorArray[4] = { (float)color->r / 255.f, (float)color->g / 255.f, (float)color->b / 255.f, (float)color->a / 255.f };
+    static float colorArray[4];
+    colorArray[0] = (float)color->r / 255.f;
+    colorArray[1] = (float)color->g / 255.f;
+    colorArray[2] = (float)color->b / 255.f;
+    colorArray[3] = (float)color->a / 255.f;
 
     ImGui::TableNextRow();
     ImGui::PushID(name);
@@ -1936,12 +1940,13 @@ void inspectColorProperty(char* name, SDL_Color* color)
     ImGui::TableNextColumn();
 
     ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::ColorEdit4(name, colorArray);
-
-    color->r = colorArray[0] * 255;
-    color->g = colorArray[1] * 255;
-    color->b = colorArray[2] * 255;
-    color->a = colorArray[3] * 255;
+    if (ImGui::ColorEdit4(name, colorArray))
+    {
+        color->r = colorArray[0] * 255;
+        color->g = colorArray[1] * 255;
+        color->b = colorArray[2] * 255;
+        color->a = colorArray[3] * 255;
+    }
 
     ImGui::PopID();
 }
