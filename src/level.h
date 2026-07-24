@@ -204,10 +204,11 @@ inline Entity& getLastAddedEntity()
 	return entityManager._entities[entityManager._lastValidEntityId];
 }
 
-inline Entity& addEntity(char* debugName, Vec2 position = Vec2())
+inline Entity& addEntity(const char* debugName, Vec2 position = Vec2())
 {
 	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
-	entity.debugName = debugName;
+
+	strncpy(entity.debugName, debugName, k_entityMaxNameCharacters);
 	auto* t = addComponentToEntity<TransformComponent>(entity);
 	t->position = position;
 	t->previousPosition = position;

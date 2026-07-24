@@ -9,7 +9,7 @@
 struct Entity
 {
 #ifndef RELEASE_BUILD
-	char* debugName = { 0 };
+	char debugName[k_entityMaxNameCharacters];
 #endif 
 
 	int32_t id = k_invalidId;

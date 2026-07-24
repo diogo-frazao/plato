@@ -1988,6 +1988,11 @@ void inspectSpriteProperty(char* name, SpriteComponent* s)
     ImGui::PopID();
 }
 
+void iterateOnLastPlacedEntity()
+{
+
+}
+
 void ECSLevel::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
@@ -2065,7 +2070,6 @@ void ECSLevel::imguiRender()
         if (ImGui::Button("Iterate on last added entity"))
         {
             Entity& e = addEntity("debugEntity");
-            e.debugName = "Light";
 
             //_gangsterConfrontationStageData.canDarwinComeClose = true;
 
@@ -2213,13 +2217,30 @@ void ECSLevel::imguiRender()
 
         // Left side -> entities tree
         {
+            static char name[256] = "";
+            ImGui::SetNextItemWidth(130);
+            ImGui::InputTextWithHint("##", "Enter entity name", name, IM_ARRAYSIZE(name));
+            ImGui::SameLine();
+            if (ImGui::Button("Add entity"))
+            {
+                addEntity(name);
+                name[0] = '\0';
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("iterateOnLastPlacedEntity"))
+            {
+                iterateOnLastPlacedEntity();
+            }
+
             ImGui::BeginChild("##tree", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened);
             if (ImGui::BeginTable("##bg", 1, ImGuiTableFlags_RowBg))
             {
                 if (selectedEntityToInspect && isSelectedEntityOutlineVisible)
                 {
                     Vec2 position = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect)->position;
-                    auto* s = getComponentFromEntity<SpriteComponent>(*selectedEntityToInspect);
+                    auto* s = entityHasComponent<SpriteComponent>(*selectedEntityToInspect) ? getComponentFromEntity<SpriteComponent>(*selectedEntityToInspect) : nullptr;
                     IVec2 debugSize = s ? s->getCurrentSize() : IVec2(1, 1);
 
                     RectCollider outline = { {0,0}, debugSize };
@@ -2311,7 +2332,22 @@ void ECSLevel::imguiRender()
                 endInspectorComponentSection();
             }
 
+            if (startInspectorComponentSection<RectColliderComponent>(selectedEntityToInspect))
+            {
+                endInspectorComponentSection();
+            }
+            
+            if (startInspectorComponentSection<MovementComponent>(selectedEntityToInspect))
+            {
+                endInspectorComponentSection();
+            }
+
+            if (startInspectorComponentSection<AttackingComponent>(selectedEntityToInspect))
+            {
+                endInspectorComponentSection();
+            }
         }
+
         ImGui::EndGroup();
         ImGui::End();
     }

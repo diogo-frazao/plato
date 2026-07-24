@@ -11,6 +11,7 @@ inline constexpr uint16_t k_maxLevels = 1;
 inline bool s_isImGuiOpen = true;
 
 // ECS Related
+inline constexpr uint8_t k_entityMaxNameCharacters = 64;
 inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
 inline constexpr uint32_t k_playerEntityId = 0;
