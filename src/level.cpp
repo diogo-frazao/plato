@@ -1924,6 +1924,70 @@ void inspectFloatProperty(char* name, float* variable)
     ImGui::PopID();
 }
 
+void inspectColorProperty(char* name, SDL_Color* color)
+{
+    static float colorArray[4] = { (float)color->r / 255.f, (float)color->g / 255.f, (float)color->b / 255.f, (float)color->a / 255.f };
+
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    ImGui::ColorEdit4(name, colorArray);
+
+    color->r = colorArray[0] * 255;
+    color->g = colorArray[1] * 255;
+    color->b = colorArray[2] * 255;
+    color->a = colorArray[3] * 255;
+
+    ImGui::PopID();
+}
+
+template<typename Enum>
+void inspectEnumProperty(char* name, Enum* currentEnumType, const char* allEnumTypesAsString)
+{
+    int currentEnumTypeAsInt = (int)*currentEnumType;
+
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::Combo(name, &currentEnumTypeAsInt, allEnumTypesAsString))
+    {
+        *currentEnumType = (Enum)currentEnumTypeAsInt;
+    }
+
+    ImGui::PopID();
+}
+
+void inspectSpriteProperty(char* name, SpriteComponent* s)
+{
+    int currenSpriteAsInt = (int)s->sprite;
+
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::Combo(name, &currenSpriteAsInt, s_allSpritesAsString))
+    {
+        SpriteType newSpriteType = (SpriteType)currenSpriteAsInt;
+        s->setSpriteData(newSpriteType);
+    }
+
+    ImGui::PopID();
+}
+
 void ECSLevel::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
@@ -2236,8 +2300,18 @@ void ECSLevel::imguiRender()
 
                 endInspectorComponentSection();
             }
-        }
 
+            if (startInspectorComponentSection<SpriteComponent>(selectedEntityToInspect))
+            {
+                auto* s = getComponentFromEntity<SpriteComponent>(*selectedEntityToInspect);
+                inspectColorProperty("color", &s->color);
+                inspectEnumProperty("layer", &s->layer, s_allLayersAsString);
+                inspectSpriteProperty("sprite", s);
+
+                endInspectorComponentSection();
+            }
+
+        }
         ImGui::EndGroup();
         ImGui::End();
     }
