@@ -10,6 +10,7 @@
 #include <SDL3/SDL.h>
 #include <string>
 #include <stdint.h>
+#include "debugUtils.h"
 
 #include "level.h"
 #include "input.h"
@@ -67,6 +68,7 @@ void App::update()
             //TODO: Remove press esc to close game
             if (_wasKeyPressedThisFrame(SDL_SCANCODE_ESCAPE))
             {
+                copyAllChangesToClipboard();
                 return;
             }
         }

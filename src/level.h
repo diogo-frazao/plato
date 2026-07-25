@@ -256,19 +256,3 @@ inline SDL_FRect convertWorldRectToCameraSpace(const SDL_FRect& worldRect)
 
 	return { posInCameraSpace.x, posInCameraSpace.y, sizeInCameraSpace.x, sizeInCameraSpace.y };
 }
-
-template<typename T>
-bool createInspectorComponentSeparator(Entity* entity)
-{
-	if (!entityHasComponent<T>(*entity))
-	{
-		return false;
-	}
-
-	ImGui::Separator();
-	ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
-	ImGui::Text(typeid(T).name());
-	ImGui::PopStyleColor();
-
-	return true;
-}

@@ -18,6 +18,19 @@ struct TransformComponent
 	// Used every frame to reset the current scale back to {1,1}. Changed at runtime to have slow/fast scale effects
 	float resetScaleLerp = 1.f;
 	bool useDynamicScale = false;
+
+	// Used for inspector debugging. Only needs to print the variables exposed to the inspector.
+	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
+	{
+		int bytesWritten = snprintf(buffer + *currentWriteByte, bufferSize - *currentWriteByte,
+			"getComponentFromEntity<TransformComponent>(%s)->position = { %.2ff, %.2ff };\ngetComponentFromEntity<TransformComponent>(%s)->scale = { %.2ff, %.2ff };\n",
+			entityName, position.x, position.y, entityName, scale.x, scale.y);
+
+		if (bytesWritten > 0)
+		{
+			*currentWriteByte += bytesWritten;
+		}
+	}
 };
 
 struct AnimationData
@@ -122,6 +135,19 @@ struct SpriteComponent
 
 	// Point where the sprite rotates around
 	RotationPivot rotationPivotType = DEFAULT_CENTER_ROTATION;
+
+	// Used for inspector debugging. Only needs to print the variables exposed to the inspector.
+	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
+	{
+		int bytesWritten = snprintf(buffer + *currentWriteByte, bufferSize - *currentWriteByte, 
+			"getComponentFromEntity<SpriteComponent>(%s)->color = {% i,% i,% i,% i}; \ngetComponentFromEntity<SpriteComponent>(%s)->layer = %i; \ngetComponentFromEntity<SpriteComponent>(%s)->setSpriteData(%i);\n",
+			entityName, color.r, color.g, color.b, color.a, entityName, (int)layer, entityName, (int)sprite);
+
+		if (bytesWritten > 0)
+		{
+			*currentWriteByte += bytesWritten;
+		}
+	}
 };
 
 struct RectColliderComponent

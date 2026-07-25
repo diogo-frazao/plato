@@ -2,6 +2,7 @@
 
 #include "core/input.h"
 #include "components.h"
+#include "debugUtils.h"
 #include "imgui.h"
 #include <SDL3/SDL_render.h>
 
@@ -1884,115 +1885,6 @@ void ECSLevel::render(float renderAlpha)
     _renderingSystem.renderCrosshair(renderAlpha);
 }
 
-template<typename T>
-bool startInspectorComponentSection(Entity* entity)
-{
-    if (!createInspectorComponentSeparator<T>(entity))
-    {
-        return false;
-    }
-
-    if (!ImGui::BeginTable("##properties", 2, ImGuiTableFlags_Resizable))
-    {
-        return false;
-    }
-
-    ImGui::PushID(entity->id);
-    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
-    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-    return true;
-}
-
-void endInspectorComponentSection()
-{
-    ImGui::PopID();
-    ImGui::EndTable();
-}
-
-void inspectFloatProperty(char* name, float* variable)
-{
-    ImGui::TableNextRow();
-    ImGui::PushID(name);
-    ImGui::TableNextColumn();
-    ImGui::AlignTextToFramePadding();
-    ImGui::TextUnformatted(name);
-    ImGui::TableNextColumn();
-
-    ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::SliderFloat("##Editor", variable, *variable - 1.f, *variable + 1.f);
-
-    ImGui::PopID();
-}
-
-void inspectColorProperty(char* name, SDL_Color* color)
-{
-    static float colorArray[4];
-    colorArray[0] = (float)color->r / 255.f;
-    colorArray[1] = (float)color->g / 255.f;
-    colorArray[2] = (float)color->b / 255.f;
-    colorArray[3] = (float)color->a / 255.f;
-
-    ImGui::TableNextRow();
-    ImGui::PushID(name);
-    ImGui::TableNextColumn();
-    ImGui::AlignTextToFramePadding();
-    ImGui::TextUnformatted(name);
-    ImGui::TableNextColumn();
-
-    ImGui::SetNextItemWidth(-FLT_MIN);
-    if (ImGui::ColorEdit4(name, colorArray))
-    {
-        color->r = colorArray[0] * 255;
-        color->g = colorArray[1] * 255;
-        color->b = colorArray[2] * 255;
-        color->a = colorArray[3] * 255;
-    }
-
-    ImGui::PopID();
-}
-
-template<typename Enum>
-void inspectEnumProperty(char* name, Enum* currentEnumType, const char* allEnumTypesAsString)
-{
-    int currentEnumTypeAsInt = (int)*currentEnumType;
-
-    ImGui::TableNextRow();
-    ImGui::PushID(name);
-    ImGui::TableNextColumn();
-    ImGui::AlignTextToFramePadding();
-    ImGui::TextUnformatted(name);
-    ImGui::TableNextColumn();
-
-    ImGui::SetNextItemWidth(-FLT_MIN);
-    if (ImGui::Combo(name, &currentEnumTypeAsInt, allEnumTypesAsString))
-    {
-        *currentEnumType = (Enum)currentEnumTypeAsInt;
-    }
-
-    ImGui::PopID();
-}
-
-void inspectSpriteProperty(char* name, SpriteComponent* s)
-{
-    int currenSpriteAsInt = (int)s->sprite;
-
-    ImGui::TableNextRow();
-    ImGui::PushID(name);
-    ImGui::TableNextColumn();
-    ImGui::AlignTextToFramePadding();
-    ImGui::TextUnformatted(name);
-    ImGui::TableNextColumn();
-
-    ImGui::SetNextItemWidth(-FLT_MIN);
-    if (ImGui::Combo(name, &currenSpriteAsInt, s_allSpritesAsString))
-    {
-        SpriteType newSpriteType = (SpriteType)currenSpriteAsInt;
-        s->setSpriteData(newSpriteType);
-    }
-
-    ImGui::PopID();
-}
-
 void iterateOnLastPlacedEntity()
 {
 
@@ -2234,7 +2126,16 @@ void ECSLevel::imguiRender()
 
             ImGui::SameLine();
 
-            if (ImGui::Button("iterateOnLastPlacedEntity"))
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+            if (ImGui::Button("Copy all changes to clipboard"))
+            {
+                copyAllChangesToClipboard();
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Debug"))
             {
                 iterateOnLastPlacedEntity();
             }
@@ -2319,10 +2220,10 @@ void ECSLevel::imguiRender()
             if (startInspectorComponentSection<TransformComponent>(selectedEntityToInspect))
             {
                 auto* t = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect);
-                inspectFloatProperty("position.x", &t->position.x);
-                inspectFloatProperty("position.y", &t->position.y);
-                inspectFloatProperty("scale.x", &t->scale.x);
-                inspectFloatProperty("scale.y", &t->scale.y);
+                inspectFloatProperty("position.x", &t->position.x, selectedEntityToInspect);
+                inspectFloatProperty("position.y", &t->position.y, selectedEntityToInspect);
+                inspectFloatProperty("scale.x", &t->scale.x, selectedEntityToInspect);
+                inspectFloatProperty("scale.y", &t->scale.y, selectedEntityToInspect);
 
                 endInspectorComponentSection();
             }
@@ -2330,9 +2231,9 @@ void ECSLevel::imguiRender()
             if (startInspectorComponentSection<SpriteComponent>(selectedEntityToInspect))
             {
                 auto* s = getComponentFromEntity<SpriteComponent>(*selectedEntityToInspect);
-                inspectColorProperty("color", &s->color);
-                inspectEnumProperty("layer", &s->layer, s_allLayersAsString);
-                inspectSpriteProperty("sprite", s);
+                inspectColorProperty("color", &s->color, selectedEntityToInspect);
+                inspectEnumProperty("layer", &s->layer, s_allLayersAsString, selectedEntityToInspect);
+                inspectSpriteProperty("sprite", s, selectedEntityToInspect);
 
                 endInspectorComponentSection();
             }
@@ -2352,7 +2253,6 @@ void ECSLevel::imguiRender()
                 endInspectorComponentSection();
             }
         }
-
         ImGui::EndGroup();
         ImGui::End();
     }
