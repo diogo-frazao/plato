@@ -203,6 +203,11 @@ void setImGuiWindowsTransparent()
 
 void testResolutions(SDL_Window* window)
 {
+    if (s_isImGuiOpen)
+    {
+        return;
+    }
+
     if (_wasKeyPressedThisFrame(SDL_SCANCODE_1))
     {
         SDL_SetWindowSize(window, 960, 540);

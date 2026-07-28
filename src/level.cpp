@@ -180,53 +180,36 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& ceilingLightLeft = addEntity("ceilingLightLeft");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightLeft);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightLeft);
+        Entity& lightTopLeftB = addEntity("lightTopLeftB");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftB);
+        t->position = { -0.88f, 78.00f };
+        t->scale = { 1.37f, 0.70f };
+        addComponentToEntity<SpriteComponent>(lightTopLeftB);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftB);
+        s->color = { 255, 184, 107, 15 };
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 167, 0, 18 };
-        t->scale = { 1.f, 1.f };
-        t->position = { 30, 55 };
     }
 
     {
-        Entity& ceilingLightRight = addEntity("ceilingLightRight");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(ceilingLightRight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(ceilingLightRight);
+        Entity& lightTopLeftM = addEntity("lightTopLeftM");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftM);
+        t->position = { 36.95f, 76.35f };
+        t->scale = { 0.80f, 0.70f };
+        addComponentToEntity<SpriteComponent>(lightTopLeftM);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftM);
+        s->color = { 255, 133, 0, 12 };
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 167, 0, 17 };
-        t->scale = { 1.f, 1.f };
-        t->position = { 270, k_restaurantBaseY - 14.f };
     }
 
     {
-        Entity& highlightCeilingLeft = addEntity("highlightCeilingLeft");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingLeft);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingLeft);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 228, 228, 66, 40 };
-        t->scale = { 0.65f, 0.15f };
-        t->position = { 62, k_restaurantBaseY - 1.f };
-    }
-
-    {
-        Entity& highlightCeilingRight = addEntity("highlightCeilingRight");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(highlightCeilingRight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(highlightCeilingRight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 228, 228, 66, 40 };
-        t->scale = { 0.65f, 0.15f };
-        t->position = { 305, k_restaurantBaseY + 1.f };
-    }
-
-    {
-        Entity& exitLight = addEntity("exitLight");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(exitLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(exitLight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 0, 255, 50, 20 };
-        t->scale = { 1.3f, 0.8f };
-        t->position = { 10, k_restaurantBaseY + 26.f };
+        Entity& lightTopLeftS = addEntity("lightTopLeftS");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftS);
+        t->position = { 53.09f, 65.91f };
+        t->scale = { 0.55f, 0.80f };
+        addComponentToEntity<SpriteComponent>(lightTopLeftS);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftS);
+        s->color = { 255, 173, 84, 10 };
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
     }
 
     {
@@ -234,7 +217,7 @@ void setupInsideRestaurantScene()
         TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
         s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 255, 255, 15 };
+        s->color = { 255, 255, 255, 5 };
         t->scale = { 0.8f, 0.45f };
         t->position = { 106, k_restaurantBaseY + 29.f };
     }
@@ -250,13 +233,65 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& lampLight = addEntity("lampLight");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(lampLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(lampLight);
+        Entity& lightTopRightB = addEntity("lightTopRightB");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopRightB);
+        t->position = { 257.f, 78.00f };
+        t->scale = { 1.37f, 0.70f };
+        addComponentToEntity<SpriteComponent>(lightTopRightB);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightB);
+        s->color = { 255, 184, 107, 15 };
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 77, 0, 25 };
-        t->scale = { 0.47f, 0.47f };
-        t->position = { 325, k_restaurantBaseY + 31.f };
+    }
+
+    {
+        Entity& lightTopRightM = addEntity("lightTopRightM");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopRightM);
+        t->position = { 290.f, 75.19f };
+        t->scale = { 0.80f, 0.70f };
+        addComponentToEntity<SpriteComponent>(lightTopRightM);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightM);
+        s->color = { 255, 133, 0, 12 };
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& lightTopRightS = addEntity("lightTopRightS");
+        auto* t = getComponentFromEntity<TransformComponent>(lightTopRightS);
+        t->position = { 304.f, 65.91f };
+        t->scale = { 0.55f, 0.80f };
+        addComponentToEntity<SpriteComponent>(lightTopRightS);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightS);
+        s->color = { 255, 173, 84, 10 };
+        s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& lightHighlightLeft = addEntity("lightHighlightLeft");
+        auto* t = getComponentFromEntity<TransformComponent>(lightHighlightLeft);
+        t->position = { 56.f, 77.f };
+        addComponentToEntity<SpriteComponent>(lightHighlightLeft);
+        auto* s = getComponentFromEntity<SpriteComponent>(lightHighlightLeft);
+        s->color = { 255, 211, 131, 148 };
+        s->setupSpriteForLayer(LONG_THIN_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& lightHighlightRight = addEntity("lightHighlightRight");
+        auto* t = getComponentFromEntity<TransformComponent>(lightHighlightRight);
+        t->position = { 311.f, 78.f };
+        auto* s = addComponentToEntity<SpriteComponent>(lightHighlightRight);
+        s->color = { 255, 211, 131, 148 };
+        s->setupSpriteForLayer(LONG_THIN_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& bakedHighlights = addEntity("bakedHighlights");
+        addComponentToEntity<SpriteComponent>(bakedHighlights);
+        auto* t = getComponentFromEntity<TransformComponent>(bakedHighlights);
+        t->position = { 58.00f, 65.00f };
+        t->scale = { 1.00f, 1.00f };
+        auto* s = getComponentFromEntity<SpriteComponent>(bakedHighlights);
+        s->setupSpriteForLayer(RESTAURANT_BAKED_HIGHLIGHTS_SPRITE, IN_FRONT_CHAR_LAYER);
     }
 
     {
@@ -1794,10 +1829,6 @@ void ECSLevel::update()
 
     static float cameraOffsetXFromPlayer = 20.f;
     static bool testShake = false;
-    if (_wasKeyPressedThisFrame(SDL_SCANCODE_T))
-    {
-        _levelCamera.cameraShakeToPerform = LIGHT_SHAKE;
-    }
 
     // After all systems, update camera
     {
@@ -1857,6 +1888,11 @@ void ECSLevel::update()
             s_isImGuiOpen = !s_isImGuiOpen;
         }
 
+        if (s_isImGuiOpen)
+        {
+            return;
+        }
+
         // Destroy dialogue and reconstruct
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
         {
@@ -1887,7 +1923,14 @@ void ECSLevel::render(float renderAlpha)
 
 void iterateOnLastPlacedEntity()
 {
+    Entity& last = getEntityById(17);
+    if (!entityHasComponent<SpriteComponent>(last))
+    {
+        addComponentToEntity<SpriteComponent>(last);
+    }
 
+    auto* s = getComponentFromEntity<SpriteComponent>(last);
+    s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
 }
 
 void ECSLevel::imguiRender()

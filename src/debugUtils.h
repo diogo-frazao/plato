@@ -27,6 +27,7 @@ inline void registerEntityChangeAtRuntime(Entity* entity)
 
 inline void copyAllChangesToClipboard()
 {
+    bool appliedAtLeastOneChange = false;
     for (Entity* entity : s_entitiesThatChangedViaInspector)
     {
         if (!entity)
@@ -34,6 +35,7 @@ inline void copyAllChangesToClipboard()
             continue;
         }
 
+        appliedAtLeastOneChange = true;
         getComponentFromEntity<TransformComponent>(*entity)->writeComponentDataToBuffer(entity->debugName, s_printComponentsToClipboardBuffer, k_bufferSize, &s_currentWriteByte);
 
         if (entityHasComponent<SpriteComponent>(*entity))
@@ -50,7 +52,15 @@ inline void copyAllChangesToClipboard()
     memset(s_printComponentsToClipboardBuffer, 0, k_bufferSize - s_currentWriteByte);
     s_currentWriteByte = 0;
 
-    D_LOG(LOG, "Copied all changes to clipboard");
+    if (appliedAtLeastOneChange)
+    {
+    
+        D_LOG(LOG, "Copied all changes to clipboard");
+    }
+    else
+    {
+        D_LOG(WARNING, "No changes to copy");
+    }
 }
 
 template<typename T>

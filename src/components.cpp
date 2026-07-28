@@ -43,6 +43,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 73, 55 };
 		atlas = LIGHTS_ATLAS;
 		break;
+	case LONG_THIN_LIGHT_SPRITE:
+		atlasOffset = { 124, 145 };
+		size = { 66, 9 };
+		atlas = LIGHTS_ATLAS;
+		break;
 	case TODO_REMOVE_LEVEL_GEOMETRY_SPRITE:
 		atlasOffset = { 0, 180 };
 		size = { 320, 45 };
@@ -61,6 +66,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 	case TODO_REMOVE_RESTAURANT_FLOOR_SPRITE:
 		atlasOffset = { 323, 162 };
 		size = { 565, 44 };
+		atlas = GAME_ATLAS;
+		break;
+	case RESTAURANT_BAKED_HIGHLIGHTS_SPRITE:
+		atlasOffset = { 611, 214 };
+		size = { 521, 78 };
 		atlas = GAME_ATLAS;
 		break;
 	case GOLF_WEAPON_SPRITE:

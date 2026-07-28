@@ -23,8 +23,8 @@ struct TransformComponent
 	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
 	{
 		int bytesWritten = snprintf(buffer + *currentWriteByte, bufferSize - *currentWriteByte,
-			"getComponentFromEntity<TransformComponent>(%s)->position = { %.2ff, %.2ff };\ngetComponentFromEntity<TransformComponent>(%s)->scale = { %.2ff, %.2ff };\n",
-			entityName, position.x, position.y, entityName, scale.x, scale.y);
+			"auto* t = getComponentFromEntity<TransformComponent>(%s);\nt->position = { %.2ff, %.2ff };\nt->scale = { %.2ff, %.2ff };\n",
+			entityName, position.x, position.y, scale.x, scale.y);
 
 		if (bytesWritten > 0)
 		{
@@ -140,8 +140,8 @@ struct SpriteComponent
 	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
 	{
 		int bytesWritten = snprintf(buffer + *currentWriteByte, bufferSize - *currentWriteByte, 
-			"getComponentFromEntity<SpriteComponent>(%s)->color = {% i,% i,% i,% i}; \ngetComponentFromEntity<SpriteComponent>(%s)->layer = %i; \ngetComponentFromEntity<SpriteComponent>(%s)->setSpriteData(%i);\n",
-			entityName, color.r, color.g, color.b, color.a, entityName, (int)layer, entityName, (int)sprite);
+			"auto* s = getComponentFromEntity<SpriteComponent>(%s);\ns->color = {% i,% i,% i,% i};\ns->setupSpriteForLayer(%i, %i);\n",
+			entityName, color.r, color.g, color.b, color.a, (int)sprite, (int)layer);
 
 		if (bytesWritten > 0)
 		{

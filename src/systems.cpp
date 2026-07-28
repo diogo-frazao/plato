@@ -99,9 +99,9 @@ void RenderingSystem::render(float renderAlpha)
 
 	renderSpritesAtLayer(BEHIND_CHAR_LAYER, renderAlpha);
 	renderSpritesAtLayer(CHARACTER_LAYER, renderAlpha);
-	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
 	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
+	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
 	renderSpritesAtLayer(CELLPHONE_LAYER, renderAlpha);
 }
