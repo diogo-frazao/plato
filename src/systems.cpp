@@ -187,7 +187,22 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		}
 
 		SDL_Texture* atlas = loadAtlas(spriteComponent->atlas);
-		SDL_SetTextureColorMod(atlas, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
+
+		// Apply ambient light directly to characters layer
+		if (layer == CHARACTERS_LAYER)
+		{
+			// Since ambient light is just a rectangle that fills the whole screen, we can just apply it to the characters
+			uint8_t r = (uint8_t)((spriteComponent->color.r * _currentAmbientColor.r) / 255.f);
+			uint8_t g = (uint8_t)((spriteComponent->color.g * _currentAmbientColor.g) / 255.f);
+			uint8_t b = (uint8_t)((spriteComponent->color.b * _currentAmbientColor.b) / 255.f);
+
+			SDL_SetTextureColorMod(atlas, r, g, b);
+		}
+		else
+		{
+			SDL_SetTextureColorMod(atlas, spriteComponent->color.r, spriteComponent->color.g, spriteComponent->color.b);
+		}
+
 		SDL_SetTextureAlphaMod(atlas, spriteComponent->color.a);
 
 		SDL_FPoint rotationPoint;
