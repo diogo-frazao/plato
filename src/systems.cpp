@@ -97,13 +97,19 @@ void RenderingSystem::render(float renderAlpha)
 	computeLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	computeLightsAtLayer(FRONT_LIGHTS_LAYER);
 
-	renderSpritesAtLayer(BEHIND_CHAR_LAYER, renderAlpha);
-	renderSpritesAtLayer(CHARACTER_LAYER, renderAlpha);
+	renderSpritesAtLayer(BEHIND_LIGHTS_LAYER, renderAlpha);
+	// Ambient light is applied here because of true. Everything in BEHIND_LIGHTS_LAYER is affected
 	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
+	// We reserve this for baked highlights. Fake lights that shouldn't be affected by ambient light
+	renderSpritesAtLayer(BAKED_HIGHLIGHTS_LAYER, renderAlpha);
+	// Characters layer. Apply ambient light by multiplying the ambient color directly.
+	renderSpritesAtLayer(CHARACTERS_LAYER, renderAlpha);
+	// Lights. Will affect everything below
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
-	renderSpritesAtLayer(IN_FRONT_CHAR_LAYER, renderAlpha);
+	// Level geometry is not affected by lights nor ambient light.
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
-	renderSpritesAtLayer(CELLPHONE_LAYER, renderAlpha);
+	// UI Layer, on top of everything and not affected by anything.
+	renderSpritesAtLayer(UI_LAYER, renderAlpha);
 }
 
 void RenderingSystem::renderCrosshair(float renderAlpha)
@@ -466,7 +472,7 @@ void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
 	//	Vec2 smearPosition = { LevelManager::getCurrentLevel()->_levelCamera.worldPosition.x, hitLocation.y };
 	//	_crosshairSmear.entity = &addEntity(smearPosition);
 	//	auto* sprite = addComponentToEntity<SpriteComponent>(*_crosshairSmear.entity);
-	//	sprite->setupSpriteForLayer(SMEAR_MELEE_ATTACK_SPRITE, BEHIND_CHAR_LAYER);
+	//	sprite->setupSpriteForLayer(SMEAR_MELEE_ATTACK_SPRITE, BEHIND_LIGHTS_LAYER);
 	//	sprite->color = { 138, 148, 255, 100 };
 	//	sprite->rotationPivotType = TOP_LEFT_ROTATION;
 
@@ -725,7 +731,7 @@ void MovementSystem::processMainCharacterMovement()
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(takeoffParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.6f, 0.6f };
-		addComponentToEntity<SpriteComponent>(takeoffParticle)->setupAnimationForLayer(TAKEOFF_PARTICLE_SPRITE, BEHIND_CHAR_LAYER, false, 70, 70);
+		addComponentToEntity<SpriteComponent>(takeoffParticle)->setupAnimationForLayer(TAKEOFF_PARTICLE_SPRITE, BEHIND_LIGHTS_LAYER, false, 70, 70);
 		getComponentFromEntity<SpriteComponent>(takeoffParticle)->color = { 255, 255, 255, 200 };
 	}
 
@@ -750,7 +756,7 @@ void MovementSystem::processMainCharacterMovement()
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(turnParticle);
 		particleTransform->previousPosition = particleTransform->position;
 		particleTransform->scale = { 0.7f, 0.7f };
-		addComponentToEntity<SpriteComponent>(turnParticle)->setupAnimationForLayer(TURN_PARTICLE_SPRITE, BEHIND_CHAR_LAYER, false, 70, 70);
+		addComponentToEntity<SpriteComponent>(turnParticle)->setupAnimationForLayer(TURN_PARTICLE_SPRITE, BEHIND_LIGHTS_LAYER, false, 70, 70);
 		getComponentFromEntity<SpriteComponent>(turnParticle)->color = { 255, 255, 255, 200 };
 	}
 

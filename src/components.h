@@ -111,7 +111,7 @@ struct SpriteComponent
 	// Sprite type
 	SpriteType sprite = INVALID_SPRITE;
 	// The layer where this sprite is rendered on
-	LayerType layer = BEHIND_CHAR_LAYER;
+	LayerType layer = BEHIND_LIGHTS_LAYER;
 	// Color used to render this sprite
 	SDL_Color color = { 255, 255, 255, 255 };
 	// 0 for non animated sprites, X for the number of animations

@@ -60,13 +60,13 @@ void setupOutsideRestaurantScene()
     s_isInsideRestaurant = false;
 
     Entity& bg = addEntity("bg");
-    addComponentToEntity<SpriteComponent>(bg)->setupSpriteForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_CHAR_LAYER);
+    addComponentToEntity<SpriteComponent>(bg)->setupSpriteForLayer(TODO_REMOVE_BG_SPRITE, BEHIND_LIGHTS_LAYER);
 
     Entity& geometry = addEntity("geometry", { 0, 135 });
     addComponentToEntity<SpriteComponent>(geometry)->setupSpriteForLayer(TODO_REMOVE_LEVEL_GEOMETRY_SPRITE, LEVEL_GEOMETRY_LAYER);
 
     Entity& fg = addEntity("fg", { 34, 129 });
-    addComponentToEntity<SpriteComponent>(fg)->setupSpriteForLayer(TODO_REMOVE_FG_SPRITE, IN_FRONT_CHAR_LAYER);
+    addComponentToEntity<SpriteComponent>(fg)->setupSpriteForLayer(TODO_REMOVE_FG_SPRITE, BAKED_HIGHLIGHTS_LAYER);
 
     Entity& darwinLettersLight = addEntity("darwinLettersLight");
     addComponentToEntity<SpriteComponent>(darwinLettersLight)->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -100,7 +100,7 @@ void setupOutsideRestaurantScene()
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
     Entity& dummyEnemy = addEntity("dummyEnemy", { 160, 0 });
-    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, IN_FRONT_CHAR_LAYER, true, 70, 900);
+    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, BAKED_HIGHLIGHTS_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
@@ -165,7 +165,7 @@ void setupInsideRestaurantScene()
         Entity& bgColor = addEntity("bgColor");
         TransformComponent* t = getComponentFromEntity<TransformComponent>(bgColor);
         SpriteComponent* s = addComponentToEntity<SpriteComponent>(bgColor);
-        s->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
+        s->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_LIGHTS_LAYER);
         s->color = { 0, 0, 0, 255 };
         s->drawnAtScreenSpace = true;
         t->scale = { 322.f, 182.f };
@@ -174,7 +174,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& restaurant = addEntity("restaurant", { 14, k_restaurantBaseY });
-        addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_CHAR_LAYER);
+        addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_LIGHTS_LAYER);
         createBlockAtPositionWithSize({ 24, k_restaurantBaseY + 83.f }, { 81, 11 });
         createBlockAtPositionWithSize({ 104, k_restaurantBaseY + 75.f }, { 488, 18 });
     }
@@ -291,7 +291,8 @@ void setupInsideRestaurantScene()
         t->position = { 58.00f, 65.00f };
         t->scale = { 1.00f, 1.00f };
         auto* s = getComponentFromEntity<SpriteComponent>(bakedHighlights);
-        s->setupSpriteForLayer(RESTAURANT_BAKED_HIGHLIGHTS_SPRITE, IN_FRONT_CHAR_LAYER);
+        s->color = { 255, 255, 255, 180 };
+        s->setupSpriteForLayer(RESTAURANT_BAKED_HIGHLIGHTS_SPRITE, BAKED_HIGHLIGHTS_LAYER);
     }
 
     {
@@ -304,7 +305,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& darwin = addEntity("darwin", { 415.f, 117.f });
-        addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTER_LAYER);
+        addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTERS_LAYER);
         addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
 
         auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
@@ -318,7 +319,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& hugo = addEntity("hugo", { 179.f, 106.f });
-        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
+        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         // We can't attack hugo until oskar dies
         addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
@@ -332,7 +333,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& oskar = addEntity("oskar", { 242.f, 95.f });
-        addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTER_LAYER, true, 70, 900);
+        addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         addComponentToEntity<AttackingComponent>(oskar);
         getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
@@ -345,7 +346,7 @@ void setupInsideRestaurantScene()
     }
 
     Entity& golfWeapon = addEntity("golfWeapon");
-    addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_CHAR_LAYER);
+    addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_LIGHTS_LAYER);
     addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
 }   
 
@@ -384,11 +385,11 @@ void ECSLevel::start()
 
     Entity& cellphone = addEntity("cellphone", {10, 200});
     auto* cellphoneSprite = addComponentToEntity<SpriteComponent>(cellphone);
-    cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, CELLPHONE_LAYER);
+    cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, UI_LAYER);
     cellphoneSprite->drawnAtScreenSpace = true;
 
     // We don't need to set the sprite since the player's sprite is handled on the movement system
-    playerSprite->setLayer(CHARACTER_LAYER);
+    playerSprite->setLayer(CHARACTERS_LAYER);
     playerSprite->flipX = true;
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
@@ -2004,7 +2005,7 @@ void ECSLevel::imguiRender()
         if (ImGui::Button("Add Debug White Entity"))
         {
             Entity& entity = addEntity("debugEntity", getComponentFromEntity<TransformComponent>(player)->position);
-            addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_CHAR_LAYER);
+            addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, BEHIND_LIGHTS_LAYER);
         }
 
         if (ImGui::Button("Iterate on last added entity"))
@@ -2019,7 +2020,7 @@ void ECSLevel::imguiRender()
 
             //getComponentFromEntity<TransformComponent>(hugo)->position.x += 4.f;
             //Entity& entity = getLastAddedEntity();
-            //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTER_LAYER);
+            //getComponentFromEntity<SpriteComponent>(entity)->setupSpriteForLayer(GANGSTER_OSKAR_SPRITE, CHARACTERS_LAYER);
             //addComponentToEntity<MovementComponent>(entity);
             //addComponentToEntity<RectColliderComponent>(entity)->collider = RectCollider({ 0,0 }, { 13, 19 });
             //getComponentFromEntity<TransformComponent>(entity)->position = { 270.f, 100.f };
