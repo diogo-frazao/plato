@@ -1871,7 +1871,7 @@ void UISystem::update()
 			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
 			{
 				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
-				LevelManager::getCurrentLevel()->_levelCamera.doShake(shakeToPerform, 0.1f);
+				LevelManager::getCurrentLevel()->_levelCamera.doShake(shakeToPerform, 0.05f);
 				_currentDialogue.hasAppliedShakeForCurrentWord = true;
 			}
 
@@ -2773,6 +2773,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case PINK_WAVE_EFFECT:
 		dialogueCharacter.overrideColor = { 240, 79, 210 };
 		break;
+	case FATHER_EDWARD_EFFECT:
+		dialogueCharacter.overrideColor = { 198, 226, 210};
+		break;
 	case BLUE_EFFECT:
 		dialogueCharacter.overrideColor = { 77, 101, 180 };
 		break;
@@ -2782,6 +2785,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case RED_EFFECT:
 	case RED_SHAKE_EFFECT:
 		dialogueCharacter.overrideColor = { 198, 35, 35 };
+		break;
+	case INTERJECTION_EFFECT:
+		dialogueCharacter.rotationAngle = 1.f;
 		break;
 	default:
 		break;

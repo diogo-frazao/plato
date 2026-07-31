@@ -37,7 +37,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_C_2:
 				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_3:
-				return { "I BRING TO YOU THE [yellow]HOLY TECHNOLOGY[yellow] FROM [pink]FATHER EDWARD HIMSELF[pink]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "I BRING TO YOU THE [yellow]HOLY TECHNOLOGY[yellow] FROM [fatheredward]FATHER EDWARD[fatheredward] HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_4:
 				return { "AND YOU HAVE THE [redshake]AUDACITY[redshake] TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 				case MARKETING_PHONE_2_C_4_A:
@@ -59,7 +59,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_4:
 		return "[interjection]*Ahem*[interjection]";
 	case MARKETING_PHONE_5:
-		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [pink]FATHER EDWARD'S Research Department team[pink], here at KELIA", CELLPHONE_DIALOGUE, 5};
+		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [fatheredward]FATHER EDWARD'S[fatheredward] Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
 		return { "AND FOR [yellow]ONLY 499D[yellow], MR ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
@@ -93,7 +93,7 @@ TextDTO getTextInfo(TextType textType)
 		case MARKETING_PHONE_11_B_HIGH_TENSION:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_12:
-		return { "I bring you the [yellow]holy technology[yellow] from [pink]FATHER EDWARD himself[pink]", CELLPHONE_DIALOGUE, 10 };
+		return { "I bring you the [yellow]holy technology[yellow] from [fatheredward]FATHER EDWARD[fatheredward] himself", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_13:
 		return { "A man [pink]so humble[pink] that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_14:
@@ -499,6 +499,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "red") == 0)
 	{
 		return RED_EFFECT;
+	}
+
+	if (strcmp(effectName, "fatheredward") == 0)
+	{
+		return FATHER_EDWARD_EFFECT;
 	}
 
 	if (strcmp(effectName, "interjection") == 0)

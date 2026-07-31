@@ -313,6 +313,7 @@ enum TextEffectType
 	BLUE_EFFECT, // Important things
 	YELLOW_EFFECT, // Also important things
 	RED_EFFECT, // Negative but not necessarily mad
+	FATHER_EDWARD_EFFECT, // He has a custom color
 	//Wave
 	WAVE_EFFECT, // Playful
 	PINK_WAVE_EFFECT, // Playful + love/happiness
