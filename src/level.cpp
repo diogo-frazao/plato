@@ -750,17 +750,7 @@ void ECSLevel::update()
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_4, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B, ONE_DAD_PHONE_4_C });
             }
 
-            if (u.hasChosenOption(ONE_DAD_PHONE_4_C))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_4_C_1);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_4_C_1))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_4_C_2, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B });
-            }
-
-            if (u.hasChosenOption(ONE_DAD_PHONE_4_A) || u.hasChosenOption(ONE_DAD_PHONE_4_B))
+            if (u.hasChosenOption(ONE_DAD_PHONE_4_A) || u.hasChosenOption(ONE_DAD_PHONE_4_B) || u.hasChosenOption(ONE_DAD_PHONE_4_C))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_5);
             }
@@ -784,6 +774,7 @@ void ECSLevel::update()
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_9);
                 startTimer(s_multiPurpuseTimer);
+
             }
 
             // Darwin enters and interrupts father dialogue
@@ -835,7 +826,7 @@ void ECSLevel::update()
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_3))
             {
-                u.pushCellphoneDialogue(ONE_DARWIN_4);
+                u.pushCellphoneDialogue(ONE_DARWIN_5);
             }
 
             if (_darwinConversationStageData.canGetNearTable)
@@ -846,10 +837,10 @@ void ECSLevel::update()
                 }
             }
 
-            if (u.hasDialogueFinihsed(ONE_DARWIN_4))
+            /*if (u.hasDialogueFinihsed(ONE_DARWIN_4))
             {
                 u.pushCellphoneDialogue(ONE_DARWIN_5);
-            }
+            }*/
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_5))
             {
@@ -942,12 +933,6 @@ void ECSLevel::update()
             }
 
             if (u.hasDialogueFinihsed(ONE_DARWIN_15))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_16);
-
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_16))
             {
                 u.popTensionBar();
                 _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;

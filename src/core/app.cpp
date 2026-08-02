@@ -21,6 +21,12 @@ void testResolutions(SDL_Window* window);
 
 static bool s_isWindowFullscreen = false;
 
+void toggleFullscreen(SDL_Window* window)
+{
+    s_isWindowFullscreen = !s_isWindowFullscreen;
+    SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
+}
+
 void App::run()
 {
     init();
@@ -33,6 +39,7 @@ void App::init()
 {
     initSDL();
     initImgui();
+    toggleFullscreen(_window);
 }
 
 void App::update()

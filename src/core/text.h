@@ -74,8 +74,6 @@ enum TextType
 	ONE_DAD_PHONE_4_A,
 	ONE_DAD_PHONE_4_B,
 	ONE_DAD_PHONE_4_C,
-	ONE_DAD_PHONE_4_C_1,
-	ONE_DAD_PHONE_4_C_2,
 	ONE_DAD_PHONE_5,
 	ONE_DAD_PHONE_6,
 	ONE_DAD_PHONE_6_A,
@@ -88,7 +86,7 @@ enum TextType
 	ONE_DARWIN_2_A,
 	ONE_DARWIN_2_B,
 	ONE_DARWIN_3,
-	ONE_DARWIN_4,
+	//ONE_DARWIN_4, UNUSED
 	ONE_DARWIN_5,
 	ONE_DARWIN_6,
 	ONE_DARWIN_7,
@@ -314,6 +312,9 @@ enum TextEffectType
 	YELLOW_EFFECT, // Also important things
 	RED_EFFECT, // Negative but not necessarily mad
 	FATHER_EDWARD_EFFECT, // He has a custom color
+	ROSTOV_EFFECT, // Same, custom color
+	PA_EFFECT, // Same
+	DARWIN_EFFECT, // Same
 	//Wave
 	WAVE_EFFECT, // Playful
 	PINK_WAVE_EFFECT, // Playful + love/happiness

@@ -2774,7 +2774,16 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 		dialogueCharacter.overrideColor = { 240, 79, 210 };
 		break;
 	case FATHER_EDWARD_EFFECT:
-		dialogueCharacter.overrideColor = { 198, 226, 210};
+		dialogueCharacter.overrideColor = { 255, 255, 255};
+		break;
+	case ROSTOV_EFFECT:
+		dialogueCharacter.overrideColor = { 139, 191, 174 };
+		break;
+	case DARWIN_EFFECT:
+		dialogueCharacter.overrideColor = { 174, 77, 77 };
+		break;
+	case PA_EFFECT:
+		dialogueCharacter.overrideColor = { 75, 114, 110 };
 		break;
 	case BLUE_EFFECT:
 		dialogueCharacter.overrideColor = { 77, 101, 180 };

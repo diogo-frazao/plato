@@ -19,7 +19,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_1:
 		return "[wave]Heloooooooooo[wave]";
 	case MARKETING_PHONE_2:
-		return "Do I have the [pink]pleasure[pink] of speaking with Mr ROSTOV?";
+		return "Do I have the [pink]pleasure[pink] of speaking with [rostov]Mr ROSTOV?[rostov]";
 		case MARKETING_PHONE_2_A:
 			return "Yes...";
 			case MARKETING_PHONE_2_A_1:
@@ -37,7 +37,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_2_C_2:
 				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_3:
-				return { "I BRING TO YOU THE [yellow]HOLY TECHNOLOGY[yellow] FROM [fatheredward]FATHER EDWARD[fatheredward] HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "I BRING TO YOU THE [pinkwave]HOLY TECHNOLOGY[pinkwave] FROM [fatheredward]FATHER EDWARD[fatheredward] HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_2_C_4:
 				return { "AND YOU HAVE THE [redshake]AUDACITY[redshake] TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 				case MARKETING_PHONE_2_C_4_A:
@@ -55,13 +55,13 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
-				return "Mr ROSTOV please listen, [yellow]I'm sure[yellow] you'll be interested";
+				return "[rostov]Mr ROSTOV[rostov] please listen, [yellow]I'm sure[yellow] you'll be interested";
 	case MARKETING_PHONE_4:
 		return "[interjection]*Ahem*[interjection]";
 	case MARKETING_PHONE_5:
 		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [fatheredward]FATHER EDWARD'S[fatheredward] Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
-		return { "AND FOR [yellow]ONLY 499D[yellow], MR ROSTOV CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
+		return { "AND FOR [yellow]ONLY 499D[yellow], [rostov]MR ROSTOV[rostov] CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
 		return "And what is this creation I hear you ask?";
 		case MARKETING_PHONE_7_A:
@@ -107,9 +107,9 @@ TextDTO getTextInfo(TextType textType)
 	// Starting dialogue with dad
 	{
 	case ONE_DAD_PHONE_1:
-		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [lightpink]ROSTOV?[lightpink]";
+		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [rostov]ROSTOV?[rostov]";
 	case ONE_DAD_PHONE_2:
-		return "Can you hear me [lightpink]son?[lightpink]";
+		return "Can you hear me [rostov]son?[rostov]";
 		case ONE_DAD_PHONE_2_A:
 			return { "Oh, it's you Pa", CELLPHONE_DIALOGUE, -100 , LOW_TENSION};
 		case ONE_DAD_PHONE_2_B:
@@ -119,9 +119,9 @@ TextDTO getTextInfo(TextType textType)
 		case ONE_DAD_PHONE_3_A:
 			return "Yes, and you?";
 			case ONE_DAD_PHONE_3_A_1:
-				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection]";
+				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection] The usual...";
 			case ONE_DAD_PHONE_3_A_2:
-				return "The usual...";
+				return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
 		case ONE_DAD_PHONE_3_B:
 			return { "A solicitor called me", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case ONE_DAD_PHONE_3_B_1:
@@ -137,29 +137,25 @@ TextDTO getTextInfo(TextType textType)
 			case ONE_DAD_PHONE_3_B_4:
 				return "I know son, I know...";
 		case ONE_DAD_PHONE_4:
-			return "...";
+			return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
 			case ONE_DAD_PHONE_4_A:
-				return "How did your exam go?";
+				return "Any news from [red]that?[red]";
 			case ONE_DAD_PHONE_4_B:
-				return "Do you know the results already?";
+				return "Do you know [red]the[red] results?";
 			case ONE_DAD_PHONE_4_C:
-				return { "I miss you [lightpink]Pa[lightpink]", CELLPHONE_DIALOGUE , -100, LOW_TENSION };
-				case ONE_DAD_PHONE_4_C_1:
-					return "[lightpink]I miss you too son[lightpink]";
-				case ONE_DAD_PHONE_4_C_2:
-					return "You just need to [blue]wait[blue] a bit more, I still [red]can't[red] have any visits...";
+				return "[red]What[red] did he told you?";
 		case ONE_DAD_PHONE_5:
-			return "Oh...";
+			return { "Oh...", CELLPHONE_DIALOGUE, 5 };
 		case ONE_DAD_PHONE_6:
-			return { "No no news yet, it will still take a while", CELLPHONE_DIALOGUE, 5 };
+			return "No news about the [red]exam[red], if that's what you're asking";
 			case ONE_DAD_PHONE_6_A:
-				return "Are you sure?";
+				return "It's been almost 2 weeks...";
 			case ONE_DAD_PHONE_6_B:
-				return { "Be honest Pa", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
+				return { "Are you being honest Pa?", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
 		case ONE_DAD_PHONE_7:
-			return "[lightpink]ROSTOV[lightpink], please [interjection]*cough*[interjection] [interjection]*cough*[interjection]";
+			return { "[rostov]ROSTOV,[rostov] [redshake]stop it[redshake]", CELLPHONE_DIALOGUE, 5};
 		case ONE_DAD_PHONE_8:
-			return "With the [yellow]money you send[yellow] I'm getting the [lightpink]proper treatment[lightpink]";
+			return "You know the [yellow]money you send[yellow] helps with the [red]chemo treatment...[red]";
 		case ONE_DAD_PHONE_9:
 			return "[red]But the truth is the doctor told me that[red]";
 	}
@@ -169,52 +165,47 @@ TextDTO getTextInfo(TextType textType)
 	case ONE_DARWIN_1:
 		return { "[nowait]ROSTOV your shift is o-[nowait]", DARWIN_DIALOGUE };
 	case ONE_DARWIN_2:
-		return {"Oh. I'm sorry, I didn't know you were on the phone.", DARWIN_DIALOGUE };
+		return {"[redshake]Oh.[redshake] [pink]I'm sorry,[pink] I didn't know you were on the phone.", DARWIN_DIALOGUE };
 		case ONE_DARWIN_2_A:
-			return "No worries DARWIN";
+			return "You scared me";
 		case ONE_DARWIN_2_B:
-			return "I'm talking with Pa";
+			return "I'm talking with [pa]Pa[pa]";
 	case ONE_DARWIN_3:
-		return "SR.DARWIN! *cough* *cough*";
-	case ONE_DARWIN_4:
-		return "Did ROSTOV do a good job today?";
+		return "[darwin]SR DARWIN![darwin] [interjection]*cough*[interjection] [interjection]*cough*[interjection] Did [rostov]ROSTOV[rostov] do a [yellow]good job[yellow] today?";
 	case ONE_DARWIN_5:
-		return { "I hope he didn't fell asleep again", CELLPHONE_DIALOGUE, 10 };
+		return { "I [red]hope[red] he didn't fell asleep [red]again[red]", CELLPHONE_DIALOGUE, 10 };
 	case ONE_DARWIN_6:
-		return { "Ahahah. Don't worry MISTER", DARWIN_DIALOGUE };
+		return { "[wave]Ahahah.[wave] [pink]Don't worry[pink] [pa]MISTER[pa]", DARWIN_DIALOGUE };
 	case ONE_DARWIN_7:
-		return { "ROSTOV works very hard and helps me every day", DARWIN_DIALOGUE, -10 };
+		return { "[rostov]ROSTOV[rostov] works [pink]very hard[pink] and helps me [pink]every day[pink]", DARWIN_DIALOGUE, -10 };
 	case ONE_DARWIN_8:
-		return { "...", DARWIN_DIALOGUE };
+		return { "We just served the last [blue]saltuna sandwich.[blue] [pink]Everything's clean[pink] and we're ready to close for the day", DARWIN_DIALOGUE };
 	case ONE_DARWIN_9:
-		return { "MISTER what did the doctors say about your exam?", DARWIN_DIALOGUE };
+		return { "[pa]...MISTER,[pa] do you have news about your [red]exam?[red]", DARWIN_DIALOGUE };
 	case ONE_DARWIN_10:
 		return { "Can he hear me?", DARWIN_DIALOGUE };
 		case ONE_DARWIN_10_A:
-			return "Pa are you there?";
+			return "[pa]Pa[pa] are you there?";
 		case ONE_DARWIN_10_B:
-			return "Did you hear SR.DARWIN?";
+			return "Did you hear [darwin]SR.DARWIN?[darwin]";
 		case ONE_DARWIN_10_C:
-			return "Papa?";
+			return "[pa]Papa?[pa]";
 	case ONE_DARWIN_11:
-		return "Sorry the doctor is here *cough* *cough* I need to go";
+		return "[nowait]Sorry the doctor is here, I need to go[nowait]";
 	case ONE_DARWIN_12:
-		return { "Cmon ROSTOV don't worry... I'm sure he will recover", DARWIN_DIALOGUE };
+		return { "Don't worry [rostov]ROSTOV...[rostov] we know [pink]he will recover[pink]", DARWIN_DIALOGUE };
 	case ONE_DARWIN_13:
-		return {"And you are a good man, still working after all these years to help your Pa", DARWIN_DIALOGUE };
+		return {"And [pink]you are a good man,[pink] working all these years to [lightpink]help[lightpink] your [pa]Pa[pa]", DARWIN_DIALOGUE };
 		case ONE_DARWIN_13_A:
-			return "Thank you DARWIN";
+			return "Thank you [darwin]DARWIN[darwin]";
 		case ONE_DARWIN_13_B:
-			return { "He's all I have", CELLPHONE_DIALOGUE , -5, LOW_TENSION};
+			return "I hope so";
 		case ONE_DARWIN_13_C:
-			return { "It is what it is", CELLPHONE_DIALOGUE, 5, HIGH_TENSION};
+			return { "He's all I have", CELLPHONE_DIALOGUE , -5, LOW_TENSION};
 	case ONE_DARWIN_14:
-		return { "Well... your shift is over ROSTOV, you can go home when you want.", DARWIN_DIALOGUE };
+		return { "Well... your shift is over [rostov]son,[rostov] you can [blue]go home[blue] when you want.", DARWIN_DIALOGUE };
 	case ONE_DARWIN_15:
-		return { "HEY!! STOP IT!!", DARWIN_DIALOGUE, 10 };
-	case ONE_DARWIN_16:
-		return { "WHAT ARE YOU DOING HERE??", DARWIN_DIALOGUE, 10 };
-
+		return { "[red]HEY![red] [redshake]STOP IT![redshake]", DARWIN_DIALOGUE, 10 };
 	}
 
 	// Starting confrontation with hugo and oskar
@@ -430,7 +421,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		break;
 	case DARWIN_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
-		s_currentDialogueEntityDTO.outlineColor = { 160, 63, 39 };
+		s_currentDialogueEntityDTO.outlineColor = { 106, 106, 106 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
 		s_currentDialogueEntityDTO.entityId = s_darwinEntityId;
@@ -504,6 +495,21 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "fatheredward") == 0)
 	{
 		return FATHER_EDWARD_EFFECT;
+	}
+
+	if (strcmp(effectName, "pa") == 0)
+	{
+		return PA_EFFECT;
+	}
+
+	if (strcmp(effectName, "rostov") == 0)
+	{
+		return ROSTOV_EFFECT;
+	}
+
+	if (strcmp(effectName, "darwin") == 0)
+	{
+		return DARWIN_EFFECT;
 	}
 
 	if (strcmp(effectName, "interjection") == 0)
