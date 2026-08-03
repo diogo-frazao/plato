@@ -3158,7 +3158,16 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 3);
 			float baseSecondsToWaitBeforeShowingOptions = _currentDialogue.characters[characterIndexToStartShowingOptions].secondsToStartShowingCharacter;
 
-			dialogueOption.secondsToStartShowingOption = baseSecondsToWaitBeforeShowingOptions + (optionIndex * 0.2f);
+			float baseSecondsToStartShowingOption = baseSecondsToWaitBeforeShowingOptions + (optionIndex * 0.2f);
+
+			if (dialogueOption.optionTensionType == FATAL_TENSION)
+			{
+				dialogueOption.secondsToStartShowingOption = baseSecondsToStartShowingOption + 1.f;
+			}
+			else
+			{
+				dialogueOption.secondsToStartShowingOption = baseSecondsToStartShowingOption;
+			}
 		}
 	}
 
