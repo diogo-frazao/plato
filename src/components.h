@@ -172,7 +172,7 @@ struct MovementComponent
 	// Max horizontal speed while moving
 	float maxHorizontalSpeed = 1.5f;
 	// How fast the character reaches maxHorizontalSpeed while moving
-	float runAcceleration = 8.f;
+	float runAcceleration = 6.f;
 	// How fast the character will come to stop when not moving
 	float friction = 10.f;
 
@@ -205,7 +205,9 @@ struct MovementComponent
 enum WeaponType
 {
 	NO_WEAPON_TYPE,
-	GOLF_WEAPON_TYPE
+	GOLF_WEAPON_TYPE,
+	ROSTOV_WEAPON_PISTOL_TYPE,
+	WEAPON_TYPE_COUNT,
 };
 
 struct AttackingComponent

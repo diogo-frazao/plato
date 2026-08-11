@@ -1909,14 +1909,14 @@ void ECSLevel::render(float renderAlpha)
 
 void iterateOnLastPlacedEntity()
 {
-    Entity& last = getEntityById(17);
-    if (!entityHasComponent<SpriteComponent>(last))
-    {
-        addComponentToEntity<SpriteComponent>(last);
-    }
+    //Entity& last = getEntityById(17);
+    //if (!entityHasComponent<SpriteComponent>(last))
+    //{
+    //    addComponentToEntity<SpriteComponent>(last);
+    //}
 
-    auto* s = getComponentFromEntity<SpriteComponent>(last);
-    s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    //auto* s = getComponentFromEntity<SpriteComponent>(last);
+    //s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
 }
 
 void ECSLevel::imguiRender()
@@ -2109,6 +2109,10 @@ void ECSLevel::imguiRender()
                 _phoneConfrontationStageData.reset();
                 break;
             }
+            case FREE_STAGE:
+                Entity& player = getEntityById(k_playerEntityId);
+                player.entityState = IDLE_STATE;
+                _uiSystem.hangupPhone();
             }
         }
 
@@ -2129,6 +2133,13 @@ void ECSLevel::imguiRender()
             _levelCamera.canFollowTarget = true;
             _levelCamera.zoom = 1.f;
         }
+
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+        if (ImGui::Button("Reload Atlas"))
+        {
+            _renderingSystem.reloadAtlas(GAME_ATLAS);
+        }
+        ImGui::PopStyleColor();
 
         ImGui::End();
     }

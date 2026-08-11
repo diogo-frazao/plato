@@ -66,6 +66,20 @@ SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 	return texture;
 }
 
+void RenderingSystem::reloadAtlas(AtlasType type)
+{
+	SDL_Texture* atlas = _loadedAtlasFiles[type];
+	if (!atlas)
+	{
+		return;
+	}
+
+	_loadedAtlasFiles[type] = nullptr;
+	SDL_DestroyTexture(atlas);
+
+	loadAtlas(type);
+}
+
 void RenderingSystem::createLightsBuffers()
 {
 	if (!_backLightsBuffer)
@@ -615,6 +629,7 @@ void MovementSystem::processMainCharacterMovement()
 	auto* transformComponent = getComponentFromEntity<TransformComponent>(player);
 	auto* movementComponent = getComponentFromEntity<MovementComponent>(player);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(player);
+	auto* attackingComponent = getComponentFromEntity<AttackingComponent>(player);
 
 	//TODO: remove debug to reset player pos
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_Q))
@@ -797,34 +812,118 @@ void MovementSystem::processMainCharacterMovement()
 	//TODO: Implement random x scale while running, almost like a wave effect
 
 	//TODO: remove later
-	static bool hasGolf = false;
+	static int weaponInHandIndex = 0;
 	if (_wasKeyPressedThisFrame(SDL_SCANCODE_K))
 	{
-		hasGolf = !hasGolf;
-		getComponentFromEntity<AttackingComponent>(player)->weaponInHand = hasGolf ? GOLF_WEAPON_TYPE : NO_WEAPON_TYPE;
+		if (++weaponInHandIndex >= WEAPON_TYPE_COUNT)
+		{
+			weaponInHandIndex = 0;
+		}
+
+		getComponentFromEntity<AttackingComponent>(player)->weaponInHand = (WeaponType)weaponInHandIndex;
 	}
 
 	// Handle movement animations
+	SpriteType animation;
 	switch (player.entityState)
 	{
 	case IDLE_STATE:
 	case ON_CUTSCENE_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_IDLE_SPRITE : CHARACTER_IDLE_SPRITE, true, 70, 600);
+
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_IDLE_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_IDLE_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_WEAPON_PISTOL_IDLE_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, true, 70, 600);
 		break;
 	case TAKE_OFF_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE : CHARACTER_TAKEOFF_SPRITE, false, 60, 60);
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_TAKEOFF_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_WEAPON_PISTOL_TAKEOFF_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, false, 60, 60);
 		break;
 	case RUNNING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_RUN_SPRITE : CHARACTER_RUN_SPRITE, true, 70, 70);
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_RUN_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_RUN_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, true, 70, 70);
 		break;
 	case SLOWDOWN_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE : CHARACTER_RUN_SPRITE, false, 70, 70);
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_RUN_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, false, 70, 70);
 		break;
 	case JUMPING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_JUMP_SPRITE : CHARACTER_JUMP_SPRITE, true, 70, 70);
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_JUMP_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_JUMP_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_JUMP_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, true, 70, 70);
 		break;
 	case FALLING_STATE:
-		spriteComponent->setAnimationToPlayIfNotPlaying(hasGolf ? CHARACTER_WEAPON_GOLF_FALL_SPRITE : CHARACTER_FALL_SPRITE, false, 70, 70);
+		switch (attackingComponent->weaponInHand)
+		{
+		case NO_WEAPON_TYPE:
+			animation = CHARACTER_FALL_SPRITE;
+			break;
+		case GOLF_WEAPON_TYPE:
+			animation = CHARACTER_WEAPON_GOLF_FALL_SPRITE;
+			break;
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			animation = CHARACTER_FALL_SPRITE;
+			break;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(animation, false, 70, 70);
 		break;
 	}
 }

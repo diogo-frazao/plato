@@ -52,6 +52,7 @@ public:
 	}
 
 	SDL_Texture* loadAtlas(AtlasType type);
+	void reloadAtlas(AtlasType type);
 private:
 	SDL_Texture* getTargetLightsBuffer(LayerType layer);
 
