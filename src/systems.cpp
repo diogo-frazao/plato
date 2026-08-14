@@ -1441,6 +1441,14 @@ void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, Attack
 				s_renderingSystem._inFrontOfEverythingOpacity = 0;
 			}
 
+			Entity& playerEffects = getEntityById(k_playerEffectsEntityId);
+			auto* effectsSprite = getComponentFromEntity<SpriteComponent>(playerEffects);
+			effectsSprite->setupAnimationForLayer(CHARACTER_WEAPON_PISTOL_FX_SPRITE, UI_LAYER, false, 70, 70);
+			if (effectsSprite->animationData.finishedPlayingAnimation)
+			{
+				effectsSprite->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, UI_LAYER);
+			}
+
 			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_PISTOL_FIRE_SPRITE, false, 70, 70);
 			break;
 		}

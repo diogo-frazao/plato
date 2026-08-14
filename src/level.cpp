@@ -389,6 +389,9 @@ void Level::start()
     cellphoneSprite->setupSpriteForLayer(CELLPHONE_IDLE_SPRITE, UI_LAYER);
     cellphoneSprite->drawnAtScreenSpace = true;
 
+    Entity& playerEffects = addEntity("playerEffects");
+    addComponentToEntity<SpriteComponent>(playerEffects)->setLayer(UI_LAYER);
+
     // We don't need to set the sprite since the player's sprite is handled on the movement system
     playerSprite->setLayer(CHARACTERS_LAYER);
     playerSprite->flipX = true;
@@ -404,6 +407,10 @@ void Level::start()
         s_renderingSystem.setTargetAmbientColor(64, 64, 64);
         _levelCamera.position = { 510.f, 90.f };
     }
+
+    _currentLevelStage = FREE_STAGE;
+    getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+    player.entityState = IDLE_STATE;
 }
 
 bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, SpriteComponent* s, float targetXPosition)
@@ -1812,6 +1819,10 @@ void Level::update()
         s_animationSystem.update();
         s_crosshairSystem.update();
         s_uiSystem.update();
+
+        Entity& playerEffects = getEntityById(k_playerEffectsEntityId);
+        getComponentFromEntity<TransformComponent>(playerEffects)->position = playerTransform->position;
+        getComponentFromEntity<SpriteComponent>(playerEffects)->flipX = getComponentFromEntity<SpriteComponent>(player)->flipX;
     }
 
     static float cameraOffsetXFromPlayer = 20.f;

@@ -14,9 +14,12 @@ inline bool s_isImGuiOpen = true;
 inline constexpr uint8_t k_entityMaxNameCharacters = 64;
 inline constexpr int32_t k_maxNumberOfEntities = 500;
 inline constexpr uint16_t k_maxNumberOfSystems = 10;
+
+// Constant entities ids
 inline constexpr uint32_t k_playerEntityId = 0;
 inline constexpr uint32_t k_crosshairEntityId = 1;
 inline constexpr uint32_t k_cellphoneEntityId = 2;
+inline constexpr uint32_t k_playerEffectsEntityId = 3;
 
 // These entities ids change at runtime depending on the level
 // When the entities are created, we must update these values to point to the correct entity
