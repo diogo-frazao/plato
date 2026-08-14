@@ -80,6 +80,20 @@ void RenderingSystem::reloadAtlas(AtlasType type)
 	loadAtlas(type);
 }
 
+void RenderingSystem::createInFrontOfEverythingBuffer()
+{
+	if (!_inFrontOfEverythingBuffer)
+	{
+		_inFrontOfEverythingBuffer = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, k_baseGameWidth, k_baseGameHeight);
+	}
+
+	if (!_inFrontOfEverythingBuffer)
+	{
+		D_ASSERT(false, "_inFrontOfEverythingBuffer doesnt' exist: %s", SDL_GetError());
+		return;
+	}
+}
+
 void RenderingSystem::createLightsBuffers()
 {
 	if (!_backLightsBuffer)
@@ -105,6 +119,15 @@ void RenderingSystem::createLightsBuffers()
 	}
 }
 
+void RenderingSystem::renderInFrontOfEverythingTexture()
+{
+	SDL_SetRenderTarget(s_renderer, _inFrontOfEverythingBuffer);
+	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, _inFrontOfEverythingOpacity);
+	SDL_RenderClear(s_renderer);
+	SDL_SetRenderTarget(s_renderer, nullptr);
+	SDL_RenderTexture(s_renderer, _inFrontOfEverythingBuffer, nullptr, nullptr);
+}
+
 void RenderingSystem::render(float renderAlpha)
 {
 	//TODO: If needed improve performance, since every function interates over every entity
@@ -124,6 +147,8 @@ void RenderingSystem::render(float renderAlpha)
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
 	// UI Layer, on top of everything and not affected by anything.
 	renderSpritesAtLayer(UI_LAYER, renderAlpha);
+
+	renderInFrontOfEverythingTexture();
 }
 
 void RenderingSystem::renderCrosshair(float renderAlpha)
@@ -1373,7 +1398,6 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 
 		break;
 	case ROSTOV_WEAPON_PISTOL_TYPE:
-
 		break;
 	}
 
@@ -1408,6 +1432,15 @@ void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, Attack
 			break;
 		}
 		case ROSTOV_WEAPON_PISTOL_TYPE:
+			if (s->animationData.currentFrame == 0)
+			{
+				s_renderingSystem._inFrontOfEverythingOpacity = 30;
+			}
+			else
+			{
+				s_renderingSystem._inFrontOfEverythingOpacity = 0;
+			}
+
 			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_PISTOL_FIRE_SPRITE, false, 70, 70);
 			break;
 		}

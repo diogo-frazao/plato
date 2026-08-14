@@ -10,6 +10,70 @@
 
 #include <SDL3/SDL_rect.h>
 
+// Systems Globals
+inline EntityManager s_entityManager;
+inline ComponentManager s_componentManager;
+
+inline SavePreviousPositionSystem s_savePositionSystem;
+inline RenderingSystem s_renderingSystem;
+inline AnimationSystem s_animationSystem;
+inline MovementSystem s_characterMovementSystem;
+inline DebugSystem s_debugCollidersSystem;
+inline CrosshairSystem s_crosshairSystem;
+inline AttackingSystem s_attackingSystem;
+inline UISystem s_uiSystem;
+
+template<typename T>
+bool entityHasComponent(Entity& entity)
+{
+	return s_componentManager.entityHasComponent<T>(entity);
+}
+
+template<typename T>
+T* addComponentToEntity(Entity& entity)
+{
+	return s_componentManager.addComponentToEntity<T>(entity);
+}
+
+template<typename T>
+void removeComponentFromEntity(Entity& entity)
+{
+	return s_componentManager.removeComponentFromEntity<T>(entity);
+}
+
+template<typename T>
+T* getComponentFromEntity(Entity& entity)
+{
+	return s_componentManager.getComponentFromEntity<T>(entity);
+}
+
+inline Entity& getLastAddedEntity()
+{
+	return s_entityManager._entities[s_entityManager._lastValidEntityId];
+}
+
+inline Entity& addEntity(const char* debugName, Vec2 position = Vec2())
+{
+	Entity& entity = s_entityManager.addEntity();
+
+	strncpy(entity.debugName, debugName, k_entityMaxNameCharacters);
+	auto* t = addComponentToEntity<TransformComponent>(entity);
+	t->position = position;
+	t->previousPosition = position;
+	t->startingPosition = position;
+	return entity;
+}
+
+inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
+{
+	return s_entityManager._entities;
+}
+
+inline Entity& getEntityById(uint32_t id)
+{
+	return s_entityManager._entities[id];
+}
+
 enum CameraShakeType
 {
 	NO_SHAKE,
@@ -145,18 +209,6 @@ public:
 
 	Camera _levelCamera;
 
-	EntityManager _entityManager;
-	ComponentManager _componentManager;
-
-	SavePreviousPositionSystem _savePositionSystem;
-	RenderingSystem _renderingSystem;
-	AnimationSystem _animationSystem;
-	MovementSystem _characterMovementSystem;
-	DebugSystem _debugCollidersSystem;
-	CrosshairSystem _crosshairSystem;
-	AttackingSystem _attackingSystem;
-	UISystem _uiSystem;
-
 private:
 	LevelStages _currentLevelStage = MARKETING_PHONE_STAGE;
 	DarwinConfrontationStageData _darwinConversationStageData;
@@ -174,58 +226,6 @@ struct LevelManager
 		return _levels[s_currentLevelIndex];
 	}
 };
-
-template<typename T>
-bool entityHasComponent(Entity& entity)
-{
-	return LevelManager::getCurrentLevel()->_componentManager.entityHasComponent<T>(entity);
-}
-
-template<typename T>
-T* addComponentToEntity(Entity& entity)
-{
-	return LevelManager::getCurrentLevel()->_componentManager.addComponentToEntity<T>(entity);
-}
-
-template<typename T>
-void removeComponentFromEntity(Entity& entity)
-{
-	return LevelManager::getCurrentLevel()->_componentManager.removeComponentFromEntity<T>(entity);
-}
-
-template<typename T>
-T* getComponentFromEntity(Entity& entity)
-{
-	return LevelManager::getCurrentLevel()->_componentManager.getComponentFromEntity<T>(entity);
-}
-
-inline Entity& getLastAddedEntity()
-{
-	EntityManager& entityManager = LevelManager::getCurrentLevel()->_entityManager;
-	return entityManager._entities[entityManager._lastValidEntityId];
-}
-
-inline Entity& addEntity(const char* debugName, Vec2 position = Vec2())
-{
-	Entity& entity = LevelManager::getCurrentLevel()->_entityManager.addEntity();
-
-	strncpy(entity.debugName, debugName, k_entityMaxNameCharacters);
-	auto* t = addComponentToEntity<TransformComponent>(entity);
-	t->position = position;
-	t->previousPosition = position;
-	t->startingPosition = position;
-	return entity;
-}
-
-inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
-{
-	return LevelManager::getCurrentLevel()->_entityManager._entities;
-}
-
-inline Entity& getEntityById(uint32_t id)
-{
-	return LevelManager::getCurrentLevel()->_entityManager._entities[id];
-}
 
 // Takes a screen position and converts it to camera/world space.
 inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)

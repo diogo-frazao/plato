@@ -28,6 +28,7 @@ class RenderingSystem
 {
 public:
 	void createLightsBuffers();
+	void createInFrontOfEverythingBuffer();
 	void render(float renderAlpha);
 	void renderCrosshair(float renderAlpha);
 
@@ -36,6 +37,8 @@ public:
 	SDL_FColor _currentAmbientColor = { 0, 0, 0, 0 };
 	// Used only for debugging with imgui
 	float _debugAmbientColorPicker[4] = {255, 255, 255};
+
+	uint8_t _inFrontOfEverythingOpacity = 0.f;
 
 	void setTargetAmbientColor(uint8_t r, uint8_t g, uint8_t b)
 	{
@@ -59,6 +62,7 @@ private:
 	void computeLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight = false);
 	void renderSpritesAtLayer(LayerType layer, float renderAlpha);
 	void renderLightsAtLayer(LayerType layer, bool isAffectedByAmbientLight = false);
+	void renderInFrontOfEverythingTexture();
 
 	SDL_FRect _src;
 	SDL_FRect _dest;
@@ -66,6 +70,7 @@ private:
 	SDL_Texture* _loadedAtlasFiles[k_maxAtlasFiles]{ nullptr, nullptr };
 	SDL_Texture* _backLightsBuffer = nullptr;
 	SDL_Texture* _frontLightsBuffer = nullptr;
+	SDL_Texture* _inFrontOfEverythingBuffer = nullptr;
 };
 
 class AnimationSystem

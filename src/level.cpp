@@ -368,8 +368,9 @@ void createDummyEntities(int amount)
 
 void Level::start()
 {
-	_renderingSystem.createLightsBuffers();
-    _uiSystem.start();
+	s_renderingSystem.createLightsBuffers();
+    s_renderingSystem.createInFrontOfEverythingBuffer();
+    s_uiSystem.start();
 
     Entity& player = addEntity("player", { 490.f, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
@@ -400,7 +401,7 @@ void Level::start()
     setupInsideRestaurantScene();
     if (s_isInsideRestaurant)
     {
-        _renderingSystem.setTargetAmbientColor(64, 64, 64);
+        s_renderingSystem.setTargetAmbientColor(64, 64, 64);
         _levelCamera.position = { 510.f, 90.f };
     }
 }
@@ -520,10 +521,10 @@ void Level::update()
 
     // Update save position system
     {
-        _savePositionSystem.update();
+        s_savePositionSystem.update();
     }
 
-    UISystem& u = _uiSystem;
+    UISystem& u = s_uiSystem;
 
     // Level logic
     switch (_currentLevelStage)
@@ -538,152 +539,152 @@ void Level::update()
                 float k_timeToShowCellphoneFirstTime = 1.f;
                 if (s_multiPurpuseTimer >= k_timeToShowCellphoneFirstTime)
                 {
-                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
+                    s_uiSystem.receivePhoneCallAndPushDialogueOnAnswer(MARKETING_PHONE_1);
                     invalidateTimer(s_multiPurpuseTimer);
                 }
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, { MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, { MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C });
             }
 
-            if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_A_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_A_1);
             }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_B))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
             }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
-            }
-
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
-            {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_2);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B });
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, { MARKETING_PHONE_3_A, MARKETING_PHONE_3_B });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_2);
             }
 
-            if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_A_1);
-            }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_3_B))
-            {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, { MARKETING_PHONE_3_A, MARKETING_PHONE_3_B });
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_2);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_A_1);
+            }
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_B))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_2);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A,
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A,
                     MARKETING_PHONE_7_B, s_playerTension >= 30 ? MARKETING_PHONE_7_C_HIGH_TENSION : MARKETING_PHONE_7_C_LOW_TENSION });
             }
 
-            if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
             }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
             }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
-            }
-
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
-            {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A,
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A,
                     s_playerTension >= 50 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
             }
 
-            if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
             }
-            else if (_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
-            }
-
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || _uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
-            {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
             }
 
-            if (_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
             {
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
             }
 
-            if (_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
-                _uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || _uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
-                _uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || _uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
             {
-                _uiSystem.hangupPhone();
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
+            }
+
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
+                s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || s_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
+                s_uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
+            {
+                s_uiSystem.hangupPhone();
                 _currentLevelStage = FIRST_DAD_PHONE_STAGE;
                 startTimer(s_multiPurpuseTimer);
             }
@@ -700,7 +701,7 @@ void Level::update()
 
                 if (s_multiPurpuseTimer >= 5.f)
                 {
-                    _uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ONE_DAD_PHONE_1);
+                    s_uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ONE_DAD_PHONE_1);
                     invalidateTimer(s_multiPurpuseTimer);
                 }
             }
@@ -1788,29 +1789,29 @@ void Level::update()
             targetAmbientColor = { 115, 115, 115 };
         }
 
-        bool isCurrentColorDifferentFromTarget = targetAmbientColor.r != _renderingSystem._currentAmbientColor.r ||
-            targetAmbientColor.b != _renderingSystem._currentAmbientColor.b ||
-            targetAmbientColor.g != _renderingSystem._currentAmbientColor.g;
+        bool isCurrentColorDifferentFromTarget = targetAmbientColor.r != s_renderingSystem._currentAmbientColor.r ||
+            targetAmbientColor.b != s_renderingSystem._currentAmbientColor.b ||
+            targetAmbientColor.g != s_renderingSystem._currentAmbientColor.g;
 
         if (isCurrentColorDifferentFromTarget)
         {
-            _renderingSystem.setTargetAmbientColor(targetAmbientColor.r, targetAmbientColor.g, targetAmbientColor.b);
+            s_renderingSystem.setTargetAmbientColor(targetAmbientColor.r, targetAmbientColor.g, targetAmbientColor.b);
 
             float k_ambientColorChangeSpeed = 0.025f;
-            _renderingSystem._currentAmbientColor.r = lerp((float)_renderingSystem._currentAmbientColor.r, (float)_renderingSystem._targetAmbientColor.r, k_ambientColorChangeSpeed);
-            _renderingSystem._currentAmbientColor.b = lerp((float)_renderingSystem._currentAmbientColor.b, (float)_renderingSystem._targetAmbientColor.b, k_ambientColorChangeSpeed);
-            _renderingSystem._currentAmbientColor.g = lerp((float)_renderingSystem._currentAmbientColor.g, (float)_renderingSystem._targetAmbientColor.g, k_ambientColorChangeSpeed);
+            s_renderingSystem._currentAmbientColor.r = lerp((float)s_renderingSystem._currentAmbientColor.r, (float)s_renderingSystem._targetAmbientColor.r, k_ambientColorChangeSpeed);
+            s_renderingSystem._currentAmbientColor.b = lerp((float)s_renderingSystem._currentAmbientColor.b, (float)s_renderingSystem._targetAmbientColor.b, k_ambientColorChangeSpeed);
+            s_renderingSystem._currentAmbientColor.g = lerp((float)s_renderingSystem._currentAmbientColor.g, (float)s_renderingSystem._targetAmbientColor.g, k_ambientColorChangeSpeed);
         }
     }
 
     // Update systems
     {
         overrideColliderOffsetsBasedOnCurrentSprite();
-        _characterMovementSystem.update();
-        _attackingSystem.update();
-        _animationSystem.update();
-        _crosshairSystem.update();
-        _uiSystem.update();
+        s_characterMovementSystem.update();
+        s_attackingSystem.update();
+        s_animationSystem.update();
+        s_crosshairSystem.update();
+        s_uiSystem.update();
     }
 
     static float cameraOffsetXFromPlayer = 20.f;
@@ -1883,8 +1884,8 @@ void Level::update()
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_I))
         {
             D_LOG(LOG, "Dialogue recreated");
-            _uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
-            _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
+            s_uiSystem._cellphone.state = UISystem::CELLPHONE_TALKING;
+            s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
             _currentLevelStage = MARKETING_PHONE_STAGE;
             //startTimer(s_multiPurpuseTimer);
             s_playerTension = 0;
@@ -1900,11 +1901,11 @@ void Level::update()
 
 void Level::render(float renderAlpha)
 {
-    _renderingSystem.render(renderAlpha);
-    _uiSystem.render(&_renderingSystem);
-    _debugCollidersSystem.render();
-    _uiSystem.debugColliders();
-    _renderingSystem.renderCrosshair(renderAlpha);
+    s_renderingSystem.render(renderAlpha);
+    s_uiSystem.render(&s_renderingSystem);
+    s_debugCollidersSystem.render();
+    s_uiSystem.debugColliders();
+    s_renderingSystem.renderCrosshair(renderAlpha);
 }
 
 void iterateOnLastPlacedEntity()
@@ -2021,28 +2022,28 @@ void Level::imguiRender()
         ImGui::Combo("Level Stages", &s_levelStageToChangeTo, s_levelStagesString);
         if (ImGui::Button("Change to selected level stage"))
         {
-            _uiSystem.destroyCurrentDialogue();
-            _uiSystem.popTensionBar();
+            s_uiSystem.destroyCurrentDialogue();
+            s_uiSystem.popTensionBar();
 
             switch (s_levelStageToChangeTo)
             {
             case MARKETING_PHONE_STAGE:
                 _currentLevelStage = MARKETING_PHONE_STAGE;
-                _uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
-                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_1);
+                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
                 s_playerTension = 0;
                 break;
             case FIRST_DAD_PHONE_STAGE:
                 _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-                _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
-                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
                 s_playerTension = 80;
                 break;
             case DARWIN_CONVERSATION_STAGE:
             {
                 _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-                _uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
-                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_TALKING;
+                s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
+                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
                 startTimer(s_multiPurpuseTimer);
                 s_playerTension = 20;
                 Entity& darwin = getEntityById(s_darwinEntityId);
@@ -2053,7 +2054,7 @@ void Level::imguiRender()
             case GANGSTER_CONFRONTATION_STAGE:
             {
                 _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
-                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
 
                 Entity& darwin = getEntityById(s_darwinEntityId);
                 getComponentFromEntity<TransformComponent>(darwin)->position = { 293.f, 117.f };
@@ -2084,8 +2085,8 @@ void Level::imguiRender()
             {
                 _currentLevelStage = PHONE_CONFRONTATION_STAGE;
 
-                _uiSystem._cellphone.state = _uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
-                _uiSystem.pushTensionBar();
+                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_NOT_VISIBLE_STATE;
+                s_uiSystem.pushTensionBar();
 
                 Entity& player = getEntityById(k_playerEntityId);
                 getComponentFromEntity<TransformComponent>(player)->position.x = 200.f;
@@ -2112,15 +2113,15 @@ void Level::imguiRender()
             case FREE_STAGE:
                 Entity& player = getEntityById(k_playerEntityId);
                 player.entityState = IDLE_STATE;
-                _uiSystem.hangupPhone();
+                s_uiSystem.hangupPhone();
             }
         }
 
-        if (ImGui::ColorEdit3("Ambient Color", _renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
+        if (ImGui::ColorEdit3("Ambient Color", s_renderingSystem._debugAmbientColorPicker, ImGuiColorEditFlags_NoInputs))
         {
-            _renderingSystem.setTargetAmbientColor(_renderingSystem._debugAmbientColorPicker[0] * 255,
-                _renderingSystem._debugAmbientColorPicker[1] * 255,
-                _renderingSystem._debugAmbientColorPicker[2] * 255);
+            s_renderingSystem.setTargetAmbientColor(s_renderingSystem._debugAmbientColorPicker[0] * 255,
+                s_renderingSystem._debugAmbientColorPicker[1] * 255,
+                s_renderingSystem._debugAmbientColorPicker[2] * 255);
         }
 
 
@@ -2137,7 +2138,7 @@ void Level::imguiRender()
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
         if (ImGui::Button("Reload Atlas"))
         {
-            _renderingSystem.reloadAtlas(GAME_ATLAS);
+            s_renderingSystem.reloadAtlas(GAME_ATLAS);
         }
         ImGui::PopStyleColor();
 
