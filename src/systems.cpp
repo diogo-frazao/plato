@@ -1372,6 +1372,9 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 		t->resetScaleLerp = 0.05f;
 
 		break;
+	case ROSTOV_WEAPON_PISTOL_TYPE:
+
+		break;
 	}
 
 	clearEntitiesPlayerAttacked();
@@ -1395,9 +1398,20 @@ void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, Attack
 			player->entityState = m->isMovingOnFloor ? TAKE_OFF_STATE : IDLE_STATE;
 		}
 
-		// Set animation based on state and weapon
-		float speedForAttackAnimation = (s->animationData.currentFrame == 2) ? 140 : 70;
-		s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, speedForAttackAnimation, 70);
+		switch (a->weaponInHand)
+		{
+		case GOLF_WEAPON_TYPE:
+		{
+			// Set animation based on state and weapon
+			float speedForAttackAnimation = (s->animationData.currentFrame == 2) ? 140 : 70;
+			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_GOLF_ATTACK_MIDDLE_SPRITE, false, speedForAttackAnimation, 70);
+			break;
+		}
+		case ROSTOV_WEAPON_PISTOL_TYPE:
+			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_PISTOL_FIRE_SPRITE, false, 70, 70);
+			break;
+		}
+
 		break;
 	}
 }
