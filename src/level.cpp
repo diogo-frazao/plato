@@ -366,7 +366,7 @@ void createDummyEntities(int amount)
     }
 }
 
-void ECSLevel::start()
+void Level::start()
 {
 	_renderingSystem.createLightsBuffers();
     _uiSystem.start();
@@ -499,7 +499,7 @@ void handleCameraShake(Camera& camera)
     camera.cameraShakeToPerform = NO_SHAKE;
 }
 
-void ECSLevel::update()
+void Level::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
@@ -1898,7 +1898,7 @@ void ECSLevel::update()
     }
 }
 
-void ECSLevel::render(float renderAlpha)
+void Level::render(float renderAlpha)
 {
     _renderingSystem.render(renderAlpha);
     _uiSystem.render(&_renderingSystem);
@@ -1919,7 +1919,7 @@ void iterateOnLastPlacedEntity()
     //s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
 }
 
-void ECSLevel::imguiRender()
+void Level::imguiRender()
 {
     ImGui::SetMouseCursor(s_isImGuiOpen ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 

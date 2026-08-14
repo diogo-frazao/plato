@@ -135,7 +135,7 @@ struct PhoneConfrontationStage
 	}
 };
 
-class ECSLevel
+class Level
 {
 public:
 	void start();
@@ -167,9 +167,9 @@ private:
 struct LevelManager
 {
 	inline static uint16_t s_currentLevelIndex = 0;
-	inline static ECSLevel* _levels[k_maxLevels] = { new ECSLevel() };
+	inline static Level* _levels[k_maxLevels] = { new Level() };
 
-	inline static ECSLevel* getCurrentLevel()
+	inline static Level* getCurrentLevel()
 	{
 		return _levels[s_currentLevelIndex];
 	}

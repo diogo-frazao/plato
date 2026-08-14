@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "text.h"
 
-class ECSLevel;
+class Level;
 class MovementComponent;
 class TransformComponent;
 class AttackingComponent;
