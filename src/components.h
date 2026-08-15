@@ -19,6 +19,9 @@ struct TransformComponent
 	float resetScaleLerp = 1.f;
 	bool useDynamicScale = false;
 
+	// Scale X Pivot
+	ScaleXPivot xScalePivot = CENTER_X_SCALE_PIVOT;
+
 	// Used for inspector debugging. Only needs to print the variables exposed to the inspector.
 	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
 	{

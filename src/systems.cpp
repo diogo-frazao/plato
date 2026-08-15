@@ -211,7 +211,21 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		}
 		else
 		{
-			scaleOffsetX = (frameSizeX - scaledWidth) * 0.5f;
+			float xScalePivotMultiplier = 0.f;
+			switch (transformComponent->xScalePivot)
+			{
+			case CENTER_X_SCALE_PIVOT:
+				xScalePivotMultiplier = 0.5f;
+				break;
+			case LEFT_X_SCALE_PIVOT:
+				xScalePivotMultiplier = 0.f;
+				break;
+			case RIGHT_X_SCALE_PIVOT:
+				xScalePivotMultiplier = 1.f;
+				break;
+			}
+
+			scaleOffsetX = (frameSizeX - scaledWidth) * xScalePivotMultiplier;
 			scaleOffsetY = (frameSizeY - scaledHeight);
 		}
 
@@ -655,26 +669,6 @@ void MovementSystem::processMainCharacterMovement()
 	auto* movementComponent = getComponentFromEntity<MovementComponent>(player);
 	auto* spriteComponent = getComponentFromEntity<SpriteComponent>(player);
 	auto* attackingComponent = getComponentFromEntity<AttackingComponent>(player);
-
-	//TODO: remove debug to reset player pos
-	if (_wasKeyPressedThisFrame(SDL_SCANCODE_Q))
-	{
-		transformComponent->previousPosition = Vec2(490, 117);
-		transformComponent->position = Vec2(490, 117);
-		movementComponent->currentSpeed.x = 0;
-		movementComponent->currentSpeed.y = 0;
-		spriteComponent->flipX = true;
-
-		Entity& enemy = getEntityById(10);
-		if (enemy.id != k_invalidId && entityHasComponent<AttackingComponent>(enemy))
-		{
-			getComponentFromEntity<TransformComponent>(enemy)->previousPosition = Vec2(160, 0);
-			getComponentFromEntity<TransformComponent>(enemy)->position = Vec2(160, 0);
-			getComponentFromEntity<MovementComponent>(enemy)->currentSpeed = Vec2(0, 0);
-			getComponentFromEntity<AttackingComponent>(enemy)->damageCounter = 0;
-			enemy.entityState = IDLE_STATE;
-		}
-	}
 
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
@@ -1398,6 +1392,34 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 
 		break;
 	case ROSTOV_WEAPON_PISTOL_TYPE:
+
+		// Create bullet
+		{
+			Vec2 bulletPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 15.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
+			Entity& bullet = addEntity("bullet", bulletPosition);
+
+			auto* bulletTransform = getComponentFromEntity<TransformComponent>(bullet);
+			bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;
+			bulletTransform->scale.x = 0.1f;
+			bulletTransform->useDynamicScale = true;
+			bulletTransform->resetScaleLerp = 0.1f;
+
+			auto* bulletSprite = addComponentToEntity<SpriteComponent>(bullet);
+			bulletSprite->setupSpriteForLayer(PISTOL_BULLET_SPRITE, UI_LAYER);
+			bulletSprite->flipX = !s->flipX;
+
+			auto* bulletCollider = addComponentToEntity<RectColliderComponent>(bullet);
+			bulletCollider->collider = { {0, 0}, bulletSprite->size };
+
+			SpriteType movementAnimations[] = { PISTOL_BULLET_SPRITE };
+			auto* bulletMovement = addComponentToEntity<MovementComponent>(bullet);
+			bulletMovement->setupMovementAnimations(movementAnimations);
+			bulletMovement->gravity = 0.f;
+			bulletMovement->airFriction = 0.f;
+			int8_t movementDirection = bulletSprite->flipX ? 1.f : -1.f;
+			bulletMovement->currentSpeed.x = 7.f * movementDirection;
+		}
+
 		break;
 	}
 
@@ -1441,12 +1463,15 @@ void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, Attack
 				s_renderingSystem._inFrontOfEverythingOpacity = 0;
 			}
 
-			Entity& playerEffects = getEntityById(k_playerEffectsEntityId);
-			auto* effectsSprite = getComponentFromEntity<SpriteComponent>(playerEffects);
-			effectsSprite->setupAnimationForLayer(CHARACTER_WEAPON_PISTOL_FX_SPRITE, UI_LAYER, false, 70, 70);
-			if (effectsSprite->animationData.finishedPlayingAnimation)
+			// FX when shooting pistol
 			{
-				effectsSprite->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, UI_LAYER);
+				Entity& playerEffects = getEntityById(k_playerEffectsEntityId);
+				auto* effectsSprite = getComponentFromEntity<SpriteComponent>(playerEffects);
+				effectsSprite->setupAnimationForLayer(CHARACTER_WEAPON_PISTOL_FX_SPRITE, UI_LAYER, false, 70, 70);
+				if (effectsSprite->animationData.finishedPlayingAnimation)
+				{
+					effectsSprite->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, UI_LAYER);
+				}
 			}
 
 			s->setAnimationToPlayIfNotPlaying(CHARACTER_WEAPON_PISTOL_FIRE_SPRITE, false, 70, 70);

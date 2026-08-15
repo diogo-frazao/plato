@@ -135,6 +135,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 300, 36 };
 		numberOfFrames = 5;
 		break;
+	case PISTOL_BULLET_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 470, 40 };
+		size = { 27, 1 };
+		break;
 	case CHARACTER_WEAPON_GOLF_IDLE_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 1, 369 };
