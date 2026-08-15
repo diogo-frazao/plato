@@ -494,7 +494,8 @@ void CrosshairSystem::update()
 	Entity& crosshair = getEntityById(k_crosshairEntityId);
 	auto* s = getComponentFromEntity<SpriteComponent>(crosshair);
 
-	s->color.a = s_corsshairOpacity;
+	//s->color.a = s_corsshairOpacity;
+	s->color.a = 0;
 
 	// Follow mouse
 	{
@@ -1402,7 +1403,7 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 			bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;
 			bulletTransform->scale.x = 0.1f;
 			bulletTransform->useDynamicScale = true;
-			bulletTransform->resetScaleLerp = 0.1f;
+			bulletTransform->resetScaleLerp = 0.05f;
 
 			auto* bulletSprite = addComponentToEntity<SpriteComponent>(bullet);
 			bulletSprite->setupSpriteForLayer(PISTOL_BULLET_SPRITE, UI_LAYER);
