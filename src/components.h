@@ -247,3 +247,11 @@ struct AttackingComponent
 
 	float recoverTimer = k_invalidTime;
 };
+
+struct ProjectileComponent
+{
+	uint8_t damageToDealToTarget = 1;
+
+	// Id of the entity that fired the projectile
+	int32_t ownerEntityId = k_invalidId;
+};

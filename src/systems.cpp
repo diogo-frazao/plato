@@ -441,7 +441,7 @@ void DebugSystem::render()
 		auto* t = getComponentFromEntity<TransformComponent>(possibleCollider);
 		auto* c = getComponentFromEntity<RectColliderComponent>(possibleCollider);
 
-		for (RectCollider& attackCollider : AttackingSystem::s_attackCollisionsToDebugThisFrame)
+		for (RectCollider& attackCollider : CombatSystem::s_attackCollisionsToDebugThisFrame)
 		{
 			// If the attack will land, color attack collider + entity damaged red
 			if (aabb({ 0.f, 0.f }, t->position, attackCollider, c->collider))
@@ -1161,9 +1161,56 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 
 #pragma endregion
 
-#pragma region Attacking System
+#pragma region Combat System
 
-void AttackingSystem::update()
+void CombatSystem::handleProjectile(Entity* entity)
+{
+	auto* projectile = getComponentFromEntity<ProjectileComponent>(*entity);
+	auto* transform = getComponentFromEntity<TransformComponent>(*entity);
+	auto* collider = getComponentFromEntity<RectColliderComponent>(*entity);
+
+	for (Entity& targetEntity : getAllEntities())
+	{
+		if (targetEntity.id == k_invalidId ||
+			targetEntity.id == projectile->ownerEntityId)
+		{
+			continue;
+		}
+
+		// Right now bullets only hit other attacking components
+		// TODO: Maybe expand so we can stop bullets by firing ours against theirs.,
+		if (!entityHasComponent<AttackingComponent>(targetEntity))
+		{
+			continue;
+		}
+
+		auto* aTarget = getComponentFromEntity<AttackingComponent>(targetEntity);
+		if (!aTarget->canBeAttacked)
+		{
+			continue;
+		}
+
+		Vec2 targetPosition = getComponentFromEntity<TransformComponent>(targetEntity)->position;
+		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(targetEntity)->collider;
+
+		if (!aabb(transform->position, targetPosition, collider->collider, targetCollider))
+		{
+			continue;
+		}
+
+		// If we get here it's because the bullet hit a target
+		addColliderToDebugList(transform->position, collider->collider);
+
+		//TODO: PROPERLY DELETE THE BULLET
+		clearEntityComponentsBitmask(*entity);
+
+		targetEntity.entityState = TODO_REMOVE_STATE;
+
+		D_LOG(LOG, "Entity hit");
+	}
+}
+
+void CombatSystem::update()
 {
 	clearDebugCollisions();
 
@@ -1180,6 +1227,12 @@ void AttackingSystem::update()
 			continue;
 		}
 
+		if (entityHasComponent<ProjectileComponent>(entity))
+		{
+			handleProjectile(&entity);
+			continue;
+		}
+
 		if (!entityHasComponent<AttackingComponent>(entity))
 		{
 			continue;
@@ -1188,7 +1241,7 @@ void AttackingSystem::update()
 		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(entity);
 		SpriteComponent* s = getComponentFromEntity<SpriteComponent>(entity);
 
-		// Later, we also need to switch on entity type
+		// Handle NPC animations
 		switch (entity.entityState)
 		{
 		case HURT_ONE_STATE:
@@ -1342,11 +1395,15 @@ void AttackingSystem::update()
 		case DEAD_STATE:
 			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_DEAD_SPRITE, false, 70, 70);
 			break;
+
+		case TODO_REMOVE_STATE:
+			s->setAnimationToPlayIfNotPlaying(GANGSTER_OSKAR_PISTOL_HIT_SPRITE, false, 70, 70);
+			break;
 		}
 	}
 }
 
-void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+void CombatSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
 {
 	// Prevent attacking while using the mouse for imgui related things
 	if (s_isImGuiOpen)
@@ -1419,6 +1476,9 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 			bulletMovement->airFriction = 0.f;
 			int8_t movementDirection = bulletSprite->flipX ? 1.f : -1.f;
 			bulletMovement->currentSpeed.x = 7.f * movementDirection;
+
+			auto* projectile = addComponentToEntity<ProjectileComponent>(bullet);
+			projectile->ownerEntityId = player->id;
 		}
 
 		break;
@@ -1429,7 +1489,7 @@ void AttackingSystem::tryMainCharacterAttack(Entity* player, AttackingComponent*
 	return;
 }
 
-void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
+void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
 {
 	if (a->weaponInHand == NO_WEAPON_TYPE)
 	{
@@ -1483,7 +1543,7 @@ void AttackingSystem::handleMainCharacterAttackAnimations(Entity* player, Attack
 	}
 }
 
-void AttackingSystem::handleMainCharacter()
+void CombatSystem::handleMainCharacter()
 {
 	Entity& player = getEntityById(k_playerEntityId);
 	auto* a = getComponentFromEntity<AttackingComponent>(player);
@@ -1501,7 +1561,11 @@ void AttackingSystem::handleMainCharacter()
 		return;
 	}
 
-	// Look for targets to hit from player attack
+	if (a->weaponInHand != GOLF_WEAPON_TYPE)
+	{
+		return;
+	}
+
 	for (Entity& target : getAllEntities())
 	{
 		if (target.id == k_invalidId || target.id == k_playerEntityId)
@@ -1620,7 +1684,7 @@ void AttackingSystem::handleMainCharacter()
 	}
 }
 
-void AttackingSystem::registerPlayerAttackToEntity(Entity* entity)
+void CombatSystem::registerPlayerAttackToEntity(Entity* entity)
 {
 	for (int32_t& entityId : _entitiesPlayerAttackedForCurrentAttack)
 	{
@@ -1634,7 +1698,7 @@ void AttackingSystem::registerPlayerAttackToEntity(Entity* entity)
 	D_LOG(ERROR, "Player couldn't attack entity %i because array is too small", entity->id);
 }
 
-bool AttackingSystem::hasPlayerAlreadyAttackedEntity(int32_t idToCheck)
+bool CombatSystem::hasPlayerAlreadyAttackedEntity(int32_t idToCheck)
 {
 	for (int32_t entityId : _entitiesPlayerAttackedForCurrentAttack)
 	{
@@ -1647,7 +1711,7 @@ bool AttackingSystem::hasPlayerAlreadyAttackedEntity(int32_t idToCheck)
 	return false;
 }
 
-void AttackingSystem::clearEntitiesPlayerAttacked()
+void CombatSystem::clearEntitiesPlayerAttacked()
 {
 	memset(_entitiesPlayerAttackedForCurrentAttack, k_invalidId, sizeof(_entitiesPlayerAttackedForCurrentAttack));
 }

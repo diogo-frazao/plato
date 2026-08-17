@@ -210,7 +210,7 @@ bool wasMoveLeftPressedThisFrame()
 
 bool wasAttackKeyPressedThisFrame()
 {
-	return _wasMouseButtonPressedThisFrame(LEFT) || _wasKeyPressedThisFrame(SDL_SCANCODE_RETURN);
+	return _wasMouseButtonPressedThisFrame(LEFT) || _wasKeyPressedThisFrame(SDL_SCANCODE_RETURN) || _wasKeyPressedThisFrame(SDL_SCANCODE_Z); 
 }
 
 bool wasSkipDialogueKeyPressedThisFrame()

@@ -314,6 +314,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 0, 0 };
 		break;
+	case GANGSTER_OSKAR_PISTOL_HIT_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 247, 567 };
+		size = { 720, 36 };
+		numberOfFrames = 12;
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
 	case DARWIN_PLACEHOLDER_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 339, 2 };

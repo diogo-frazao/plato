@@ -122,7 +122,7 @@ public:
 	inline static CrossHairSmear _crosshairSmear;
 };
 
-class AttackingSystem
+class CombatSystem
 {
 public:
 	void update();
@@ -136,6 +136,9 @@ public:
 	void registerPlayerAttackToEntity(Entity* entity);
 	void clearEntitiesPlayerAttacked();
 	int32_t _entitiesPlayerAttackedForCurrentAttack[10];
+
+	// Projectiles
+	void handleProjectile(Entity* entity);
 
 	// Cleared at the beginning of each frame
 	// This is the only place where we use RectCollider.topLeftPointOffset as a world position

@@ -20,7 +20,7 @@ inline AnimationSystem s_animationSystem;
 inline MovementSystem s_characterMovementSystem;
 inline DebugSystem s_debugCollidersSystem;
 inline CrosshairSystem s_crosshairSystem;
-inline AttackingSystem s_attackingSystem;
+inline CombatSystem s_attackingSystem;
 inline UISystem s_uiSystem;
 
 template<typename T>
@@ -62,6 +62,11 @@ inline Entity& addEntity(const char* debugName, Vec2 position = Vec2())
 	t->previousPosition = position;
 	t->startingPosition = position;
 	return entity;
+}
+
+inline void clearEntityComponentsBitmask(Entity& entity)
+{
+	s_entityManager.clearEntityComponentBitmask(entity);
 }
 
 inline std::array<Entity, k_maxNumberOfEntities>& getAllEntities()
