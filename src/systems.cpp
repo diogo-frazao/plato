@@ -1163,11 +1163,11 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 
 #pragma region Combat System
 
-void CombatSystem::handleProjectile(Entity* entity)
+void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 {
-	auto* projectile = getComponentFromEntity<ProjectileComponent>(*entity);
-	auto* transform = getComponentFromEntity<TransformComponent>(*entity);
-	auto* collider = getComponentFromEntity<RectColliderComponent>(*entity);
+	auto* projectile = getComponentFromEntity<ProjectileComponent>(*projectileEntity);
+	auto* transform = getComponentFromEntity<TransformComponent>(*projectileEntity);
+	auto* collider = getComponentFromEntity<RectColliderComponent>(*projectileEntity);
 
 	for (Entity& targetEntity : getAllEntities())
 	{
@@ -1202,7 +1202,7 @@ void CombatSystem::handleProjectile(Entity* entity)
 		addColliderToDebugList(transform->position, collider->collider);
 
 		//TODO: PROPERLY DELETE THE BULLET
-		clearEntityComponentsBitmask(*entity);
+		clearEntityComponentsBitmask(*projectileEntity);
 
 		targetEntity.entityState = SHOT_DYING_STATE;
 
@@ -1230,14 +1230,14 @@ void CombatSystem::update()
 			auto* s = getComponentFromEntity<SpriteComponent>(player);
 			auto* c = getComponentFromEntity<RectColliderComponent>(player);
 
-			tryMainCharacterAttack(&player, a, m, t, s, c);
+			tryStartMainCharacterAttack(&player, a, m, t, s, c);
 			handleMainCharacterAttackAnimations(&player, a, m, s);
 			continue;
 		}
 
 		if (entityHasComponent<ProjectileComponent>(entity))
 		{
-			handleProjectile(&entity);
+			handleProjectileHitDetection(&entity);
 			continue;
 		}
 
@@ -1246,10 +1246,10 @@ void CombatSystem::update()
 			continue;
 		}
 
+		// Handle Combat related NPC animations
 		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(entity);
 		SpriteComponent* s = getComponentFromEntity<SpriteComponent>(entity);
 
-		// Handle Combat related NPC animations
 		switch (entity.entityState)
 		{
 		case SHOT_DYING_STATE:
@@ -1259,7 +1259,7 @@ void CombatSystem::update()
 	}
 }
 
-void CombatSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
 {
 	// Prevent attacking while using the mouse for imgui related things
 	if (s_isImGuiOpen)
@@ -1354,6 +1354,7 @@ void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, Attacking
 	switch (player->entityState)
 	{
 	case ATTACKING_STATE:
+
 		// Transition when attacking animation ends.
 		if (s->animationData.finishedPlayingAnimation)
 		{

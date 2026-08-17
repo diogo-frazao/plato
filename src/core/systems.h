@@ -128,11 +128,11 @@ public:
 	void update();
 	
 	// Player attacks
-	void tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
+	void tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
 	void handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
 
 	// Projectiles
-	void handleProjectile(Entity* entity);
+	void handleProjectileHitDetection(Entity* projectileEntity);
 
 	// Cleared at the beginning of each frame
 	// This is the only place where we use RectCollider.topLeftPointOffset as a world position
