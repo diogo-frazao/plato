@@ -195,126 +195,14 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 133, 12 };
 		numberOfFrames = 7;
 		break;
-	case GANGSTER_SMALL_IDLE_SPRITE:
+	case OSKAR_IDLE_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 1, 486 };
 		size = { 60, 36 };
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 10 };
 		break;
-	case GANGSTER_SMALL_HURT_TOP_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 307, 528 };
-		size = { 120, 36 };
-		numberOfFrames = 2;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_TOP_BOTTOM_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 553, 528 };
-		size = { 120, 36 };
-		numberOfFrames = 2;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_TOP_BOTTOM_RECOVER_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 676, 528 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_TOP_TOP_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 1, 567 };
-		size = { 180, 36 };
-		numberOfFrames = 3;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_TOP_TOP_RECOVER_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 184, 567 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 64, 486 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_RECOVER_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 127, 486 };
-		size = { 120, 36 };
-		numberOfFrames = 2;
-		collidertopLeftPointOffset = { 25, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 250, 486 };
-		size = { 180, 36 };
-		numberOfFrames = 3;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_RECOVER_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 433, 486 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_TOP_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 1, 528 };
-		size = { 180, 36 };
-		numberOfFrames = 3;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_HURT_BOTTOM_TOP_RECOVER_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 184, 528 };
-		size = { 120, 36 };
-		numberOfFrames = 2;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_CRAWL_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 496, 486 };
-		size = { 120, 36 };
-		numberOfFrames = 2;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_WAIT_TO_DIE_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 496, 486 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_SMALL_DEAD_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 619, 486 };
-		size = { 60, 36 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 22, 10 };
-		break;
-	case GANGSTER_HUGO_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 407, 1 };
-		size = { 13, 21 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 0, 0 };
-		break;
-	case GANGSTER_OSKAR_SPRITE:
-		atlas = GAME_ATLAS;
-		atlasOffset = { 406, 29 };
-		size = { 13, 19 };
-		numberOfFrames = 1;
-		collidertopLeftPointOffset = { 0, 0 };
-		break;
-	case GANGSTER_OSKAR_PISTOL_HIT_SPRITE:
+	case OSKAR_SHOT_DYING_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 247, 567 };
 		size = { 720, 36 };

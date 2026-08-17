@@ -215,37 +215,14 @@ enum WeaponType
 
 struct AttackingComponent
 {
-	// Deal Damage related
-
+	// Weapon the character is currently holding
 	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
-
-	// Updated as the entity gets damaged.
-	enum AttackType lastDamageType = NO_ATTACK;
-
-	// Receive Damage related
-
-	// If true, instead of crawling, the entity will be on the same spot. Used for cutscenes when we will talk with someone as we are about to kill them
-	bool shouldWaitToDie = false;
 
 	// Whether or not this entity can be attacked/damaged
 	bool canBeAttacked = true;
 
-	// If damageCounter is equal or greater than this, the character will fall and go to HURT_STATE_TWO
-	uint8_t numberOfHitsToFall = 2;
-
 	// How many times this entity was attacked
 	uint8_t damageCounter = 0;
-
-	// After this time (in sec), character will play hurt one recover, and go back to idle at the end.
-	float timeToRecoverFromHurtOneState = 2.f;
-
-	// After this time (in sec), character will play hurt two recover.
-	float timeToRecoverFromHurtTwoState = 1.f;
-
-	// When hurt two recover starts playing, After this time (in sec), the character will start crawling.
-	float timeToStartCrawling = 0.5f;
-
-	float recoverTimer = k_invalidTime;
 };
 
 struct ProjectileComponent

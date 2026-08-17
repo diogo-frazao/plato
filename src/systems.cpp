@@ -1204,7 +1204,7 @@ void CombatSystem::handleProjectile(Entity* entity)
 		//TODO: PROPERLY DELETE THE BULLET
 		clearEntityComponentsBitmask(*entity);
 
-		targetEntity.entityState = TODO_REMOVE_STATE;
+		targetEntity.entityState = SHOT_DYING_STATE;
 
 		D_LOG(LOG, "Entity hit");
 	}
@@ -1223,7 +1223,15 @@ void CombatSystem::update()
 
 		if (entity.id == k_playerEntityId)
 		{
-			handleMainCharacter();
+			Entity& player = getEntityById(k_playerEntityId);
+			auto* a = getComponentFromEntity<AttackingComponent>(player);
+			auto* m = getComponentFromEntity<MovementComponent>(player);
+			auto* t = getComponentFromEntity<TransformComponent>(player);
+			auto* s = getComponentFromEntity<SpriteComponent>(player);
+			auto* c = getComponentFromEntity<RectColliderComponent>(player);
+
+			tryMainCharacterAttack(&player, a, m, t, s, c);
+			handleMainCharacterAttackAnimations(&player, a, m, s);
 			continue;
 		}
 
@@ -1241,163 +1249,11 @@ void CombatSystem::update()
 		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(entity);
 		SpriteComponent* s = getComponentFromEntity<SpriteComponent>(entity);
 
-		// Handle NPC animations
+		// Handle Combat related NPC animations
 		switch (entity.entityState)
 		{
-		case HURT_ONE_STATE:
-		{
-			SpriteType animationToPlay = INVALID_SPRITE;
-			switch (a->lastDamageType)
-			{
-			case BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_SPRITE;
-				break;
-			case TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_SPRITE;
-				break;
-			}
-
-			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, 70, 70);
-
-			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToRecoverFromHurtOneState)
-			{
-				entity.entityState = HURT_ONE_RECOVER_STATE;
-				invalidateTimer(a->recoverTimer);
-			}
-			break;
-		}
-		case HURT_ONE_RECOVER_STATE:
-		{
-			SpriteType animationToPlay = INVALID_SPRITE;
-			switch (a->lastDamageType)
-			{
-			case BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_RECOVER_SPRITE;
-				break;
-			case TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_RECOVER_SPRITE;
-				break;
-			}
-
-			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, 70, 70);
-
-			if (s->animationData.finishedPlayingAnimation)
-			{
-				entity.entityState = IDLE_STATE;
-			}
-
-			break;
-		}
-		case HURT_TWO_STATE:
-		{
-			SpriteType animationToPlay = INVALID_SPRITE;
-			switch (a->lastDamageType)
-			{
-			case BOTTOM_BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_SPRITE;
-				break;
-			case BOTTOM_TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_TOP_SPRITE;
-				break;
-			case TOP_BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_BOTTOM_SPRITE;
-				break;
-			case TOP_TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_TOP_SPRITE;
-			}
-
-			float animationSpeed = 70.f;
-			if (s->animationData.currentFrame == 0)
-			{
-				animationSpeed = 300.f;
-			}
-			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, animationSpeed, 70);
-
-			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToRecoverFromHurtTwoState)
-			{
-				entity.entityState = HURT_TWO_RECOVER_STATE;
-				invalidateTimer(a->recoverTimer);
-			}
-
-			break;
-		}
-		case HURT_TWO_RECOVER_STATE:
-		{
-			SpriteType animationToPlay = INVALID_SPRITE;
-			switch (a->lastDamageType)
-			{
-			case BOTTOM_BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_BOTTOM_RECOVER_SPRITE;
-				break;
-			case BOTTOM_TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_BOTTOM_TOP_RECOVER_SPRITE;
-				break;
-			case TOP_BOTTOM_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_BOTTOM_RECOVER_SPRITE;
-				break;
-			case TOP_TOP_ATTACK:
-				animationToPlay = GANGSTER_SMALL_HURT_TOP_TOP_RECOVER_SPRITE;
-			}
-
-			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, 70, 70);
-
-			a->recoverTimer += k_deltaTime;
-			if (a->recoverTimer >= a->timeToStartCrawling)
-			{
-				if (a->shouldWaitToDie)
-				{
-					entity.entityState = WAIT_TO_DIE_STATE;
-				}
-				else
-				{
-					entity.entityState = CRAWL_STATE;
-				}
-
-				invalidateTimer(a->recoverTimer);
-			}
-
-			break;
-		}
-		case CRAWL_STATE:
-		{
-			bool shouldInvertCrawlDirection = false;
-			int8_t crawlMovementDirection = -1;
-
-			switch (a->lastDamageType)
-			{
-			case BOTTOM_TOP_ATTACK:
-			case TOP_BOTTOM_ATTACK:
-			case TOP_TOP_ATTACK:
-				shouldInvertCrawlDirection = true;
-				break;
-			}
-
-			if (shouldInvertCrawlDirection)
-			{
-				s->flipX = false;
-				crawlMovementDirection = 1;
-			}
-
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_CRAWL_SPRITE, true, 400, 400);
-
-			// TODO: Improve to move alongside animation
-			MovementComponent* m = getComponentFromEntity<MovementComponent>(entity);
-			m->currentSpeed.x = crawlMovementDirection * 20.f * k_deltaTime;
-
-			break;
-		}
-		case WAIT_TO_DIE_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_WAIT_TO_DIE_SPRITE, true, 400, 400);
-			break;
-			break;
-		case DEAD_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_SMALL_DEAD_SPRITE, false, 70, 70);
-			break;
-
-		case TODO_REMOVE_STATE:
-			s->setAnimationToPlayIfNotPlaying(GANGSTER_OSKAR_PISTOL_HIT_SPRITE, false, 70, 70);
+		case SHOT_DYING_STATE:
+			s->setAnimationToPlayIfNotPlaying(OSKAR_SHOT_DYING_SPRITE, false, 70, 70);
 			break;
 		}
 	}
@@ -1484,7 +1340,6 @@ void CombatSystem::tryMainCharacterAttack(Entity* player, AttackingComponent* a,
 		break;
 	}
 
-	clearEntitiesPlayerAttacked();
 	player->entityState = ATTACKING_STATE;
 	return;
 }
@@ -1541,179 +1396,6 @@ void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, Attacking
 
 		break;
 	}
-}
-
-void CombatSystem::handleMainCharacter()
-{
-	Entity& player = getEntityById(k_playerEntityId);
-	auto* a = getComponentFromEntity<AttackingComponent>(player);
-	auto* m = getComponentFromEntity<MovementComponent>(player);
-	auto* t = getComponentFromEntity<TransformComponent>(player);
-	auto* s = getComponentFromEntity<SpriteComponent>(player);
-	auto* c = getComponentFromEntity<RectColliderComponent>(player);
-
-	tryMainCharacterAttack(&player, a, m, t, s, c);
-	handleMainCharacterAttackAnimations(&player, a, m, s);
-
-	// Actual hit detection, depending on the weapon
-	if (player.entityState != ATTACKING_STATE || s->animationData.currentFrame > 3)
-	{
-		return;
-	}
-
-	if (a->weaponInHand != GOLF_WEAPON_TYPE)
-	{
-		return;
-	}
-
-	for (Entity& target : getAllEntities())
-	{
-		if (target.id == k_invalidId || target.id == k_playerEntityId)
-		{
-			continue;
-		}
-
-		if (!entityHasComponent<AttackingComponent>(target) || !entityHasComponent<RectColliderComponent>(target) ||
-			hasPlayerAlreadyAttackedEntity(target.id))
-		{
-			continue;
-		}
-
-		auto* aTarget = getComponentFromEntity<AttackingComponent>(target);
-		auto* tTarget = getComponentFromEntity<TransformComponent>(target);
-
-		Vec2 attackStartingLocation{ t->position.x, t->position.y + 18 };
-		if (s->flipX)
-		{
-			attackStartingLocation.x += 8.f;
-		}
-		else
-		{
-			attackStartingLocation.x += 35.f;
-		}
-
-		RectCollider attackCollider = { {0,0}, {17, 10} };
-
-		Vec2 targetPos = tTarget->position;
-		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(target)->collider;
-
-		addColliderToDebugList(attackStartingLocation, attackCollider);
-		if (!aabb(attackStartingLocation, targetPos, attackCollider, targetCollider))
-		{
-			continue;
-		}
-
-		if (!aTarget->canBeAttacked)
-		{
-			continue;
-		}
-
-		// If we get here, we hit the target
-		registerPlayerAttackToEntity(&target);
-		aTarget->damageCounter++;
-
-		bool isEnemyAlreadyDead = (target.entityState == DEAD_STATE);
-		if (isEnemyAlreadyDead)
-		{
-			continue;
-		}
-
-		// Check if we did a up hit or bottom hit
-		TransformComponent* targetTransform = getComponentFromEntity<TransformComponent>(target);
-		Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
-		bool wasUpHit = mouseWorldPosition.y < targetTransform->position.y;
-
-		auto* mTarget = getComponentFromEntity<MovementComponent>(target);
-		int8_t hitDirection = s->flipX ? -1 : 1;
-
-		bool targetWillRemainStanding = aTarget->damageCounter < aTarget->numberOfHitsToFall;
-		if (targetWillRemainStanding)
-		{
-			target.entityState = HURT_ONE_STATE;
-			mTarget->currentSpeed = { 3.f * hitDirection, 0.f };
-		}
-		else if (aTarget->damageCounter == aTarget->numberOfHitsToFall)
-		{
-			if (target.entityState == IDLE_STATE)
-			{
-				target.entityState = HURT_ONE_STATE;
-				mTarget->currentSpeed = { 3.f * hitDirection, 0.f };
-			}
-			else
-			{
-				target.entityState = HURT_TWO_STATE;
-				mTarget->currentSpeed = { 3.f * hitDirection, -1.f };
-			}
-		}
-		else
-		{
-			if (canKillyEntityFromCurrentState(target.entityState))
-			{
-				mTarget->currentSpeed = { 4.5f * hitDirection, 0.f };
-				target.entityState = DEAD_STATE;
-			}
-			else
-			{
-				target.entityState = HURT_TWO_STATE;
-				mTarget->currentSpeed = { 3.f * hitDirection, -1.f };
-			}
-		}
-
-		// TODO: Expand when we add the new combos
-		switch (target.entityState)
-		{
-		case HURT_ONE_STATE:
-			aTarget->lastDamageType = wasUpHit ? TOP_ATTACK : BOTTOM_ATTACK;
-			break;
-		case HURT_TWO_STATE:
-			AttackType lastDamageType = aTarget->lastDamageType;
-			if (lastDamageType == TOP_ATTACK)
-			{
-				aTarget->lastDamageType = wasUpHit ? TOP_TOP_ATTACK : TOP_BOTTOM_ATTACK;
-
-			}
-
-			if (lastDamageType == BOTTOM_ATTACK)
-			{
-				aTarget->lastDamageType = wasUpHit ? BOTTOM_TOP_ATTACK : BOTTOM_BOTTOM_ATTACK;
-			}
-			break;
-		}
-
-		invalidateTimer(aTarget->recoverTimer);
-	}
-}
-
-void CombatSystem::registerPlayerAttackToEntity(Entity* entity)
-{
-	for (int32_t& entityId : _entitiesPlayerAttackedForCurrentAttack)
-	{
-		if (entityId == k_invalidId)
-		{
-			entityId = entity->id;
-			return;
-		}
-	}
-
-	D_LOG(ERROR, "Player couldn't attack entity %i because array is too small", entity->id);
-}
-
-bool CombatSystem::hasPlayerAlreadyAttackedEntity(int32_t idToCheck)
-{
-	for (int32_t entityId : _entitiesPlayerAttackedForCurrentAttack)
-	{
-		if (entityId == idToCheck)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void CombatSystem::clearEntitiesPlayerAttacked()
-{
-	memset(_entitiesPlayerAttackedForCurrentAttack, k_invalidId, sizeof(_entitiesPlayerAttackedForCurrentAttack));
 }
 
 #pragma endregion

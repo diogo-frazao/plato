@@ -100,7 +100,7 @@ void setupOutsideRestaurantScene()
     lightThatFollowsPlayerEntityId = lightThatFollowsPlayer.id;
 
     Entity& dummyEnemy = addEntity("dummyEnemy", { 160, 0 });
-    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, BAKED_HIGHLIGHTS_LAYER, true, 70, 900);
+    addComponentToEntity<SpriteComponent>(dummyEnemy)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, BAKED_HIGHLIGHTS_LAYER, true, 70, 900);
     addComponentToEntity<RectColliderComponent>(dummyEnemy)->collider = RectCollider({ 4, 4 }, { 9, 17 });
     getComponentFromEntity<SpriteComponent>(dummyEnemy)->flipX = true;
     auto* enemyMovementComponent = addComponentToEntity<MovementComponent>(dummyEnemy);
@@ -319,7 +319,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& hugo = addEntity("hugo", { 179.f, 106.f });
-        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
+        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         // We can't attack hugo until oskar dies
         addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
@@ -327,13 +327,13 @@ void setupInsideRestaurantScene()
         hugoM->maxHorizontalSpeed = 0.3f;
         s_hugoEntityId = hugo.id;
 
-        SpriteType hugoAnimations[] = { GANGSTER_SMALL_IDLE_SPRITE };
+        SpriteType hugoAnimations[] = { OSKAR_IDLE_SPRITE };
         hugoM->setupMovementAnimations(hugoAnimations);
     }
 
     {
         Entity& oskar = addEntity("oskar", { 242.f, 95.f });
-        addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(GANGSTER_SMALL_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
+        addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         addComponentToEntity<AttackingComponent>(oskar);
         getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
@@ -341,7 +341,7 @@ void setupInsideRestaurantScene()
         oskarM->maxHorizontalSpeed = 0.3f;
         s_oskarEntityId = oskar.id;
 
-        SpriteType oskarAnimations[] = { GANGSTER_SMALL_IDLE_SPRITE };
+        SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
     }
 
@@ -2085,7 +2085,6 @@ void Level::imguiRender()
                 getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
                 getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
-                getComponentFromEntity<AttackingComponent>(hugo)->shouldWaitToDie = true;
                 hugo.entityState = IDLE_STATE;
 
                 _gangsterConfrontationStageData.reset();
@@ -2115,8 +2114,7 @@ void Level::imguiRender()
                 Entity& hugo = getEntityById(s_hugoEntityId);
                 getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
                 getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
-                getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = getComponentFromEntity<AttackingComponent>(hugo)->numberOfHitsToFall + 1;
-                hugo.entityState = WAIT_TO_DIE_STATE;
+                hugo.entityState = IDLE_STATE;
 
                 _phoneConfrontationStageData.reset();
                 break;

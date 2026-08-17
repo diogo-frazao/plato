@@ -128,14 +128,8 @@ public:
 	void update();
 	
 	// Player attacks
-	void handleMainCharacter();
 	void tryMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
 	void handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
-
-	bool hasPlayerAlreadyAttackedEntity(int32_t entityId);
-	void registerPlayerAttackToEntity(Entity* entity);
-	void clearEntitiesPlayerAttacked();
-	int32_t _entitiesPlayerAttackedForCurrentAttack[10];
 
 	// Projectiles
 	void handleProjectile(Entity* entity);
