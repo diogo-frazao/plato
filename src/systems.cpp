@@ -1214,10 +1214,28 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		//TODO: PROPERLY DELETE THE BULLET
 		clearEntityComponentsBitmask(*projectileEntity);
 
-		targetEntity.entityState = SHOT_STATE;
+		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
+		if (targetEntity.entityState == SHOT_STATE)
+		{
+			auto* targetSprite = getComponentFromEntity<SpriteComponent>(targetEntity);
 
-		auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-		targetMovement->currentSpeed.x = -2.5f;
+			// Jump directly to last frame
+			targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
+
+			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+			targetMovement->currentSpeed.x = -3.f;
+		}
+		else
+		{
+			targetEntity.entityState = SHOT_STATE;
+
+			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+			targetMovement->currentSpeed.x = -2.5f;
+		}
+
+		auto* aTransform = getComponentFromEntity<TransformComponent>(targetEntity);
+		aTransform->scale.x = 1.25f;
+		aTransform->resetScaleLerp = 0.05f;
 	}
 }
 
@@ -1409,7 +1427,7 @@ void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, Attacking
 		case ROSTOV_WEAPON_PISTOL_TYPE:
 			if (s->animationData.currentFrame == 0)
 			{
-				s_renderingSystem._inFrontOfEverythingOpacity = 30;
+				s_renderingSystem._inFrontOfEverythingOpacity = 50;
 			}
 			else
 			{

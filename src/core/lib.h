@@ -36,7 +36,7 @@ inline bool isEntityInCombatState(EntityState state)
 
 inline bool isEntityAlreadyDying(EntityState state)
 {
-	return state == SHOT_STATE || state == DEAD_STATE;
+	return state == SHOT_FALL_DEATH_STATE || state == DEAD_STATE;
 }
 
 inline bool canKillyEntityFromCurrentState(EntityState state)
