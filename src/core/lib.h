@@ -23,14 +23,20 @@ enum EntityState
 
 	// Combat. Controlled by Combat System
 	ATTACKING_STATE,
-	SHOT_DYING_STATE,
+	SHOT_STATE,
+	SHOT_FALL_DEATH_STATE,
 	WAITING_TO_DIE_STATE,
 	DEAD_STATE,
 };
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == SHOT_DYING_STATE || state == DEAD_STATE;
+	return state == SHOT_STATE || state == DEAD_STATE;
+}
+
+inline bool isEntityAlreadyDying(EntityState state)
+{
+	return state == SHOT_STATE || state == DEAD_STATE;
 }
 
 inline bool canKillyEntityFromCurrentState(EntityState state)
@@ -58,7 +64,7 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Attacking";
 	case ON_CUTSCENE_STATE:
 		return "On cutscene";
-	case SHOT_DYING_STATE:
+	case SHOT_STATE:
 		return "Shot Dying";
 	case WAITING_TO_DIE_STATE:
 		return "Waiting to Die";
@@ -127,7 +133,8 @@ enum SpriteType
 
 	// Enemies
 	OSKAR_IDLE_SPRITE,
-	OSKAR_SHOT_DYING_SPRITE,
+	OSKAR_SHOT_SPRITE,
+	OSKAR_FALL_DEATH_SPRITE,
 
 	// Darwin
 	DARWIN_PLACEHOLDER_SPRITE,

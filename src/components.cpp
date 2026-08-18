@@ -202,11 +202,18 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 10 };
 		break;
-	case OSKAR_SHOT_DYING_SPRITE:
+	case OSKAR_SHOT_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 247, 567 };
-		size = { 720, 36 };
-		numberOfFrames = 12;
+		size = { 300, 36 };
+		numberOfFrames = 5;
+		collidertopLeftPointOffset = { 22, 10 };
+		break;
+	case OSKAR_FALL_DEATH_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 550, 567 };
+		size = { 240, 36 };
+		numberOfFrames = 4;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
 	case DARWIN_PLACEHOLDER_SPRITE:

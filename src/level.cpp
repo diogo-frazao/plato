@@ -1861,6 +1861,28 @@ void Level::update()
         }
         */
 
+        // Reset entities
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_Q))
+        {
+            for (Entity& entity : getAllEntities())
+            {
+                if (entity.id == k_invalidId || entity.id == k_playerEntityId)
+                {
+                    continue;
+                }
+
+                if (!entityHasComponent<AttackingComponent>(entity))
+                {
+                    continue;
+                }
+
+                entity.entityState = IDLE_STATE;
+
+                auto* t = getComponentFromEntity<TransformComponent>(entity);
+                t->position = t->startingPosition;
+            }
+        }
+
         // Debug level blocks
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
         {

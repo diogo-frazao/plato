@@ -645,20 +645,25 @@ void AnimationSystem::update()
 		if (sprite->animationData.currentFrame == lastFrame)
 		{
 			sprite->animationData.currentFrame = sprite->animationData.loopAnimation ? 0 : lastFrame;
+
+			if (sprite->animationData.loopAnimation)
+			{
+				sprite->animationData.millisecondsSinceLastFrame = 0.f;
+			}
 		}
 		else
 		{
 			sprite->animationData.currentFrame++;
 			sprite->animationData.currentFrame = min(sprite->animationData.currentFrame, lastFrame);
+			sprite->animationData.millisecondsSinceLastFrame = 0.f;
 		}
 
-		sprite->animationData.millisecondsSinceLastFrame = 0.f;
-
-		bool finishedPlayingAnimation = (sprite->animationData.currentFrame == lastFrame && !sprite->animationData.loopAnimation);
+		bool finishedPlayingAnimation = (sprite->animationData.currentFrame == lastFrame && !sprite->animationData.loopAnimation) && sprite->animationData.millisecondsSinceLastFrame >= milliseondsToChangeToNextFrame;
 		if (finishedPlayingAnimation)
 		{
 			sprite->animationData.finishedPlayingAnimation = true;
 		}
+
 	}
 }
 
@@ -1190,6 +1195,11 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			continue;
 		}
 
+		if (isEntityAlreadyDying(targetEntity.entityState))
+		{
+			continue;
+		}
+
 		Vec2 targetPosition = getComponentFromEntity<TransformComponent>(targetEntity)->position;
 		RectCollider targetCollider = getComponentFromEntity<RectColliderComponent>(targetEntity)->collider;
 
@@ -1204,9 +1214,10 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		//TODO: PROPERLY DELETE THE BULLET
 		clearEntityComponentsBitmask(*projectileEntity);
 
-		targetEntity.entityState = SHOT_DYING_STATE;
+		targetEntity.entityState = SHOT_STATE;
 
-		D_LOG(LOG, "Entity hit");
+		auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+		targetMovement->currentSpeed.x = -2.5f;
 	}
 }
 
@@ -1252,8 +1263,33 @@ void CombatSystem::update()
 
 		switch (entity.entityState)
 		{
-		case SHOT_DYING_STATE:
-			s->setAnimationToPlayIfNotPlaying(OSKAR_SHOT_DYING_SPRITE, false, 70, 70);
+		case SHOT_STATE:
+		{
+			uint32_t animationSpeed = 70;
+			if (s->animationData.currentFrame == 0)
+			{
+				animationSpeed = 600;
+			}
+			if (s->animationData.currentFrame == 2)
+			{
+				animationSpeed = 200;
+			}
+			if (s->animationData.currentFrame == 4)
+			{
+				// TODO: Random time to fall
+				animationSpeed = 400;
+			}
+
+			if (s->animationData.finishedPlayingAnimation)
+			{
+				entity.entityState = SHOT_FALL_DEATH_STATE;
+			}
+
+			s->setAnimationToPlayIfNotPlaying(OSKAR_SHOT_SPRITE, false, animationSpeed, 70);
+			break;
+		}
+		case SHOT_FALL_DEATH_STATE:
+			s->setAnimationToPlayIfNotPlaying(OSKAR_FALL_DEATH_SPRITE, false, 70, 70);
 			break;
 		}
 	}
