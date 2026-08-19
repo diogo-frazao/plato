@@ -223,6 +223,9 @@ struct AttackingComponent
 
 	// How many times this entity was attacked
 	uint8_t damageCounter = 0;
+
+	// How many times this entity needs to be hit to die
+	uint8_t numberOfHitsToDie = 1;
 };
 
 struct ProjectileComponent

@@ -1880,6 +1880,10 @@ void Level::update()
 
                 auto* t = getComponentFromEntity<TransformComponent>(entity);
                 t->position = t->startingPosition;
+
+                auto* a = getComponentFromEntity<AttackingComponent>(entity);
+                a->damageCounter = 0;
+                a->numberOfHitsToDie = 2;
             }
         }
 

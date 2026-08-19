@@ -1214,6 +1214,8 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		//TODO: PROPERLY DELETE THE BULLET
 		clearEntityComponentsBitmask(*projectileEntity);
 
+		aTarget->damageCounter++;
+
 		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
 		if (targetEntity.entityState == SHOT_STATE)
 		{
@@ -1284,26 +1286,52 @@ void CombatSystem::update()
 		case SHOT_STATE:
 		{
 			uint32_t animationSpeed = 70;
-			if (s->animationData.currentFrame == 0)
+			SpriteType animationToPlay = OSKAR_SHOT_FALL_SPRITE;
+			
+			if (a->damageCounter >= a->numberOfHitsToDie)
 			{
-				animationSpeed = 600;
+				animationToPlay = OSKAR_SHOT_FALL_SPRITE;
+
+				if (s->animationData.currentFrame == 0)
+				{
+					animationSpeed = 600;
+				}
+				if (s->animationData.currentFrame == 2)
+				{
+					animationSpeed = 200;
+				}
+				if (s->animationData.currentFrame == 4)
+				{
+					// TODO: Random time to fall
+					animationSpeed = 400;
+				}
+
+				if (s->animationData.finishedPlayingAnimation)
+				{
+					entity.entityState = SHOT_FALL_DEATH_STATE;
+				}
 			}
-			if (s->animationData.currentFrame == 2)
+			else
 			{
-				animationSpeed = 200;
-			}
-			if (s->animationData.currentFrame == 4)
-			{
-				// TODO: Random time to fall
-				animationSpeed = 400;
+				animationToPlay = OSKAR_SHOT_RECOVER_SPRITE;
+
+				if (s->animationData.currentFrame == 0)
+				{
+					animationSpeed = 600;
+				}
+				if (s->animationData.currentFrame == 2)
+				{
+					//animationSpeed = 200;
+				}
+
+				if (s->animationData.finishedPlayingAnimation)
+				{
+					//TODO: Add limping state
+					entity.entityState = IDLE_STATE;
+				}
 			}
 
-			if (s->animationData.finishedPlayingAnimation)
-			{
-				entity.entityState = SHOT_FALL_DEATH_STATE;
-			}
-
-			s->setAnimationToPlayIfNotPlaying(OSKAR_SHOT_SPRITE, false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, animationSpeed, 70);
 			break;
 		}
 		case SHOT_FALL_DEATH_STATE:
