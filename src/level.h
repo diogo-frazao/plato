@@ -83,6 +83,7 @@ enum CameraShakeType
 {
 	NO_SHAKE,
 	LIGHT_SHAKE,
+	LIGHT_MEDIUM_SHAKE,
 	MEDIUM_SHAKE,
 };
 

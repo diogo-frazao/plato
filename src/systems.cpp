@@ -1238,6 +1238,8 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		auto* aTransform = getComponentFromEntity<TransformComponent>(targetEntity);
 		aTransform->scale.x = 1.25f;
 		aTransform->resetScaleLerp = 0.05f;
+
+		LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
 	}
 }
 
@@ -1418,6 +1420,8 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 			auto* projectile = addComponentToEntity<ProjectileComponent>(bullet);
 			projectile->ownerEntityId = player->id;
 		}
+
+		LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_SHAKE, 0.f);
 
 		break;
 	}

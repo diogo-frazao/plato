@@ -499,6 +499,10 @@ void handleCameraShake(Camera& camera)
         camera.targetPosition.x += 5.f;
         camera.targetPosition.y += 10.f;
         break;
+    case LIGHT_MEDIUM_SHAKE:
+        camera.targetPosition.x += 10.f;
+        camera.targetPosition.y += 20.f;
+        break;
     case MEDIUM_SHAKE:
         camera.targetPosition.x += 20.f;
         camera.targetPosition.y += 40.f;
