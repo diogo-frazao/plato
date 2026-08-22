@@ -226,6 +226,15 @@ struct AttackingComponent
 
 	// How many times this entity needs to be hit to die
 	uint8_t numberOfHitsToDie = 1;
+
+	// NPC Only
+
+	// Used by npcs. They only engage in combat with player when state is engaged. Set via cutscenes, automatically when shot or notices player
+	bool isEngagedInCombat = false;
+
+	// This makes the NPCS's movements smoother since they have to hold the idle position for a fraction before attacking again
+	float secondsSinceLastAttackTimer = k_invalidTime;
+	float secondsNeededToAttackAgain = 0.3f;
 };
 
 struct ProjectileComponent

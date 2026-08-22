@@ -1888,6 +1888,11 @@ void Level::update()
                 auto* a = getComponentFromEntity<AttackingComponent>(entity);
                 a->damageCounter = 0;
                 a->numberOfHitsToDie = 2;
+
+                if (entity.id == s_oskarEntityId)
+                {
+                    a->isEngagedInCombat = true;
+                }
             }
         }
 

@@ -31,7 +31,7 @@ enum EntityState
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == SHOT_STATE || state == DEAD_STATE;
+	return state == ATTACKING_STATE || state == SHOT_STATE || state == SHOT_FALL_DEATH_STATE || state == WAITING_TO_DIE_STATE || state == DEAD_STATE;
 }
 
 inline bool isEntityAlreadyDying(EntityState state)
@@ -133,6 +133,7 @@ enum SpriteType
 
 	// Enemies
 	OSKAR_IDLE_SPRITE,
+	OSKAR_ATTACK_SPRITE,
 	OSKAR_SHOT_FALL_SPRITE,
 	OSKAR_SHOT_RECOVER_SPRITE,
 	OSKAR_FALL_DEATH_SPRITE,

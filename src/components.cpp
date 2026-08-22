@@ -202,6 +202,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 10 };
 		break;
+	case OSKAR_ATTACK_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 64, 486 };
+		size = { 420, 36 };
+		numberOfFrames = 7;
+		collidertopLeftPointOffset = { 24, 10 };
+		break;
 	case OSKAR_SHOT_FALL_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 247, 567 };

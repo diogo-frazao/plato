@@ -1247,6 +1247,13 @@ void CombatSystem::update()
 {
 	clearDebugCollisions();
 
+	Entity& player = getEntityById(k_playerEntityId);
+	auto* playerA = getComponentFromEntity<AttackingComponent>(player);
+	auto* playerM = getComponentFromEntity<MovementComponent>(player);
+	auto* playerT = getComponentFromEntity<TransformComponent>(player);
+	auto* playerS = getComponentFromEntity<SpriteComponent>(player);
+	auto* playerC = getComponentFromEntity<RectColliderComponent>(player);
+
 	for (Entity& entity : getAllEntities())
 	{
 		if (entity.id == k_invalidId)
@@ -1256,15 +1263,8 @@ void CombatSystem::update()
 
 		if (entity.id == k_playerEntityId)
 		{
-			Entity& player = getEntityById(k_playerEntityId);
-			auto* a = getComponentFromEntity<AttackingComponent>(player);
-			auto* m = getComponentFromEntity<MovementComponent>(player);
-			auto* t = getComponentFromEntity<TransformComponent>(player);
-			auto* s = getComponentFromEntity<SpriteComponent>(player);
-			auto* c = getComponentFromEntity<RectColliderComponent>(player);
-
-			tryStartMainCharacterAttack(&player, a, m, t, s, c);
-			handleMainCharacterAttackAnimations(&player, a, m, s);
+			tryStartMainCharacterAttack(&player, playerA, playerM, playerT, playerS, playerC);
+			handleMainCharacterAttackAnimations(&player, playerA, playerM, playerS);
 			continue;
 		}
 
@@ -1279,12 +1279,71 @@ void CombatSystem::update()
 			continue;
 		}
 
-		// Handle Combat related NPC animations
-		AttackingComponent* a = getComponentFromEntity<AttackingComponent>(entity);
-		SpriteComponent* s = getComponentFromEntity<SpriteComponent>(entity);
+		auto* a = getComponentFromEntity<AttackingComponent>(entity);
+		auto* m = getComponentFromEntity<MovementComponent>(entity);
+		auto* s = getComponentFromEntity<SpriteComponent>(entity);
+		auto* t = getComponentFromEntity<TransformComponent>(entity);
 
+		bool isWaitingToAttackAgain = false;
+		if (isTimerOngoing(a->secondsSinceLastAttackTimer))
+		{
+			a->secondsSinceLastAttackTimer += k_deltaTime;
+			if (a->secondsSinceLastAttackTimer < a->secondsNeededToAttackAgain)
+			{
+				isWaitingToAttackAgain = true;
+			}
+		}
+
+		// Hnadle NPC Attack state machine
+
+		if (a->isEngagedInCombat && !isEntityInCombatState(entity.entityState) && !isWaitingToAttackAgain)
+		{
+			switch (a->weaponInHand)
+			{
+			case NO_WEAPON_TYPE:
+				// No weapon in hand means melee. Get close enough > Attack > Wait > repeat
+
+				invalidateTimer(a->secondsSinceLastAttackTimer);
+
+				float targetMinDistanceToAttack = 30.f;
+				float targetXPosition = playerT->position.x;
+
+				bool shouldMoveLeft = targetXPosition < t->position.x;
+				s->flipX = shouldMoveLeft;
+
+				if (abs(t->position.x - targetXPosition) < targetMinDistanceToAttack)
+				{
+					m->isMovingOnFloor = false;
+					entity.entityState = ATTACKING_STATE;
+					break;
+				}
+
+				m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
+				m->isMovingOnFloor = true;
+				break;
+			}
+		}
+
+		// Handle Combat related NPC animations
 		switch (entity.entityState)
 		{
+		case ATTACKING_STATE:
+		{
+			uint32_t animationSpeed = 70;
+			if (s->animationData.currentFrame == 1)
+			{
+				animationSpeed = 140;
+			}
+
+			if (s->animationData.finishedPlayingAnimation)
+			{
+				startTimer(a->secondsSinceLastAttackTimer);
+				entity.entityState = IDLE_STATE;
+			}
+
+			s->setAnimationToPlayIfNotPlaying(OSKAR_ATTACK_SPRITE, false, animationSpeed, 70);
+			break;
+		}
 		case SHOT_STATE:
 		{
 			uint32_t animationSpeed = 70;
