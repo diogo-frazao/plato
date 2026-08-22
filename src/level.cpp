@@ -413,6 +413,7 @@ void Level::start()
     player.entityState = IDLE_STATE;
 }
 
+// TODO: Try as much as possible to remove this, we shouldn't set m->isMovingOnFloor. This is ignoring physics which is dumb.
 bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, SpriteComponent* s, float targetXPosition)
 {
     bool shouldMoveLeft = targetXPosition < t->position.x;
@@ -1892,6 +1893,7 @@ void Level::update()
                 if (entity.id == s_oskarEntityId)
                 {
                     a->isEngagedInCombat = true;
+                    getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 0.65f;
                 }
             }
         }

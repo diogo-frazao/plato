@@ -1295,8 +1295,8 @@ void CombatSystem::update()
 		}
 
 		// Hnadle NPC Attack state machine
-
-		if (a->isEngagedInCombat && !isEntityInCombatState(entity.entityState) && !isWaitingToAttackAgain)
+		bool canNPCAttack = m->isGrounded && a->isEngagedInCombat && !isEntityInCombatState(entity.entityState) && !isWaitingToAttackAgain;
+		if (canNPCAttack)
 		{
 			switch (a->weaponInHand)
 			{
@@ -1313,13 +1313,11 @@ void CombatSystem::update()
 
 				if (abs(t->position.x - targetXPosition) < targetMinDistanceToAttack)
 				{
-					m->isMovingOnFloor = false;
 					entity.entityState = ATTACKING_STATE;
 					break;
 				}
 
 				m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
-				m->isMovingOnFloor = true;
 				break;
 			}
 		}
