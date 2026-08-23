@@ -235,6 +235,9 @@ struct AttackingComponent
 	// This makes the NPCS's movements smoother since they have to hold the idle position for a fraction before attacking again
 	float secondsSinceLastAttackTimer = k_invalidTime;
 	float secondsNeededToAttackAgain = 0.3f;
+
+	// Used to know if the player was already hit by the current attack or not (avoid applying damage twice)
+	bool wasPlayerHitByCurrentAttack = false;
 };
 
 struct ProjectileComponent

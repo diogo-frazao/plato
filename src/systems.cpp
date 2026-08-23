@@ -1173,6 +1173,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 	auto* projectile = getComponentFromEntity<ProjectileComponent>(*projectileEntity);
 	auto* transform = getComponentFromEntity<TransformComponent>(*projectileEntity);
 	auto* collider = getComponentFromEntity<RectColliderComponent>(*projectileEntity);
+	auto* sprite = getComponentFromEntity<SpriteComponent>(*projectileEntity);
 
 	for (Entity& targetEntity : getAllEntities())
 	{
@@ -1216,6 +1217,8 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 
 		aTarget->damageCounter++;
 
+		int8_t hitDirection = sprite->flipX ? -1 : 1;
+
 		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
 		if (targetEntity.entityState == SHOT_STATE)
 		{
@@ -1225,14 +1228,14 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
 
 			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-			targetMovement->currentSpeed.x = -3.f;
+			targetMovement->currentSpeed.x = -3.f * hitDirection;
 		}
 		else
 		{
 			targetEntity.entityState = SHOT_STATE;
 
 			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-			targetMovement->currentSpeed.x = -2.5f;
+			targetMovement->currentSpeed.x = -2.5f * hitDirection;
 		}
 
 		auto* aTransform = getComponentFromEntity<TransformComponent>(targetEntity);
@@ -1322,6 +1325,30 @@ void CombatSystem::update()
 			}
 		}
 
+		// Handle NPC Melee hit detection
+		if (entity.entityState == ATTACKING_STATE)
+		{
+			bool canAttackFromCurrentFrame = (s->animationData.currentFrame == 2) || (s->animationData.currentFrame == 3);
+			if (!a->wasPlayerHitByCurrentAttack && canAttackFromCurrentFrame)
+			{
+				RectCollider attackCollider{ {34, 9}, {24, 18} };
+				if (s->flipX)
+				{
+					attackCollider.topLeftPointOffset.x = 5;
+				}
+
+				addColliderToDebugList(t->position, attackCollider);
+				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
+				{
+					player.entityState = SHOT_STATE;
+					a->wasPlayerHitByCurrentAttack = true;
+
+					int8_t hitDirection = s->flipX ? -1 : 1;
+					playerM->currentSpeed.x = 4.f * hitDirection;
+				}
+			}
+		}
+
 		// Handle Combat related NPC animations
 		switch (entity.entityState)
 		{
@@ -1336,6 +1363,7 @@ void CombatSystem::update()
 			if (s->animationData.finishedPlayingAnimation)
 			{
 				startTimer(a->secondsSinceLastAttackTimer);
+				a->wasPlayerHitByCurrentAttack = false;
 				entity.entityState = IDLE_STATE;
 			}
 
