@@ -1002,23 +1002,35 @@ void MovementSystem::update()
 			}
 			else
 			{
-				bool canChangeToIdle = entity.entityState == RUNNING_STATE || entity.entityState == FALLING_STATE;
-				if (canChangeToIdle && abs(movementComponent->currentSpeed.x) <= 0.05f)
+				bool isMoving = abs(movementComponent->currentSpeed.x) >= 0.05f;
+				if (isMoving)
 				{
-					entity.entityState = IDLE_STATE;
+					entity.entityState = RUNNING_STATE;
+				}
+				else
+				{
+					bool canChangeToIdle = entity.entityState == RUNNING_STATE || entity.entityState == FALLING_STATE;
+					if (canChangeToIdle)
+					{
+						entity.entityState = IDLE_STATE;
+					}
 				}
 			}
 		}
 
-		//TODO: quando voltar: fix animation speed for hurt 2 + hitbox for hurt two
 		//TODO: Fix hardcoded sprites
+		// Handle NPC movement animations
+		auto* s = getComponentFromEntity<SpriteComponent>(entity);
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
-			getComponentFromEntity<SpriteComponent>(entity)->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[0], true, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[0], true, 70, 70);
+			break;
+		case RUNNING_STATE:
+			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[1], true, 65, 65);
+			break;
 		}
 	}
-	
 }
 
 void MovementSystem::processVerticalMovement(Entity* self)

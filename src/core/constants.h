@@ -27,7 +27,7 @@ inline int32_t s_darwinEntityId = k_invalidId;
 inline int32_t s_oskarEntityId = k_invalidId;
 inline int32_t s_hugoEntityId = k_invalidId;
 
-inline constexpr uint8_t k_maxNumberOfMovementAnimations = 1;
+inline constexpr uint8_t k_maxNumberOfMovementAnimations = 2;
 
 // Dialogue
 // Expand as we support more languages/characters

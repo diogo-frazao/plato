@@ -341,7 +341,7 @@ void setupInsideRestaurantScene()
         oskarM->maxHorizontalSpeed = 0.3f;
         s_oskarEntityId = oskar.id;
 
-        SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE };
+        SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE, OSKAR_RUN_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
     }
 
@@ -1893,7 +1893,7 @@ void Level::update()
                 if (entity.id == s_oskarEntityId)
                 {
                     a->isEngagedInCombat = true;
-                    getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 0.65f;
+                    getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 1.2f;
                 }
             }
         }
