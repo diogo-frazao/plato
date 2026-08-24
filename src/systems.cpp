@@ -1027,7 +1027,7 @@ void MovementSystem::update()
 			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[0], true, 70, 70);
 			break;
 		case RUNNING_STATE:
-			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[1], true, 65, 65);
+			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[1], true, 70, 70);
 			break;
 		}
 	}
@@ -1309,7 +1309,10 @@ void CombatSystem::update()
 			}
 		}
 
-		// Hnadle NPC Attack state machine
+		// The order here matters and must remain.
+		// 1- Update state machine. 2- Update animations based on new state. 3- Take the new current animation frame to decide if we should attack
+
+		// Handle NPC Attack state machine
 		bool canNPCAttack = m->isGrounded && a->isEngagedInCombat && !isEntityInCombatState(entity.entityState) && !isWaitingToAttackAgain;
 		if (canNPCAttack)
 		{
@@ -1334,30 +1337,6 @@ void CombatSystem::update()
 
 				m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
 				break;
-			}
-		}
-
-		// Handle NPC Melee hit detection
-		if (entity.entityState == ATTACKING_STATE)
-		{
-			bool canAttackFromCurrentFrame = (s->animationData.currentFrame == 2) || (s->animationData.currentFrame == 3);
-			if (!a->wasPlayerHitByCurrentAttack && canAttackFromCurrentFrame)
-			{
-				RectCollider attackCollider{ {34, 9}, {24, 18} };
-				if (s->flipX)
-				{
-					attackCollider.topLeftPointOffset.x = 5;
-				}
-
-				addColliderToDebugList(t->position, attackCollider);
-				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
-				{
-					player.entityState = SHOT_STATE;
-					a->wasPlayerHitByCurrentAttack = true;
-
-					int8_t hitDirection = s->flipX ? -1 : 1;
-					playerM->currentSpeed.x = 4.f * hitDirection;
-				}
 			}
 		}
 
@@ -1436,6 +1415,30 @@ void CombatSystem::update()
 		case SHOT_FALL_DEATH_STATE:
 			s->setAnimationToPlayIfNotPlaying(OSKAR_FALL_DEATH_SPRITE, false, 70, 70);
 			break;
+		}
+
+		// Handle NPC Melee hit detection
+		if (entity.entityState == ATTACKING_STATE)
+		{
+			bool canAttackFromCurrentFrame = (s->animationData.currentFrame == 2) || (s->animationData.currentFrame == 3);
+			if (!a->wasPlayerHitByCurrentAttack && canAttackFromCurrentFrame)
+			{
+				RectCollider attackCollider{ {34, 9}, {24, 18} };
+				if (s->flipX)
+				{
+					attackCollider.topLeftPointOffset.x = 5;
+				}
+
+				addColliderToDebugList(t->position, attackCollider);
+				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
+				{
+					player.entityState = SHOT_STATE;
+					a->wasPlayerHitByCurrentAttack = true;
+
+					int8_t hitDirection = s->flipX ? -1 : 1;
+					playerM->currentSpeed.x = 4.f * hitDirection;
+				}
+			}
 		}
 	}
 }

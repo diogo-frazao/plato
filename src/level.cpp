@@ -1893,7 +1893,7 @@ void Level::update()
                 if (entity.id == s_oskarEntityId)
                 {
                     a->isEngagedInCombat = true;
-                    getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 1.2f;
+                    getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 1.3f;
                 }
             }
         }
@@ -2281,6 +2281,7 @@ void Level::imguiRender()
         if (selectedEntityToInspect)
         {
             ImGui::Text("Entity: %s", selectedEntityToInspect->debugName);
+            ImGui::Text("Entity State: %s", getEntityStateAsString(selectedEntityToInspect->entityState));
             ImGui::TextDisabled("Id: %i", selectedEntityToInspect->id);
 
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5 / 7.0f, 0.6f, 0.6f));
