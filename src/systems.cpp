@@ -1187,6 +1187,11 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 	auto* collider = getComponentFromEntity<RectColliderComponent>(*projectileEntity);
 	auto* sprite = getComponentFromEntity<SpriteComponent>(*projectileEntity);
 
+	// Scale projectile's collider with its scale
+	{
+		collider->collider.size.x = transform->scale.x;
+	}
+
 	for (Entity& targetEntity : getAllEntities())
 	{
 		if (targetEntity.id == k_invalidId ||
@@ -1426,7 +1431,7 @@ void CombatSystem::update()
 				RectCollider attackCollider{ {34, 9}, {24, 18} };
 				if (s->flipX)
 				{
-					attackCollider.topLeftPointOffset.x = 5;
+					attackCollider.topLeftPointOffset.x = -1;
 				}
 
 				addColliderToDebugList(t->position, attackCollider);
