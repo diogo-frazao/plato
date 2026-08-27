@@ -129,7 +129,7 @@ public:
 	
 	// Player attacks
 	void tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
-	void handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
+	void handleMainCharacterAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
 
 	// Projectiles
 	void handleProjectileHitDetection(Entity* projectileEntity);

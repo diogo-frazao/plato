@@ -679,7 +679,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
+	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE && player.entityState != DAMAGED_STATE;
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
@@ -702,7 +702,7 @@ void MovementSystem::processMainCharacterMovement()
 		spriteComponent->flipX = true;
 	}
 
-	bool canJumpFromCurrentState = player.entityState != ON_CUTSCENE_STATE;
+	bool canJumpFromCurrentState = isInAllowedStateToMove;
 
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
@@ -754,10 +754,8 @@ void MovementSystem::processMainCharacterMovement()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	bool canChangeFromCurrentStateToIdle = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
-
 	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
-	if (isGroundedAndNotMoving && canChangeFromCurrentStateToIdle)
+	if (isGroundedAndNotMoving && isInAllowedStateToMove)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
 		{
@@ -822,7 +820,7 @@ void MovementSystem::processMainCharacterMovement()
 		transformComponent->resetScaleLerp = 0.1f;
 	}
 
-	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE;
+	bool canChangeToFallingState = movementComponent->currentSpeed.y > 0.f && isInAllowedStateToMove;
 	if (canChangeToFallingState)
 	{
 		player.entityState = FALLING_STATE;
@@ -1237,7 +1235,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		int8_t hitDirection = sprite->flipX ? -1 : 1;
 
 		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
-		if (targetEntity.entityState == SHOT_STATE)
+		if (targetEntity.entityState == DAMAGED_STATE)
 		{
 			auto* targetSprite = getComponentFromEntity<SpriteComponent>(targetEntity);
 
@@ -1249,7 +1247,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		}
 		else
 		{
-			targetEntity.entityState = SHOT_STATE;
+			targetEntity.entityState = DAMAGED_STATE;
 
 			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
 			targetMovement->currentSpeed.x = -2.5f * hitDirection;
@@ -1284,7 +1282,7 @@ void CombatSystem::update()
 		if (entity.id == k_playerEntityId)
 		{
 			tryStartMainCharacterAttack(&player, playerA, playerM, playerT, playerS, playerC);
-			handleMainCharacterAttackAnimations(&player, playerA, playerM, playerS);
+			handleMainCharacterAnimations(&player, playerA, playerM, playerS);
 			continue;
 		}
 
@@ -1366,7 +1364,7 @@ void CombatSystem::update()
 			s->setAnimationToPlayIfNotPlaying(OSKAR_ATTACK_SPRITE, false, animationSpeed, 70);
 			break;
 		}
-		case SHOT_STATE:
+		case DAMAGED_STATE:
 		{
 			uint32_t animationSpeed = 70;
 			SpriteType animationToPlay = OSKAR_SHOT_FALL_SPRITE;
@@ -1402,10 +1400,6 @@ void CombatSystem::update()
 				{
 					animationSpeed = 600;
 				}
-				if (s->animationData.currentFrame == 2)
-				{
-					//animationSpeed = 200;
-				}
 
 				if (s->animationData.finishedPlayingAnimation)
 				{
@@ -1437,7 +1431,7 @@ void CombatSystem::update()
 				addColliderToDebugList(t->position, attackCollider);
 				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
 				{
-					player.entityState = SHOT_STATE;
+					player.entityState = DAMAGED_STATE;
 					a->wasPlayerHitByCurrentAttack = true;
 
 					int8_t hitDirection = s->flipX ? -1 : 1;
@@ -1462,7 +1456,7 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 	}
 
 	// Attack based on state
-	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE;
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE && player->entityState != DAMAGED_STATE;
 	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
 	if (!canAttack)
 	{
@@ -1535,17 +1529,12 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 	return;
 }
 
-void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
+void CombatSystem::handleMainCharacterAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
 {
-	if (a->weaponInHand == NO_WEAPON_TYPE)
-	{
-		return;
-	}
-
 	switch (player->entityState)
 	{
 	case ATTACKING_STATE:
-
+	{
 		// Transition when attacking animation ends.
 		if (s->animationData.finishedPlayingAnimation)
 		{
@@ -1586,6 +1575,23 @@ void CombatSystem::handleMainCharacterAttackAnimations(Entity* player, Attacking
 			break;
 		}
 
+		break;
+	}
+	case DAMAGED_STATE:
+
+		uint32_t animationSpeed = 70;
+		if (s->animationData.currentFrame == 0)
+		{
+			animationSpeed = 600;
+		}
+
+		if (s->animationData.finishedPlayingAnimation)
+		{
+			// TODO: Introduce limping
+			player->entityState = IDLE_STATE;
+		}
+
+		s->setAnimationToPlayIfNotPlaying(CHARACTER_DAMAGED_SPRITE, false, animationSpeed, animationSpeed);
 		break;
 	}
 }

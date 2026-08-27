@@ -23,7 +23,7 @@ enum EntityState
 
 	// Combat. Controlled by Combat System
 	ATTACKING_STATE,
-	SHOT_STATE,
+	DAMAGED_STATE,
 	SHOT_FALL_DEATH_STATE,
 	WAITING_TO_DIE_STATE,
 	DEAD_STATE,
@@ -31,7 +31,7 @@ enum EntityState
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == ATTACKING_STATE || state == SHOT_STATE || state == SHOT_FALL_DEATH_STATE || state == WAITING_TO_DIE_STATE || state == DEAD_STATE;
+	return state == ATTACKING_STATE || state == DAMAGED_STATE || state == SHOT_FALL_DEATH_STATE || state == WAITING_TO_DIE_STATE || state == DEAD_STATE;
 }
 
 inline bool isEntityAlreadyDying(EntityState state)
@@ -64,8 +64,10 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "Attacking";
 	case ON_CUTSCENE_STATE:
 		return "On cutscene";
-	case SHOT_STATE:
-		return "Shot Dying";
+	case DAMAGED_STATE:
+		return "Damaged";
+	case SHOT_FALL_DEATH_STATE:
+		return "Shot fall death";
 	case WAITING_TO_DIE_STATE:
 		return "Waiting to Die";
 	case DEAD_STATE:
@@ -107,6 +109,7 @@ enum SpriteType
 	CHARACTER_RUN_SPRITE,
 	CHARACTER_JUMP_SPRITE,
 	CHARACTER_FALL_SPRITE,
+	CHARACTER_DAMAGED_SPRITE,
 
 	// Main Character pistol
 	CHARACTER_WEAPON_PISTOL_IDLE_SPRITE,
