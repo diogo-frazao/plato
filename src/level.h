@@ -116,6 +116,8 @@ struct Camera
 	}
 };
 
+inline Camera s_camera;
+
 enum LevelStages
 {
     MARKETING_PHONE_STAGE,
@@ -213,8 +215,6 @@ public:
 	void imguiRender();
 	void render(float renderAlpha);
 
-	Camera _levelCamera;
-
 private:
 	LevelStages _currentLevelStage = MARKETING_PHONE_STAGE;
 	DarwinConfrontationStageData _darwinConversationStageData;
@@ -236,7 +236,7 @@ struct LevelManager
 // Takes a screen position and converts it to camera/world space.
 inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)
 {
-	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
+	Camera& camera = s_camera;
 
 	if (posInScreenSpace.x > k_baseGameWidth || posInScreenSpace.y > k_baseGameHeight)
 	{
@@ -253,7 +253,7 @@ inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)
 // Used to render sprites, since they should be drawn taking into account the camera pos and zoom
 inline SDL_FRect convertWorldRectToCameraSpace(const SDL_FRect& worldRect)
 {
-	Camera& camera = LevelManager::getCurrentLevel()->_levelCamera;
+	Camera& camera = s_camera;
 
 	Vec2 posInCameraSpace{ worldRect.x - camera.position.x, worldRect.y - camera.position.y };
 	posInCameraSpace.x = posInCameraSpace.x * camera.zoom + camera.zoomFocusPoint.x;

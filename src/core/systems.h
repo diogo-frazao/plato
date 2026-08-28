@@ -38,7 +38,7 @@ public:
 	// Used only for debugging with imgui
 	float _debugAmbientColorPicker[4] = {255, 255, 255};
 
-	uint8_t _inFrontOfEverythingOpacity = 0.f;
+	SDL_Color _inFrontOfEverythingColor = { 0,0,0,0 };
 
 	void setTargetAmbientColor(uint8_t r, uint8_t g, uint8_t b)
 	{

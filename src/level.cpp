@@ -405,7 +405,7 @@ void Level::start()
     if (s_isInsideRestaurant)
     {
         s_renderingSystem.setTargetAmbientColor(64, 64, 64);
-        _levelCamera.position = { 510.f, 90.f };
+        s_camera.position = { 510.f, 90.f };
     }
 
     _currentLevelStage = FREE_STAGE;
@@ -1835,22 +1835,22 @@ void Level::update()
 
     // After all systems, update camera
     {
-        _levelCamera.minX = s_isInsideRestaurant ? 160 : -320;
-        _levelCamera.maxX = s_isInsideRestaurant ? 540 : 0;
-        _levelCamera.followTargetRatio = 0.06f;
+        s_camera.minX = s_isInsideRestaurant ? 160 : -320;
+        s_camera.maxX = s_isInsideRestaurant ? 540 : 0;
+        s_camera.followTargetRatio = 0.06f;
 
-        if (_levelCamera.canFollowTarget)
+        if (s_camera.canFollowTarget)
         {
-            _levelCamera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
-            _levelCamera.targetPosition.x = clamp(_levelCamera.targetPosition.x, _levelCamera.minX, _levelCamera.maxX);
+            s_camera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
+            s_camera.targetPosition.x = clamp(s_camera.targetPosition.x, s_camera.minX, s_camera.maxX);
         }
 
-        handleCameraShake(_levelCamera);
+        handleCameraShake(s_camera);
 
         // Try to catch up with target position
-        if (abs(_levelCamera.targetPosition.x - _levelCamera.position.x) > 0.5f || abs(_levelCamera.targetPosition.y - _levelCamera.position.y) > 0.f)
+        if (abs(s_camera.targetPosition.x - s_camera.position.x) > 0.5f || abs(s_camera.targetPosition.y - s_camera.position.y) > 0.f)
         {
-            _levelCamera.position = lerp(_levelCamera.position, _levelCamera.targetPosition, _levelCamera.followTargetRatio);
+            s_camera.position = lerp(s_camera.position, s_camera.targetPosition, s_camera.followTargetRatio);
         }
     }
 
@@ -2171,14 +2171,14 @@ void Level::imguiRender()
         }
 
 
-        ImGui::Checkbox("Toogle Camera Follow Player", &_levelCamera.canFollowTarget);
-        ImGui::DragFloat("Camera Pos X", &_levelCamera.targetPosition.x);
-        ImGui::DragFloat("Camera Pos Y", &_levelCamera.targetPosition.y);
-        ImGui::DragFloat("Camera zoom", &_levelCamera.zoom, 0.01f, 1.f, 2.f);
+        ImGui::Checkbox("Toogle Camera Follow Player", &s_camera.canFollowTarget);
+        ImGui::DragFloat("Camera Pos X", &s_camera.targetPosition.x);
+        ImGui::DragFloat("Camera Pos Y", &s_camera.targetPosition.y);
+        ImGui::DragFloat("Camera zoom", &s_camera.zoom, 0.01f, 1.f, 2.f);
         if (ImGui::Button("Reset camera"))
         {
-            _levelCamera.canFollowTarget = true;
-            _levelCamera.zoom = 1.f;
+            s_camera.canFollowTarget = true;
+            s_camera.zoom = 1.f;
         }
 
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
@@ -2287,11 +2287,11 @@ void Level::imguiRender()
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5 / 7.0f, 0.6f, 0.6f));
             if (ImGui::Button("Toggle Focus"))
             {
-                _levelCamera.canFollowTarget = !_levelCamera.canFollowTarget;
+                s_camera.canFollowTarget = !s_camera.canFollowTarget;
 
-                if (!_levelCamera.canFollowTarget)
+                if (!s_camera.canFollowTarget)
                 {
-                    _levelCamera.targetPosition.x = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect)->position.x;
+                    s_camera.targetPosition.x = getComponentFromEntity<TransformComponent>(*selectedEntityToInspect)->position.x;
                 }
             }
             ImGui::PopStyleColor();

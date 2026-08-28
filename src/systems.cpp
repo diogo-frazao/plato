@@ -122,7 +122,7 @@ void RenderingSystem::createLightsBuffers()
 void RenderingSystem::renderInFrontOfEverythingTexture()
 {
 	SDL_SetRenderTarget(s_renderer, _inFrontOfEverythingBuffer);
-	SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, _inFrontOfEverythingOpacity);
+	SDL_SetRenderDrawColor(s_renderer, _inFrontOfEverythingColor.r, _inFrontOfEverythingColor.g, _inFrontOfEverythingColor.b, _inFrontOfEverythingColor.a);
 	SDL_RenderClear(s_renderer);
 	SDL_SetRenderTarget(s_renderer, nullptr);
 	SDL_RenderTexture(s_renderer, _inFrontOfEverythingBuffer, nullptr, nullptr);
@@ -538,7 +538,7 @@ void CrosshairSystem::crosshairMeleeHitFeedback(Vec2 hitLocation)
 
 	// Smear
 	//{
-	//	Vec2 smearPosition = { LevelManager::getCurrentLevel()->_levelCamera.worldPosition.x, hitLocation.y };
+	//	Vec2 smearPosition = { s_camera.worldPosition.x, hitLocation.y };
 	//	_crosshairSmear.entity = &addEntity(smearPosition);
 	//	auto* sprite = addComponentToEntity<SpriteComponent>(*_crosshairSmear.entity);
 	//	sprite->setupSpriteForLayer(SMEAR_MELEE_ATTACK_SPRITE, BEHIND_LIGHTS_LAYER);
@@ -1257,7 +1257,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		aTransform->scale.x = 1.25f;
 		aTransform->resetScaleLerp = 0.05f;
 
-		LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
+		s_camera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
 	}
 }
 
@@ -1431,11 +1431,15 @@ void CombatSystem::update()
 				addColliderToDebugList(t->position, attackCollider);
 				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
 				{
+					// If we're here it means a npc hit the player
 					player.entityState = DAMAGED_STATE;
 					a->wasPlayerHitByCurrentAttack = true;
 
 					int8_t hitDirection = s->flipX ? -1 : 1;
 					playerM->currentSpeed.x = 4.f * hitDirection;
+
+					s_camera.doShake(MEDIUM_SHAKE, 0.f);
+					getComponentFromEntity<TransformComponent>(player)->scale.x = 1.5f;
 				}
 			}
 		}
@@ -1520,7 +1524,7 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 			projectile->ownerEntityId = player->id;
 		}
 
-		LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_SHAKE, 0.f);
+		s_camera.doShake(LIGHT_SHAKE, 0.f);
 
 		break;
 	}
@@ -1553,11 +1557,11 @@ void CombatSystem::handleMainCharacterAnimations(Entity* player, AttackingCompon
 		case ROSTOV_WEAPON_PISTOL_TYPE:
 			if (s->animationData.currentFrame == 0)
 			{
-				s_renderingSystem._inFrontOfEverythingOpacity = 50;
+				s_renderingSystem._inFrontOfEverythingColor.a = 50;
 			}
 			else
 			{
-				s_renderingSystem._inFrontOfEverythingOpacity = 0;
+				s_renderingSystem._inFrontOfEverythingColor.a = 0;
 			}
 
 			// FX when shooting pistol
@@ -1583,6 +1587,16 @@ void CombatSystem::handleMainCharacterAnimations(Entity* player, AttackingCompon
 		if (s->animationData.currentFrame == 0)
 		{
 			animationSpeed = 600;
+
+			if (s->animationData.millisecondsSinceLastFrame < 70)
+			{
+				s_renderingSystem._inFrontOfEverythingColor = { 255, 0, 0, 15 };
+			}
+			else
+			{
+				s_renderingSystem._inFrontOfEverythingColor = { 0, 0, 0, 0 };
+			}
+
 		}
 
 		if (s->animationData.finishedPlayingAnimation)
@@ -1897,10 +1911,10 @@ void UISystem::update()
 					switch (dialogueOption.optionTensionType)
 					{
 					case HIGH_TENSION:
-						LevelManager::getCurrentLevel()->_levelCamera.doShake(LIGHT_SHAKE, 0.f);
+						s_camera.doShake(LIGHT_SHAKE, 0.f);
 						break;
 					case FATAL_TENSION:
-						LevelManager::getCurrentLevel()->_levelCamera.doShake(MEDIUM_SHAKE, 0.f);
+						s_camera.doShake(MEDIUM_SHAKE, 0.f);
 						break;
 					default:
 						break;
@@ -1995,7 +2009,7 @@ void UISystem::update()
 			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
 			{
 				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
-				LevelManager::getCurrentLevel()->_levelCamera.doShake(shakeToPerform, 0.05f);
+				s_camera.doShake(shakeToPerform, 0.05f);
 				_currentDialogue.hasAppliedShakeForCurrentWord = true;
 			}
 
@@ -2162,7 +2176,7 @@ void UISystem::interruptCurrentDialogue()
 									_currentDialogue.topLeftPosition.y + (_currentDialogue.dialogueBoxSize.y * 0.5f) };
 
 
-	LevelManager::getCurrentLevel()->_levelCamera.doShake(MEDIUM_SHAKE, 0.f);
+	s_camera.doShake(MEDIUM_SHAKE, 0.f);
 
 	// Launch every character away from center
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
