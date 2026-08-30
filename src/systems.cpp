@@ -862,7 +862,7 @@ void MovementSystem::processMainCharacterMovement()
 			animation = CHARACTER_WEAPON_GOLF_IDLE_SPRITE;
 			break;
 		case ROSTOV_WEAPON_PISTOL_TYPE:
-			animation = CHARACTER_WEAPON_PISTOL_IDLE_SPRITE;
+			animation = attackingComponent->isLimping ? CHARACTER_WEAPON_PISTOL_IDLE_LIMP_SPRITE : CHARACTER_WEAPON_PISTOL_IDLE_SPRITE;
 			break;
 		}
 
@@ -878,7 +878,7 @@ void MovementSystem::processMainCharacterMovement()
 			animation = CHARACTER_WEAPON_GOLF_TAKEOFF_SPRITE;
 			break;
 		case ROSTOV_WEAPON_PISTOL_TYPE:
-			animation = CHARACTER_WEAPON_PISTOL_TAKEOFF_SPRITE;
+			animation = attackingComponent->isLimping ? CHARACTER_WEAPON_PISTOL_TAKEOFF_LIMP_SPRITE : CHARACTER_WEAPON_PISTOL_TAKEOFF_SPRITE;
 			break;
 		}
 
@@ -894,7 +894,7 @@ void MovementSystem::processMainCharacterMovement()
 			animation = CHARACTER_WEAPON_GOLF_RUN_SPRITE;
 			break;
 		case ROSTOV_WEAPON_PISTOL_TYPE:
-			animation = CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
+			animation = attackingComponent->isLimping ? CHARACTER_WEAPON_PISTOL_RUN_LIMP_SPRITE : CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
 			break;
 		}
 
@@ -910,7 +910,7 @@ void MovementSystem::processMainCharacterMovement()
 			animation = CHARACTER_WEAPON_GOLF_SLOWDOWN_SPRITE;
 			break;
 		case ROSTOV_WEAPON_PISTOL_TYPE:
-			animation = CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
+			animation = attackingComponent->isLimping ? CHARACTER_WEAPON_PISTOL_RUN_LIMP_SPRITE : CHARACTER_WEAPON_PISTOL_RUN_SPRITE;
 			break;
 		}
 
@@ -1279,13 +1279,6 @@ void CombatSystem::update()
 			continue;
 		}
 
-		if (entity.id == k_playerEntityId)
-		{
-			tryStartMainCharacterAttack(&player, playerA, playerM, playerT, playerS, playerC);
-			handleMainCharacterAnimations(&player, playerA, playerM, playerS);
-			continue;
-		}
-
 		if (entityHasComponent<ProjectileComponent>(entity))
 		{
 			handleProjectileHitDetection(&entity);
@@ -1297,7 +1290,26 @@ void CombatSystem::update()
 			continue;
 		}
 
+		// Recover from limping
 		auto* a = getComponentFromEntity<AttackingComponent>(entity);
+		if (a->isLimping)
+		{
+			a->recoverFromLimpingTimer += k_deltaTime;
+			if (a->recoverFromLimpingTimer >= a->secondsToRecoverFromLimping)
+			{
+				a->isLimping = false;
+				invalidateTimer(a->recoverFromLimpingTimer);
+			}
+		}
+
+
+		if (entity.id == k_playerEntityId)
+		{
+			tryStartMainCharacterAttack(&player, playerA, playerM, playerT, playerS, playerC);
+			handleMainCharacterAnimations(&player, playerA, playerM, playerS);
+			continue;
+		}
+
 		auto* m = getComponentFromEntity<MovementComponent>(entity);
 		auto* s = getComponentFromEntity<SpriteComponent>(entity);
 		auto* t = getComponentFromEntity<TransformComponent>(entity);
@@ -1433,6 +1445,9 @@ void CombatSystem::update()
 				{
 					// If we're here it means a npc hit the player
 					player.entityState = DAMAGED_STATE;
+					playerA->isLimping = true;
+					startTimer(playerA->recoverFromLimpingTimer);
+
 					a->wasPlayerHitByCurrentAttack = true;
 
 					int8_t hitDirection = s->flipX ? -1 : 1;

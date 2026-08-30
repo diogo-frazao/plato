@@ -114,6 +114,21 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 4;
 		collidertopLeftPointOffset = { 25, 10 };
 		break;
+	case CHARACTER_WEAPON_PISTOL_IDLE_LIMP_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 523, 325 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
+	case CHARACTER_WEAPON_PISTOL_TAKEOFF_LIMP_SPRITE:
+	case CHARACTER_WEAPON_PISTOL_RUN_LIMP_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 670, 408 };
+		size = { 360, 36 };
+		numberOfFrames = 6;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
 	case CHARACTER_WEAPON_PISTOL_IDLE_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 586, 325 };

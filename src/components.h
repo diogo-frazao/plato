@@ -227,6 +227,12 @@ struct AttackingComponent
 	// How many times this entity needs to be hit to die
 	uint8_t numberOfHitsToDie = 1;
 
+	// Rostov and NPCS can enter limping state. the next hit kills them
+	bool isLimping = false;
+	// How many seconds it takes for the character to "auto heal" from the limping state
+	float secondsToRecoverFromLimping = 4.f;
+	float recoverFromLimpingTimer = k_invalidTime;
+
 	// NPC Only
 
 	// Used by npcs. They only engage in combat with player when state is engaged. Set via cutscenes, automatically when shot or notices player
