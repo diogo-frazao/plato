@@ -51,6 +51,7 @@ static std::array<KeyState, 290> s_keyboardInputState;
 // Game related
 bool wasJumpKeyPressedThisFrame();
 bool wasJumpKeyReleasedThisFrame();
+bool wasRollKeyPressedThisFrame();
 bool isMoveRightKeyDown();
 bool isMoveLeftKeyDown();
 bool wasMoveRightPressedThisFrame();

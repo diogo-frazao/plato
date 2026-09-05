@@ -679,12 +679,13 @@ void MovementSystem::processMainCharacterMovement()
 	bool wasGrounded = movementComponent->isGrounded;
 	float horizontalSpeedMultiplier = calculateHorizontalSpeedMultiplier(movementComponent);
 
-	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE && player.entityState != DAMAGED_STATE;
+	bool canMoveWhileRolling = player.entityState == ROLLING_STATE && spriteComponent->animationData.currentFrame >= 4;
+
+	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE && player.entityState != DAMAGED_STATE && 
+		player.entityState != ROLLING_STATE || canMoveWhileRolling;
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
-
-	bool performedJumpThisFrame = false;
 
 	// Right movement
 	if (isMovingRight)
@@ -702,6 +703,13 @@ void MovementSystem::processMainCharacterMovement()
 		spriteComponent->flipX = true;
 	}
 
+	// Roll
+	if (wasRollKeyPressedThisFrame() && isInAllowedStateToMove)
+	{
+		player.entityState = ROLLING_STATE;
+	}
+
+	bool performedJumpThisFrame = false;
 	bool canJumpFromCurrentState = isInAllowedStateToMove;
 
 	// Fake jump if we're 2 pixels away from floor or less
@@ -754,7 +762,7 @@ void MovementSystem::processMainCharacterMovement()
 	// After vertical movement was processed and isGrounded was updated, check coyoteTime
 	handleCoyoteTime(movementComponent, wasGrounded);
 
-	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded;
+	bool isGroundedAndNotMoving = !isMovingHorizontally && movementComponent->isGrounded && player.entityState != ROLLING_STATE;
 	if (isGroundedAndNotMoving && isInAllowedStateToMove)
 	{
 		if (abs(movementComponent->currentSpeed.x) <= 0.05f)
@@ -947,6 +955,37 @@ void MovementSystem::processMainCharacterMovement()
 		}
 
 		spriteComponent->setAnimationToPlayIfNotPlaying(animation, false, 70, 70);
+		break;
+	case ROLLING_STATE:
+		
+		int8_t rollDirection = spriteComponent->flipX ? -1 : 1;
+
+		if (spriteComponent->animationData.currentFrame <= 1)
+		{
+			if (spriteComponent->animationData.currentFrame == 0)
+			{
+				if ((wasMoveRightPressedThisFrame() && spriteComponent->flipX) || (wasMoveLeftPressedThisFrame() && !spriteComponent->flipX))
+				{
+					spriteComponent->flipX = !spriteComponent->flipX;
+					rollDirection *= -1;
+				}
+			}
+
+			movementComponent->currentSpeed.x = 3.f * rollDirection;
+		}
+
+		// Skip end of animation if player is trying to run while rolling
+		if (spriteComponent->animationData.currentFrame >= 8 && (isMoveRightKeyDown() || isMoveLeftKeyDown()))
+		{
+			player.entityState = RUNNING_STATE;
+		}
+
+		if (spriteComponent->animationData.finishedPlayingAnimation)
+		{
+			player.entityState = IDLE_STATE;
+		}
+
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_ROLL_GUN_SPRITE, false, 55, 70);
 		break;
 	}
 }

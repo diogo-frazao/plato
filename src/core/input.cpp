@@ -178,6 +178,13 @@ static SDL_Scancode s_alternateMoveRightKey = SDL_SCANCODE_RIGHT;
 static SDL_Scancode s_moveLeftKey = SDL_SCANCODE_A;
 static SDL_Scancode s_alternateMoveLeftKey = SDL_SCANCODE_LEFT;
 
+static SDL_Scancode s_rollKey = SDL_SCANCODE_DOWN;
+
+bool wasRollKeyPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(s_rollKey);
+}
+
 bool wasJumpKeyPressedThisFrame()
 {
 	return _wasKeyPressedThisFrame(s_jumpKey) || _wasKeyPressedThisFrame(s_alternateJumpKey);

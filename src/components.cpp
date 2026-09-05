@@ -100,6 +100,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 25, 10 };
 		break;
+	case CHARACTER_ROLL_GUN_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 424, 447 };
+		size = { 540, 36 };
+		numberOfFrames = 9;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
 	case CHARACTER_FALL_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 364, 295 };
