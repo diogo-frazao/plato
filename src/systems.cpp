@@ -682,7 +682,7 @@ void MovementSystem::processMainCharacterMovement()
 	bool canMoveWhileRolling = player.entityState == ROLLING_STATE && spriteComponent->animationData.currentFrame >= 4;
 
 	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE && player.entityState != DAMAGED_STATE && 
-		player.entityState != ROLLING_STATE || canMoveWhileRolling;
+		(player.entityState != ROLLING_STATE || canMoveWhileRolling);
 
 	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
 	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
@@ -706,11 +706,12 @@ void MovementSystem::processMainCharacterMovement()
 	// Roll
 	if (wasRollKeyPressedThisFrame() && isInAllowedStateToMove)
 	{
+		s_camera.doShake(LIGHT_SHAKE, 0.f);
 		player.entityState = ROLLING_STATE;
 	}
 
 	bool performedJumpThisFrame = false;
-	bool canJumpFromCurrentState = isInAllowedStateToMove;
+	bool canJumpFromCurrentState = false;
 
 	// Fake jump if we're 2 pixels away from floor or less
 	bool canJumpWithoutTouchingFloor = false;
@@ -960,11 +961,13 @@ void MovementSystem::processMainCharacterMovement()
 		
 		int8_t rollDirection = spriteComponent->flipX ? -1 : 1;
 
+		// Switch roll direction
 		if (spriteComponent->animationData.currentFrame <= 1)
 		{
 			if (spriteComponent->animationData.currentFrame == 0)
 			{
-				if ((wasMoveRightPressedThisFrame() && spriteComponent->flipX) || (wasMoveLeftPressedThisFrame() && !spriteComponent->flipX))
+				bool shouldSwitchRollDirection = (wasMoveRightPressedThisFrame() && spriteComponent->flipX) || (wasMoveLeftPressedThisFrame() && !spriteComponent->flipX);
+				if (shouldSwitchRollDirection)
 				{
 					spriteComponent->flipX = !spriteComponent->flipX;
 					rollDirection *= -1;
@@ -1296,7 +1299,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		aTransform->scale.x = 1.25f;
 		aTransform->resetScaleLerp = 0.05f;
 
-		s_camera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
+		s_camera.doShake(MEDIUM_SHAKE, 0.f);
 	}
 }
 
@@ -1514,7 +1517,9 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 	}
 
 	// Attack based on state
-	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE && player->entityState != DAMAGED_STATE;
+	bool canInterruptRollingToShoot = player->entityState == ROLLING_STATE && s->animationData.currentFrame >= 4;
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE && player->entityState != DAMAGED_STATE && 
+		(player->entityState != ROLLING_STATE || canInterruptRollingToShoot);
 	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
 	if (!canAttack)
 	{
@@ -1578,7 +1583,7 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 			projectile->ownerEntityId = player->id;
 		}
 
-		s_camera.doShake(LIGHT_SHAKE, 0.f);
+		s_camera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
 
 		break;
 	}
