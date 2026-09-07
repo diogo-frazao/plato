@@ -175,14 +175,13 @@ void setupInsideRestaurantScene()
     {
         Entity& restaurant = addEntity("restaurant", { 14, k_restaurantBaseY });
         addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_LIGHTS_LAYER);
-        createBlockAtPositionWithSize({ 24, k_restaurantBaseY + 83.f }, { 81, 11 });
-        createBlockAtPositionWithSize({ 104, k_restaurantBaseY + 75.f }, { 488, 18 });
+        createBlockAtPositionWithSize({ 20, k_restaurantBaseY + 75.f }, { 580, 18 });
     }
 
     {
         Entity& lightTopLeftB = addEntity("lightTopLeftB");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftB);
-        t->position = { -0.88f, 78.00f };
+        t->position = { 173.f, 78.00f };
         t->scale = { 1.37f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopLeftB);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftB);
@@ -193,7 +192,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopLeftM = addEntity("lightTopLeftM");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftM);
-        t->position = { 36.95f, 76.35f };
+        t->position = { 213.f, 78.35f };
         t->scale = { 0.80f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopLeftM);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftM);
@@ -204,22 +203,12 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopLeftS = addEntity("lightTopLeftS");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftS);
-        t->position = { 53.09f, 65.91f };
+        t->position = { 235.f, 65.91f };
         t->scale = { 0.55f, 0.80f };
         addComponentToEntity<SpriteComponent>(lightTopLeftS);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftS);
         s->color = { 255, 173, 84, 10 };
         s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-    }
-
-    {
-        Entity& tvLight = addEntity("tvLight");
-        TransformComponent* t = getComponentFromEntity<TransformComponent>(tvLight);
-        SpriteComponent* s = addComponentToEntity<SpriteComponent>(tvLight);
-        s->setupSpriteForLayer(ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
-        s->color = { 255, 255, 255, 5 };
-        t->scale = { 0.8f, 0.45f };
-        t->position = { 106, k_restaurantBaseY + 29.f };
     }
 
     {
@@ -229,13 +218,13 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 0, 240, 255, 37 };
         t->scale = { 1.f, 1.f };
-        t->position = { 170, k_restaurantBaseY - 15.f };
+        t->position = { 375.f, 45.f };
     }
 
     {
         Entity& lightTopRightB = addEntity("lightTopRightB");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightB);
-        t->position = { 257.f, 78.00f };
+        t->position = { 439.f, 78.00f };
         t->scale = { 1.37f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopRightB);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightB);
@@ -246,7 +235,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopRightM = addEntity("lightTopRightM");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightM);
-        t->position = { 290.f, 75.19f };
+        t->position = { 471.f, 75.19f };
         t->scale = { 0.80f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopRightM);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightM);
@@ -257,7 +246,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopRightS = addEntity("lightTopRightS");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightS);
-        t->position = { 304.f, 65.91f };
+        t->position = { 490.f, 65.91f };
         t->scale = { 0.55f, 0.80f };
         addComponentToEntity<SpriteComponent>(lightTopRightS);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightS);
@@ -268,7 +257,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightHighlightLeft = addEntity("lightHighlightLeft");
         auto* t = getComponentFromEntity<TransformComponent>(lightHighlightLeft);
-        t->position = { 56.f, 77.f };
+        t->position = { 236.f, 78.f };
         addComponentToEntity<SpriteComponent>(lightHighlightLeft);
         auto* s = getComponentFromEntity<SpriteComponent>(lightHighlightLeft);
         s->color = { 255, 211, 131, 148 };
@@ -278,7 +267,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightHighlightRight = addEntity("lightHighlightRight");
         auto* t = getComponentFromEntity<TransformComponent>(lightHighlightRight);
-        t->position = { 311.f, 78.f };
+        t->position = { 493.f, 77.f };
         auto* s = addComponentToEntity<SpriteComponent>(lightHighlightRight);
         s->color = { 255, 211, 131, 148 };
         s->setupSpriteForLayer(LONG_THIN_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -288,7 +277,7 @@ void setupInsideRestaurantScene()
         Entity& bakedHighlights = addEntity("bakedHighlights");
         addComponentToEntity<SpriteComponent>(bakedHighlights);
         auto* t = getComponentFromEntity<TransformComponent>(bakedHighlights);
-        t->position = { 58.00f, 65.00f };
+        t->position = { 35.00f, 65.00f };
         t->scale = { 1.00f, 1.00f };
         auto* s = getComponentFromEntity<SpriteComponent>(bakedHighlights);
         s->color = { 255, 255, 255, 180 };
@@ -344,10 +333,6 @@ void setupInsideRestaurantScene()
         SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE, OSKAR_RUN_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
     }
-
-    Entity& golfWeapon = addEntity("golfWeapon");
-    addComponentToEntity<SpriteComponent>(golfWeapon)->setupSpriteForLayer(GOLF_WEAPON_SPRITE, BEHIND_LIGHTS_LAYER);
-    addComponentToEntity<TransformComponent>(golfWeapon)->position = { 383.f, 124.f };
 }   
 
 void createDummyEntities(int amount)
@@ -1788,11 +1773,11 @@ void Level::update()
 
     // Dynamic ambient color
     {
-        float xPositionWherePlayerIsInsidePantry = 407.f;
+        float xPositionWherePlayerIsInsidePantry = 148.f;
 
         SDL_Color targetAmbientColor = { 0,0,0 };
 
-        if (playerTransform->position.x >= xPositionWherePlayerIsInsidePantry)
+        if (playerTransform->position.x <= xPositionWherePlayerIsInsidePantry)
         {
             targetAmbientColor = { 64, 64, 64 };
         }
