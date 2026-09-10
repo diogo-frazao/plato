@@ -30,20 +30,6 @@ TextDTO getTextInfo(TextType textType)
 				return "Oh...";
 			case MARKETING_PHONE_2_B_2:
 				return "I am [pinkwave]FREDERICO[pinkwave] from [yellow]KELIA's marketing department[yellow]";
-		case MARKETING_PHONE_2_C:
-			return { "No, fuck you", CELLPHONE_DIALOGUE, 20, HIGH_TENSION };
-			case MARKETING_PHONE_2_C_1:
-				return { "What did [redshake]you[redshake] just say to me?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case MARKETING_PHONE_2_C_2:
-				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case MARKETING_PHONE_2_C_3:
-				return { "I BRING TO YOU THE [pinkwave]HOLY TECHNOLOGY[pinkwave] FROM [fatheredward]FATHER EDWARD[fatheredward] HIMSELF", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case MARKETING_PHONE_2_C_4:
-				return { "AND YOU HAVE THE [redshake]AUDACITY[redshake] TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-				case MARKETING_PHONE_2_C_4_A:
-					return {"YES < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
-				case MARKETING_PHONE_2_C_4_B:
-					return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 	case MARKETING_PHONE_3:
 		return "I bring to you a [blue]deal[blue] too good to miss!";
 		case MARKETING_PHONE_3_A:
@@ -51,57 +37,53 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_A_1:
 				return "Yes sir, a [blue]deal[blue]";
 		case MARKETING_PHONE_3_B:
-			return { "I don't care", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION};
+			return { "Not interested", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
 			case MARKETING_PHONE_3_B_1:
 				return "...";
 			case MARKETING_PHONE_3_B_2:
 				return "[rostov]Mr ROSTOV[rostov] please listen, [yellow]I'm sure[yellow] you'll be interested";
+		case MARKETING_PHONE_3_C:
+			return {"I don't care, goodbye", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
+			case MARKETING_PHONE_3_C_1:
+				return { "What did [redshake]you[redshake] just say to me?", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
+			case MARKETING_PHONE_3_C_2:
+				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
+			case MARKETING_PHONE_3_C_3:
+				return { "DO YOU EVEN UNDERSTAND WHAT I’M OFFERING TO A [redshake]PEASANT[redshake] LIKE YOU?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+			case MARKETING_PHONE_3_C_4:
+				return { "I BRING YOU THE [yellow]HOLY TECHNOLOGY[yellow] FROM OUR [pink]HARD WORKING AND FEARFUL LEADER[pink], [fatheredward]FATHER EDWARD[fatheredward] HIMSELF. ", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+			case MARKETING_PHONE_3_C_5:
+				return { "AND YOU HAVE THE [red]AUDACITY[red] TO RECEIVE IT LIKE THIS?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+			case MARKETING_PHONE_3_C_5_A:
+				return { "YES < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
+			case MARKETING_PHONE_3_C_5_B:
+				return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
 	case MARKETING_PHONE_4:
 		return "[interjection]*Ahem*[interjection]";
 	case MARKETING_PHONE_5:
-		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the newest creation[blue] from [fatheredward]FATHER EDWARD'S[fatheredward] Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
+		return { "It's with [yellow]great honor[yellow] that I present to you sir, [blue]the NEWEST creation[blue] from [fatheredward]FATHER EDWARD'S[fatheredward] Research Department team, here at KELIA", CELLPHONE_DIALOGUE, 5};
 	case MARKETING_PHONE_6:
-		return { "AND FOR [yellow]ONLY 499D[yellow], [rostov]MR ROSTOV[rostov] CAN HAVE ACCESS TO IT", CELLPHONE_DIALOGUE, 5 };
+		return { "AND FOR [yellow]ONLY 499 Dram[yellow], [rostov]MR ROSTOV[rostov] CAN HAVE ACCESS TO THIS [wave]FANTASTIC[wave] CREATION MADE BY OUR [pink]HARD WORKING AND FEARFUL LEADER[pink], [fatheredward]FATHER EDWARD[fatheredward]", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_7:
-		return "And what is this creation I hear you ask?";
+		return "AND WHAT IS THIS CREATION I HEAR YOU ASK?";
 		case MARKETING_PHONE_7_A:
 			return "I'm not really interested";
 			case MARKETING_PHONE_7_A_1:
 				return "Wait sir now [yellow]I'm sure[yellow] you'll be interested";
 		case MARKETING_PHONE_7_B:
-			return { "You're annoying me", CELLPHONE_DIALOGUE, 20 , HIGH_TENSION };
-		case MARKETING_PHONE_7_C_LOW_TENSION:
 			return "...";
-		case MARKETING_PHONE_7_C_HIGH_TENSION:
+		case MARKETING_PHONE_7_C:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
 	case MARKETING_PHONE_8:
-		return { "WITH THIS [blue]NEW APPLICATION[blue] EVERYONE CAN [blue]TRACK THE CITY'S TRAINS IN REAL TIME[blue]", CELLPHONE_DIALOGUE, 10 };
+		return { "WITH THIS [yellow]NEW APPLICATION[yellow] EVERYONE CAN [blue]TRACK THE CITY'S TRAINS IN REAL TIME[blue] AND SEE WHERE THEY ARE", CELLPHONE_DIALOGUE, 10 };
 	case MARKETING_PHONE_9:
-		return { "NO. MORE. WAITING.", CELLPHONE_DIALOGUE, 5 };
+		return { "[yellow]I’M SURE[yellow] YOU KNOW HOW IT FEELS TO MISS ONE... [redshake]NOW[redshake], NO. MORE. WAITING. NO. MORE. MISSING. TRAINS.", CELLPHONE_DIALOGUE, 5 };
 	case MARKETING_PHONE_10:
-		return { "NO. MORE. MISSING. TRAINS.", CELLPHONE_DIALOGUE, 5 };
-	case MARKETING_PHONE_11:
-		return "ALL OF THIS... [pinkwave]FOR ONLY 499D[pinkwave]";
-		case MARKETING_PHONE_11_A:
-			return "I don't have the money";
-			case MARKETING_PHONE_11_A_1:
-				return { "What do you mean you [redshake]don't[redshake] have the money?", CELLPHONE_DIALOGUE, 10 };
-		case MARKETING_PHONE_11_B_LOW_TENSION:
-			return { "STOP YELLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case MARKETING_PHONE_11_B_1:
-				return { "What did [redshake]you[redshake] just say?", CELLPHONE_DIALOGUE, 10 };
-		case MARKETING_PHONE_11_B_HIGH_TENSION:
+		return "ALL OF THIS... [pinkwave]FOR ONLY 499 Dram[pinkwave]";
+		case MARKETING_PHONE_10_A:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 5, FATAL_TENSION };
-	case MARKETING_PHONE_12:
-		return { "I bring you the [yellow]holy technology[yellow] from [fatheredward]FATHER EDWARD[fatheredward] himself", CELLPHONE_DIALOGUE, 10 };
-	case MARKETING_PHONE_13:
-		return { "A man [pink]so humble[pink] that still helps those that live outside of KELIA!", CELLPHONE_DIALOGUE, 10 };
-	case MARKETING_PHONE_14:
-		return "And [redshake]YOU[redshake] receive it like this?";
-		case MARKETING_PHONE_14_A:
-			return { "FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 20, FATAL_TENSION };
-		case MARKETING_PHONE_14_B:
-			return { "GOODBYE < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
+		case MARKETING_PHONE_10_B:
+			return { " FUCK YOU < HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION };
 	}
 
 	// Starting dialogue with dad

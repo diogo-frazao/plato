@@ -33,7 +33,7 @@ inline constexpr uint8_t k_maxNumberOfMovementAnimations = 2;
 // Expand as we support more languages/characters
 inline const uint16_t k_maxFontGlyphs = 128;
 inline const char* k_fontAtlasLayout = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;''(!?)+-*/=__[]{}|#$%&<>^@~";
-inline const uint16_t k_maxCharactersPerDialogue = 200;
+inline const uint16_t k_maxCharactersPerDialogue = 250;
 inline const uint8_t k_maxDialogueOptions = 3;
 
 // Frame rate related

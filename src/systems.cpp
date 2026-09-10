@@ -1830,6 +1830,30 @@ void UISystem::update()
 		static RectCollider mouseCollider{ {0,0}, {1, 1} };
 		bool isHoverOption = false;
 
+		// Handle hovered dialogue option
+		{
+			if (wasHoverLeftDialogueOptionKeyPressedThisFrame())
+			{
+				_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+			}
+
+			if (wasHoverRightDialogueOptionKeyPressedThisFrame() && _dialogueOptions[1].isValid())
+			{
+				_currentDialogue.dialogueOptionHovered = _dialogueOptions[1].dialogueType;
+			}
+
+			if (wasHoverDownDialogueOptionKeyPressedThisFrame() && _dialogueOptions[2].isValid())
+			{
+				_currentDialogue.dialogueOptionHovered = _dialogueOptions[2].dialogueType;
+			}
+
+			bool isDownDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered == _dialogueOptions[2].dialogueType);
+			if (wasHoverUpDialogueOptionKeyPressedThisFrame() && isDownDialogueOptionHovered)
+			{
+				_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+			}
+		}
+
 		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
 		{
 			DialogueOption& dialogueOption = _dialogueOptions[i];
@@ -1932,7 +1956,7 @@ void UISystem::update()
 			RectCollider dialogueOptionCollider{ {0,0}, {(int32_t)dialogueOption.colliderDest.w, (int32_t)dialogueOption.colliderDest.h} };
 
 			bool canReactToHoverFeedback = (dialogueOption.state == DIALOGUE_OPTION_IDLE_STATE) || (dialogueOption.state == DIALOGUE_OPTION_HOVERED_STATE);
-			bool isMouseHoverOption = aabb(s_mousePositionThisFrameInScreenSpace, dialogueOptionPosition, mouseCollider, dialogueOptionCollider);
+			bool isMouseHoverOption = (_currentDialogue.dialogueOptionHovered == dialogueOption.dialogueType);
 
 			// End current dialogue and destroy dialogue options after choosing an option and the fade out of the chosen option is complete
 			bool canRequestDialogueToEnd = (dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE) && dialogueOption.opacity <= 50 && (_currentDialogue.state == DIALOGUE_BASE_STATE);

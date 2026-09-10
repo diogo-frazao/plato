@@ -59,4 +59,8 @@ bool wasMoveLeftPressedThisFrame();
 bool wasAttackKeyPressedThisFrame();
 bool wasSkipDialogueKeyPressedThisFrame();
 bool wasPickupPhoneKeyPressedThisFrame();
+bool wasHoverLeftDialogueOptionKeyPressedThisFrame();
+bool wasHoverDownDialogueOptionKeyPressedThisFrame();
+bool wasHoverRightDialogueOptionKeyPressedThisFrame();
+bool wasHoverUpDialogueOptionKeyPressedThisFrame();
 bool wasChooseDialogueOptionKeyPressedThisFrame();

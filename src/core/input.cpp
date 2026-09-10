@@ -230,6 +230,26 @@ bool wasPickupPhoneKeyPressedThisFrame()
 	return wasJumpKeyPressedThisFrame();
 }
 
+bool wasHoverLeftDialogueOptionKeyPressedThisFrame()
+{
+	return wasMoveLeftPressedThisFrame();
+}
+
+bool wasHoverDownDialogueOptionKeyPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(SDL_SCANCODE_DOWN);
+}
+
+bool wasHoverRightDialogueOptionKeyPressedThisFrame()
+{
+	return wasMoveRightPressedThisFrame();
+}
+
+bool wasHoverUpDialogueOptionKeyPressedThisFrame()
+{
+	return _wasKeyPressedThisFrame(SDL_SCANCODE_UP);
+}
+
 bool wasChooseDialogueOptionKeyPressedThisFrame()
 {
 	return wasSkipDialogueKeyPressedThisFrame();

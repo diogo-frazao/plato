@@ -316,6 +316,7 @@ public:
 		float speechIndicatorDynamicYSize = 0.f;
 		// Only matters if the current dialogue has options
 		TextType dialogueOptionChosen = INVALID_TEXT;
+		TextType dialogueOptionHovered = INVALID_TEXT;
 		Entity* entityTalking = nullptr;
 		float dialogueOutlineDynamicXSize = 0.f;
 		// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
@@ -346,6 +347,7 @@ public:
 			this->dialogueBoxDynamicXSize = 0.f;
 			this->dialogueType = INVALID_TEXT;
 			this->dialogueOptionChosen = INVALID_TEXT;
+			this->dialogueOptionHovered = INVALID_TEXT;
 			this->tensionDelta = 0;
 			this->entityTalking = nullptr;
 			this->speechIndicatorDynamicYSize = 0.f;
@@ -390,6 +392,7 @@ public:
 	//TODO: Improve later
 	Dialogue _currentDialogue;
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
+
 	float _currentTensionSpriteXSize = 0.f;
 	TextType _lastDialogueType = INVALID_TEXT;
 	TextType _lastOptionChosen = INVALID_TEXT;

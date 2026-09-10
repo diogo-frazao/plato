@@ -357,10 +357,10 @@ void Level::start()
     s_renderingSystem.createInFrontOfEverythingBuffer();
     s_uiSystem.start();
 
-    Entity& player = addEntity("player", { 490.f, k_restaurantBaseY + 48.f });
+    Entity& player = addEntity("player", { 67.f, k_restaurantBaseY + 48.f });
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
-    addComponentToEntity<AttackingComponent>(player)->weaponInHand;
+    addComponentToEntity<AttackingComponent>(player);
     getComponentFromEntity<TransformComponent>(player)->useDynamicScale = true;
     player.entityState = ON_CUTSCENE_STATE;
 
@@ -379,7 +379,6 @@ void Level::start()
 
     // We don't need to set the sprite since the player's sprite is handled on the movement system
     playerSprite->setLayer(CHARACTERS_LAYER);
-    playerSprite->flipX = true;
     addComponentToEntity<RectColliderComponent>(player)->collider = RectCollider({ 4, 4 }, { 9, 17 });
 
     // Outside restaurant
@@ -390,12 +389,12 @@ void Level::start()
     if (s_isInsideRestaurant)
     {
         s_renderingSystem.setTargetAmbientColor(64, 64, 64);
-        s_camera.position = { 510.f, 90.f };
+        s_camera.position = { 160.f, 90.f };
     }
 
-    _currentLevelStage = FREE_STAGE;
-    getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
-    player.entityState = IDLE_STATE;
+    //_currentLevelStage = FREE_STAGE;
+    //getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+    //player.entityState = IDLE_STATE;
 }
 
 // TODO: Try as much as possible to remove this, we shouldn't set m->isMovingOnFloor. This is ignoring physics which is dumb.
@@ -543,7 +542,7 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_1))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, { MARKETING_PHONE_2_A, MARKETING_PHONE_2_B, MARKETING_PHONE_2_C });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2, { MARKETING_PHONE_2_A, MARKETING_PHONE_2_B});
             }
 
             if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_A))
@@ -554,25 +553,6 @@ void Level::update()
             {
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_B_1);
             }
-            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_1);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_1))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_2);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_2))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_3);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_C_3))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_2_C_4, { MARKETING_PHONE_2_C_4_A, MARKETING_PHONE_2_C_4_B });
-            }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_1))
             {
@@ -581,7 +561,7 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_2_B_2))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, { MARKETING_PHONE_3_A, MARKETING_PHONE_3_B });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3, { MARKETING_PHONE_3_A, MARKETING_PHONE_3_B, MARKETING_PHONE_3_C});
             }
 
             if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_A))
@@ -592,6 +572,10 @@ void Level::update()
             {
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_B_1);
             }
+            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_1);
+            }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_1))
             {
@@ -601,6 +585,26 @@ void Level::update()
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_B_2))
             {
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_4);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_1))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_2);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_2))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_3);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_3))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_4);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_4))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_5, { MARKETING_PHONE_3_C_5_A, MARKETING_PHONE_3_C_5_B });
             }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_4))
@@ -615,8 +619,7 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A,
-                    MARKETING_PHONE_7_B, s_playerTension >= 30 ? MARKETING_PHONE_7_C_HIGH_TENSION : MARKETING_PHONE_7_C_LOW_TENSION });
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, MARKETING_PHONE_7_B, MARKETING_PHONE_7_C });
             }
 
             if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_A))
@@ -624,10 +627,6 @@ void Level::update()
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7_A_1);
             }
             else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
-            }
-            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_LOW_TENSION))
             {
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
             }
@@ -644,42 +643,12 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_10, { MARKETING_PHONE_10_A, MARKETING_PHONE_10_B });
             }
 
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_10))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11, { MARKETING_PHONE_11_A,
-                    s_playerTension >= 50 ? MARKETING_PHONE_11_B_HIGH_TENSION : MARKETING_PHONE_11_B_LOW_TENSION });
-            }
-
-            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_11_A))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_A_1);
-            }
-            else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_LOW_TENSION))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_11_B_1);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_A_1) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_11_B_1))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_12);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_12))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_13);
-            }
-
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_13))
-            {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_14, { MARKETING_PHONE_14_A, MARKETING_PHONE_14_B });
-            }
-
-            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_2_C_4_B) ||
-                s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C_HIGH_TENSION) || s_uiSystem.hasChosenOption(MARKETING_PHONE_11_B_HIGH_TENSION) ||
-                s_uiSystem.hasChosenOption(MARKETING_PHONE_14_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_14_B))
+            // Fatal choices that hang up the phone
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_B) ||
+                s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C) || s_uiSystem.hasChosenOption(MARKETING_PHONE_10_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_10_B))
             {
                 s_uiSystem.hangupPhone();
                 _currentLevelStage = FIRST_DAD_PHONE_STAGE;
@@ -1884,23 +1853,23 @@ void Level::update()
         }
 
         // Debug level blocks
-        if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
-        {
-            D_LOG(LOG, "--------------");
-            for (Entity& entity : getAllEntities())
-            {
-                if (entity.id == k_invalidId)
-                {
-                    continue;
-                }
+        //if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
+        //{
+        //    D_LOG(LOG, "--------------");
+        //    for (Entity& entity : getAllEntities())
+        //    {
+        //        if (entity.id == k_invalidId)
+        //        {
+        //            continue;
+        //        }
 
-                if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
-                {
-                    auto* t = getComponentFromEntity<TransformComponent>(entity);
-                    D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
-                }
-            }
-        }
+        //        if (entityHasComponent<RectColliderComponent>(entity) && getComponentFromEntity<RectColliderComponent>(entity)->isLevelGeometry)
+        //        {
+        //            auto* t = getComponentFromEntity<TransformComponent>(entity);
+        //            D_LOG(LOG, "createBlockAtPosition({ %i, %i});", (int)t->position.x, (int)t->position.y);
+        //        }
+        //    }
+        //}
 
         // Toggle imgui
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_TAB))
@@ -1922,6 +1891,13 @@ void Level::update()
             _currentLevelStage = MARKETING_PHONE_STAGE;
             //startTimer(s_multiPurpuseTimer);
             s_playerTension = 0;
+        }
+
+        // Recreate current dialogue
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
+        {
+            s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
+                s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
         }
 
         // Debug to not have to wait x seconds for things to happen
