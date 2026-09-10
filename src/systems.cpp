@@ -1799,10 +1799,11 @@ void UISystem::update()
 	}
 	
 	// Destroy dialogue if has ended and it's not visible anymore
+	// Dialogues work by pushing another dialogue before the current finishes deleting itself. 
+	// If nothing is pushed, it will destroy the current and checks of hasDialogueFInished will not work anymore
 	if (_currentDialogue.dialogueBoxDynamicXSize <= 1.f && _currentDialogue.state == DIALOGUE_ENDED_STATE)
 	{
 		destroyCurrentDialogue();
-		D_LOG(WARNING, "Dialogue destroyed")
 	}
 
 	// Skip dialogue
@@ -1983,7 +1984,8 @@ void UISystem::update()
 				}
 
 				// Choose dialogue option
-				if (wasChooseDialogueOptionKeyPressedThisFrame() && dialogueOption.state != DIALOGUE_OPTION_CHOSEN_STATE)
+				bool hasValidDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered != INVALID_TEXT);
+				if (wasChooseDialogueOptionKeyPressedThisFrame() && dialogueOption.state != DIALOGUE_OPTION_CHOSEN_STATE && hasValidDialogueOptionHovered)
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
 					dialogueOption.backgroundSpriteColor = { 108, 26, 86, 255 };
@@ -1998,6 +2000,7 @@ void UISystem::update()
 						break;
 					case FATAL_TENSION:
 						s_camera.doShake(MEDIUM_SHAKE, 0.f);
+						interruptCurrentDialogue();
 						break;
 					default:
 						break;
@@ -2046,6 +2049,7 @@ void UISystem::update()
 
 	// Main dialogue characters logic + animate
 	bool hasDialogueFinished = false;
+	// Overridden below. Only true when all characters are outside of the screen
 	bool hasFinishedInterrupting = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE) ? true : false;
 	uint16_t numberOfCharactersOnCurrentDialogue = 0;
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
@@ -2100,8 +2104,9 @@ void UISystem::update()
 		}
 
 		// Wave movement effect
+		bool canApplyDynamicEffects = (_currentDialogue.state != DIALOGUE_INTERRUPTED_STATE && _currentDialogue.state != DIALOGUE_FINISHED_INTERRUPTED);
 		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
-		if (isWaveEffect && canCharacterFadeIn)
+		if (isWaveEffect && canCharacterFadeIn && canApplyDynamicEffects)
 		{
 			// offset * sin(time * speed)
 			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
@@ -2161,11 +2166,43 @@ void UISystem::update()
 		_currentDialogue.timeSinceFinalCharacterWasDrawn += k_deltaTime;
 	}
 
-
-	// Destroy dialogue if has finished interrupting
-	if (hasFinishedInterrupting)
+	// If no characters are on screen anymore (from the interruption), change to DIALOGUE_FINISHED_INTERRUPTED
+	if (hasFinishedInterrupting && _currentDialogue.state == DIALOGUE_INTERRUPTED_STATE)
 	{
 		_currentDialogue.state = DIALOGUE_FINISHED_INTERRUPTED;
+	}
+
+	// Register that DIALOGUE_FINISHED_INTERRUPTED and destroy it if no next dialogue was pushed
+	{
+		// If we interrupted a dialogue with a fatal choice and all animations ended, register the chosen option
+		if (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED)
+		{
+			bool canDestroyDialogue = false;
+			for (DialogueOption& option : _dialogueOptions)
+			{
+				// This will enable the next dialogue (if exists) to be pushed
+				if (option.isValid() && (option.state == DIALOGUE_OPTION_CHOSEN_STATE) && option.opacity <= 50)
+				{
+					_currentDialogue.dialogueOptionChosen = option.dialogueType;
+				}
+
+				// This will only be executed if there's no next dialogue (since nothing was pushed in the meantime
+				if (option.isValid() && (option.state == DIALOGUE_OPTION_CHOSEN_STATE) && option.opacity <= 1)
+				{
+					_currentDialogue.dialogueOptionChosen = option.dialogueType;
+					canDestroyDialogue = true;
+					break;
+				}
+			}
+
+			if (canDestroyDialogue)
+			{
+				for (DialogueOption& option : _dialogueOptions) { option.destroyDialogueOption(); }
+				destroyCurrentDialogue();
+				canDestroyDialogue = false;
+			}
+		}
+		
 	}
 
 	// Animate dialogue outline (auto skip)
@@ -2295,6 +2332,7 @@ void UISystem::interruptCurrentDialogue()
 
 void UISystem::destroyCurrentDialogue()
 {
+	D_LOG(WARNING, "Dialogue destroyed")
 	_lastDialogueType = _currentDialogue.dialogueType;
 	_lastOptionChosen = _currentDialogue.dialogueOptionChosen;
 	_currentDialogue.destroyDialoge();
@@ -2952,9 +2990,10 @@ bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 
 bool UISystem::hasChosenOption(TextType dialogueType)
 {
-	return (_currentDialogue.state == DIALOGUE_ENDED_STATE) && (_currentDialogue.dialogueOptionChosen == dialogueType);
+	return (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueOptionChosen == dialogueType);
 }
 
+// TODO: Eventually delete since it's useless. DIALOGUE_FINISHED_INTERRUPTED can be merged to hasDialogueFinihsed and hasChosenOption
 bool UISystem::hasDialogueFinishedInterrupting(TextType dialogueType)
 {
 	return (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueType == dialogueType);

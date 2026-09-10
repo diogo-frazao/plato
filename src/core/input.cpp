@@ -217,12 +217,12 @@ bool wasMoveLeftPressedThisFrame()
 
 bool wasAttackKeyPressedThisFrame()
 {
-	return _wasMouseButtonPressedThisFrame(LEFT) || _wasKeyPressedThisFrame(SDL_SCANCODE_RETURN) || _wasKeyPressedThisFrame(SDL_SCANCODE_Z); 
+	return _wasKeyPressedThisFrame(SDL_SCANCODE_Z); 
 }
 
 bool wasSkipDialogueKeyPressedThisFrame()
 {
-	return wasAttackKeyPressedThisFrame() || _wasKeyPressedThisFrame(SDL_SCANCODE_RETURN);
+	return wasAttackKeyPressedThisFrame() || _wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
 }
 
 bool wasPickupPhoneKeyPressedThisFrame()
@@ -252,6 +252,6 @@ bool wasHoverUpDialogueOptionKeyPressedThisFrame()
 
 bool wasChooseDialogueOptionKeyPressedThisFrame()
 {
-	return wasSkipDialogueKeyPressedThisFrame();
+	return wasAttackKeyPressedThisFrame();
 }
 

@@ -292,9 +292,9 @@ public:
 	enum DialogueStateType
 	{
 		DIALOGUE_BASE_STATE, // Base state unless it's changed for one of the below
-		DIALOGUE_ENDED_STATE, // Set automatically when a dialogue finishes or we choose an option. 
-		DIALOGUE_INTERRUPTED_STATE, // Set manually. Will also end the dialogue but in a different way
-		DIALOGUE_FINISHED_INTERRUPTED, // Set automatically when the interrupted animation finishes
+		DIALOGUE_ENDED_STATE, // Set automatically when a dialogue finishes or we choose an option. It starts animating back. Being in this state does not mean  it's invisible
+		DIALOGUE_INTERRUPTED_STATE, // Set manually. Explodes all characters.
+		DIALOGUE_FINISHED_INTERRUPTED, // Set automatically when all characters from the interruption are off screen. Moves automatically to ended state when all are off screen + fade out ended.
 	};
 
 	struct Dialogue
