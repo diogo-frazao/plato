@@ -269,12 +269,18 @@ struct TextDTO
 	TextTensionType tensionType = NORMAL_TENSION;
 	DialogueEntityType entityTalking = INVALID_DIALOGUE_ENTITY;
 
-	TextDTO(char* text, DialogueEntityType entity = CELLPHONE_DIALOGUE, int8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION)
+	// Only > -1 if this is an option used as a mid-sentence interruption.
+	// Value 0 means it will show the option from the beginning of the sntence. 100 Means at character 100
+	int16_t characterIndexToInterrupt = k_invalidId;
+
+	TextDTO(char* text, DialogueEntityType entity = CELLPHONE_DIALOGUE, int8_t playerTensionDelta = 0, TextTensionType tensionType = NORMAL_TENSION, 
+			int16_t characterIndexToInterrupt = k_invalidId)
 	{
 		this->text = text;
 		this->entityTalking = entity;
 		this->playerTensionDelta = playerTensionDelta;
 		this->tensionType = tensionType;
+		this->characterIndexToInterrupt = characterIndexToInterrupt;
 	}
 };
 

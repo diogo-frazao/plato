@@ -257,6 +257,8 @@ public:
 		// Color of the hovered sprite
 		SDL_Color hoveredBorderSpriteColor{ 0, 0, 0, 0 };
 
+		bool isMidSentenceInterruption = false;
+
 		void destroyDialogueOption()
 		{
 			for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
@@ -281,6 +283,7 @@ public:
 			this->secondsToStartShowingOption = 0.f;
 			this->tensionDelta = 0;
 			this->optionTensionType = NORMAL_TENSION;
+			this->isMidSentenceInterruption = false;
 		}
 
 		bool isValid()
@@ -380,13 +383,14 @@ public:
 	bool hasChosenOption(TextType dialogueType);
 	bool hasDialogueFinishedInterrupting(TextType dialogueType);
 	bool hasAnyDialogueOngoing();
+	bool doesCurrentDialogueHaveMidSentenceInterruption();
 
 	void skipDialogue();
 	void interruptCurrentDialogue();
 	void destroyCurrentDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
-	// For example asciiToAtlasIndex[97] = 1 means that lower case a (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
+	// For example asciiToAtlasIndex[97] = 1 means that lower case 'a' (dec 97 asciiToAtlasIndex) is on index 1 of the font atlas.
 	uint16_t _asciiToAtlasIndex[k_maxFontGlyphs]{ 0 };
 
 	//TODO: Improve later

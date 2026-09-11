@@ -13,7 +13,7 @@ TextDTO getTextInfo(TextType textType)
 	case INVALID_TEXT:
 		return "Invalid Text";
 	case DEBUG_TEXT:
-		return "Is that SR.DARWIN?";
+		return {" Stop yelling", CELLPHONE_DIALOGUE, 10, HIGH_TENSION, 30};
 	case ETC_TEXT:
 		return "...";
 	case MARKETING_PHONE_1:
@@ -43,7 +43,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_B_2:
 				return "[rostov]Mr ROSTOV[rostov] please listen, [yellow]I'm sure[yellow] you'll be interested";
 		case MARKETING_PHONE_3_C:
-			return {"I don't care, goodbye", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
+			return {"Goodbye", CELLPHONE_DIALOGUE, 10 , HIGH_TENSION };
 			case MARKETING_PHONE_3_C_1:
 				return { "What did [redshake]you[redshake] just say to me?", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
 			case MARKETING_PHONE_3_C_2:

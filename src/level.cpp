@@ -614,7 +614,7 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6, {DEBUG_TEXT});
             }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
@@ -1896,8 +1896,9 @@ void Level::update()
         // Recreate current dialogue
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
         {
-            s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
-                s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
+            s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
+            //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
+            //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
         }
 
         // Debug to not have to wait x seconds for things to happen

@@ -1824,6 +1824,12 @@ void UISystem::update()
 		}
 	}
 
+	// Fade out mid sentence interruption if we didn't pick if
+	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 1.f && doesCurrentDialogueHaveMidSentenceInterruption() && _dialogueOptions[0].state != DIALOGUE_OPTION_NOT_CHOSEN_STATE)
+	{
+		_dialogueOptions[0].state = DIALOGUE_OPTION_NOT_CHOSEN_STATE;
+	}
+
 	// Handle dialogue options
 	bool doesDialogueHaveOptions = _dialogueOptions[0].isValid();
 	if (doesDialogueHaveOptions)
@@ -1833,27 +1839,50 @@ void UISystem::update()
 
 		// Handle hovered dialogue option
 		{
-			if (wasHoverLeftDialogueOptionKeyPressedThisFrame())
+			bool wasAnyDialogueOptionAlreadyChosen = false;
+			for (DialogueOption& option : _dialogueOptions)
 			{
-				_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+				if (option.state == DIALOGUE_OPTION_CHOSEN_STATE || option.state == DIALOGUE_OPTION_NOT_CHOSEN_STATE)
+				{
+					wasAnyDialogueOptionAlreadyChosen = true;
+					break;
+				}
 			}
 
-			if (wasHoverRightDialogueOptionKeyPressedThisFrame() && _dialogueOptions[1].isValid())
+			if (!wasAnyDialogueOptionAlreadyChosen)
 			{
-				_currentDialogue.dialogueOptionHovered = _dialogueOptions[1].dialogueType;
-			}
+				if (doesCurrentDialogueHaveMidSentenceInterruption())
+				{
+					if (wasHoverLeftDialogueOptionKeyPressedThisFrame() || wasHoverRightDialogueOptionKeyPressedThisFrame() ||
+						wasHoverDownDialogueOptionKeyPressedThisFrame() || wasHoverUpDialogueOptionKeyPressedThisFrame())
+					{
+						_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+					}
+				}
 
-			if (wasHoverDownDialogueOptionKeyPressedThisFrame() && _dialogueOptions[2].isValid())
-			{
-				_currentDialogue.dialogueOptionHovered = _dialogueOptions[2].dialogueType;
-			}
+				if (wasHoverLeftDialogueOptionKeyPressedThisFrame())
+				{
+					_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+				}
 
-			bool isDownDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered == _dialogueOptions[2].dialogueType);
-			if (wasHoverUpDialogueOptionKeyPressedThisFrame() && isDownDialogueOptionHovered)
-			{
-				_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+				if (wasHoverRightDialogueOptionKeyPressedThisFrame() && _dialogueOptions[1].isValid())
+				{
+					_currentDialogue.dialogueOptionHovered = _dialogueOptions[1].dialogueType;
+				}
+
+				if (wasHoverDownDialogueOptionKeyPressedThisFrame() && _dialogueOptions[2].isValid())
+				{
+					_currentDialogue.dialogueOptionHovered = _dialogueOptions[2].dialogueType;
+				}
+
+				bool isDownDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered == _dialogueOptions[2].dialogueType);
+				if (wasHoverUpDialogueOptionKeyPressedThisFrame() && isDownDialogueOptionHovered)
+				{
+					_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
+				}
 			}
 		}
+		
 
 		for (uint8_t i = 0; i < k_maxDialogueOptions; ++i)
 		{
@@ -1985,25 +2014,24 @@ void UISystem::update()
 
 				// Choose dialogue option
 				bool hasValidDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered != INVALID_TEXT);
-				if (wasChooseDialogueOptionKeyPressedThisFrame() && dialogueOption.state != DIALOGUE_OPTION_CHOSEN_STATE && hasValidDialogueOptionHovered)
+				bool wasAnyDialogueOptionAlreadyChosen = dialogueOption.state == DIALOGUE_OPTION_CHOSEN_STATE || dialogueOption.state == DIALOGUE_OPTION_NOT_CHOSEN_STATE;
+				if (wasChooseDialogueOptionKeyPressedThisFrame() && !wasAnyDialogueOptionAlreadyChosen && hasValidDialogueOptionHovered)
 				{
 					dialogueOption.state = DIALOGUE_OPTION_CHOSEN_STATE;
 					dialogueOption.backgroundSpriteColor = { 108, 26, 86, 255 };
 					dialogueOption.hoveredBorderSpriteColor = { 108, 26, 86, 255 };
 					startTimer(dialogueOption.fadeOutTimer);
 
-					// Apply camera shake based on the type of option
-					switch (dialogueOption.optionTensionType)
+					// Apply camera shake based on the type of option. Fatal tension choices and mid sentence interruptions cause a dialogue interruption
+					bool canInterruptDialogue = dialogueOption.optionTensionType == FATAL_TENSION || dialogueOption.isMidSentenceInterruption;
+					if (canInterruptDialogue)
 					{
-					case HIGH_TENSION:
-						s_camera.doShake(LIGHT_SHAKE, 0.f);
-						break;
-					case FATAL_TENSION:
 						s_camera.doShake(MEDIUM_SHAKE, 0.f);
 						interruptCurrentDialogue();
-						break;
-					default:
-						break;
+					}
+					else if (dialogueOption.optionTensionType == HIGH_TENSION)
+					{
+						s_camera.doShake(LIGHT_SHAKE, 0.f);
 					}
 
 					s_playerTension += dialogueOption.tensionDelta;
@@ -2206,7 +2234,8 @@ void UISystem::update()
 	}
 
 	// Animate dialogue outline (auto skip)
-	if (!doesDialogueHaveOptions &&_currentDialogue.state == DIALOGUE_BASE_STATE)
+	bool canAutoSkipDialogueWithOptions = !doesDialogueHaveOptions || doesCurrentDialogueHaveMidSentenceInterruption();
+	if (canAutoSkipDialogueWithOptions && _currentDialogue.state == DIALOGUE_BASE_STATE)
 	{
 		float secondsToSkipDialogue = 3.f;
 		if (numberOfCharactersOnCurrentDialogue < 10)
@@ -2240,7 +2269,7 @@ void UISystem::update()
 		}
 	}
 
-	if (doesDialogueHaveOptions)
+	if (doesDialogueHaveOptions && !doesCurrentDialogueHaveMidSentenceInterruption())
 	{
 		_currentDialogue.dialogueOutlineDynamicXSize = _currentDialogue.dialogueBoxDynamicXSize;
 	}
@@ -2985,7 +3014,7 @@ bool UISystem::isCurrentDialogue(TextType dialogueType)
 
 bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 {
-	return (_currentDialogue.dialogueType == dialogueType) && (_currentDialogue.state == DIALOGUE_ENDED_STATE);
+	return (_currentDialogue.dialogueType == dialogueType) && (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED);
 }
 
 bool UISystem::hasChosenOption(TextType dialogueType)
@@ -3002,6 +3031,11 @@ bool UISystem::hasDialogueFinishedInterrupting(TextType dialogueType)
 bool UISystem::hasAnyDialogueOngoing()
 {
 	return (_currentDialogue.dialogueType != INVALID_TEXT);
+}
+
+bool UISystem::doesCurrentDialogueHaveMidSentenceInterruption()
+{
+	return _dialogueOptions[0].isValid() && _dialogueOptions[0].isMidSentenceInterruption;
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
@@ -3276,6 +3310,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	maxCharactersPerLine = 50;
 
 	float screenCenterX = k_baseGameWidth * 0.5f;
+	Vec2 midSentenceInterruptionOptionStartPosition = { screenCenterX, 162.f };
 	Vec2 dialogueOptionsStartPosition[k_maxDialogueOptions] = { { screenCenterX - 15.f, 162.f } , { screenCenterX + 15.f, 162.f } , { screenCenterX, 174.f } };
 	DialogueAlignmentType dialogueOptionsAlignmentType[k_maxDialogueOptions] = { DIALOGUE_RIGHT_ALIGNED, DIALOGUE_LEFT_ALIGNED, DIALOGUE_CENTER_ALIGNED };
 
@@ -3291,10 +3326,12 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		}
 
 		TextDTO optionInfo = getTextInfo(dialogueOptions.options[optionIndex]);
+		bool isMidSentenceInterruption = optionInfo.characterIndexToInterrupt >= 0;
 
 		dialogueOption.dialogueType = dialogueOptions.options[optionIndex];
 		dialogueOption.tensionDelta = optionInfo.playerTensionDelta;
 		dialogueOption.optionTensionType = optionInfo.tensionType;
+		dialogueOption.isMidSentenceInterruption = isMidSentenceInterruption;
 
 		currentHorizontalSpaceBetweenCharacters = 0;
 		currentVerticalSpaceBetweenCharacters = 0;
@@ -3302,7 +3339,17 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		maxXDialogueSize = 0;
 
 		const char* optionText = optionInfo.text;
-		Vec2 positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsStartPosition[optionIndex], dialogueOptionsAlignmentType[optionIndex], maxCharactersPerLine);
+
+		Vec2 positionToDrawOptionText;
+
+		if (isMidSentenceInterruption)
+		{
+			positionToDrawOptionText = getPositionToStartDrawingText(optionText, midSentenceInterruptionOptionStartPosition, DIALOGUE_CENTER_ALIGNED, maxCharactersPerLine);
+		}
+		else
+		{
+			positionToDrawOptionText = getPositionToStartDrawingText(optionText, dialogueOptionsStartPosition[optionIndex], dialogueOptionsAlignmentType[optionIndex], maxCharactersPerLine);
+		}
 
 		// Same as i inside the for loop but ignores everything that's text effects syntax
 		uint16_t optionsTextCurrentCharacterIndex = 0;
@@ -3413,6 +3460,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 			dialogueOption.dialogueBoxDynamicYSize = 0.f;
 
+			// Handle when to show dialogue options
 			// Dialogue options appear close to the finishing of the main dialogue
 			uint16_t mainDialogueLength = mainDialogueCurrentCharacterIndex;
 			int32_t characterIndexToStartShowingOptions = max(mainDialogueLength - 10, 3);
@@ -3427,6 +3475,12 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			else
 			{
 				dialogueOption.secondsToStartShowingOption = baseSecondsToStartShowingOption;
+			}
+
+			// Mid sentence interruptions have a configurable index to appear (which is the letter index from the current dialogue), and disappear at the end of the dialogue
+			if (isMidSentenceInterruption)
+			{
+				dialogueOption.secondsToStartShowingOption = _currentDialogue.characters[optionInfo.characterIndexToInterrupt].secondsToStartShowingCharacter;
 			}
 		}
 	}
