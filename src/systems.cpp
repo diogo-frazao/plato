@@ -1825,7 +1825,8 @@ void UISystem::update()
 	}
 
 	// Fade out mid sentence interruption if we didn't pick if
-	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 1.f && doesCurrentDialogueHaveMidSentenceInterruption() && _dialogueOptions[0].state != DIALOGUE_OPTION_NOT_CHOSEN_STATE)
+	bool canChangeInterruptionToBeNotChosen = (_dialogueOptions[0].state != DIALOGUE_OPTION_CHOSEN_STATE) && (_dialogueOptions[0].state != DIALOGUE_OPTION_NOT_CHOSEN_STATE);
+	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 2.f && doesCurrentDialogueHaveMidSentenceInterruption() && canChangeInterruptionToBeNotChosen)
 	{
 		_dialogueOptions[0].state = DIALOGUE_OPTION_NOT_CHOSEN_STATE;
 	}
@@ -2026,12 +2027,12 @@ void UISystem::update()
 					bool canInterruptDialogue = dialogueOption.optionTensionType == FATAL_TENSION || dialogueOption.isMidSentenceInterruption;
 					if (canInterruptDialogue)
 					{
-						s_camera.doShake(MEDIUM_SHAKE, 0.f);
+						s_camera.doShake(STRONG_SHAKE, 0.f);
 						interruptCurrentDialogue();
 					}
 					else if (dialogueOption.optionTensionType == HIGH_TENSION)
 					{
-						s_camera.doShake(LIGHT_SHAKE, 0.f);
+						s_camera.doShake(MEDIUM_SHAKE, 0.f);
 					}
 
 					s_playerTension += dialogueOption.tensionDelta;
@@ -2217,7 +2218,6 @@ void UISystem::update()
 				// This will only be executed if there's no next dialogue (since nothing was pushed in the meantime
 				if (option.isValid() && (option.state == DIALOGUE_OPTION_CHOSEN_STATE) && option.opacity <= 1)
 				{
-					_currentDialogue.dialogueOptionChosen = option.dialogueType;
 					canDestroyDialogue = true;
 					break;
 				}
@@ -2237,15 +2237,15 @@ void UISystem::update()
 	bool canAutoSkipDialogueWithOptions = !doesDialogueHaveOptions || doesCurrentDialogueHaveMidSentenceInterruption();
 	if (canAutoSkipDialogueWithOptions && _currentDialogue.state == DIALOGUE_BASE_STATE)
 	{
-		float secondsToSkipDialogue = 3.f;
+		float secondsToSkipDialogue = 2.f;
 		if (numberOfCharactersOnCurrentDialogue < 10)
 		{
-			secondsToSkipDialogue = 2.f;
+			secondsToSkipDialogue = 1.f;
 		}
 
 		if (numberOfCharactersOnCurrentDialogue > 70)
 		{
-			secondsToSkipDialogue = 4.f;
+			secondsToSkipDialogue = 2.5f;
 		}
 
 		// Apply the no wait effect - make time to skip to next dialogue faster
@@ -2323,9 +2323,6 @@ void UISystem::interruptCurrentDialogue()
 
 	Vec2 dialogueCenterPosition = { _currentDialogue.topLeftPosition.x + (_currentDialogue.dialogueBoxSize.x * 0.5f),
 									_currentDialogue.topLeftPosition.y + (_currentDialogue.dialogueBoxSize.y * 0.5f) };
-
-
-	s_camera.doShake(MEDIUM_SHAKE, 0.f);
 
 	// Launch every character away from center
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
@@ -3012,9 +3009,14 @@ bool UISystem::isCurrentDialogue(TextType dialogueType)
 	return (_currentDialogue.dialogueType == dialogueType);
 }
 
+bool UISystem::hasInterruptedMidSentence(TextType interruptionTextType)
+{
+	return (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueOptionChosen == interruptionTextType);
+}
+
 bool UISystem::hasDialogueFinihsed(TextType dialogueType)
 {
-	return (_currentDialogue.dialogueType == dialogueType) && (_currentDialogue.state == DIALOGUE_ENDED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED);
+	return (_currentDialogue.dialogueType == dialogueType) && (_currentDialogue.state == DIALOGUE_ENDED_STATE);
 }
 
 bool UISystem::hasChosenOption(TextType dialogueType)

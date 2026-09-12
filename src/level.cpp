@@ -492,6 +492,10 @@ void handleCameraShake(Camera& camera)
         camera.targetPosition.x += 20.f;
         camera.targetPosition.y += 40.f;
         break;
+    case STRONG_SHAKE:
+        camera.targetPosition.x += 80.f;
+        camera.targetPosition.y += 160.f;
+        break;
     }
     camera.cameraShakeToPerform = NO_SHAKE;
 }
@@ -594,12 +598,12 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_2))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_3);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_3, { MARKETING_PHONE_3_C_3_I });
             }
 
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_3))
+            if (s_uiSystem.hasInterruptedMidSentence(MARKETING_PHONE_3_C_3_I) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_3))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_4);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_3_C_4, { MARKETING_PHONE_3_C_4_I });
             }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_3_C_4))
@@ -614,10 +618,15 @@ void Level::update()
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_5))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6, {DEBUG_TEXT});
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6, { MARKETING_PHONE_6_I});
             }
 
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6))
+            if (s_uiSystem.hasInterruptedMidSentence(MARKETING_PHONE_6_I))
+            {
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_6_I_1);
+            }
+
+            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_6_I_1))
             {
                 s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_7, { MARKETING_PHONE_7_A, MARKETING_PHONE_7_B, MARKETING_PHONE_7_C });
             }
@@ -628,17 +637,17 @@ void Level::update()
             }
             else if (s_uiSystem.hasChosenOption(MARKETING_PHONE_7_B))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8, { MARKETING_PHONE_8_I });
             }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_7_A_1))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_8, { MARKETING_PHONE_8_I });
             }
 
-            if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
+            if (s_uiSystem.hasInterruptedMidSentence(MARKETING_PHONE_8_I) || s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_8))
             {
-                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9);
+                s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_9, { MARKETING_PHONE_9_I });
             }
 
             if (s_uiSystem.hasDialogueFinihsed(MARKETING_PHONE_9))
@@ -647,7 +656,8 @@ void Level::update()
             }
 
             // Fatal choices that hang up the phone
-            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_B) ||
+            if (s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_3_C_5_B) || 
+                s_uiSystem.hasInterruptedMidSentence(MARKETING_PHONE_9_I) || s_uiSystem.hasInterruptedMidSentence(MARKETING_PHONE_3_C_4_I) ||
                 s_uiSystem.hasChosenOption(MARKETING_PHONE_7_C) || s_uiSystem.hasChosenOption(MARKETING_PHONE_10_A) || s_uiSystem.hasChosenOption(MARKETING_PHONE_10_B))
             {
                 s_uiSystem.hangupPhone();

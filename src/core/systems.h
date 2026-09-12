@@ -380,6 +380,7 @@ public:
 
 	bool isCurrentDialogue(TextType dialogueType);
 	bool hasDialogueFinihsed(TextType dialogueType);
+	bool hasInterruptedMidSentence(TextType interruptionTextType);
 	bool hasChosenOption(TextType dialogueType);
 	bool hasDialogueFinishedInterrupting(TextType dialogueType);
 	bool hasAnyDialogueOngoing();
