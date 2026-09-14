@@ -100,62 +100,40 @@ TextDTO getTextInfo(TextType textType)
 
 	// Starting dialogue with dad
 	{
-	case ONE_DAD_PHONE_1:
-		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [rostov]ROSTOV?[rostov]";
-		case ONE_DAD_PHONE_1_I:
-			return { "STOP CALLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION, 0 };
-		case ONE_DAD_PHONE_1_I_1:
-			return "What? Sorry son, I'll call later";
-			case ONE_DAD_PHONE_1_I_1_A:
-				return { "Wait Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
-			case ONE_DAD_PHONE_1_I_1_B:
-				return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
-		case ONE_DAD_PHONE_1_I_2:
-			return "Are you ok? What was that for?";
-			case ONE_DAD_PHONE_1_I_2_A:
-				return { "A solicitor keeps calling me", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
-			case ONE_DAD_PHONE_1_I_2_B:
-				return "Everything's fine don't worry";
-		case ONE_DAD_PHONE_1_I_3:
-			return "Oh... [interjection]*cough*[interjection] [interjection]*cough*[interjection] I see";
-		case ONE_DAD_PHONE_1_I_4:
-			return "...But are you sure you're ok?";
-			case ONE_DAD_PHONE_1_I_4_A:
-				return "Yes Papa don't worry";
-			case ONE_DAD_PHONE_1_I_4_B:
-				return "Of course Pa";
-		case ONE_DAD_PHONE_1_I_5:
-			return "Ok son, ok";
-	case ONE_DAD_PHONE_2:
-		return "Can you hear me son?";
-		case ONE_DAD_PHONE_2_A:
-			return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
-		case ONE_DAD_PHONE_2_B:
-			return { "Yes Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
-	case ONE_DAD_PHONE_3:
-		return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
-		case ONE_DAD_PHONE_3_A:
-			return "Any news from [red]that?[red]";
-		case ONE_DAD_PHONE_3_B:
-			return "Do you know [red]the[red] results?";
-		case ONE_DAD_PHONE_3_C:
-			return "Did he bring [red]any[red] news?";
-	case ONE_DAD_PHONE_4:
-		return "Oh...";
-	case ONE_DAD_PHONE_5:
-		return "No, nothing... No news about [red]the exam[red], if that's what you're asking";
-		case ONE_DAD_PHONE_5_A:
-			return "It's been almost 2 weeks...";
-		case ONE_DAD_PHONE_5_B:
-			return "Why is it taking so long?";
-	case ONE_DAD_PHONE_6:
-		return "[rostov]ROSTOV,[rostov] [redshake]stop it[redshake]";
-	case ONE_DAD_PHONE_7:
-		return  { "You know I'm feeling stronger every day", CELLPHONE_DIALOGUE, -20 };
-	case ONE_DAD_PHONE_8:
-		return { "And the extra money you sent is helping with the treatment…", CELLPHONE_DIALOGUE, -20 };
-	case ONE_DAD_PHONE_9:
-		return "[red]But the truth is the doctor told me that[red]";
+	case ONE_DAD_PHONE_1: return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [rostov]ROSTOV?[rostov]";
+		case ONE_DAD_PHONE_1_I: return { "STOP CALLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION, 0 };
+		case ONE_DAD_PHONE_1_I_1: return "What? Sorry son, I'll call later";
+			case ONE_DAD_PHONE_1_I_1_A: return { "Wait Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+			case ONE_DAD_PHONE_1_I_1_B: return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+		case ONE_DAD_PHONE_1_I_2: return "Are you ok? What was that for?";
+			case ONE_DAD_PHONE_1_I_2_A: return { "A solicitor keeps calling me", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
+			case ONE_DAD_PHONE_1_I_2_B: return "Everything's fine don't worry";
+		case ONE_DAD_PHONE_1_I_3: return "Oh... [interjection]*cough*[interjection] [interjection]*cough*[interjection] I see";
+		case ONE_DAD_PHONE_1_I_4: return "...But are you sure you're ok?";
+			case ONE_DAD_PHONE_1_I_4_A: return "Yes Papa don't worry";
+			case ONE_DAD_PHONE_1_I_4_B: return "Of course Pa";
+		case ONE_DAD_PHONE_1_I_5: return "Ok son, ok";
+	case ONE_DAD_PHONE_2: return "Can you hear me son?";
+		case ONE_DAD_PHONE_2_A: return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+		case ONE_DAD_PHONE_2_B: return { "Yes Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+	case ONE_DAD_PHONE_3: return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
+		case ONE_DAD_PHONE_3_A: return "Any news from [red]that?[red]";
+		case ONE_DAD_PHONE_3_B: return "Do you know [red]the[red] results?";
+		case ONE_DAD_PHONE_3_C: return "Did he bring [red]any[red] news?";
+	case ONE_DAD_PHONE_4: return "Oh...";
+	case ONE_DAD_PHONE_5: return "No, nothing... No news about [red]the exam[red], if that's what you're asking";
+		case ONE_DAD_PHONE_5_A: return "It's been almost 2 weeks...";
+		case ONE_DAD_PHONE_5_B: return "Why is it taking so long?";
+	case ONE_DAD_PHONE_6: return "[rostov]ROSTOV,[rostov] [redshake]stop it[redshake]";
+	case ONE_DAD_PHONE_7: return  { "You know I'm feeling stronger every day", CELLPHONE_DIALOGUE, -20 };
+	case ONE_DAD_PHONE_8: return { "And the extra money you sent, [interjection]*cough*[interjection] [interjection]*cough*[interjection] it helps with the treatment…", CELLPHONE_DIALOGUE, -20 };
+	case ONE_DAD_PHONE_9: return "[red]But the truth is the doctor told me that[red]";
+	case ONE_DAD_PHONE_10: return { "What was that sound? Are you ok? What about [darwin]MR.DARWIN?[darwin]" };
+		case ONE_DAD_PHONE_10_I: return { "I have to go Pa < HANG UP >", CELLPHONE_DIALOGUE, 0, FATAL_TENSION, 10 };
+	case ONE_DAD_PHONE_11: return "[rostov]ROSTOV[rostov] [interjection]*cough*[interjection] [interjection]*cough*[interjection] are you there?";
+		case ONE_DAD_PHONE_11_A: return "I'm fine but I don't know about [darwin]MR.DARWIN[darwin]";
+		case ONE_DAD_PHONE_11_B: return { "Someone broke the radio", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
+	case ONE_DAD_PHONE_12: return "Go check what it is but call me later son";
 	}
 
 	// Starting confrontation with hugo and oskar

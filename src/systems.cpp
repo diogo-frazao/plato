@@ -2536,6 +2536,13 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				xPositionToDrawSpeechIndicator = textLeftAlignedXPos;
 				break;
 			}
+			case DIALOGUE_RIGHT_ALIGNED:
+			{
+				float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
+				float textRightXPos = dest.x + dialogueBoxTargetXSize;
+				xPositionToDrawSpeechIndicator = textRightXPos - 5;
+				break;
+			}
 			default:
 				D_ASSERT(false, "Alignment type not supported");
 				break;
@@ -2550,6 +2557,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		// Calculate X Position for speech indicator.
 		// If needed, move move it (only neeed when the entity moved during the dialogue)
 		// On update, we take the current and target and just lerp.
+		if (!_currentDialogue.isScreenSpace)
 		{
 			Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*_currentDialogue.entityTalking)->position;
 			SDL_FRect positionWhereDialogueStartsDrawing;
@@ -2573,6 +2581,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 			{
 				dest.x = xPositionToDrawSpeechIndicator;
 			}
+		}
+		else
+		{
+			dest.x = xPositionToDrawSpeechIndicator;
 		}
 
 		float dialogueOutlineEndYPosition = dest.y + dest.h;
@@ -3011,6 +3023,11 @@ bool UISystem::isCurrentDialogue(TextType dialogueType)
 	return (_currentDialogue.dialogueType == dialogueType);
 }
 
+bool UISystem::isDialogueBeingInterrupted(TextType dialogueType)
+{
+	return (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueType == dialogueType);
+}
+
 bool UISystem::hasInterruptedMidSentence(TextType interruptionTextType)
 {
 	return (_currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED) && (_currentDialogue.dialogueOptionChosen == interruptionTextType);
@@ -3057,7 +3074,7 @@ void UISystem::hangupPhone()
 void UISystem::pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
 	pushTensionBar();
-	pushEntityDialogue(dialogueTextType, dialogueOptions, false, DIALOGUE_CENTER_ALIGNED);
+	pushEntityDialogue(dialogueTextType, dialogueOptions, false, {}, DIALOGUE_CENTER_ALIGNED);
 }
 
 void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
@@ -3102,7 +3119,7 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	}
 }
 
-void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, DialogueAlignmentType alignmentType)
+void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, Vec2 screenSpacePosition, DialogueAlignmentType alignmentType)
 {
 	TextDTO textInfo = getTextInfo(dialogueTextType);
 	const char* textToShow = textInfo.text;
@@ -3136,6 +3153,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 	Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*entityToAttachDialogue)->position;
 	Vec2 positionToDrawText = { entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x,
 							   entityPosition.y + s_currentDialogueEntityDTO.dialoguePositionOffset.y };
+
+	if (isScreenSpace)
+	{
+		positionToDrawText = screenSpacePosition;
+	}
 
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, positionToDrawText, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;

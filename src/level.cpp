@@ -525,6 +525,10 @@ void handleCameraShake(Camera& camera)
         camera.targetPosition.x += 80.f;
         camera.targetPosition.y += 160.f;
         break;
+    case MEGA_SHAKE:
+        camera.targetPosition.x += 250.f;
+        camera.targetPosition.y += 1000.f;
+        break;
     }
     camera.cameraShakeToPerform = NO_SHAKE;
 }
@@ -700,7 +704,7 @@ void Level::update()
         case FIRST_DAD_PHONE_STAGE:
         {
             // After marketing dialogue, wait x seconds and receive dad call
-            if (isTimerOngoing(s_multiPurpuseTimer))
+            if (isTimerOngoing(s_multiPurpuseTimer) && !u.isDialogueBeingInterrupted(ONE_DAD_PHONE_9))
             {
                 s_multiPurpuseTimer += k_deltaTime;
 
@@ -787,11 +791,35 @@ void Level::update()
             if (u._currentDialogue.dialogueType == ONE_DAD_PHONE_9 && isTimerOngoing(s_multiPurpuseTimer))
             {
                 s_multiPurpuseTimer += k_deltaTime;
-                if (s_multiPurpuseTimer >= 3.1f)
+                if (s_multiPurpuseTimer >= 3.1f && !u.isDialogueBeingInterrupted(ONE_DAD_PHONE_9))
                 {
                     u.interruptCurrentDialogue();
-                    invalidateTimer(s_multiPurpuseTimer);
+                    s_camera.doShake(MEGA_SHAKE, 0.f);
                 }
+            }
+
+            if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9) && s_multiPurpuseTimer >= 5.5f)
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_10, { ONE_DAD_PHONE_10_I });
+                invalidateTimer(s_multiPurpuseTimer);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_10))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_11, { ONE_DAD_PHONE_11_A, ONE_DAD_PHONE_11_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_11_A) || u.hasChosenOption(ONE_DAD_PHONE_11_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_12);
+            }
+
+            if (u.hasInterruptedMidSentence(ONE_DAD_PHONE_10_I) || u.hasDialogueFinihsed(ONE_DAD_PHONE_12))
+            {
+                u.hangupPhone();
+                u.popTensionBar();
+                _currentLevelStage = FREE_STAGE;
+                player.entityState = IDLE_STATE;
             }
 
             break;
@@ -1796,7 +1824,8 @@ void Level::update()
         // Recreate current dialogue
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
         {
-            s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
+            s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_8);
+            //s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
         }

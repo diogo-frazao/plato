@@ -374,11 +374,12 @@ public:
 	};
 
 	void pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {},
-					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
+					  bool isScreenSpace = false, Vec2 screenSpacePosition = {0.f, 0.f}, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 
 	bool isCurrentDialogue(TextType dialogueType);
+	bool isDialogueBeingInterrupted(TextType dialogueType);
 	bool hasDialogueFinihsed(TextType dialogueType);
 	bool hasInterruptedMidSentence(TextType interruptionTextType);
 	bool hasChosenOption(TextType dialogueType);

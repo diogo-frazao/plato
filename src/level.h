@@ -86,6 +86,7 @@ enum CameraShakeType
 	LIGHT_MEDIUM_SHAKE,
 	MEDIUM_SHAKE,
 	STRONG_SHAKE,
+	MEGA_SHAKE,
 };
 
 struct Camera
