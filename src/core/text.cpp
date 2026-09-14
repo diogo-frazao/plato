@@ -158,54 +158,6 @@ TextDTO getTextInfo(TextType textType)
 		return "[red]But the truth is the doctor told me that[red]";
 	}
 
-	// Starting dialogue with Darwin
-	{
-	case ONE_DARWIN_1:
-		return { "[nowait]ROSTOV your shift is o-[nowait]", DARWIN_DIALOGUE };
-	case ONE_DARWIN_2:
-		return {"[redshake]Oh.[redshake] [pink]I'm sorry,[pink] I didn't know you were on the phone.", DARWIN_DIALOGUE };
-		case ONE_DARWIN_2_A:
-			return "You scared me";
-		case ONE_DARWIN_2_B:
-			return "I'm talking with [pa]Pa[pa]";
-	case ONE_DARWIN_3:
-		return "[darwin]SR DARWIN![darwin] [interjection]*cough*[interjection] [interjection]*cough*[interjection] Did [rostov]ROSTOV[rostov] do a [yellow]good job[yellow] today?";
-	case ONE_DARWIN_5:
-		return { "I [red]hope[red] he didn't fell asleep [red]again[red]", CELLPHONE_DIALOGUE, 10 };
-	case ONE_DARWIN_6:
-		return { "[wave]Ahahah.[wave] [pink]Don't worry[pink] [pa]MISTER[pa]", DARWIN_DIALOGUE };
-	case ONE_DARWIN_7:
-		return { "[rostov]ROSTOV[rostov] works [pink]very hard[pink] and helps me [pink]every day[pink]", DARWIN_DIALOGUE, -10 };
-	case ONE_DARWIN_8:
-		return { "We just served the last [blue]saltuna sandwich.[blue] [pink]Everything's clean[pink] and we're ready to close for the day", DARWIN_DIALOGUE };
-	case ONE_DARWIN_9:
-		return { "[pa]...MISTER,[pa] do you have news about your [red]exam?[red]", DARWIN_DIALOGUE };
-	case ONE_DARWIN_10:
-		return { "Can he hear me?", DARWIN_DIALOGUE };
-		case ONE_DARWIN_10_A:
-			return "[pa]Pa[pa] are you there?";
-		case ONE_DARWIN_10_B:
-			return "Did you hear [darwin]SR.DARWIN?[darwin]";
-		case ONE_DARWIN_10_C:
-			return "[pa]Papa?[pa]";
-	case ONE_DARWIN_11:
-		return "[nowait]Sorry the doctor is here, I need to go[nowait]";
-	case ONE_DARWIN_12:
-		return { "Don't worry [rostov]ROSTOV...[rostov] we know [pink]he will recover[pink]", DARWIN_DIALOGUE };
-	case ONE_DARWIN_13:
-		return {"And [pink]you are a good man,[pink] working all these years to [lightpink]help[lightpink] your [pa]Pa[pa]", DARWIN_DIALOGUE };
-		case ONE_DARWIN_13_A:
-			return "Thank you [darwin]DARWIN[darwin]";
-		case ONE_DARWIN_13_B:
-			return "I hope so";
-		case ONE_DARWIN_13_C:
-			return { "He's all I have", CELLPHONE_DIALOGUE , -5, LOW_TENSION};
-	case ONE_DARWIN_14:
-		return { "Well... your shift is over [rostov]son,[rostov] you can [blue]go home[blue] when you want.", DARWIN_DIALOGUE };
-	case ONE_DARWIN_15:
-		return { "[red]HEY![red] [redshake]STOP IT![redshake]", DARWIN_DIALOGUE, 10 };
-	}
-
 	// Starting confrontation with hugo and oskar
 	{
 	case C_1:

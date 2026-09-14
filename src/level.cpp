@@ -783,166 +783,15 @@ void Level::update()
                 startTimer(s_multiPurpuseTimer);
             }
 
-            // Darwin enters and interrupts father dialogue
+            // Dialogue is interrupted by darwin calling us
             if (u._currentDialogue.dialogueType == ONE_DAD_PHONE_9 && isTimerOngoing(s_multiPurpuseTimer))
             {
                 s_multiPurpuseTimer += k_deltaTime;
                 if (s_multiPurpuseTimer >= 3.1f)
                 {
                     u.interruptCurrentDialogue();
-                    _currentLevelStage = DARWIN_CONVERSATION_STAGE;
                     invalidateTimer(s_multiPurpuseTimer);
                 }
-            }
-
-            break;
-        }
-
-        case DARWIN_CONVERSATION_STAGE:
-        {
-            Entity& darwin = getEntityById(s_darwinEntityId);
-            auto* darwinT = getComponentFromEntity<TransformComponent>(darwin);
-            auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
-            auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
-
-            if (u.hasDialogueFinishedInterrupting(ONE_DAD_PHONE_9))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_1);
-                _darwinConversationStageData.canMoveFromDoor = true;
-            }
-
-            if (_darwinConversationStageData.canMoveFromDoor)
-            {
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 427.f))
-                {
-                    _darwinConversationStageData.canMoveFromDoor = false;
-                }
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_1))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_2, { ONE_DARWIN_2_A, ONE_DARWIN_2_B });
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_2))
-            {
-                u.pushCellphoneDialogue(ONE_DARWIN_3);
-                _darwinConversationStageData.canGetNearTable = true;
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_3))
-            {
-                u.pushCellphoneDialogue(ONE_DARWIN_5);
-            }
-
-            if (_darwinConversationStageData.canGetNearTable)
-            {
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
-                {
-                    _darwinConversationStageData.canGetNearTable = false;
-                }
-            }
-
-            /*if (u.hasDialogueFinihsed(ONE_DARWIN_4))
-            {
-                u.pushCellphoneDialogue(ONE_DARWIN_5);
-            }*/
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_5))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_6);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_6))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_7);
-                _darwinConversationStageData.canGetEvenNearTable = true;
-            }
-
-            if (_darwinConversationStageData.canGetEvenNearTable)
-            {
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 480.f))
-                {
-                    _darwinConversationStageData.canGetEvenNearTable = false;
-                }
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_7))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_8);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_8))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_9);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_9))
-            {
-                startTimer(_darwinConversationStageData.waitToAskIfPaHeardUs);
-            }
-
-            if (isTimerOngoing(_darwinConversationStageData.waitToAskIfPaHeardUs))
-            {
-                _darwinConversationStageData.waitToAskIfPaHeardUs += k_deltaTime;
-                if (_darwinConversationStageData.waitToAskIfPaHeardUs >= 2.f)
-                {
-                    u.pushEntityDialogue(ONE_DARWIN_10, { ONE_DARWIN_10_A, ONE_DARWIN_10_B, ONE_DARWIN_10_C });
-                    invalidateTimer(_darwinConversationStageData.waitToAskIfPaHeardUs);
-                }
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_10))
-            {
-                Vec2 darwinPos = getComponentFromEntity<TransformComponent>(darwin)->position;
-                u.pushCellphoneDialogue(ONE_DARWIN_11);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_11))
-            {
-                u.hangupPhone();
-                startTimer(_darwinConversationStageData.waitAfterCallEndsTimer);
-            }
-
-            if (isTimerOngoing(_darwinConversationStageData.waitAfterCallEndsTimer))
-            {
-                _darwinConversationStageData.waitAfterCallEndsTimer += k_deltaTime;
-                if (_darwinConversationStageData.waitAfterCallEndsTimer >= 2.f)
-                {
-                    u.pushEntityDialogue(ONE_DARWIN_12);
-                    invalidateTimer(_darwinConversationStageData.waitAfterCallEndsTimer);
-                }
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_12))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_13, { ONE_DARWIN_13_A, ONE_DARWIN_13_B, ONE_DARWIN_13_C });
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_13))
-            {
-                u.pushEntityDialogue(ONE_DARWIN_14);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_14))
-            {
-                _darwinConversationStageData.canMoveBack = true;
-            }
-
-            if (_darwinConversationStageData.canMoveBack)
-            {
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 440.f))
-                {
-                    u.pushEntityDialogue(ONE_DARWIN_15);
-                    _darwinConversationStageData.canMoveBack = false;
-                }
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DARWIN_15))
-            {
-                u.popTensionBar();
-                _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
-                player.entityState = IDLE_STATE;
             }
 
             break;
@@ -2094,18 +1943,6 @@ void Level::imguiRender()
                 s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
                 s_playerTension = 80;
                 break;
-            case DARWIN_CONVERSATION_STAGE:
-            {
-                _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-                s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_9);
-                s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
-                startTimer(s_multiPurpuseTimer);
-                s_playerTension = 20;
-                Entity& darwin = getEntityById(s_darwinEntityId);
-                getComponentFromEntity<TransformComponent>(darwin)->position = getComponentFromEntity<TransformComponent>(darwin)->startingPosition;
-                _darwinConversationStageData.reset();
-                break;
-            }
             case GANGSTER_CONFRONTATION_STAGE:
             {
                 _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
