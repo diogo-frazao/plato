@@ -376,7 +376,7 @@ public:
 	void pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {},
 					  bool isScreenSpace = false, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
-	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType);
+	void receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
 
 	bool isCurrentDialogue(TextType dialogueType);
 	bool hasDialogueFinihsed(TextType dialogueType);
@@ -414,6 +414,7 @@ public:
 		Entity* entity = nullptr;
 		CellphoneState state = CELLPHONE_NOT_VISIBLE_STATE;
 		TextType textToShowOnAnswer = INVALID_TEXT;
+		DialogueOptionsDTO dialogueOptionsToShowOnAnswer{ INVALID_TEXT , INVALID_TEXT , INVALID_TEXT };
 	};
 
 	void hangupPhone();

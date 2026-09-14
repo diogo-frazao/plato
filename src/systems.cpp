@@ -145,6 +145,7 @@ void RenderingSystem::render(float renderAlpha)
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	// Level geometry is not affected by lights nor ambient light.
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
+	renderSpritesAtLayer(DARKEN_ROOMS_LAYER, renderAlpha);
 	// UI Layer, on top of everything and not affected by anything.
 	renderSpritesAtLayer(UI_LAYER, renderAlpha);
 
@@ -1777,8 +1778,9 @@ void UISystem::update()
 			if (wasPickupPhoneKeyPressedThisFrame())
 			{
 				_cellphone.state = CELLPHONE_TALKING;
-				pushCellphoneDialogue(_cellphone.textToShowOnAnswer);
+				pushCellphoneDialogue(_cellphone.textToShowOnAnswer, _cellphone.dialogueOptionsToShowOnAnswer);
 				_cellphone.textToShowOnAnswer = INVALID_TEXT;
+				_cellphone.dialogueOptionsToShowOnAnswer = {};
 			}
 			break;
 
@@ -3040,10 +3042,11 @@ bool UISystem::doesCurrentDialogueHaveMidSentenceInterruption()
 	return _dialogueOptions[0].isValid() && _dialogueOptions[0].isMidSentenceInterruption;
 }
 
-void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType)
+void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)
 {
 	_cellphone.state = CELLPHONE_PENDING_CALL_STATE;
 	_cellphone.textToShowOnAnswer = dialogueTextType;
+	_cellphone.dialogueOptionsToShowOnAnswer = dialogueOptions;
 }
 
 void UISystem::hangupPhone()

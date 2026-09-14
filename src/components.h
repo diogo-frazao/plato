@@ -143,8 +143,8 @@ struct SpriteComponent
 	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)
 	{
 		int bytesWritten = snprintf(buffer + *currentWriteByte, bufferSize - *currentWriteByte, 
-			"auto* s = getComponentFromEntity<SpriteComponent>(%s);\ns->color = {% i,% i,% i,% i};\ns->setupSpriteForLayer(%i, %i);\n",
-			entityName, color.r, color.g, color.b, color.a, (int)sprite, (int)layer);
+			"auto* s = getComponentFromEntity<SpriteComponent>(%s);\ns->color = {% i,% i,% i,% i};\ns->setupSpriteForLayer(%i, %i);\ns->flipX = %s;\n",
+			entityName, color.r, color.g, color.b, color.a, (int)sprite, (int)layer, flipX ? "true" : "false");
 
 		if (bytesWritten > 0)
 		{

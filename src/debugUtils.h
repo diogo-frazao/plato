@@ -8,6 +8,7 @@
 inline Entity* s_entitiesThatChangedViaInspector[200];
 inline uint8_t s_lastEntityThatChangedIndex = 0;
 inline constexpr int k_bufferSize = 1024 * 1024;
+// TODO: BRUH SHOULDNT THIS BE HEAP ALLOCATED????
 inline char s_printComponentsToClipboardBuffer[k_bufferSize];
 inline size_t s_currentWriteByte = 0;
 
@@ -102,6 +103,24 @@ inline void endInspectorComponentSection()
 {
     ImGui::PopID();
     ImGui::EndTable();
+}
+
+inline void inspectBoolProperty(char* name, bool* variable, Entity* entity)
+{
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::Checkbox(name, variable))
+    {
+        registerEntityChangeAtRuntime(entity);
+    }
+
+    ImGui::PopID();
 }
 
 inline void inspectFloatProperty(char* name, float* variable, Entity* entity)

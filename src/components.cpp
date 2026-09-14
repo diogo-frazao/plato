@@ -297,6 +297,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 320, 7 };
 		numberOfFrames = 1;
 		break;
+	case DAKEN_ROOMS_SHADOW_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = {912, 49 };
+		size = { 72, 114 };
+		break;
 	default:
 		SpriteType unimplementedSprite = sprite;
 		D_ASSERT(false, "Unkown sprite type");

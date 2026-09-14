@@ -49,7 +49,7 @@ TextDTO getTextInfo(TextType textType)
 			case MARKETING_PHONE_3_C_2:
 				return { "DO YOU KNOW [redshake]WHO.[redshake] [redshake]I.[redshake] [redshake]AM.[redshake]", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 			case MARKETING_PHONE_3_C_3:
-				return { "DO YOU EVEN UNDERSTAND WHAT I’M OFFERING TO A [redshake]PEASANT[redshake] LIKE YOU?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
+				return { "DO YOU EVEN UNDERSTAND WHAT I'M OFFERING TO A [redshake]PEASANT[redshake] LIKE YOU?", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
 				case MARKETING_PHONE_3_C_3_I:
 					return { "Stop yelling", CELLPHONE_DIALOGUE, 5, HIGH_TENSION, 10 };
 			case MARKETING_PHONE_3_C_4:
@@ -87,7 +87,7 @@ TextDTO getTextInfo(TextType textType)
 	case MARKETING_PHONE_8_I:
 		return { "STOP YELLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION, 10 };
 	case MARKETING_PHONE_9:
-		return { "[yellow]I’M SURE[yellow] YOU KNOW HOW IT FEELS TO MISS ONE... [redshake]NOW[redshake], NO. MORE. WAITING. NO. MORE. MISSING. TRAINS.", CELLPHONE_DIALOGUE, 5 };
+		return { "[yellow]I'M SURE[yellow] YOU KNOW HOW IT FEELS TO MISS ONE... [redshake]NOW[redshake], NO. MORE. WAITING. NO. MORE. MISSING. TRAINS.", CELLPHONE_DIALOGUE, 5 };
 		case MARKETING_PHONE_9_I:
 			return { "< HANG UP >", CELLPHONE_DIALOGUE, 10, FATAL_TENSION, 5 };
 	case MARKETING_PHONE_10:
@@ -102,56 +102,60 @@ TextDTO getTextInfo(TextType textType)
 	{
 	case ONE_DAD_PHONE_1:
 		return "Halo? [interjection]*cough*[interjection] [interjection]*cough*[interjection] [rostov]ROSTOV?[rostov]";
+		case ONE_DAD_PHONE_1_I:
+			return { "STOP CALLING", CELLPHONE_DIALOGUE, 10, HIGH_TENSION, 0 };
+		case ONE_DAD_PHONE_1_I_1:
+			return "What? Sorry son, I'll call later";
+			case ONE_DAD_PHONE_1_I_1_A:
+				return { "Wait Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+			case ONE_DAD_PHONE_1_I_1_B:
+				return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
+		case ONE_DAD_PHONE_1_I_2:
+			return "Are you ok? What was that for?";
+			case ONE_DAD_PHONE_1_I_2_A:
+				return { "A solicitor keeps calling me", CELLPHONE_DIALOGUE, 5, HIGH_TENSION };
+			case ONE_DAD_PHONE_1_I_2_B:
+				return "Everything's fine don't worry";
+		case ONE_DAD_PHONE_1_I_3:
+			return "Oh... [interjection]*cough*[interjection] [interjection]*cough*[interjection] I see";
+		case ONE_DAD_PHONE_1_I_4:
+			return "...But are you sure you're ok?";
+			case ONE_DAD_PHONE_1_I_4_A:
+				return "Yes Papa don't worry";
+			case ONE_DAD_PHONE_1_I_4_B:
+				return "Of course Pa";
+		case ONE_DAD_PHONE_1_I_5:
+			return "Ok son, ok";
 	case ONE_DAD_PHONE_2:
-		return "Can you hear me [rostov]son?[rostov]";
+		return "Can you hear me son?";
 		case ONE_DAD_PHONE_2_A:
-			return { "Oh, it's you Pa", CELLPHONE_DIALOGUE, -100 , LOW_TENSION};
+			return { "Oh it's you Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
 		case ONE_DAD_PHONE_2_B:
-			return { "Yes Pa", CELLPHONE_DIALOGUE, - 100 , LOW_TENSION};
+			return { "Yes Pa", CELLPHONE_DIALOGUE, -20, LOW_TENSION };
 	case ONE_DAD_PHONE_3:
-		return "I was trying to call you, is everything ok?";
+		return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
 		case ONE_DAD_PHONE_3_A:
-			return "Yes, and you?";
-			case ONE_DAD_PHONE_3_A_1:
-				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection] The usual...";
-			case ONE_DAD_PHONE_3_A_2:
-				return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
+			return "Any news from [red]that?[red]";
 		case ONE_DAD_PHONE_3_B:
-			return { "A solicitor called me", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case ONE_DAD_PHONE_3_B_1:
-				return "Oh brilliant...";
-			case ONE_DAD_PHONE_3_B_2:
-				return "[interjection]*cough*[interjection] [interjection]*cough*[interjection]";
-			case ONE_DAD_PHONE_3_B_3:
-				return "Another one from the [red]cult?[red]";
-				case ONE_DAD_PHONE_3_B_3_A:
-					return "Yes...";
-				case ONE_DAD_PHONE_3_B_3_B:
-					return { "As always", CELLPHONE_DIALOGUE, 10, HIGH_TENSION };
-			case ONE_DAD_PHONE_3_B_4:
-				return "I know son, I know...";
-		case ONE_DAD_PHONE_4:
-			return "You were about to ask me [red]something[red] earlier, before the doctor came in... [interjection]*cough*[interjection] [interjection]*cough*[interjection] [yellow]What was it?[yellow]";
-			case ONE_DAD_PHONE_4_A:
-				return "Any news from [red]that?[red]";
-			case ONE_DAD_PHONE_4_B:
-				return "Do you know [red]the[red] results?";
-			case ONE_DAD_PHONE_4_C:
-				return "[red]What[red] did he told you?";
-		case ONE_DAD_PHONE_5:
-			return { "Oh...", CELLPHONE_DIALOGUE, 5 };
-		case ONE_DAD_PHONE_6:
-			return "No news about the [red]exam[red], if that's what you're asking";
-			case ONE_DAD_PHONE_6_A:
-				return "It's been almost 2 weeks...";
-			case ONE_DAD_PHONE_6_B:
-				return { "Are you being honest Pa?", CELLPHONE_DIALOGUE, 5 , HIGH_TENSION};
-		case ONE_DAD_PHONE_7:
-			return { "[rostov]ROSTOV,[rostov] [redshake]stop it[redshake]", CELLPHONE_DIALOGUE, 5};
-		case ONE_DAD_PHONE_8:
-			return "You know the [yellow]money you send[yellow] helps with the [red]chemo treatment...[red]";
-		case ONE_DAD_PHONE_9:
-			return "[red]But the truth is the doctor told me that[red]";
+			return "Do you know [red]the[red] results?";
+		case ONE_DAD_PHONE_3_C:
+			return "Did he bring [red]any[red] news?";
+	case ONE_DAD_PHONE_4:
+		return "Oh...";
+	case ONE_DAD_PHONE_5:
+		return "No, nothing... No news about [red]the exam[red], if that's what you're asking";
+		case ONE_DAD_PHONE_5_A:
+			return "It's been almost 2 weeks...";
+		case ONE_DAD_PHONE_5_B:
+			return "Why is it taking so long?";
+	case ONE_DAD_PHONE_6:
+		return "[rostov]ROSTOV,[rostov] [redshake]stop it[redshake]";
+	case ONE_DAD_PHONE_7:
+		return  { "You know I'm feeling stronger every day", CELLPHONE_DIALOGUE, -20 };
+	case ONE_DAD_PHONE_8:
+		return { "And the extra money you sent is helping with the treatment…", CELLPHONE_DIALOGUE, -20 };
+	case ONE_DAD_PHONE_9:
+		return "[red]But the truth is the doctor told me that[red]";
 	}
 
 	// Starting dialogue with Darwin

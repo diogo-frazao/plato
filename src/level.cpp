@@ -12,6 +12,9 @@ static bool s_isInsideRestaurant = false;
 static float s_multiPurpuseTimer = 0.f;
 float k_restaurantBaseY = 60.f;
 
+static int32_t s_darkenedRoomShadowEntityId = k_invalidId;
+static int32_t s_bigRoomShadowEntityId = k_invalidId;
+
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
     Entity& block = addEntity("colliderInvisibleBlock");
@@ -332,6 +335,32 @@ void setupInsideRestaurantScene()
 
         SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE, OSKAR_RUN_SPRITE };
         oskarM->setupMovementAnimations(oskarAnimations);
+    }
+
+    // Darkened room shadow
+    {
+        Entity& darkenedRoomShadow = addEntity("darkenedRoomShadow");
+        auto* t = getComponentFromEntity<TransformComponent>(darkenedRoomShadow);
+        t->position = { 166.f, 43.f };
+        t->scale = { 1.00f, 1.00f };
+        auto* s = addComponentToEntity<SpriteComponent>(darkenedRoomShadow);
+        s->color = { 255, 255, 255, 255 };
+        s->setupSpriteForLayer(DAKEN_ROOMS_SHADOW_SPRITE, DARKEN_ROOMS_LAYER);
+        s->flipX = false;
+        s_darkenedRoomShadowEntityId = darkenedRoomShadow.id;
+    }
+
+    // Big room shadow
+    {
+        Entity& bigRoomShadow = addEntity("bigRoomShadow");
+        auto* t = getComponentFromEntity<TransformComponent>(bigRoomShadow);
+        t->position = { 337.f, 147.f };
+        t->scale = { 200.00f, 200.00f };
+        auto* s = addComponentToEntity<SpriteComponent>(bigRoomShadow);
+        s->color = { 0, 0, 0, 255 };
+        s->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, DARKEN_ROOMS_LAYER);
+        s->flipX = false;
+        s_bigRoomShadowEntityId = bigRoomShadow.id;
     }
 }   
 
@@ -677,64 +706,65 @@ void Level::update()
 
                 if (s_multiPurpuseTimer >= 5.f)
                 {
-                    s_uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ONE_DAD_PHONE_1);
+                    s_uiSystem.receivePhoneCallAndPushDialogueOnAnswer(ONE_DAD_PHONE_1, { ONE_DAD_PHONE_1_I });
                     invalidateTimer(s_multiPurpuseTimer);
                 }
             }
+
+            if (u.hasInterruptedMidSentence(ONE_DAD_PHONE_1_I))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_1_I_1, { ONE_DAD_PHONE_1_I_1_A, ONE_DAD_PHONE_1_I_1_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_1_I_1_A) || u.hasChosenOption(ONE_DAD_PHONE_1_I_1_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_1_I_2, { ONE_DAD_PHONE_1_I_2_A, ONE_DAD_PHONE_1_I_2_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_1_I_2_A) || u.hasChosenOption(ONE_DAD_PHONE_1_I_2_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_1_I_3);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_1_I_3))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_1_I_4, { ONE_DAD_PHONE_1_I_4_A, ONE_DAD_PHONE_1_I_4_B });
+            }
+
+            if (u.hasChosenOption(ONE_DAD_PHONE_1_I_4_A) || u.hasChosenOption(ONE_DAD_PHONE_1_I_4_B))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_1_I_5);
+            }
+
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_1_I_5))
+            {
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3, { ONE_DAD_PHONE_3_A, ONE_DAD_PHONE_3_B, ONE_DAD_PHONE_3_C });
+            }
+
 
             if (u.hasDialogueFinihsed(ONE_DAD_PHONE_1))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_2, { ONE_DAD_PHONE_2_A, ONE_DAD_PHONE_2_B});
             }
 
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_2))
+            if (u.hasChosenOption(ONE_DAD_PHONE_2_A) || u.hasChosenOption(ONE_DAD_PHONE_2_B))
             {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3, { ONE_DAD_PHONE_3_A, ONE_DAD_PHONE_3_B });
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_3, { ONE_DAD_PHONE_3_A, ONE_DAD_PHONE_3_B, ONE_DAD_PHONE_3_C });
             }
 
-            if (u.hasChosenOption(ONE_DAD_PHONE_3_A))
+            if (u.hasChosenOption(ONE_DAD_PHONE_3_A) || u.hasChosenOption(ONE_DAD_PHONE_3_B) || u.hasChosenOption(ONE_DAD_PHONE_3_C))
             {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_1);
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_4);
             }
 
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_A_1))
+            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_4))
             {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_A_2, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B, ONE_DAD_PHONE_4_C });
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_5, { ONE_DAD_PHONE_5_A, ONE_DAD_PHONE_5_B });
             }
 
-            if (u.hasChosenOption(ONE_DAD_PHONE_3_B))
+            if (u.hasChosenOption(ONE_DAD_PHONE_5_A) || u.hasChosenOption(ONE_DAD_PHONE_5_B))
             {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_1);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_1))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_2);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_2))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_3, { ONE_DAD_PHONE_3_B_3_A , ONE_DAD_PHONE_3_B_3_B });
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_3))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_3_B_4);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_3_B_4))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_4, { ONE_DAD_PHONE_4_A , ONE_DAD_PHONE_4_B, ONE_DAD_PHONE_4_C });
-            }
-
-            if (u.hasChosenOption(ONE_DAD_PHONE_4_A) || u.hasChosenOption(ONE_DAD_PHONE_4_B) || u.hasChosenOption(ONE_DAD_PHONE_4_C))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_5);
-            }
-
-            if (u.hasDialogueFinihsed(ONE_DAD_PHONE_5))
-            {
-                u.pushCellphoneDialogue(ONE_DAD_PHONE_6, { ONE_DAD_PHONE_6_A , ONE_DAD_PHONE_6_B });
+                u.pushCellphoneDialogue(ONE_DAD_PHONE_6);
             }
 
             if (u.hasDialogueFinihsed(ONE_DAD_PHONE_6))
@@ -751,7 +781,6 @@ void Level::update()
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_9);
                 startTimer(s_multiPurpuseTimer);
-
             }
 
             // Darwin enters and interrupts father dialogue
@@ -1753,30 +1782,42 @@ void Level::update()
     // Dynamic ambient color
     {
         float xPositionWherePlayerIsInsidePantry = 148.f;
+        SDL_FColor ambientColorInsidePantry = { 64, 64, 64 };
+        SDL_FColor restaurantAmbientColor = { 115, 115, 115 };
 
-        SDL_Color targetAmbientColor = { 0,0,0 };
-
-        if (playerTransform->position.x <= xPositionWherePlayerIsInsidePantry)
+        if (playerTransform->position.x > xPositionWherePlayerIsInsidePantry)
         {
-            targetAmbientColor = { 64, 64, 64 };
-        }
-        else
-        {
-            targetAmbientColor = { 115, 115, 115 };
+            hasOpenedRestaurantDoor = true;
         }
 
-        bool isCurrentColorDifferentFromTarget = targetAmbientColor.r != s_renderingSystem._currentAmbientColor.r ||
-            targetAmbientColor.b != s_renderingSystem._currentAmbientColor.b ||
-            targetAmbientColor.g != s_renderingSystem._currentAmbientColor.g;
+        bool needsToUpdateShadowsDueToOpenedDoor =  hasOpenedRestaurantDoor && 
+            (s_renderingSystem._currentAmbientColor.r != restaurantAmbientColor.r ||
+            s_renderingSystem._currentAmbientColor.g != restaurantAmbientColor.g ||
+            s_renderingSystem._currentAmbientColor.b != restaurantAmbientColor.b);
 
-        if (isCurrentColorDifferentFromTarget)
+        if (needsToUpdateShadowsDueToOpenedDoor)
         {
-            s_renderingSystem.setTargetAmbientColor(targetAmbientColor.r, targetAmbientColor.g, targetAmbientColor.b);
+            // Change ambient color
+            s_renderingSystem.setTargetAmbientColor(restaurantAmbientColor.r, restaurantAmbientColor.g, restaurantAmbientColor.b);
 
             float k_ambientColorChangeSpeed = 0.025f;
             s_renderingSystem._currentAmbientColor.r = lerp((float)s_renderingSystem._currentAmbientColor.r, (float)s_renderingSystem._targetAmbientColor.r, k_ambientColorChangeSpeed);
             s_renderingSystem._currentAmbientColor.b = lerp((float)s_renderingSystem._currentAmbientColor.b, (float)s_renderingSystem._targetAmbientColor.b, k_ambientColorChangeSpeed);
             s_renderingSystem._currentAmbientColor.g = lerp((float)s_renderingSystem._currentAmbientColor.g, (float)s_renderingSystem._targetAmbientColor.g, k_ambientColorChangeSpeed);
+
+            // Hide shadows when door is opened
+            Entity& shadow1 = getEntityById(s_darkenedRoomShadowEntityId);
+            auto* s1 = getComponentFromEntity<SpriteComponent>(shadow1);
+
+            Entity& shadow2 = getEntityById(s_bigRoomShadowEntityId);
+            auto* s2 = getComponentFromEntity<SpriteComponent>(shadow2);
+
+            s1->color.a = lerp(s1->color.a, 0.f, 0.1f);
+            s2->color.a = lerp(s2->color.a, 0.f, 0.1f);
+        }
+        else
+        {
+            s_renderingSystem._currentAmbientColor = ambientColorInsidePantry;
         }
     }
 
@@ -1930,14 +1971,8 @@ void Level::render(float renderAlpha)
 
 void iterateOnLastPlacedEntity()
 {
-    //Entity& last = getEntityById(17);
-    //if (!entityHasComponent<SpriteComponent>(last))
-    //{
-    //    addComponentToEntity<SpriteComponent>(last);
-    //}
-
-    //auto* s = getComponentFromEntity<SpriteComponent>(last);
-    //s->setupSpriteForLayer(BIG_ROUND_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
+    Entity& entity = addEntity("bigRoomShadow");
+    addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, DARKEN_ROOMS_LAYER);
 }
 
 void Level::imguiRender()
@@ -2055,7 +2090,7 @@ void Level::imguiRender()
                 break;
             case FIRST_DAD_PHONE_STAGE:
                 _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-                s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1);
+                s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_1, { ONE_DAD_PHONE_1_I });
                 s_uiSystem._cellphone.state = s_uiSystem.CELLPHONE_TALKING;
                 s_playerTension = 80;
                 break;
@@ -2294,6 +2329,7 @@ void Level::imguiRender()
                 inspectColorProperty("color", &s->color, selectedEntityToInspect);
                 inspectEnumProperty("layer", &s->layer, s_allLayersAsString, selectedEntityToInspect);
                 inspectSpriteProperty("sprite", s, selectedEntityToInspect);
+                inspectBoolProperty("flipX", &s->flipX, selectedEntityToInspect);
 
                 endInspectorComponentSection();
             }

@@ -221,6 +221,8 @@ private:
 	DarwinConfrontationStageData _darwinConversationStageData;
 	GangsterConfrontationStageData _gangsterConfrontationStageData;
 	PhoneConfrontationStage _phoneConfrontationStageData;
+
+	bool hasOpenedRestaurantDoor = false;
 };
 
 struct LevelManager
