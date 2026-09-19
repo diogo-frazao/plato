@@ -178,7 +178,7 @@ void setupInsideRestaurantScene()
     {
         Entity& restaurant = addEntity("restaurant", { 14, k_restaurantBaseY });
         addComponentToEntity<SpriteComponent>(restaurant)->setupSpriteForLayer(TODO_REMOVE_RESTAURANT_INTERIOR, BEHIND_LIGHTS_LAYER);
-        createBlockAtPositionWithSize({ 20, k_restaurantBaseY + 75.f }, { 580, 18 });
+        createBlockAtPositionWithSize({ 20, k_restaurantBaseY + 75.f }, { 1000, 18 });
     }
 
     {
@@ -433,13 +433,13 @@ bool moveEntityUntilXPosition(TransformComponent* t, MovementComponent* m, Sprit
 
     if (abs(t->position.x - targetXPosition) < 1.f)
     {
-        m->isMovingOnFloor = false;
+        m->isAutoMoving = false;
         return true;
     }
     
     m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
     s->flipX = shouldMoveLeft;
-    m->isMovingOnFloor = true;
+    m->isAutoMoving = true;
     return false;
 }
 
@@ -537,6 +537,8 @@ void Level::update()
 {
     Entity& player = getEntityById(k_playerEntityId);
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
+    auto* playerM = getComponentFromEntity<MovementComponent>(player);
+    auto* playerS = getComponentFromEntity<SpriteComponent>(player);
 
     // Light that follows player
     if(lightThatFollowsPlayerEntityId != k_invalidId)
@@ -818,7 +820,7 @@ void Level::update()
             {
                 u.hangupPhone();
                 u.popTensionBar();
-                _currentLevelStage = FREE_STAGE;
+                _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
                 player.entityState = IDLE_STATE;
             }
 
@@ -826,6 +828,47 @@ void Level::update()
         }
 
         case GANGSTER_CONFRONTATION_STAGE:
+        {
+            float distanceToOskarToStartCutscene = 230.f;
+
+            Entity& oskar = getEntityById(s_oskarEntityId);
+            float oskarPosition = getComponentFromEntity<TransformComponent>(oskar)->position.x;
+
+            // Enter cutscene
+            if (_confrontStageData.canEnterCutscene && (playerTransform->position.x >= (oskarPosition - distanceToOskarToStartCutscene)))
+            {
+                player.entityState = ON_CUTSCENE_STATE;
+                u.pushTensionBar();
+                _confrontStageData.canEnterCutscene = false;
+                _confrontStageData.canAutoMove = true;
+            }
+
+            // Auto move
+            if (_confrontStageData.canAutoMove)
+            {
+                float distanceToOskarToStopMoving = 50.f;
+                if (moveEntityUntilXPosition(playerTransform, playerM, playerS, oskarPosition - distanceToOskarToStopMoving))
+                {
+                    _confrontStageData.canAutoMove = false;
+                }
+            }
+
+            // Oskar talks when we get near
+            float distanceToOskarToStartDialogue = 50.f;
+            if (playerTransform->position.x >= (oskarPosition - distanceToOskarToStartCutscene + distanceToOskarToStartDialogue))
+            {
+                if (_confrontStageData.canDarwinTalk)
+                {
+                    getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
+                    u.pushEntityDialogue(C_1, { C_1_I });
+                    _confrontStageData.canDarwinTalk = false;
+                }
+            }
+
+            break;
+        }
+
+        case GANGSTER_CONFRONTATION_STAGE_OLD:
         {
             Entity& darwin = getEntityById(s_darwinEntityId);
             Entity& hugo = getEntityById(s_hugoEntityId);
@@ -837,21 +880,21 @@ void Level::update()
             auto* darwinT = getComponentFromEntity<TransformComponent>(darwin);
             auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
             auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
-            if (_gangsterConfrontationStageData.canDarwinMoveToKitchen)
+            if (_oldGangsterConfrontationStageData.canDarwinMoveToKitchen)
             {
                 darwinM->maxHorizontalSpeed = 0.6f;
                 if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 293.f))
                 {
                     darwinM->maxHorizontalSpeed = 0.3f;
-                    _gangsterConfrontationStageData.canDarwinMoveToKitchen = false;
+                    _oldGangsterConfrontationStageData.canDarwinMoveToKitchen = false;
                 }
             }
 
             // As soon as we move, push the dialogue
-            if (playerTransform->position.x < 488.f && !_gangsterConfrontationStageData.hasStartedConfrontationDialogue)
+            if (playerTransform->position.x < 488.f && !_oldGangsterConfrontationStageData.hasStartedConfrontationDialogue)
             {
                 u.pushEntityDialogue(C_1);
-                _gangsterConfrontationStageData.hasStartedConfrontationDialogue = true;
+                _oldGangsterConfrontationStageData.hasStartedConfrontationDialogue = true;
                 D_LOG(MINI, "Started confrontation dialogue");
             }
 
@@ -866,11 +909,11 @@ void Level::update()
             }
 
             // Tell rostov to not get involved when he gets near
-            if (playerTransform->position.x <= 315.f && !_gangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
+            if (playerTransform->position.x <= 315.f && !_oldGangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
             {
                 u.pushTensionBar();
                 u.pushEntityDialogue(C_4, {C_4_A, C_4_B, C_4_C });
-                _gangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
+                _oldGangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
                 player.entityState = ON_CUTSCENE_STATE;
             }
 
@@ -886,7 +929,7 @@ void Level::update()
 
             if (u.hasDialogueFinihsed(C_4_BC_2))
             {
-                _gangsterConfrontationStageData.canOskarMoveClose = true;
+                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
             }
 
             if (u.hasChosenOption(C_4_BC_3_A))
@@ -957,10 +1000,10 @@ void Level::update()
 
             if (u.hasDialogueFinihsed(C_4_A_6_AB_1))
             {
-                _gangsterConfrontationStageData.canOskarMoveClose = true;
+                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
             }
 
-            if (_gangsterConfrontationStageData.canOskarMoveClose)
+            if (_oldGangsterConfrontationStageData.canOskarMoveClose)
             {
                 if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(oskar), getComponentFromEntity<MovementComponent>(oskar),
                     getComponentFromEntity<SpriteComponent>(oskar), 290.f))
@@ -987,7 +1030,7 @@ void Level::update()
                         break;
                     }
 
-                    _gangsterConfrontationStageData.canOskarMoveClose = false;
+                    _oldGangsterConfrontationStageData.canOskarMoveClose = false;
 
                 }
             }
@@ -1008,7 +1051,7 @@ void Level::update()
                 u.popTensionBar();
                 player.entityState = IDLE_STATE;
 
-                _gangsterConfrontationStageData.canOskarMoveClose = true;
+                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
             }
 
             if (u.hasDialogueFinihsed(C_4_BC_3_C_1))
@@ -1018,9 +1061,9 @@ void Level::update()
 
             // If rostov attacks oskar stop the dialogues
             auto* oskarA = getComponentFromEntity<AttackingComponent>(oskar);
-            if (oskarA->damageCounter > 0 && !_gangsterConfrontationStageData.hasRostovAttackedEnemy)
+            if (oskarA->damageCounter > 0 && !_oldGangsterConfrontationStageData.hasRostovAttackedEnemy)
             {
-                _gangsterConfrontationStageData.hasRostovAttackedEnemy = true;
+                _oldGangsterConfrontationStageData.hasRostovAttackedEnemy = true;
 
                 if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5) ||
                     u.isCurrentDialogue(C_4_BC_3_C_CUE_1) || u.isCurrentDialogue(C_4_BC_3_C_CUE_2) || u.isCurrentDialogue(C_4_BC_3_C_CUE_3))
@@ -1029,7 +1072,7 @@ void Level::update()
                 }
             }
 
-            if (!_gangsterConfrontationStageData.hasRostovAttackedEnemy)
+            if (!_oldGangsterConfrontationStageData.hasRostovAttackedEnemy)
             {
                 if (u.hasDialogueFinihsed(C_4_BC_3_C_2))
                 {
@@ -1057,10 +1100,10 @@ void Level::update()
                 }
             }
 
-            if (oskar.entityState == DEAD_STATE && !_gangsterConfrontationStageData.hasHugoHelpedBrother)
+            if (oskar.entityState == DEAD_STATE && !_oldGangsterConfrontationStageData.hasHugoHelpedBrother)
             {
                 u.pushEntityDialogue(D_1);
-                _gangsterConfrontationStageData.hasHugoHelpedBrother = true;
+                _oldGangsterConfrontationStageData.hasHugoHelpedBrother = true;
             }
 
             if (u.hasDialogueFinihsed(D_1))
@@ -1071,7 +1114,7 @@ void Level::update()
 
             if (u.hasDialogueFinihsed(D_2))
             {
-                _gangsterConfrontationStageData.canHugoReachBrother = true;
+                _oldGangsterConfrontationStageData.canHugoReachBrother = true;
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
             }
 
@@ -1089,7 +1132,7 @@ void Level::update()
 
             if (!hasRostovAttackedHugo)
             {
-                if (_gangsterConfrontationStageData.canHugoReachBrother)
+                if (_oldGangsterConfrontationStageData.canHugoReachBrother)
                 {
                     // Move hugo until where brother died
                     float oskarXPos = getComponentFromEntity<TransformComponent>(oskar)->position.x + 10.f;
@@ -1097,23 +1140,23 @@ void Level::update()
                         getComponentFromEntity<SpriteComponent>(hugo), oskarXPos))
                     {
                         u.pushEntityDialogue(D_3);
-                        _gangsterConfrontationStageData.canHugoReachBrother = false;
+                        _oldGangsterConfrontationStageData.canHugoReachBrother = false;
                     }
                 }
 
                 if (u.hasDialogueFinihsed(D_3))
                 {
-                    startTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                    startTimer(_oldGangsterConfrontationStageData.waitToCheckIfOskarIsDead);
                 }
 
-                if (isTimerOngoing(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead))
+                if (isTimerOngoing(_oldGangsterConfrontationStageData.waitToCheckIfOskarIsDead))
                 {
-                    _gangsterConfrontationStageData.waitToCheckIfOskarIsDead += k_deltaTime;
-                    if (_gangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
+                    _oldGangsterConfrontationStageData.waitToCheckIfOskarIsDead += k_deltaTime;
+                    if (_oldGangsterConfrontationStageData.waitToCheckIfOskarIsDead >= 2.f)
                     {
                         entityLookAtAnother(&hugo, &player);
                         u.pushEntityDialogue(D_4);
-                        invalidateTimer(_gangsterConfrontationStageData.waitToCheckIfOskarIsDead);
+                        invalidateTimer(_oldGangsterConfrontationStageData.waitToCheckIfOskarIsDead);
                     }
                 }
 
@@ -1125,22 +1168,22 @@ void Level::update()
                 if (u.hasDialogueFinihsed(D_5))
                 {
                     u.pushEntityDialogue(D_6);
-                    _gangsterConfrontationStageData.canHugoReachRostov = true;
+                    _oldGangsterConfrontationStageData.canHugoReachRostov = true;
                 }
 
-                if (_gangsterConfrontationStageData.canHugoReachRostov)
+                if (_oldGangsterConfrontationStageData.canHugoReachRostov)
                 {
                     // Move hugo until rostov x pos
                     float rostovXPos = getComponentFromEntity<TransformComponent>(player)->position.x;
                     if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(hugo), getComponentFromEntity<MovementComponent>(hugo),
                         getComponentFromEntity<SpriteComponent>(hugo), rostovXPos))
                     {
-                        _gangsterConfrontationStageData.canHugoReachRostov = false;
+                        _oldGangsterConfrontationStageData.canHugoReachRostov = false;
                     }
                 }
             }
 
-            if (!_gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo)
+            if (!_oldGangsterConfrontationStageData.hasDarwinAskedToNotKillHugo)
             {
                 bool willHugoDieOnNextHit = canKillyEntityFromCurrentState(hugo.entityState);
                 if (willHugoDieOnNextHit)
@@ -1154,15 +1197,15 @@ void Level::update()
                     u.pushTensionBar();
                     player.entityState = ON_CUTSCENE_STATE;
                     u.pushEntityDialogue(D_7);
-                    _gangsterConfrontationStageData.hasDarwinAskedToNotKillHugo = true;
+                    _oldGangsterConfrontationStageData.hasDarwinAskedToNotKillHugo = true;
 
                     // Darwin should walk near us
-                    _gangsterConfrontationStageData.canDarwinComeClose = true;
+                    _oldGangsterConfrontationStageData.canDarwinComeClose = true;
                 }
             }
 
             // This ensures that darwin moves to a correct spot to talk, taking into consideration if hugo is in front or behind darwin
-            if (_gangsterConfrontationStageData.canDarwinComeClose)
+            if (_oldGangsterConfrontationStageData.canDarwinComeClose)
             {
                 bool shouldWalkRight = playerTransform->position.x > darwinT->position.x;
                 float offsetFromTarget = shouldWalkRight ? 0.f : 45.f;
@@ -1181,7 +1224,7 @@ void Level::update()
                 {
                     darwinS->flipX = true;
                     u.pushEntityDialogue(D_8);
-                    _gangsterConfrontationStageData.canDarwinComeClose = false;
+                    _oldGangsterConfrontationStageData.canDarwinComeClose = false;
                 }
             }
 
@@ -1664,10 +1707,10 @@ void Level::update()
 
         if (playerTransform->position.x > xPositionWherePlayerIsInsidePantry)
         {
-            hasOpenedRestaurantDoor = true;
+            _hasOpenedRestaurantDoor = true;
         }
 
-        bool needsToUpdateShadowsDueToOpenedDoor =  hasOpenedRestaurantDoor && 
+        bool needsToUpdateShadowsDueToOpenedDoor =  _hasOpenedRestaurantDoor && 
             (s_renderingSystem._currentAmbientColor.r != restaurantAmbientColor.r ||
             s_renderingSystem._currentAmbientColor.g != restaurantAmbientColor.g ||
             s_renderingSystem._currentAmbientColor.b != restaurantAmbientColor.b);
@@ -1712,8 +1755,7 @@ void Level::update()
         getComponentFromEntity<SpriteComponent>(playerEffects)->flipX = getComponentFromEntity<SpriteComponent>(player)->flipX;
     }
 
-    static float cameraOffsetXFromPlayer = 20.f;
-    static bool testShake = false;
+    float cameraOffsetXFromPlayer = 60.f;
 
     // After all systems, update camera
     {
@@ -1726,6 +1768,16 @@ void Level::update()
             s_camera.targetPosition = { playerTransform->position.x + cameraOffsetXFromPlayer, 90.f };
             s_camera.targetPosition.x = clamp(s_camera.targetPosition.x, s_camera.minX, s_camera.maxX);
         }
+
+        // Zoom for cutscenes. Disabled because it messes up the dialogue :c
+        //if (player.entityState == ON_CUTSCENE_STATE)
+        //{
+        //    s_camera.zoom = lerp(s_camera.zoom, 1.05f, 0.05f);
+        //}
+        //else
+        //{
+        //    s_camera.zoom = lerp(s_camera.zoom, 1.f, 0.05f);
+        //}
 
         handleCameraShake(s_camera);
 
@@ -1824,8 +1876,34 @@ void Level::update()
         // Recreate current dialogue
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
         {
-            s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_8);
-            //s_uiSystem.pushCellphoneDialogue(MARKETING_PHONE_5);
+            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_12);
+
+            Entity& oskar = getEntityById(s_oskarEntityId);
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            Entity& hugo = getEntityById(s_hugoEntityId);
+
+            float oskarXPosition = 550.f;
+
+            getComponentFromEntity<TransformComponent>(oskar)->position.x = oskarXPosition;
+            getComponentFromEntity<TransformComponent>(darwin)->position.x = oskarXPosition + 57.f;
+            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+            getComponentFromEntity<TransformComponent>(hugo)->position.x = oskarXPosition + 102.f;
+
+            // Hide shadows when door is opened
+            _hasOpenedRestaurantDoor = false;
+            Entity& shadow1 = getEntityById(s_darkenedRoomShadowEntityId);
+            auto* s1 = getComponentFromEntity<SpriteComponent>(shadow1);
+            s1->color.a = 255;
+
+            Entity& shadow2 = getEntityById(s_bigRoomShadowEntityId);
+            auto* s2 = getComponentFromEntity<SpriteComponent>(shadow2);
+            s2->color.a = 255;
+
+            _confrontStageData.reset();
+
+            playerTransform->position.x = 67.f;
+
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
         }
@@ -1931,7 +2009,7 @@ void Level::imguiRender()
         {
             Entity& e = addEntity("debugEntity");
 
-            //_gangsterConfrontationStageData.canDarwinComeClose = true;
+            //_oldGangsterConfrontationStageData.canDarwinComeClose = true;
 
             //player.entityState = IDLE_STATE;
             //Entity& hugo = getEntityById(s_hugoEntityId);
@@ -1997,7 +2075,7 @@ void Level::imguiRender()
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
                 hugo.entityState = IDLE_STATE;
 
-                _gangsterConfrontationStageData.reset();
+                _oldGangsterConfrontationStageData.reset();
 
                 break;
             }

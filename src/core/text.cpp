@@ -138,8 +138,8 @@ TextDTO getTextInfo(TextType textType)
 
 	// Starting confrontation with hugo and oskar
 	{
-	case C_1:
-		return { "That's right, if BIG DIESEL says you owe money, YOU DO", OSKAR_DIALOGUE };
+	case C_1: return { "AhahAHahaha, look who decided to show up. It's better if you stay out of this [rostov]ROSTOV[rostov]", OSKAR_DIALOGUE };
+		 case C_1_I: return { "What is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
 	case C_2:
 		return { "It can't be... Maybe you are mistaken?", DARWIN_DIALOGUE };
 	case C_3:

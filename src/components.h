@@ -203,6 +203,9 @@ struct MovementComponent
 
 	// Data needed for other components to to things
 	bool isMovingOnFloor = false;
+
+	// Used to move NPCS or move rostov during cutscenes
+	bool isAutoMoving = false;
 };
 
 enum WeaponType

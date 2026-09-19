@@ -685,15 +685,22 @@ void MovementSystem::processMainCharacterMovement()
 	bool isInAllowedStateToMove = player.entityState != ATTACKING_STATE && player.entityState != ON_CUTSCENE_STATE && player.entityState != DAMAGED_STATE && 
 		(player.entityState != ROLLING_STATE || canMoveWhileRolling);
 
-	bool isMovingRight = isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove;
-	bool isMovingLeft = isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove;
+	bool isMovingRight = (isMoveRightKeyDown() && !isMoveLeftKeyDown() && isInAllowedStateToMove) || (movementComponent->isAutoMoving && movementComponent->currentSpeed.x > 0.f);
+	bool isMovingLeft = (isMoveLeftKeyDown() && !isMoveRightKeyDown() && isInAllowedStateToMove) || (movementComponent->isAutoMoving && movementComponent->currentSpeed.x < 0.f);
+
+	// Player max speed
+	movementComponent->maxHorizontalSpeed = movementComponent->isAutoMoving ? 0.5f : 1.5f;
 
 	// Right movement
 	if (isMovingRight)
 	{
 		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, movementComponent->maxHorizontalSpeed,
 			movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
-		spriteComponent->flipX = false;
+
+		if (!movementComponent->isAutoMoving)
+		{
+			spriteComponent->flipX = false;
+		}
 	}
 
 	// Left Movement
@@ -701,7 +708,11 @@ void MovementSystem::processMainCharacterMovement()
 	{
 		movementComponent->currentSpeed.x = approach(movementComponent->currentSpeed.x, -movementComponent->maxHorizontalSpeed,
 			movementComponent->runAcceleration * horizontalSpeedMultiplier * k_deltaTime);
-		spriteComponent->flipX = true;
+
+		if (!movementComponent->isAutoMoving)
+		{
+			spriteComponent->flipX = true;
+		}
 	}
 
 	// Roll
@@ -813,7 +824,7 @@ void MovementSystem::processMainCharacterMovement()
 
 	bool changedDirectionThisFrame = (wasMoveRightPressedThisFrame() && movementComponent->currentSpeed.x < 0.f) ||
 		(wasMoveLeftPressedThisFrame() && movementComponent->currentSpeed.x > 0.f);
-	if (changedDirectionThisFrame)
+	if (isInAllowedStateToMove && changedDirectionThisFrame)
 	{
 		Entity& turnParticle = addEntity("turnParticle", { transformComponent->position.x + 12, transformComponent->position.y + 15 });
 		auto* particleTransform = getComponentFromEntity<TransformComponent>(turnParticle);
@@ -858,11 +869,17 @@ void MovementSystem::processMainCharacterMovement()
 
 	// Handle movement animations
 	SpriteType animation;
-	switch (player.entityState)
+
+	EntityState stateAnimationToPlay = player.entityState;
+	// Handle cutscene state without affecting others
+	if (stateAnimationToPlay == ON_CUTSCENE_STATE)
+	{
+		stateAnimationToPlay = movementComponent->isAutoMoving ? RUNNING_STATE : IDLE_STATE;
+	}
+
+	switch (stateAnimationToPlay)
 	{
 	case IDLE_STATE:
-	case ON_CUTSCENE_STATE:
-
 		switch (attackingComponent->weaponInHand)
 		{
 		case NO_WEAPON_TYPE:

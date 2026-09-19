@@ -88,6 +88,7 @@ enum TextType
 	ONE_DAD_PHONE_12,
 	// Gangster confrontation
 	C_1,
+	C_1_I,
 	C_2,
 	C_3,
 	C_4,
