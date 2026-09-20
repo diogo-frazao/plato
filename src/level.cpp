@@ -184,7 +184,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopLeftB = addEntity("lightTopLeftB");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftB);
-        t->position = { 173.f, 78.00f };
+        t->position = { 276.f, 78.00f };
         t->scale = { 1.37f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopLeftB);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftB);
@@ -195,8 +195,8 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopLeftM = addEntity("lightTopLeftM");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftM);
-        t->position = { 213.f, 78.35f };
-        t->scale = { 0.80f, 0.70f };
+        t->position = { 295.f, 78.35f };
+        t->scale = { 1.f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopLeftM);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftM);
         s->color = { 255, 133, 0, 12 };
@@ -206,7 +206,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopLeftS = addEntity("lightTopLeftS");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopLeftS);
-        t->position = { 235.f, 65.91f };
+        t->position = { 323.f, 65.91f };
         t->scale = { 0.55f, 0.80f };
         addComponentToEntity<SpriteComponent>(lightTopLeftS);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopLeftS);
@@ -221,13 +221,13 @@ void setupInsideRestaurantScene()
         s->setupSpriteForLayer(ROUND_LOW_QUALITY_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
         s->color = { 0, 240, 255, 37 };
         t->scale = { 1.f, 1.f };
-        t->position = { 375.f, 45.f };
+        t->position = { 535.f, 45.f };
     }
 
     {
         Entity& lightTopRightB = addEntity("lightTopRightB");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightB);
-        t->position = { 439.f, 78.00f };
+        t->position = { 596.f, 78.00f };
         t->scale = { 1.37f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopRightB);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightB);
@@ -238,7 +238,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopRightM = addEntity("lightTopRightM");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightM);
-        t->position = { 471.f, 75.19f };
+        t->position = { 631.f, 75.19f };
         t->scale = { 0.80f, 0.70f };
         addComponentToEntity<SpriteComponent>(lightTopRightM);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightM);
@@ -249,7 +249,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightTopRightS = addEntity("lightTopRightS");
         auto* t = getComponentFromEntity<TransformComponent>(lightTopRightS);
-        t->position = { 490.f, 65.91f };
+        t->position = { 651.f, 65.91f };
         t->scale = { 0.55f, 0.80f };
         addComponentToEntity<SpriteComponent>(lightTopRightS);
         auto* s = getComponentFromEntity<SpriteComponent>(lightTopRightS);
@@ -260,7 +260,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightHighlightLeft = addEntity("lightHighlightLeft");
         auto* t = getComponentFromEntity<TransformComponent>(lightHighlightLeft);
-        t->position = { 236.f, 78.f };
+        t->position = { 329.f, 78.f };
         addComponentToEntity<SpriteComponent>(lightHighlightLeft);
         auto* s = getComponentFromEntity<SpriteComponent>(lightHighlightLeft);
         s->color = { 255, 211, 131, 148 };
@@ -270,7 +270,7 @@ void setupInsideRestaurantScene()
     {
         Entity& lightHighlightRight = addEntity("lightHighlightRight");
         auto* t = getComponentFromEntity<TransformComponent>(lightHighlightRight);
-        t->position = { 493.f, 77.f };
+        t->position = { 653.f, 77.f };
         auto* s = addComponentToEntity<SpriteComponent>(lightHighlightRight);
         s->color = { 255, 211, 131, 148 };
         s->setupSpriteForLayer(LONG_THIN_LIGHT_SPRITE, FRONT_LIGHTS_LAYER);
@@ -283,7 +283,7 @@ void setupInsideRestaurantScene()
         t->position = { 35.00f, 65.00f };
         t->scale = { 1.00f, 1.00f };
         auto* s = getComponentFromEntity<SpriteComponent>(bakedHighlights);
-        s->color = { 255, 255, 255, 180 };
+        s->color = { 255, 255, 255, 210 };
         s->setupSpriteForLayer(RESTAURANT_BAKED_HIGHLIGHTS_SPRITE, BAKED_HIGHLIGHTS_LAYER);
     }
 

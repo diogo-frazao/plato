@@ -60,17 +60,17 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		break;
 	case TODO_REMOVE_RESTAURANT_INTERIOR:
 		atlasOffset = { 323, 67 };
-		size = { 586, 92 };
+		size = { 746, 92 };
 		atlas = GAME_ATLAS;
 		break;
 	case TODO_REMOVE_RESTAURANT_FLOOR_SPRITE:
 		atlasOffset = { 323, 162 };
-		size = { 565, 44 };
+		size = { 725, 44 };
 		atlas = GAME_ATLAS;
 		break;
 	case RESTAURANT_BAKED_HIGHLIGHTS_SPRITE:
 		atlasOffset = { 611, 214 };
-		size = { 521, 78 };
+		size = { 681, 78 };
 		atlas = GAME_ATLAS;
 		break;
 	case GOLF_WEAPON_SPRITE:
@@ -299,7 +299,7 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		break;
 	case DAKEN_ROOMS_SHADOW_SPRITE:
 		atlas = GAME_ATLAS;
-		atlasOffset = {912, 49 };
+		atlasOffset = {1072, 49 };
 		size = { 72, 114 };
 		break;
 	default:
