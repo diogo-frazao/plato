@@ -85,6 +85,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 8;
 		collidertopLeftPointOffset = { 25, 10 };
 		break;
+	case CHARACTER_WALK_SPRITE:
+		atlasOffset = { 967, 447 };
+		size = { 480, 36 };
+		atlas = GAME_ATLAS;
+		numberOfFrames = 8;
+		collidertopLeftPointOffset = { 25, 10 };
+		break;
 	case CHARACTER_TAKEOFF_SPRITE:
 	case CHARACTER_RUN_SPRITE:
 		atlas = GAME_ATLAS;

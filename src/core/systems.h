@@ -200,6 +200,8 @@ public:
 		bool wasInitialized = false;
 		float angularVelocity = 0.f;
 		float rotationAngle = 0.f;
+		// Used by some events to do things at specific times (ex swap a-A h-H for laugh every x seconds)
+		float periodEffectTimer = 0.f;
 
 		bool isValid()
 		{
@@ -222,6 +224,7 @@ public:
 			this->wasInitialized = false;
 			this->rotationAngle = 0.f;
 			this->angularVelocity = 0.f;
+			this->periodEffectTimer = 0.f;
 		}
 	};
 

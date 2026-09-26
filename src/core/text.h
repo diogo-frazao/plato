@@ -89,6 +89,7 @@ enum TextType
 	// Gangster confrontation
 	C_1,
 	C_1_I,
+	C_1_I_1,
 	C_2,
 	C_3,
 	C_4,
@@ -304,6 +305,8 @@ enum TextEffectType
 	ROSTOV_EFFECT, // Same, custom color
 	PA_EFFECT, // Same
 	DARWIN_EFFECT, // Same
+	HUGO_EFFECT, // Same
+	LAUGH_EFFECT, // Characters jump + change from capital to lower letter
 	//Wave
 	WAVE_EFFECT, // Playful
 	PINK_WAVE_EFFECT, // Playful + love/happiness

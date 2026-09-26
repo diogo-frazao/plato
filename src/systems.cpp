@@ -20,6 +20,45 @@ static bool isColorValid(SDL_Color color)
 	return color.r != k_blackColor.r || color.g != k_blackColor.g || color.b != k_blackColor.b;
 }
 
+static void swapCharactersForLaughEffect(UISystem::DialogueCharacter& c)
+{
+	bool isLowerA = (c.atlasOffset.x == 25 && c.atlasOffset.y == 19);
+	if (isLowerA)
+	{
+		c.atlasOffset.x = 233;
+		c.atlasOffset.y = 19;
+		c.periodEffectTimer = 0.f;
+	}
+	else
+	{
+		bool isUpperA = (c.atlasOffset.x == 233 && c.atlasOffset.y == 19);
+		if (isUpperA)
+		{
+			c.atlasOffset.x = 25;
+			c.atlasOffset.y = 19;
+			c.periodEffectTimer = 0.f;
+		}
+	}
+
+	bool isLowerH = (c.atlasOffset.x == 81 && c.atlasOffset.y == 19);
+	if (isLowerH)
+	{
+		c.atlasOffset.x = 289;
+		c.atlasOffset.y = 19;
+		c.periodEffectTimer = 0.f;
+	}
+	else
+	{
+		bool isUpperH = (c.atlasOffset.x == 289 && c.atlasOffset.y == 19);
+		if (isUpperH)
+		{
+			c.atlasOffset.x = 81;
+			c.atlasOffset.y = 19;
+			c.periodEffectTimer = 0.f;
+		}
+	}
+}
+
 SDL_Texture* RenderingSystem::loadAtlas(AtlasType type)
 {
 	SDL_Texture* atlas = _loadedAtlasFiles[type];
@@ -874,7 +913,7 @@ void MovementSystem::processMainCharacterMovement()
 	// Handle cutscene state without affecting others
 	if (stateAnimationToPlay == ON_CUTSCENE_STATE)
 	{
-		stateAnimationToPlay = movementComponent->isAutoMoving ? RUNNING_STATE : IDLE_STATE;
+		stateAnimationToPlay = movementComponent->isAutoMoving ? WALK_STATE : IDLE_STATE;
 	}
 
 	switch (stateAnimationToPlay)
@@ -894,6 +933,9 @@ void MovementSystem::processMainCharacterMovement()
 		}
 
 		spriteComponent->setAnimationToPlayIfNotPlaying(animation, true, 70, 600);
+		break;
+	case WALK_STATE:
+		spriteComponent->setAnimationToPlayIfNotPlaying(CHARACTER_WALK_SPRITE, true, 90, 90);
 		break;
 	case TAKE_OFF_STATE:
 		switch (attackingComponent->weaponInHand)
@@ -2123,6 +2165,7 @@ void UISystem::update()
 			float speed = 255.f / k_secondsToFadeInEachCharacter;
 			c.opacity = min(c.opacity + (speed * k_deltaTime), 255.f);
 			c.timeSinceCharacterAppeared += k_deltaTime;
+			c.periodEffectTimer += k_deltaTime;
 		}
 		else
 		{
@@ -2153,16 +2196,34 @@ void UISystem::update()
 
 		// Wave movement effect
 		bool canApplyDynamicEffects = (_currentDialogue.state != DIALOGUE_INTERRUPTED_STATE && _currentDialogue.state != DIALOGUE_FINISHED_INTERRUPTED);
-		bool isWaveEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT);
-		if (isWaveEffect && canCharacterFadeIn && canApplyDynamicEffects)
+		bool isDynamicEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT) || (c.textEffectToApply == LAUGH_EFFECT);
+		if (isDynamicEffect && canCharacterFadeIn && canApplyDynamicEffects)
 		{
-			// offset * sin(time * speed)
-			float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
-			c.position.y = c.startingPosition.y + sinMovementOffset;
+			if (c.textEffectToApply == LAUGH_EFFECT)
+			{
+				float sinMovementOffset = cos(c.timeSinceCharacterAppeared * 8.f);
+				c.position.y = min(c.startingPosition.y + sinMovementOffset, c.startingPosition.y);
+
+				float timeToSwapCharactersDuringLaugh = 0.5f;
+				if (isTimerOngoing(c.periodEffectTimer) && c.periodEffectTimer >= timeToSwapCharactersDuringLaugh)
+				{
+					// Add randomness to when the characters are swapped
+					if (c.periodEffectTimer >= timeToSwapCharactersDuringLaugh + randomFloatZeroToOne())
+					{
+						swapCharactersForLaughEffect(c);
+					}
+				}
+			}
+			else
+			{
+				// offset * sin(time * speed)
+				float sinMovementOffset = 1.f * sin(c.timeSinceCharacterAppeared * 5.f);
+				c.position.y = c.startingPosition.y + sinMovementOffset;
+			}
 		}
 
 		// Fade in animations
-		bool canAnimateCharacterDuringFadeIn = !isWaveEffect;
+		bool canAnimateCharacterDuringFadeIn = !isDynamicEffect;
 		if (_currentDialogue.state == DIALOGUE_BASE_STATE)
 		{
 			if (canAnimateCharacterDuringFadeIn)
@@ -2264,7 +2325,7 @@ void UISystem::update()
 
 		if (numberOfCharactersOnCurrentDialogue > 70)
 		{
-			secondsToSkipDialogue = 2.5f;
+			secondsToSkipDialogue = 4.f;
 		}
 
 		// Apply the no wait effect - make time to skip to next dialogue faster
@@ -3117,6 +3178,9 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 		break;
 	case PA_EFFECT:
 		dialogueCharacter.overrideColor = { 75, 114, 110 };
+		break;
+	case HUGO_EFFECT:
+		dialogueCharacter.overrideColor = { 251, 185, 84 };
 		break;
 	case BLUE_EFFECT:
 		dialogueCharacter.overrideColor = { 77, 101, 180 };

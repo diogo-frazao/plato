@@ -138,78 +138,9 @@ TextDTO getTextInfo(TextType textType)
 
 	// Starting confrontation with hugo and oskar
 	{
-	case C_1: return { "AhahAHahaha, look who decided to show up. It's better if you stay out of this [rostov]ROSTOV[rostov]", OSKAR_DIALOGUE };
-		 case C_1_I: return { "What is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
-	case C_2:
-		return { "It can't be... Maybe you are mistaken?", DARWIN_DIALOGUE };
-	case C_3:
-		return { "ahahHAHAH", HUGO_DIALOGUE };
-	case C_4:
-		return { "ROSTOV, please don't get involved", DARWIN_DIALOGUE };
-		case C_4_A:
-			return { "What's going on?", CHOICE_DIALOGUE };
-			case C_4_A_1:
-				return { "Isn't it obvious you OLD PIG!?", OSKAR_DIALOGUE, 5};
-			case C_4_A_2:
-				return { "BIG DIESEL sent us to collect OUR money", OSKAR_DIALOGUE };
-			case C_4_A_3:
-				return { "Because SR.DARWIN here owes us some", OSKAR_DIALOGUE };
-			case C_4_A_4:
-				return { "That is not true and we all know it", DARWIN_DIALOGUE };
-			case C_4_A_5:
-				return { "WHAT did you just say old man?", HUGO_DIALOGUE, 5 };
-			case C_4_A_6:
-				return { "Are YOU calling BIG DIESEL A LIAR?", HUGO_DIALOGUE, 5 };
-				case C_4_A_6_A:
-					return { "Let's all calm down", CHOICE_DIALOGUE };
-				case C_4_A_6_B:
-					return { "I am", CHOICE_DIALOGUE, 10, HIGH_TENSION};
-					case C_4_A_6_AB_1:
-						return { "AHAHAHAH", HUGO_DIALOGUE };
-					case C_4_A_6_AB_2:
-						return { "Listen ROSTOV...", OSKAR_DIALOGUE };
-					case C_4_A_6_AB_3:
-						return { "I'm here to get our money, not to talk", OSKAR_DIALOGUE };
-				case C_4_A_6_C:
-					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 20, FATAL_TENSION};
-		case C_4_B:
-			return { "I already did", CHOICE_DIALOGUE, 5, HIGH_TENSION };
-		case C_4_C:
-			return { "What are these kids doing here?", CHOICE_DIALOGUE , 10, HIGH_TENSION };
-			case C_4_BC_1:
-				return { "ahahAHAHAHah", HUGO_DIALOGUE };
-			case C_4_BC_2:
-				return { "OSKAR, make sure this PIG doesn't get in the way of our money", HUGO_DIALOGUE };
-			case C_4_BC_3:
-				return { "ahAHAHAH... So, what do you have to say now?", OSKAR_DIALOGUE };
-				case C_4_BC_3_A:
-					return { "We don't have your money", CHOICE_DIALOGUE };
-				case C_4_BC_3_B:
-					return { "I can feel your breath", CHOICE_DIALOGUE, 10, HIGH_TENSION};
-					case C_4_BC_2_3_1:
-						return { "ahAHAHAHA", HUGO_DIALOGUE };
-					case C_4_BC_2_3_2:
-						return { "HE IS MOCKING YOU OSKAR", HUGO_DIALOGUE };
-					case C_4_BC_2_3_3:
-						return { "SHUT THE FUCK UP ROSTOV", OSKAR_DIALOGUE };
-				case C_4_BC_3_C:
-					return { "YOU ASKED FOR IT < LEAVE DIALOGUE >", CHOICE_DIALOGUE, 20, FATAL_TENSION};
-					case C_4_BC_3_C_CUE_1:
-						return { "Asked for what heh?", OSKAR_DIALOGUE };
-					case C_4_BC_3_C_CUE_2:
-						return { "Be careful with that golf cue ROSTOV, your arm might fall off", HUGO_DIALOGUE };
-					case C_4_BC_3_C_CUE_3:
-						return { "AHAHAHA", OSKAR_DIALOGUE };
-					case C_4_BC_3_C_1:
-						return { "Asked for what heh?", OSKAR_DIALOGUE };
-					case C_4_BC_3_C_2:
-						return { "ROSTOV grab that golf cue near the table", DARWIN_DIALOGUE };
-					case C_4_BC_3_C_3:
-						return { "But be careful ROSTOV, your arm might fall off trying to pick it up", HUGO_DIALOGUE };
-					case C_4_BC_3_C_4:
-						return { "AHAHAHAH", OSKAR_DIALOGUE };
-					case C_4_BC_3_C_5:
-						return { "That was a good one brother", OSKAR_DIALOGUE };
+	case C_1: return { "Are you deaf? Where the [redshake]fuck[redshake] is my money? I'm losing my patience [darwin]DARWIN,[darwin] and me and [hugo]HUGO[hugo] are [redshake]not[redshake] in a good mood", OSKAR_DIALOGUE };
+		case C_1_I: return { "What is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
+			case C_1_I_1: return { "[laugh]HAHahaAhHa,[laugh] look who decided to show up [hugo]BROTHER[hugo]. Don't you [redshake]dare[redshake] interrupt me again [rostov]ROSTOV[rostov], or you'll fucking regret it you [red]old fuck.[red] You don't play with a member of the [yellow]24K FIRM[yellow]", OSKAR_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed
@@ -438,6 +369,16 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "darwin") == 0)
 	{
 		return DARWIN_EFFECT;
+	}
+
+	if (strcmp(effectName, "hugo") == 0)
+	{
+		return HUGO_EFFECT;
+	}
+
+	if (strcmp(effectName, "laugh") == 0)
+	{
+		return LAUGH_EFFECT;
 	}
 
 	if (strcmp(effectName, "interjection") == 0)

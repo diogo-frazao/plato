@@ -12,6 +12,7 @@ enum EntityState
 
 	// Locomotion. Controller by Movement System
 	IDLE_STATE,
+	WALK_STATE, // Used during cutscenes
 	TAKE_OFF_STATE,
 	RUNNING_STATE,
 	SLOWDOWN_STATE,
@@ -106,6 +107,7 @@ enum SpriteType
 
 	// Main Character
 	CHARACTER_IDLE_SPRITE,
+	CHARACTER_WALK_SPRITE,
 	CHARACTER_TAKEOFF_SPRITE,
 	CHARACTER_RUN_SPRITE,
 	CHARACTER_JUMP_SPRITE,
@@ -255,6 +257,14 @@ inline void startTimer(float& timer)
 inline void invalidateTimer(float& timer)
 {
 	timer = -1;
+}
+
+inline float randomFloatZeroToOne()
+{
+	// 0-9
+	int r = rand() % 10;
+	float final = (float)r / (float)10;
+	return final;
 }
 
 inline float clamp(float value, float min, float max)

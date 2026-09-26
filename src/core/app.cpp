@@ -14,6 +14,7 @@
 
 #include "level.h"
 #include "input.h"
+#include <time.h>
 
 void drawImguiDockingPreview();
 void setImGuiWindowsTransparent();
@@ -29,6 +30,7 @@ void toggleFullscreen(SDL_Window* window)
 
 void App::run()
 {
+    srand(time(0));
     init();
     LevelManager::getCurrentLevel()->start();
     update();

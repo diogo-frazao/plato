@@ -854,15 +854,19 @@ void Level::update()
             }
 
             // Oskar talks when we get near
-            float distanceToOskarToStartDialogue = 50.f;
+            float distanceToOskarToStartDialogue = 0.f;
             if (playerTransform->position.x >= (oskarPosition - distanceToOskarToStartCutscene + distanceToOskarToStartDialogue))
             {
                 if (_confrontStageData.canDarwinTalk)
                 {
-                    getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
                     u.pushEntityDialogue(C_1, { C_1_I });
                     _confrontStageData.canDarwinTalk = false;
                 }
+            }
+
+            if (u.hasInterruptedMidSentence(C_1_I))
+            {
+                u.pushEntityDialogue(C_1_I_1);
             }
 
             break;
@@ -1906,6 +1910,11 @@ void Level::update()
 
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
+        }
+
+        if (_wasKeyPressedThisFrame(SDL_SCANCODE_P))
+        {
+            u.pushEntityDialogue(C_1_I_1);
         }
 
         // Debug to not have to wait x seconds for things to happen
