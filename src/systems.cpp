@@ -20,6 +20,7 @@ static bool isColorValid(SDL_Color color)
 	return color.r != k_blackColor.r || color.g != k_blackColor.g || color.b != k_blackColor.b;
 }
 
+// TODO: Will need to be expanded when we get to translating
 static void swapCharactersForLaughEffect(UISystem::DialogueCharacter& c)
 {
 	bool isLowerA = (c.atlasOffset.x == 25 && c.atlasOffset.y == 19);
@@ -1887,7 +1888,8 @@ void UISystem::update()
 
 	// Fade out mid sentence interruption if we didn't pick if
 	bool canChangeInterruptionToBeNotChosen = (_dialogueOptions[0].state != DIALOGUE_OPTION_CHOSEN_STATE) && (_dialogueOptions[0].state != DIALOGUE_OPTION_NOT_CHOSEN_STATE);
-	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= 2.f && doesCurrentDialogueHaveMidSentenceInterruption() && canChangeInterruptionToBeNotChosen)
+	float secondsToDisableMidSentenceInterruption = max(_currentDialogue.secondsToAutoSkipDialogue, 2.f);
+	if (_currentDialogue.timeSinceFinalCharacterWasDrawn >= secondsToDisableMidSentenceInterruption && doesCurrentDialogueHaveMidSentenceInterruption() && canChangeInterruptionToBeNotChosen)
 	{
 		_dialogueOptions[0].state = DIALOGUE_OPTION_NOT_CHOSEN_STATE;
 	}
@@ -2328,6 +2330,8 @@ void UISystem::update()
 			secondsToSkipDialogue = 4.f;
 		}
 
+		_currentDialogue.secondsToAutoSkipDialogue = secondsToSkipDialogue;
+
 		// Apply the no wait effect - make time to skip to next dialogue faster
 		bool isApplyingNoWaitEffect = _currentDialogue.characters[0].textEffectToApply == NO_WAIT_EFFECT;
 		bool canSkipFromNoWaitDialogue = isApplyingNoWaitEffect && (_currentDialogue.timeSinceFinalCharacterWasDrawn > 1.5f);
@@ -2396,13 +2400,18 @@ void UISystem::skipDialogue()
 	}
 }
 
-void UISystem::interruptCurrentDialogue()
+void UISystem::interruptCurrentDialogue(bool wasInterruptionDoneByNPC)
 {
 	_currentDialogue.dialogueBoxDynamicXSize = 0.f;
 	_currentDialogue.state = DIALOGUE_INTERRUPTED_STATE;
 
 	Vec2 dialogueCenterPosition = { _currentDialogue.topLeftPosition.x + (_currentDialogue.dialogueBoxSize.x * 0.5f),
 									_currentDialogue.topLeftPosition.y + (_currentDialogue.dialogueBoxSize.y * 0.5f) };
+
+	if (wasInterruptionDoneByNPC)
+	{
+		s_camera.doShake(STRONG_SHAKE, 0.f);
+	}
 
 	// Launch every character away from center
 	for (uint16_t i = 0; i < k_maxCharactersPerDialogue; ++i)
@@ -3135,6 +3144,11 @@ bool UISystem::hasAnyDialogueOngoing()
 bool UISystem::doesCurrentDialogueHaveMidSentenceInterruption()
 {
 	return _dialogueOptions[0].isValid() && _dialogueOptions[0].isMidSentenceInterruption;
+}
+
+bool UISystem::canInterruptDialogue(TextType dialogueType)
+{
+	return _currentDialogue.state == DIALOGUE_BASE_STATE && dialogueType == _currentDialogue.dialogueType;
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)

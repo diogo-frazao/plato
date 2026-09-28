@@ -140,7 +140,30 @@ TextDTO getTextInfo(TextType textType)
 	{
 	case C_1: return { "Are you deaf? Where the [redshake]fuck[redshake] is my money? I'm losing my patience [darwin]DARWIN,[darwin] and me and [hugo]HUGO[hugo] are [redshake]not[redshake] in a good mood", OSKAR_DIALOGUE };
 		case C_1_I: return { "What is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
-			case C_1_I_1: return { "[laugh]HAHahaAhHa,[laugh] look who decided to show up [hugo]BROTHER[hugo]. Don't you [redshake]dare[redshake] interrupt me again [rostov]ROSTOV[rostov], or you'll fucking regret it you [red]old fuck.[red] You don't play with a member of the [yellow]24K FIRM[yellow]", OSKAR_DIALOGUE };
+			case C_1_I_1: return { "[laugh]HAHahaAhHa,[laugh] look who decided to show up [hugo]BROTHER[hugo]... Don't you [redshake]dare[redshake] interrupt me again [rostov]ROSTOV[rostov], or you'll fucking regret it you [redshake]old.[redshake] [redshake]fuck.[redshake] You don't play with a member of the [yellow]24K FIRM[yellow]", OSKAR_DIALOGUE };
+				case C_1_I_1_I: return { "I asked what is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
+			case C_1_I_2: return { "Are you [redshake]fucking[redshake] deaf? Do you want to get hurt? [yellow]Leave.[yellow]", OSKAR_DIALOGUE };
+	case C_2: return { "[laugh]HAHahaAhHa,[laugh] look who decided to show up [hugo]BROTHER[hugo], another [red]old fuck.[red] Just leave [rostov]ROSTOV[rostov] [red]before you get hurt,[red] there's nothing for you to see here", OSKAR_DIALOGUE, 5 };
+		case C_2_A: return { "What are you doing here?", CHOICE_DIALOGUE };
+			case C_2_A_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious, I'm here to collect [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and [yellow]we're here to get it.[yellow] One way... or the other", OSKAR_DIALOGUE };
+		case C_2_B: return { "Did you break the radio?", CHOICE_DIALOGUE };
+			case C_2_B_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious... [redshake]YES.[redshake] [redshake]I.[redshake] [redshake]DID IT.[redshake] And I'm here to collect [red]my[red] money. Your [redshake]fucking[redshake] boss owes us and we're here to collect it. One way... or the other", OSKAR_DIALOGUE };
+		case C_2_C: return { "It's you who will get hurt < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+	case C_3: return { "We all know that's not true, this has always been and will always be an honest business", DARWIN_DIALOGUE };
+	case C_3_1: return { "[laugh]HaHhAhAhah,[laugh] do you see this [hugo]BROTHER?[hugo] [redshake]FUCKING.[redhsake] [redshake]LIAR.[redhsake]", OSKAR_DIALOGUE, 5 };
+		case C_3_1_A: return { "We don't owe you anything, leave" };
+		case C_3_1_B: return { "You're really pushing it now", CHOICE_DIALOGUE, 5, HIGH_TENSION };
+		case C_3_1_C: return { "You are going to leave now < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+	case C_4: return { "And [redshake]WHAT?[redshake] I do what I [redshake]FUCKING[redshake] want, [laugh]ahAHaHaHah[laugh]", OSKAR_DIALOGUE, 5 };
+	case C_4_1: return { "Serve me another drink [darwin]DARWIN,[darwin] [yellow]now.[yellow] And if you keep talking [rostov]ROSTOV,[rostov] you might end up like your [lightpink]DAD[lightpink], peeing in a cup, [red]waiting to die,[red] and can barely take a step without tripping on himself. [laugh]AHahhahHAH[laugh]", OSKAR_DIALOGUE, 30};
+		case C_4_1_I: return { "You've gone too far < SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION, 100 };
+	case C_4_2: return { "...Actually, [yellow]forget it.[yellow] My patience is [redshake]over.[redshake] You have 5 seconds to get me [redshake]MY[redshake] money", OSKAR_DIALOGUE, 10 };
+	case C_4_3: return { "5... 4... 3... 2... 1...", OSKAR_DIALOGUE };
+		case C_4_3_I: return { "< SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION, 10 };
+	case C_AIM_1: return { "Ohohoh wait wait let's all calm down...", OSKAR_DIALOGUE };
+	case C_AIM_2: return { "I get it, me and [hugo]HUGO[hugo] will leave, just give us  second and we'll be out in no time", OSKAR_DIALOGUE };
+	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redhsake]fucking[redhsake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
+	case C_SHOOT_1: return { "WTF?? OSKAR??? I'll FUCKING KILL YOU ROSTOV", HUGO_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed

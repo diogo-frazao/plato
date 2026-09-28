@@ -462,22 +462,6 @@ void entityLookAtAnother(Entity* source, Entity* target)
     sourceS->flipX = !sourceS->flipX;
 }
 
-void pushGolfCueControntationDialogue(UISystem& u)
-{
-    Entity& player = getEntityById(k_playerEntityId);
-    auto* a = getComponentFromEntity<AttackingComponent>(player);
-
-    Entity& oskar = getEntityById(s_oskarEntityId);
-    if (a->weaponInHand == NO_WEAPON_TYPE)
-    {
-        u.pushEntityDialogue(C_4_BC_3_C_1);
-    }
-    else
-    {
-        u.pushEntityDialogue(C_4_BC_3_C_CUE_1);
-    }
-}
-
 void finishHugoConversation(UISystem& u, Entity& player, Entity& hugo, bool& canHugoProvokeDarwin)
 {
     u.popTensionBar();
@@ -833,6 +817,7 @@ void Level::update()
 
             Entity& oskar = getEntityById(s_oskarEntityId);
             float oskarPosition = getComponentFromEntity<TransformComponent>(oskar)->position.x;
+            auto* oskarSprite = getComponentFromEntity<SpriteComponent>(oskar);
 
             // Enter cutscene
             if (_confrontStageData.canEnterCutscene && (playerTransform->position.x >= (oskarPosition - distanceToOskarToStartCutscene)))
@@ -866,7 +851,85 @@ void Level::update()
 
             if (u.hasInterruptedMidSentence(C_1_I))
             {
-                u.pushEntityDialogue(C_1_I_1);
+                oskarSprite->flipX = true;
+                u.pushEntityDialogue(C_1_I_1, { C_1_I_1_I });
+            }
+
+            if (u.hasInterruptedMidSentence(C_1_I_1_I))
+            {
+                u.pushEntityDialogue(C_2_A_1);
+            }
+
+            if (u.hasDialogueFinihsed(C_1_I_1))
+            {
+                u.pushEntityDialogue(C_1_I_2, { C_2_A, C_2_B, C_2_C });
+            }
+
+            if (u.hasDialogueFinihsed(C_1))
+            {
+                oskarSprite->flipX = true;
+                u.pushEntityDialogue(C_2, {C_2_A, C_2_B, C_2_C });
+            }
+
+            if (u.hasChosenOption(C_2_A))
+            {
+                u.pushEntityDialogue(C_2_A_1);
+            }
+            else if (u.hasChosenOption(C_2_B))
+            {
+                u.pushEntityDialogue(C_2_B_1);
+            }
+            else if (u.hasChosenOption(C_2_C))
+            {
+                u.pushEntityDialogue(C_AIM_1);
+            }
+
+            if (u.hasDialogueFinihsed(C_AIM_1))
+            {
+                u.pushEntityDialogue(C_AIM_2);
+            }
+
+            // TODO: Add attack rostov and call C_SHOOT_1
+
+            if (u.hasDialogueFinihsed(C_2_A_1) || u.hasDialogueFinihsed(C_2_B_1))
+            {
+                u.pushEntityDialogue(C_3);
+            }
+
+            // Oskar interrupts DARWIN
+            if (u.canInterruptDialogue(C_3) && u._currentDialogue.timeSinceDialogueStarted >= 3.5f)
+            {
+                u.interruptCurrentDialogue(true);
+            }
+
+            if (u.hasDialogueFinishedInterrupting(C_3))
+            {
+                u.pushEntityDialogue(C_3_1, { C_3_1_A, C_3_1_B, C_3_1_C });
+            }
+
+            if (u.hasChosenOption(C_3_1_A) || u.hasChosenOption(C_3_1_B))
+            {
+                u.pushEntityDialogue(C_4);
+            }
+
+            if (u.hasDialogueFinihsed(C_4))
+            {
+                u.pushEntityDialogue(C_4_1, C_4_1_I);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_1))
+            {
+                u.pushEntityDialogue(C_4_2);
+            }
+
+            if (u.hasDialogueFinihsed(C_4_2))
+            {
+                u.pushEntityDialogue(C_4_3, C_4_3_I);
+            }
+
+            if (u.hasInterruptedMidSentence(C_4_1_I))
+            {
+                u.pushEntityDialogue(C_SHOOT_1);
             }
 
             break;
@@ -884,225 +947,6 @@ void Level::update()
             auto* darwinT = getComponentFromEntity<TransformComponent>(darwin);
             auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
             auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
-            if (_oldGangsterConfrontationStageData.canDarwinMoveToKitchen)
-            {
-                darwinM->maxHorizontalSpeed = 0.6f;
-                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 293.f))
-                {
-                    darwinM->maxHorizontalSpeed = 0.3f;
-                    _oldGangsterConfrontationStageData.canDarwinMoveToKitchen = false;
-                }
-            }
-
-            // As soon as we move, push the dialogue
-            if (playerTransform->position.x < 488.f && !_oldGangsterConfrontationStageData.hasStartedConfrontationDialogue)
-            {
-                u.pushEntityDialogue(C_1);
-                _oldGangsterConfrontationStageData.hasStartedConfrontationDialogue = true;
-                D_LOG(MINI, "Started confrontation dialogue");
-            }
-
-            if (u.hasDialogueFinihsed(C_1))
-            {
-                u.pushEntityDialogue(C_2);
-            }
-
-            if (u.hasDialogueFinihsed(C_2))
-            {
-                u.pushEntityDialogue(C_3);
-            }
-
-            // Tell rostov to not get involved when he gets near
-            if (playerTransform->position.x <= 315.f && !_oldGangsterConfrontationStageData.hasToldRostovToNotGetInvolved)
-            {
-                u.pushTensionBar();
-                u.pushEntityDialogue(C_4, {C_4_A, C_4_B, C_4_C });
-                _oldGangsterConfrontationStageData.hasToldRostovToNotGetInvolved = true;
-                player.entityState = ON_CUTSCENE_STATE;
-            }
-
-            if (u.hasChosenOption(C_4_B) || u.hasChosenOption(C_4_C))
-            {
-                u.pushEntityDialogue(C_4_BC_1);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_1))
-            {
-                u.pushEntityDialogue(C_4_BC_2);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_2))
-            {
-                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
-            }
-
-            if (u.hasChosenOption(C_4_BC_3_A))
-            {
-                u.pushEntityDialogue(C_4_A_5);
-            }
-            else if (u.hasChosenOption(C_4_BC_3_B))
-            {
-                u.pushEntityDialogue(C_4_BC_2_3_1);
-            }
-            else if (u.hasChosenOption(C_4_BC_3_C))
-            {
-                u.popTensionBar();
-                player.entityState = IDLE_STATE;
-
-                pushGolfCueControntationDialogue(u);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_2_3_1))
-            {
-                u.pushEntityDialogue(C_4_BC_2_3_2);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_2_3_2))
-            {
-                u.pushEntityDialogue(C_4_BC_2_3_3);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_2_3_3))
-            {
-                u.pushEntityDialogue(C_4_A_6_AB_3);
-            }
-
-            if (u.hasChosenOption(C_4_A))
-            {
-                u.pushEntityDialogue(C_4_A_1);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_1))
-            {
-                u.pushEntityDialogue(C_4_A_2);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_2))
-            {
-                u.pushEntityDialogue(C_4_A_3);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_3))
-            {
-                u.pushEntityDialogue(C_4_A_4);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_4))
-            {
-                u.pushEntityDialogue(C_4_A_5);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_5))
-            {
-                u.pushEntityDialogue(C_4_A_6, { C_4_A_6_A, C_4_A_6_B, C_4_A_6_C });
-            }
-
-            if (u.hasChosenOption(C_4_A_6_A) || u.hasChosenOption(C_4_A_6_B))
-            {
-                u.pushEntityDialogue(C_4_A_6_AB_1);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_6_AB_1))
-            {
-                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
-            }
-
-            if (_oldGangsterConfrontationStageData.canOskarMoveClose)
-            {
-                if (moveEntityUntilXPosition(getComponentFromEntity<TransformComponent>(oskar), getComponentFromEntity<MovementComponent>(oskar),
-                    getComponentFromEntity<SpriteComponent>(oskar), 290.f))
-                {
-                    switch (u._lastDialogueType)
-                    {
-                    case C_4_A_6_AB_1:
-                        u.pushEntityDialogue(C_4_A_6_AB_2);
-                        break;
-                    case C_4_A_6:
-                        if (u._lastOptionChosen == C_4_A_6_B || u._lastOptionChosen == C_4_A_6_A)
-                        {
-                            u.pushEntityDialogue(C_4_A_6_AB_2);
-                        }
-                        else if (u._lastOptionChosen == C_4_A_6_C)
-                        {
-                            pushGolfCueControntationDialogue(u);
-                        }
-                        break;
-                    case C_4_BC_2:
-                        u.pushEntityDialogue(C_4_BC_3, { C_4_BC_3_A, C_4_BC_3_B, C_4_BC_3_C });
-                        break;
-                    default:
-                        break;
-                    }
-
-                    _oldGangsterConfrontationStageData.canOskarMoveClose = false;
-
-                }
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_6_AB_2))
-            {
-                u.pushEntityDialogue(C_4_A_6_AB_3);
-            }
-
-            if (u.hasDialogueFinihsed(C_4_A_6_AB_3))
-            {
-                u.popTensionBar();
-                player.entityState = IDLE_STATE;
-            }
-
-            if (u.hasChosenOption(C_4_A_6_C))
-            {
-                u.popTensionBar();
-                player.entityState = IDLE_STATE;
-
-                _oldGangsterConfrontationStageData.canOskarMoveClose = true;
-            }
-
-            if (u.hasDialogueFinihsed(C_4_BC_3_C_1))
-            {
-                u.pushEntityDialogue(C_4_BC_3_C_2);
-            }
-
-            // If rostov attacks oskar stop the dialogues
-            auto* oskarA = getComponentFromEntity<AttackingComponent>(oskar);
-            if (oskarA->damageCounter > 0 && !_oldGangsterConfrontationStageData.hasRostovAttackedEnemy)
-            {
-                _oldGangsterConfrontationStageData.hasRostovAttackedEnemy = true;
-
-                if (u.isCurrentDialogue(C_4_BC_3_C_3) || u.isCurrentDialogue(C_4_BC_3_C_4) || u.isCurrentDialogue(C_4_BC_3_C_5) ||
-                    u.isCurrentDialogue(C_4_BC_3_C_CUE_1) || u.isCurrentDialogue(C_4_BC_3_C_CUE_2) || u.isCurrentDialogue(C_4_BC_3_C_CUE_3))
-                {
-                    u.destroyCurrentDialogue();
-                }
-            }
-
-            if (!_oldGangsterConfrontationStageData.hasRostovAttackedEnemy)
-            {
-                if (u.hasDialogueFinihsed(C_4_BC_3_C_2))
-                {
-                    u.pushEntityDialogue(C_4_BC_3_C_3);
-                }
-
-                if (u.hasDialogueFinihsed(C_4_BC_3_C_3))
-                {
-                    u.pushEntityDialogue(C_4_BC_3_C_4);
-                }
-
-                if (u.hasDialogueFinihsed(C_4_BC_3_C_4))
-                {
-                    u.pushEntityDialogue(C_4_BC_3_C_5);
-                }
-
-                if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_1))
-                {
-                    u.pushEntityDialogue(C_4_BC_3_C_CUE_2);
-                }
-
-                if (u.hasDialogueFinihsed(C_4_BC_3_C_CUE_2))
-                {
-                    u.pushEntityDialogue(C_4_BC_3_C_CUE_3);
-                }
-            }
 
             if (oskar.entityState == DEAD_STATE && !_oldGangsterConfrontationStageData.hasHugoHelpedBrother)
             {
@@ -1914,7 +1758,9 @@ void Level::update()
 
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_P))
         {
-            u.pushEntityDialogue(C_1_I_1);
+            Entity& oskar = getEntityById(s_oskarEntityId);
+            getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
+            u.pushEntityDialogue(C_1, { C_1_I});
         }
 
         // Debug to not have to wait x seconds for things to happen

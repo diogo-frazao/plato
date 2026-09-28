@@ -330,6 +330,7 @@ public:
 		// Needed to have frame rate independent lerp
 		float speechIndicatorCurrentXPosition = 0.f;
 		float speechIndicatorTargetXPosition = 0.f;
+		float secondsToAutoSkipDialogue = 1.f;
 
 		// Don't use directly, call destroyCurrentDialogue() instead
 		void destroyDialoge()
@@ -361,6 +362,7 @@ public:
 			this->hasAppliedShakeForCurrentWord = false;
 			this->speechIndicatorCurrentXPosition = 0.f;
 			this->speechIndicatorTargetXPosition = 0.f;
+			this->secondsToAutoSkipDialogue = 1.f;
 		}
 	};
 
@@ -389,9 +391,11 @@ public:
 	bool hasDialogueFinishedInterrupting(TextType dialogueType);
 	bool hasAnyDialogueOngoing();
 	bool doesCurrentDialogueHaveMidSentenceInterruption();
+	bool canInterruptDialogue(TextType dialogueType);
 
 	void skipDialogue();
-	void interruptCurrentDialogue();
+	// If true it also triggers a screen shake. Player screen shake is done dependent on the dialogue choices
+	void interruptCurrentDialogue(bool wasInterruptionDoneByNPC = false);
 	void destroyCurrentDialogue();
 
 	// Array index is the decimal ASCII of the character and the value is index on font atlas.
