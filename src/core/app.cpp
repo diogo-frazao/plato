@@ -28,6 +28,34 @@ void toggleFullscreen(SDL_Window* window)
     SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
 }
 
+void debugSupportedShaderFormats(SDL_GPUShaderFormat supportedShaderFormats)
+{
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_PRIVATE)
+    {
+        D_LOG(MINI, "NDA'd Platform shaders supported");
+    }
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_SPIRV)
+    {
+        D_LOG(MINI, "SPIR-V shaders for Vulkan supported");
+    }
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_DXBC)
+    {
+        D_LOG(MINI, "DXBC SM5_1 shaders for D3D12 supported");
+    }
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_DXIL)
+    {
+        D_LOG(MINI, "DXIL SM6_0 shaders for D3D12 supported");
+    }
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_MSL)
+    {
+        D_LOG(MINI, "MSL shaders for Metal supported");
+    }
+    if (supportedShaderFormats & SDL_GPU_SHADERFORMAT_METALLIB)
+    {
+        D_LOG(MINI, "Precompiled metallib shaders for Metal supported");
+    }
+}
+
 void App::run()
 {
     srand(time(0));
@@ -162,10 +190,27 @@ void App::initSDL()
         return;
     }
 
-    s_renderer = SDL_CreateRenderer(_window, nullptr);
+    s_renderer = SDL_CreateRenderer(_window, SDL_GPU_RENDERER);
     if (!s_renderer)
     {
         D_ASSERT(false, "SDL_CreateRenderer(): %s", SDL_GetError());
+        return;
+    }
+
+    SDL_GPUDevice* gpuDevice = SDL_GetGPURendererDevice(s_renderer);
+    if (!gpuDevice)
+    {
+        D_ASSERT(false, "SDL_GetGPURendererDevice() couldn't get a GPU Device");
+        return;
+    }
+
+    D_LOG(MINI, "GPU Driver used: %s", SDL_GetGPUDeviceDriver(gpuDevice));
+
+    SDL_GPUShaderFormat supportedShaderFormats = SDL_GetGPUShaderFormats(gpuDevice);
+    debugSupportedShaderFormats(supportedShaderFormats);
+
+    if (supportedShaderFormats == SDL_GPU_SHADERFORMAT_INVALID) {
+        D_ASSERT(false, "SDL_GetGPUShaderFormats() device doesn't support any of the shader formats");
         return;
     }
 
