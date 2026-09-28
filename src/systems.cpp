@@ -8,6 +8,62 @@
 #include <SDL3/SDL_pixels.h>
 #include <string>
 
+#include "../resources/shaders/testgpurender_effects_grayscale.frag.dxil.h"
+#include "../resources/shaders/testgpurender_effects_grayscale.frag.msl.h"
+#include "../resources/shaders/testgpurender_effects_grayscale.frag.spv.h"
+
+SDL_GPURenderState* exampleCreateGrayScaleShader()
+{
+	// Copied from testgpurender_effects.c
+
+	SDL_GPUShaderFormat formats;
+	SDL_GPUShaderCreateInfo info;
+	SDL_GPURenderStateCreateInfo createinfo;
+
+	SDL_GPUDevice* device = SDL_GetGPURendererDevice(s_renderer);
+	formats = SDL_GetGPUShaderFormats(device);
+
+	SDL_zero(info);
+	if (formats & SDL_GPU_SHADERFORMAT_SPIRV)
+	{
+		info.format = SDL_GPU_SHADERFORMAT_SPIRV;
+		info.code = testgpurender_effects_grayscale_frag_spv;
+		info.code_size = sizeof(testgpurender_effects_grayscale_frag_spv);
+	}
+	else if (formats & SDL_GPU_SHADERFORMAT_DXIL)
+	{
+		info.format = SDL_GPU_SHADERFORMAT_DXIL;
+		info.code = testgpurender_effects_grayscale_frag_dxil;
+		info.code_size = sizeof(testgpurender_effects_grayscale_frag_dxil);
+	}
+	else if (formats & SDL_GPU_SHADERFORMAT_MSL)
+	{
+		info.format = SDL_GPU_SHADERFORMAT_MSL;
+		info.code = testgpurender_effects_grayscale_frag_msl;
+		info.code_size = sizeof(testgpurender_effects_grayscale_frag_msl);
+	}
+
+	info.num_samplers = 1;
+	info.num_uniform_buffers = 0;
+	info.stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
+
+	SDL_GPUShader* shader = SDL_CreateGPUShader(device, &info);
+	if (!shader)
+	{
+		D_LOG(ERROR, "Couldn't create shader: %s", SDL_GetError());
+	}
+
+	SDL_zero(createinfo);
+	createinfo.fragment_shader = shader;
+	auto* grayscaleRenderState = SDL_CreateGPURenderState(s_renderer, &createinfo);
+	if (!grayscaleRenderState)
+	{
+		D_LOG(ERROR, "Couldn't create render state: %s", SDL_GetError());
+	}
+
+	return grayscaleRenderState;
+}
+
 static bool isAmbientColorValid(SDL_FColor color)
 {
 	static constexpr SDL_Color k_whiteColor = { 255, 255, 255, 255 };
@@ -312,7 +368,22 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			break;
 		}
 
-		SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, spriteComponent->rotation, &rotationPoint, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+		if (entity.id == k_playerEntityId)
+		{
+			static SDL_GPURenderState* grayscaleRenderState = nullptr;
+			if (grayscaleRenderState == nullptr)
+			{
+				grayscaleRenderState = exampleCreateGrayScaleShader();
+			}
+
+			SDL_SetGPURenderState(s_renderer, grayscaleRenderState);
+			SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, spriteComponent->rotation, &rotationPoint, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+			SDL_SetGPURenderState(s_renderer, nullptr);
+		}
+		else
+		{
+			SDL_RenderTextureRotated(s_renderer, atlas, &_src, &_dest, spriteComponent->rotation, &rotationPoint, spriteComponent->flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+		}
 	}
 }
 
