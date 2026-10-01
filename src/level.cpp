@@ -879,15 +879,6 @@ void Level::update()
             {
                 u.pushEntityDialogue(C_2_B_1);
             }
-            else if (u.hasChosenOption(C_2_C))
-            {
-                u.pushEntityDialogue(C_AIM_1);
-            }
-
-            if (u.hasDialogueFinihsed(C_AIM_1))
-            {
-                u.pushEntityDialogue(C_AIM_2);
-            }
 
             // TODO: Add attack rostov and call C_SHOOT_1
 
@@ -930,6 +921,24 @@ void Level::update()
             if (u.hasInterruptedMidSentence(C_4_1_I))
             {
                 u.pushEntityDialogue(C_SHOOT_1);
+            }
+
+            // Aim gun
+            if (u.didPressDialogueOptionThisFrame(C_2_C) || u.didPressDialogueOptionThisFrame(C_3_1_C))
+            {
+                getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+            }
+
+            if (u.hasChosenOption(C_2_C) || u.hasChosenOption(C_3_1_C))
+            {
+                player.entityState = IDLE_STATE;
+                u.popTensionBar();
+                u.pushEntityDialogue(C_AIM_1);
+            }
+
+            if (u.hasDialogueFinihsed(C_AIM_1))
+            {
+                u.pushEntityDialogue(C_AIM_2);
             }
 
             break;
@@ -1751,6 +1760,8 @@ void Level::update()
             _confrontStageData.reset();
 
             playerTransform->position.x = 67.f;
+
+            getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
 
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });

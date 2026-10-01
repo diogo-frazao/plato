@@ -147,8 +147,8 @@ TextDTO getTextInfo(TextType textType)
 		case C_2_A: return { "What are you doing here?", CHOICE_DIALOGUE };
 			case C_2_A_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious, I'm here to collect [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and [yellow]we're here to get it.[yellow] One way... or the other", OSKAR_DIALOGUE };
 		case C_2_B: return { "Did you break the radio?", CHOICE_DIALOGUE };
-			case C_2_B_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious... [redshake]YES.[redshake] [redshake]I.[redshake] [redshake]DID IT.[redshake] And I'm here to collect [red]my[red] money. Your [redshake]fucking[redshake] boss owes us and we're here to collect it. One way... or the other", OSKAR_DIALOGUE };
-		case C_2_C: return { "It's you who will get hurt < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
+			case C_2_B_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious... [redshake]YES.[redshake] [redshake]I.[redshake] [redshake]DID IT.[redshake] And I'm here to collect [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and we're here to collect it. One way... or the other", OSKAR_DIALOGUE };
+		case C_2_C: return { "You talk too much < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 	case C_3: return { "We all know that's not true, this has always been and will always be an honest business", DARWIN_DIALOGUE };
 	case C_3_1: return { "[laugh]HaHhAhAhah,[laugh] do you see this [hugo]BROTHER?[hugo] [redshake]FUCKING.[redhsake] [redshake]LIAR.[redhsake]", OSKAR_DIALOGUE, 5 };
 		case C_3_1_A: return { "We don't owe you anything, leave" };

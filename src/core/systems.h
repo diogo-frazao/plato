@@ -320,11 +320,14 @@ public:
 		// Used to animate the dialogue box from left to right
 		float dialogueBoxDynamicXSize = 0.f;
 		float speechIndicatorDynamicYSize = 0.f;
-		// Only matters if the current dialogue has options
+		// Only matters if the current dialogue has options.
+		// Only set when all animations end, not exactly when the option is selected
 		TextType dialogueOptionChosen = INVALID_TEXT;
 		TextType dialogueOptionHovered = INVALID_TEXT;
 		Entity* entityTalking = nullptr;
 		float dialogueOutlineDynamicXSize = 0.f;
+		// This is what we use to know the exact frame an option was chosen
+		TextType dialogueOptionPressedThisFrame = INVALID_TEXT;
 		// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
 		bool hasAppliedShakeForCurrentWord = false;
 		// Needed to have frame rate independent lerp
@@ -363,6 +366,7 @@ public:
 			this->speechIndicatorCurrentXPosition = 0.f;
 			this->speechIndicatorTargetXPosition = 0.f;
 			this->secondsToAutoSkipDialogue = 1.f;
+			this->dialogueOptionPressedThisFrame = INVALID_TEXT;
 		}
 	};
 
@@ -392,6 +396,7 @@ public:
 	bool hasAnyDialogueOngoing();
 	bool doesCurrentDialogueHaveMidSentenceInterruption();
 	bool canInterruptDialogue(TextType dialogueType);
+	bool didPressDialogueOptionThisFrame(TextType dialogueType);
 
 	void skipDialogue();
 	// If true it also triggers a screen shake. Player screen shake is done dependent on the dialogue choices

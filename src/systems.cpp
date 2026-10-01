@@ -1890,6 +1890,8 @@ void UISystem::start()
 
 void UISystem::update()
 {
+	_currentDialogue.dialogueOptionPressedThisFrame = INVALID_TEXT;
+
 	if (_cellphone.entity == nullptr)
 	{
 		_cellphone.entity = &getEntityById(k_cellphoneEntityId);
@@ -2172,6 +2174,8 @@ void UISystem::update()
 
 					s_playerTension += dialogueOption.tensionDelta;
 
+					_currentDialogue.dialogueOptionPressedThisFrame = dialogueOption.dialogueType;
+
 					// Change all the other options to be NOT_CHOSEN
 					for (DialogueOption& option : _dialogueOptions) { if (option.state == dialogueOption.state) continue; option.state = DIALOGUE_OPTION_NOT_CHOSEN_STATE; }
 				}
@@ -2282,9 +2286,12 @@ void UISystem::update()
 				if (isTimerOngoing(c.periodEffectTimer) && c.periodEffectTimer >= timeToSwapCharactersDuringLaugh)
 				{
 					// Add randomness to when the characters are swapped
-					if (c.periodEffectTimer >= timeToSwapCharactersDuringLaugh + randomFloatZeroToOne())
+					float randomZeroToOne = randomFloatZeroToOne();
+					if (c.periodEffectTimer >= timeToSwapCharactersDuringLaugh + randomZeroToOne)
 					{
 						swapCharactersForLaughEffect(c);
+						// Reuse the random to randomize the character opacity
+						c.opacity = randomZeroToOne * 255.f;
 					}
 				}
 			}
@@ -3221,6 +3228,11 @@ bool UISystem::doesCurrentDialogueHaveMidSentenceInterruption()
 bool UISystem::canInterruptDialogue(TextType dialogueType)
 {
 	return _currentDialogue.state == DIALOGUE_BASE_STATE && dialogueType == _currentDialogue.dialogueType;
+}
+
+bool UISystem::didPressDialogueOptionThisFrame(TextType dialogueType)
+{
+	return _currentDialogue.dialogueOptionPressedThisFrame == dialogueType;
 }
 
 void UISystem::receivePhoneCallAndPushDialogueOnAnswer(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions)

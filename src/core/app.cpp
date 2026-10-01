@@ -190,6 +190,7 @@ void App::initSDL()
         return;
     }
 
+    // TODO: Investigate. For some reason having SDL_GPU_RENDERER as the flag makes io.FrameRate from imgui (average fps) always show 60 even if vsync is disabled
     s_renderer = SDL_CreateRenderer(_window, SDL_GPU_RENDERER);
     if (!s_renderer)
     {
@@ -209,7 +210,8 @@ void App::initSDL()
     SDL_GPUShaderFormat supportedShaderFormats = SDL_GetGPUShaderFormats(gpuDevice);
     debugSupportedShaderFormats(supportedShaderFormats);
 
-    if (supportedShaderFormats == SDL_GPU_SHADERFORMAT_INVALID) {
+    if (supportedShaderFormats == SDL_GPU_SHADERFORMAT_INVALID) 
+    {
         D_ASSERT(false, "SDL_GetGPUShaderFormats() device doesn't support any of the shader formats");
         return;
     }
