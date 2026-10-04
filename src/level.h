@@ -137,12 +137,16 @@ struct GangsterConfrontagionStageData
 	bool canEnterCutscene = true;
 	bool canAutoMove = false;
 	bool canDarwinTalk = true;
+	bool hasHugoReactedToDeath = false;
+	bool canOskarMockRostov = true;
 
 	void reset()
 	{
 		canEnterCutscene = true;
 		canAutoMove = false;
 		canDarwinTalk = true;
+		hasHugoReactedToDeath = false;
+		canOskarMockRostov = true;
 	}
 };
 

@@ -129,6 +129,7 @@ public:
 	
 	// Player attacks
 	void tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
+	void mainCharacterAttackWithWeaponInHand(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
 	void handleMainCharacterAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
 
 	// Projectiles
@@ -396,7 +397,8 @@ public:
 	bool hasAnyDialogueOngoing();
 	bool doesCurrentDialogueHaveMidSentenceInterruption();
 	bool canInterruptDialogue(TextType dialogueType);
-	bool didPressDialogueOptionThisFrame(TextType dialogueType);
+	bool canInterruptCurrentDialogue();
+	bool didChooseDialogueOptionThisFrame(TextType dialogueType);
 
 	void skipDialogue();
 	// If true it also triggers a screen shake. Player screen shake is done dependent on the dialogue choices

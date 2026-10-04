@@ -295,9 +295,13 @@ void setupInsideRestaurantScene()
         t->position = { 24, k_restaurantBaseY + 75.f };
     }
 
+    float oskarXPosition = 550.f;
+
     {
-        Entity& darwin = addEntity("darwin", { 415.f, 117.f });
+        Entity& darwin = addEntity("darwin", { oskarXPosition + 57.f, 117.f });
         addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTERS_LAYER);
+        getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+
         addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
 
         auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
@@ -310,8 +314,10 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& hugo = addEntity("hugo", { 179.f, 106.f });
+        Entity& hugo = addEntity("hugo", { oskarXPosition + 102.f, 106.f });
         addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
+        getComponentFromEntity<SpriteComponent>(hugo)->flipX = true;
+
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         // We can't attack hugo until oskar dies
         addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
@@ -324,8 +330,10 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& oskar = addEntity("oskar", { 242.f, 95.f });
+        Entity& oskar = addEntity("oskar", { oskarXPosition, 95.f });
         addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
+        getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
+
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         addComponentToEntity<AttackingComponent>(oskar);
         getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
@@ -523,6 +531,8 @@ void Level::update()
     TransformComponent* playerTransform = getComponentFromEntity<TransformComponent>(player);
     auto* playerM = getComponentFromEntity<MovementComponent>(player);
     auto* playerS = getComponentFromEntity<SpriteComponent>(player);
+    auto* playerA = getComponentFromEntity<AttackingComponent>(player);
+    auto* playerC = getComponentFromEntity<RectColliderComponent>(player);
 
     // Light that follows player
     if(lightThatFollowsPlayerEntityId != k_invalidId)
@@ -918,13 +928,15 @@ void Level::update()
                 u.pushEntityDialogue(C_4_3, C_4_3_I);
             }
 
-            if (u.hasInterruptedMidSentence(C_4_1_I))
+            // Shoot oskar as interruption
+            if (u.didChooseDialogueOptionThisFrame(C_4_1_I) || u.didChooseDialogueOptionThisFrame(C_4_3_I))
             {
-                u.pushEntityDialogue(C_SHOOT_1);
+                playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+                s_attackingSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
 
-            // Aim gun
-            if (u.didPressDialogueOptionThisFrame(C_2_C) || u.didPressDialogueOptionThisFrame(C_3_1_C))
+            // Aim gun at oskar
+            if (u.didChooseDialogueOptionThisFrame(C_2_C) || u.didChooseDialogueOptionThisFrame(C_3_1_C))
             {
                 getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
             }
@@ -936,9 +948,44 @@ void Level::update()
                 u.pushEntityDialogue(C_AIM_1);
             }
 
-            if (u.hasDialogueFinihsed(C_AIM_1))
+            if (u.hasDialogueFinihsed(C_AIM_1) && !isEntityAlreadyDying(oskar.entityState))
             {
                 u.pushEntityDialogue(C_AIM_2);
+            }
+
+            // If we aim but don't shoot, oskar will attack us
+            bool willAttackRostov = u.hasDialogueFinihsed(C_AIM_2) || u.hasDialogueFinihsed(C_4_3);
+            if (willAttackRostov && !isEntityAlreadyDying(oskar.entityState))
+            {
+                player.entityState = IDLE_STATE;
+                u.popTensionBar();
+
+                getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = true;
+                getComponentFromEntity<MovementComponent>(oskar)->maxHorizontalSpeed = 1.f;
+
+                // Since this acts as a tutorial, this npc will not attack right after the first hit
+                getComponentFromEntity<AttackingComponent>(oskar)->secondsNeededToAttackAgain = 99.f;
+            }
+
+            if (!isEntityAlreadyDying(oskar.entityState) && player.entityState == DAMAGED_STATE && playerS->animationData.currentFrame >= 2)
+            {
+                if (_confrontStageData.canOskarMockRostov)
+                {
+                    u.pushEntityDialogue(C_ROSTOV_HURT);
+                    _confrontStageData.canOskarMockRostov = false;
+                }
+            }
+
+            // If the player still didn't shoot oskar, oskar will enter normal combat mode
+            if (u.hasDialogueFinihsed(C_ROSTOV_HURT) && !isEntityAlreadyDying(oskar.entityState))
+            {
+                getComponentFromEntity<AttackingComponent>(oskar)->secondsNeededToAttackAgain = 0.5f;
+            }
+
+            if (isEntityAlreadyDying(oskar.entityState) && !_confrontStageData.hasHugoReactedToDeath)
+            {
+                u.pushEntityDialogue(C_SHOOT_1);
+                _confrontStageData.hasHugoReactedToDeath = true;
             }
 
             break;
@@ -1617,7 +1664,7 @@ void Level::update()
     // After all systems, update camera
     {
         s_camera.minX = s_isInsideRestaurant ? 160 : -320;
-        s_camera.maxX = s_isInsideRestaurant ? 540 : 0;
+        s_camera.maxX = s_isInsideRestaurant ? 630 : 0;
         s_camera.followTargetRatio = 0.06f;
 
         if (s_camera.canFollowTarget)
@@ -1740,11 +1787,16 @@ void Level::update()
             Entity& darwin = getEntityById(s_darwinEntityId);
             Entity& hugo = getEntityById(s_hugoEntityId);
 
+            oskar.entityState = IDLE_STATE;
+
             float oskarXPosition = 550.f;
 
             getComponentFromEntity<TransformComponent>(oskar)->position.x = oskarXPosition;
             getComponentFromEntity<TransformComponent>(darwin)->position.x = oskarXPosition + 57.f;
             getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+            getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
+            getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = false;
+
             getComponentFromEntity<TransformComponent>(hugo)->position.x = oskarXPosition + 102.f;
 
             // Hide shadows when door is opened
@@ -1770,8 +1822,13 @@ void Level::update()
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_P))
         {
             Entity& oskar = getEntityById(s_oskarEntityId);
-            getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
-            u.pushEntityDialogue(C_1, { C_1_I});
+            oskar.entityState = IDLE_STATE;
+            getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
+
+            player.entityState = ON_CUTSCENE_STATE;
+            getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
+
+            u.pushEntityDialogue(C_3_1, { C_3_1_A, C_3_1_B, C_3_1_C });
         }
 
         // Debug to not have to wait x seconds for things to happen
@@ -1936,7 +1993,7 @@ void Level::imguiRender()
 
                 Entity& hugo = getEntityById(s_hugoEntityId);
                 getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
-                getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+                getComponentFromEntity<SpriteComponent>(hugo)->flipX = true;
                 getComponentFromEntity<AttackingComponent>(hugo)->damageCounter = 0;
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = false;
                 hugo.entityState = IDLE_STATE;

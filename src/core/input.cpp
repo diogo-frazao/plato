@@ -222,7 +222,7 @@ bool wasAttackKeyPressedThisFrame()
 
 bool wasSkipDialogueKeyPressedThisFrame()
 {
-	return wasAttackKeyPressedThisFrame() || _wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
+	return _wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
 }
 
 bool wasPickupPhoneKeyPressedThisFrame()
@@ -252,6 +252,6 @@ bool wasHoverUpDialogueOptionKeyPressedThisFrame()
 
 bool wasChooseDialogueOptionKeyPressedThisFrame()
 {
-	return wasAttackKeyPressedThisFrame();
+	return _wasKeyPressedThisFrame(SDL_SCANCODE_SPACE);
 }
 

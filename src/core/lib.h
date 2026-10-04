@@ -26,19 +26,23 @@ enum EntityState
 	// Combat. Controlled by Combat System
 	ATTACKING_STATE,
 	DAMAGED_STATE,
-	SHOT_FALL_DEATH_STATE,
 	WAITING_TO_DIE_STATE,
 	DEAD_STATE,
 };
 
 inline bool isEntityInCombatState(EntityState state)
 {
-	return state == ATTACKING_STATE || state == DAMAGED_STATE || state == SHOT_FALL_DEATH_STATE || state == WAITING_TO_DIE_STATE || state == DEAD_STATE;
+	return state == ATTACKING_STATE || state == DAMAGED_STATE || state == WAITING_TO_DIE_STATE || state == DEAD_STATE;
 }
 
 inline bool isEntityAlreadyDying(EntityState state)
 {
-	return state == SHOT_FALL_DEATH_STATE || state == DEAD_STATE;
+	return state == DEAD_STATE;
+}
+
+inline bool canPlayerSkipDialogues(EntityState state)
+{
+	return state == ON_CUTSCENE_STATE;
 }
 
 inline bool canKillyEntityFromCurrentState(EntityState state)
@@ -68,8 +72,6 @@ inline const char* getEntityStateAsString(EntityState state)
 		return "On cutscene";
 	case DAMAGED_STATE:
 		return "Damaged";
-	case SHOT_FALL_DEATH_STATE:
-		return "Shot fall death";
 	case WAITING_TO_DIE_STATE:
 		return "Waiting to Die";
 	case DEAD_STATE:

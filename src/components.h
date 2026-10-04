@@ -233,7 +233,7 @@ struct AttackingComponent
 	// Rostov and NPCS can enter limping state. the next hit kills them
 	bool isLimping = false;
 	// How many seconds it takes for the character to "auto heal" from the limping state
-	float secondsToRecoverFromLimping = 4.f;
+	float secondsToRecoverFromLimping = 10.f;
 	float recoverFromLimpingTimer = k_invalidTime;
 
 	// NPC Only

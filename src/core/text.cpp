@@ -161,9 +161,9 @@ TextDTO getTextInfo(TextType textType)
 	case C_4_3: return { "5... 4... 3... 2... 1...", OSKAR_DIALOGUE };
 		case C_4_3_I: return { "< SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION, 10 };
 	case C_AIM_1: return { "Ohohoh wait wait let's all calm down...", OSKAR_DIALOGUE };
-	case C_AIM_2: return { "I get it, me and [hugo]HUGO[hugo] will leave, just give us  second and we'll be out in no time", OSKAR_DIALOGUE };
-	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redhsake]fucking[redhsake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
-	case C_SHOOT_1: return { "WTF?? OSKAR??? I'll FUCKING KILL YOU ROSTOV", HUGO_DIALOGUE };
+	case C_AIM_2: return { "I get it, me and [hugo]HUGO[hugo] will leave, just give us a second and we'll be out in no time", OSKAR_DIALOGUE };
+	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redshake]fucking[redshake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
+	case C_SHOOT_1: return { "[redshake]WTF??[redshake] [hugo]OSKAR???[hugo] I'll [redshake]KILL YOU[redshake] [rostov]ROSTOV[rostov]", HUGO_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed

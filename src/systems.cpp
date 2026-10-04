@@ -1409,6 +1409,12 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 
 		int8_t hitDirection = sprite->flipX ? -1 : 1;
 
+		// If someone is attacked, interrupt the current dialogue
+		if (s_uiSystem.canInterruptCurrentDialogue())
+		{
+			s_uiSystem.interruptCurrentDialogue(true);
+		}
+
 		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
 		if (targetEntity.entityState == DAMAGED_STATE)
 		{
@@ -1576,7 +1582,7 @@ void CombatSystem::update()
 
 				if (s->animationData.finishedPlayingAnimation)
 				{
-					entity.entityState = SHOT_FALL_DEATH_STATE;
+					entity.entityState = DEAD_STATE;
 				}
 			}
 			else
@@ -1598,7 +1604,7 @@ void CombatSystem::update()
 			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, animationSpeed, 70);
 			break;
 		}
-		case SHOT_FALL_DEATH_STATE:
+		case DEAD_STATE:
 			s->setAnimationToPlayIfNotPlaying(OSKAR_FALL_DEATH_SPRITE, false, 70, 70);
 			break;
 		}
@@ -1659,70 +1665,74 @@ void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponen
 		return;
 	}
 
+	mainCharacterAttackWithWeaponInHand(player, a, m, t, s, c);
+}
+
+void CombatSystem::mainCharacterAttackWithWeaponInHand(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+{
 	switch (a->weaponInHand)
 	{
 	case GOLF_WEAPON_TYPE:
 		// Attack to the side the mouse is facing
+	{
+		Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
+		Vec2 characterColliderPosition = getColliderPosition(t->position, c->collider);
+
+		bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
+			(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
+
+		if (shouldAttackInAnotherDirection)
 		{
-			Vec2 mouseWorldPosition = convertScreenPositionToCameraSpace(s_mousePositionThisFrameInScreenSpace);
-			Vec2 characterColliderPosition = getColliderPosition(t->position, c->collider);
-
-			bool shouldAttackInAnotherDirection = (mouseWorldPosition.x > characterColliderPosition.x && s->flipX) ||
-				(mouseWorldPosition.x < characterColliderPosition.x && !s->flipX);
-
-			if (shouldAttackInAnotherDirection)
-			{
-				s->flipX = !s->flipX;
-			}
-
-			float attackForwardBoost = s->flipX ? -2.f : 2.f;
-			m->currentSpeed.x = attackForwardBoost;
+			s->flipX = !s->flipX;
 		}
 
-		// Scale effects
-		t->scale = Vec2(1.2f, 0.9f);
-		t->resetScaleLerp = 0.05f;
+		float attackForwardBoost = s->flipX ? -2.f : 2.f;
+		m->currentSpeed.x = attackForwardBoost;
+	}
 
-		break;
+	// Scale effects
+	t->scale = Vec2(1.2f, 0.9f);
+	t->resetScaleLerp = 0.05f;
+
+	break;
 	case ROSTOV_WEAPON_PISTOL_TYPE:
 
 		// Create bullet
-		{
-			Vec2 bulletPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 15.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
-			Entity& bullet = addEntity("bullet", bulletPosition);
+	{
+		Vec2 bulletPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 15.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
+		Entity& bullet = addEntity("bullet", bulletPosition);
 
-			auto* bulletTransform = getComponentFromEntity<TransformComponent>(bullet);
-			bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;
-			bulletTransform->scale.x = 0.1f;
-			bulletTransform->useDynamicScale = true;
-			bulletTransform->resetScaleLerp = 0.05f;
+		auto* bulletTransform = getComponentFromEntity<TransformComponent>(bullet);
+		bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;
+		bulletTransform->scale.x = 0.1f;
+		bulletTransform->useDynamicScale = true;
+		bulletTransform->resetScaleLerp = 0.05f;
 
-			auto* bulletSprite = addComponentToEntity<SpriteComponent>(bullet);
-			bulletSprite->setupSpriteForLayer(PISTOL_BULLET_SPRITE, UI_LAYER);
-			bulletSprite->flipX = !s->flipX;
+		auto* bulletSprite = addComponentToEntity<SpriteComponent>(bullet);
+		bulletSprite->setupSpriteForLayer(PISTOL_BULLET_SPRITE, UI_LAYER);
+		bulletSprite->flipX = !s->flipX;
 
-			auto* bulletCollider = addComponentToEntity<RectColliderComponent>(bullet);
-			bulletCollider->collider = { {0, 0}, bulletSprite->size };
+		auto* bulletCollider = addComponentToEntity<RectColliderComponent>(bullet);
+		bulletCollider->collider = { {0, 0}, bulletSprite->size };
 
-			SpriteType movementAnimations[] = { PISTOL_BULLET_SPRITE };
-			auto* bulletMovement = addComponentToEntity<MovementComponent>(bullet);
-			bulletMovement->setupMovementAnimations(movementAnimations);
-			bulletMovement->gravity = 0.f;
-			bulletMovement->airFriction = 0.f;
-			int8_t movementDirection = bulletSprite->flipX ? 1.f : -1.f;
-			bulletMovement->currentSpeed.x = 7.f * movementDirection;
+		SpriteType movementAnimations[] = { PISTOL_BULLET_SPRITE };
+		auto* bulletMovement = addComponentToEntity<MovementComponent>(bullet);
+		bulletMovement->setupMovementAnimations(movementAnimations);
+		bulletMovement->gravity = 0.f;
+		bulletMovement->airFriction = 0.f;
+		int8_t movementDirection = bulletSprite->flipX ? 1.f : -1.f;
+		bulletMovement->currentSpeed.x = 7.f * movementDirection;
 
-			auto* projectile = addComponentToEntity<ProjectileComponent>(bullet);
-			projectile->ownerEntityId = player->id;
-		}
+		auto* projectile = addComponentToEntity<ProjectileComponent>(bullet);
+		projectile->ownerEntityId = player->id;
+	}
 
-		s_camera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
+	s_camera.doShake(LIGHT_MEDIUM_SHAKE, 0.f);
 
-		break;
+	break;
 	}
 
 	player->entityState = ATTACKING_STATE;
-	return;
 }
 
 void CombatSystem::handleMainCharacterAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
@@ -1793,7 +1803,12 @@ void CombatSystem::handleMainCharacterAnimations(Entity* player, AttackingCompon
 
 		if (s->animationData.finishedPlayingAnimation)
 		{
-			// TODO: Introduce limping
+			// If main character was damaged and had no weapon in hand, auto equip pistol
+			if (a->weaponInHand == NO_WEAPON_TYPE)
+			{
+				a->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+			}
+
 			player->entityState = IDLE_STATE;
 		}
 
@@ -1943,7 +1958,8 @@ void UISystem::update()
 	}
 
 	// Skip dialogue
-	if (wasSkipDialogueKeyPressedThisFrame())
+	static Entity& player = getEntityById(k_playerEntityId);
+	if (wasSkipDialogueKeyPressedThisFrame() && canPlayerSkipDialogues(player.entityState))
 	{
 		if (_currentDialogue.timeSinceFinalCharacterWasDrawn > 0.f)
 		{
@@ -3230,7 +3246,12 @@ bool UISystem::canInterruptDialogue(TextType dialogueType)
 	return _currentDialogue.state == DIALOGUE_BASE_STATE && dialogueType == _currentDialogue.dialogueType;
 }
 
-bool UISystem::didPressDialogueOptionThisFrame(TextType dialogueType)
+bool UISystem::canInterruptCurrentDialogue()
+{
+	return hasAnyDialogueOngoing() && _currentDialogue.state == DIALOGUE_BASE_STATE;
+}
+
+bool UISystem::didChooseDialogueOptionThisFrame(TextType dialogueType)
 {
 	return _currentDialogue.dialogueOptionPressedThisFrame == dialogueType;
 }
@@ -3302,6 +3323,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 {
 	TextDTO textInfo = getTextInfo(dialogueTextType);
 	const char* textToShow = textInfo.text;
+	uint16_t textLength = strlen(textToShow);
 	if (strlen(textToShow) > k_maxCharactersPerDialogue)
 	{
 		D_ASSERT(false, "Trying to print more characters per dialogue than allowed");
@@ -3463,6 +3485,12 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 
 		// These characters will always delay the next character to pretend it's an actual speech with punctuation
 		bool canApplyExtraSecondsToShowNextCharacter = (c == '?') || (c == '!') || (c == ',') || (c == '.') || (dialogueCharacter.textEffectToApply == INTERJECTION_EFFECT);
+
+		bool isNextCharacterValid = (i + 1) < (textLength - 1);
+		char nextCharacter = textToShow[i + 1];
+		bool shouldNextCharacterPreventExtraSeconds = isNextCharacterValid && ((nextCharacter == '?') || (nextCharacter == '!'));
+		canApplyExtraSecondsToShowNextCharacter = shouldNextCharacterPreventExtraSeconds ? false : canApplyExtraSecondsToShowNextCharacter;
+
 		extraSecondsToStartShowingCharacter = canApplyExtraSecondsToShowNextCharacter ? 0.5f : 0.f;
 
 		// We only break to a new line if it's a space character. This avoids breaking words in half
