@@ -2278,7 +2278,12 @@ void UISystem::update()
 
 			// Camera shake text effect
 			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == INTERJECTION_EFFECT);
-			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect)
+
+			// If dialogue was interrupted don't perform the shake for these characters, since it might override
+			// The shake from choosing the interruption option itself
+			bool wasDialogueInterrupted = (_currentDialogue.state == DIALOGUE_INTERRUPTED_STATE || _currentDialogue.state == DIALOGUE_FINISHED_INTERRUPTED);
+
+			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect && !wasDialogueInterrupted)
 			{
 				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
 				s_camera.doShake(shakeToPerform, 0.05f);
