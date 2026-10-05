@@ -183,18 +183,22 @@ enum ScaleXPivot
 	RIGHT_X_SCALE_PIVOT
 };
 
+// To recall how the lighting/layers pipeline works, check RenderingSystem::render
 enum LayerType
 {
-	BEHIND_LIGHTS_LAYER,
-	BACK_LIGHTS_LAYER,
-	BAKED_HIGHLIGHTS_LAYER,
-	CHARACTERS_LAYER,
+	BEHIND_LIGHTS_LAYER, // Affected directly by ambient light
+	BACK_LIGHTS_LAYER, // Can be used for circle shine that follows rostov
+	// ^ Ambient light applied, above affected, below not
+	BAKED_HIGHLIGHTS_LAYER, // Not affected by ambient light
+	CHARACTERS_LAYER,  // Applies the ambient light by darkening the sprites
 	FRONT_LIGHTS_LAYER,
-	LEVEL_GEOMETRY_LAYER,
-	DARKEN_ROOMS_LAYER,
-	UI_LAYER,
-	CROSSHAIR_LAYER,
+	// ^ Scene lights applied, above affected, below not 
+	LEVEL_GEOMETRY_LAYER, // Used for floors and level geometry
+	DARKEN_ROOMS_LAYER, // Used to change the light of the rooms (ex: when rostov shots or impact frames)
+	UI_LAYER, // Used for UI, FX
+	CROSSHAIR_LAYER, // Deprectated.
 };
+
 static const char* s_allLayersAsString = { "BEHIND_LIGHTS_LAYER\0BACK_LIGHTS_LAYER\0BAKED_HIGHLIGHTS_LAYER\0CHARACTERS_LAYER\0FRONT_LIGHTS_LAYER\0LEVEL_GEOMETRY_LAYER\0DARKEN_ROOMS_LAYER\0UI_LAYER\0CROSSHAIR_LAYER\0" };
 
 enum AtlasType

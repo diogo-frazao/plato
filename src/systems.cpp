@@ -235,9 +235,9 @@ void RenderingSystem::render(float renderAlpha)
 	renderLightsAtLayer(BACK_LIGHTS_LAYER, true);
 	// We reserve this for baked highlights. Fake lights that shouldn't be affected by ambient light
 	renderSpritesAtLayer(BAKED_HIGHLIGHTS_LAYER, renderAlpha);
-	// Characters layer. Apply ambient light by multiplying the ambient color directly.
+	// Characters layer. Fake apply ambient light by multiplying the ambient color directly.
 	renderSpritesAtLayer(CHARACTERS_LAYER, renderAlpha);
-	// Lights. Will affect everything below
+	// Lights using blend modes. Will affect everything below
 	renderLightsAtLayer(FRONT_LIGHTS_LAYER);
 	// Level geometry is not affected by lights nor ambient light.
 	renderSpritesAtLayer(LEVEL_GEOMETRY_LAYER, renderAlpha);
