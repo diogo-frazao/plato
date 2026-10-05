@@ -1903,6 +1903,16 @@ void UISystem::start()
 	}
 }
 
+bool UISystem::isDialogueOptionVisibleAtIndex(uint8_t index)
+{
+	if (!_dialogueOptions[index].isValid())
+	{
+		return false;
+	}
+
+	return (_currentDialogue.timeSinceDialogueStarted >= _dialogueOptions[index].secondsToStartShowingOption);
+}
+
 void UISystem::update()
 {
 	_currentDialogue.dialogueOptionPressedThisFrame = INVALID_TEXT;
@@ -2005,31 +2015,38 @@ void UISystem::update()
 
 			if (!wasAnyDialogueOptionAlreadyChosen)
 			{
-				if (doesCurrentDialogueHaveMidSentenceInterruption())
+				// Select mid sentence interruption option
+				if (doesCurrentDialogueHaveMidSentenceInterruption() && isDialogueOptionVisibleAtIndex(0))
 				{
-					if (wasHoverLeftDialogueOptionKeyPressedThisFrame() || wasHoverRightDialogueOptionKeyPressedThisFrame() ||
-						wasHoverDownDialogueOptionKeyPressedThisFrame() || wasHoverUpDialogueOptionKeyPressedThisFrame())
+					if (wasHoverLeftDialogueOptionKeyPressedThisFrame() || wasHoverRightDialogueOptionKeyPressedThisFrame() || wasHoverDownDialogueOptionKeyPressedThisFrame())
 					{
 						_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
 					}
 				}
 
-				if (wasHoverLeftDialogueOptionKeyPressedThisFrame())
+				// Un select mid sentence interruption
+				if (wasHoverUpDialogueOptionKeyPressedThisFrame() && doesCurrentDialogueHaveMidSentenceInterruption() && 
+					_currentDialogue.dialogueOptionHovered == _dialogueOptions[0].dialogueType)
+				{
+					_currentDialogue.dialogueOptionHovered = INVALID_TEXT;
+				}
+
+				if (wasHoverLeftDialogueOptionKeyPressedThisFrame() && isDialogueOptionVisibleAtIndex(0))
 				{
 					_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;
 				}
 
-				if (wasHoverRightDialogueOptionKeyPressedThisFrame() && _dialogueOptions[1].isValid())
+				if (wasHoverRightDialogueOptionKeyPressedThisFrame() && isDialogueOptionVisibleAtIndex(1))
 				{
 					_currentDialogue.dialogueOptionHovered = _dialogueOptions[1].dialogueType;
 				}
 
-				if (wasHoverDownDialogueOptionKeyPressedThisFrame() && _dialogueOptions[2].isValid())
+				if (wasHoverDownDialogueOptionKeyPressedThisFrame() && isDialogueOptionVisibleAtIndex(2))
 				{
 					_currentDialogue.dialogueOptionHovered = _dialogueOptions[2].dialogueType;
 				}
 
-				bool isDownDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered == _dialogueOptions[2].dialogueType);
+				bool isDownDialogueOptionHovered = (_currentDialogue.dialogueOptionHovered != INVALID_TEXT && _currentDialogue.dialogueOptionHovered == _dialogueOptions[2].dialogueType);
 				if (wasHoverUpDialogueOptionKeyPressedThisFrame() && isDownDialogueOptionHovered)
 				{
 					_currentDialogue.dialogueOptionHovered = _dialogueOptions[0].dialogueType;

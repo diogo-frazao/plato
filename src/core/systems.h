@@ -399,6 +399,7 @@ public:
 	bool canInterruptDialogue(TextType dialogueType);
 	bool canInterruptCurrentDialogue();
 	bool didChooseDialogueOptionThisFrame(TextType dialogueType);
+	bool isDialogueOptionVisibleAtIndex(uint8_t index);
 
 	void skipDialogue();
 	// If true it also triggers a screen shake. Player screen shake is done dependent on the dialogue choices

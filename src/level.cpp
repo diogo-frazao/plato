@@ -741,7 +741,6 @@ void Level::update()
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_3, { ONE_DAD_PHONE_3_A, ONE_DAD_PHONE_3_B, ONE_DAD_PHONE_3_C });
             }
 
-
             if (u.hasDialogueFinihsed(ONE_DAD_PHONE_1))
             {
                 u.pushCellphoneDialogue(ONE_DAD_PHONE_2, { ONE_DAD_PHONE_2_A, ONE_DAD_PHONE_2_B});
@@ -931,6 +930,9 @@ void Level::update()
             // Shoot oskar as interruption
             if (u.didChooseDialogueOptionThisFrame(C_4_1_I) || u.didChooseDialogueOptionThisFrame(C_4_3_I))
             {
+                player.entityState = IDLE_STATE;
+                u.popTensionBar();
+
                 playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
                 s_attackingSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
