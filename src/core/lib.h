@@ -103,6 +103,7 @@ enum SpriteType
 	TODO_REMOVE_RESTAURANT_INTERIOR,
 	TODO_REMOVE_RESTAURANT_FLOOR_SPRITE,
 	RESTAURANT_BAKED_HIGHLIGHTS_SPRITE,
+	RESTAURANT_TABLE_FG_SPRITE,
 
 	// Weapons
 	GOLF_WEAPON_SPRITE,
@@ -186,20 +187,20 @@ enum ScaleXPivot
 // To recall how the lighting/layers pipeline works, check RenderingSystem::render
 enum LayerType
 {
-	BEHIND_LIGHTS_LAYER, // Affected directly by ambient light
-	BACK_LIGHTS_LAYER, // Can be used for circle shine that follows rostov
-	// ^ Ambient light applied, above affected, below not
-	BAKED_HIGHLIGHTS_LAYER, // Not affected by ambient light
-	CHARACTERS_LAYER,  // Applies the ambient light by darkening the sprites
-	FRONT_LIGHTS_LAYER,
-	// ^ Scene lights applied, above affected, below not 
-	LEVEL_GEOMETRY_LAYER, // Used for floors and level geometry
-	DARKEN_ROOMS_LAYER, // Used to change the light of the rooms (ex: when rostov shots or impact frames)
-	UI_LAYER, // Used for UI, FX
-	CROSSHAIR_LAYER, // Deprectated.
+	BEHIND_LIGHTS_LAYER,		// Affected directly by ambient light
+	BACK_LIGHTS_LAYER,			// Can be used for circle shine that follows rostov
+								// ^ Ambient light applied, above affected, below not
+	BAKED_HIGHLIGHTS_LAYER,		// Not affected by ambient light
+	CHARACTERS_LAYER,			// Applies the ambient light by darkening the color of the sprites
+	FRONT_LIGHTS_LAYER,			// Where the scene lights are. Sprites with additive blend mode
+								// ^ Scene lights applied, above affected, below not 
+	LEVEL_GEOMETRY_LAYER,		// Used for floors and level geometry
+	DARKEN_ROOMS_LAYER,			// Used to hide certain rooms by shadows until we open the door
+	UI_LAYER,					// Used for UI, FX
+	CROSSHAIR_LAYER,			// Deprectated.
 };
 
-static const char* s_allLayersAsString = { "BEHIND_LIGHTS_LAYER\0BACK_LIGHTS_LAYER\0BAKED_HIGHLIGHTS_LAYER\0CHARACTERS_LAYER\0FRONT_LIGHTS_LAYER\0LEVEL_GEOMETRY_LAYER\0DARKEN_ROOMS_LAYER\0UI_LAYER\0CROSSHAIR_LAYER\0" };
+static const char* s_allLayersAsString = { "BEHIND_LIGHTS_LAYER\0BACK_LIGHTS_LAYER\0BAKED_HIGHLIGHTS_LAYER\0FOREGROUND_LAYER\0CHARACTERS_LAYER\0FRONT_LIGHTS_LAYER\0LEVEL_GEOMETRY_LAYER\0DARKEN_ROOMS_LAYER\0UI_LAYER\0CROSSHAIR_LAYER\0" };
 
 enum AtlasType
 {

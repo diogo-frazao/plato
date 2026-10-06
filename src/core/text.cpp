@@ -147,7 +147,7 @@ TextDTO getTextInfo(TextType textType)
 		case C_2_A: return { "What are you doing here?", CHOICE_DIALOGUE };
 			case C_2_A_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious, I'm here to collect [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and [yellow]we're here to get it.[yellow] One way... or the other", OSKAR_DIALOGUE };
 		case C_2_B: return { "Did you break the radio?", CHOICE_DIALOGUE };
-			case C_2_B_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious... [redshake]YES.[redshake] [redshake]I.[redshake] [redshake]DID IT.[redshake] And I'm here to collect [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and we're here to collect it. One way... or the other", OSKAR_DIALOGUE };
+			case C_2_B_1: return { "[laugh]AHahhahHAH,[laugh] since you're so [redshake]fucking[redshake] curious... [redshake]YES.[redshake] [redshake]I.[redshake] [redshake]DID IT.[redshake] And I'm here to get [yellow]my[yellow] money. Your [redshake]fucking[redshake] boss owes us and we're here to collect it. One way... or the other", OSKAR_DIALOGUE };
 		case C_2_C: return { "You talk too much < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 	case C_3: return { "We all know that's not true, this has always been and will always be an honest business", DARWIN_DIALOGUE };
 	case C_3_1: return { "[laugh]HaHhAhAhah,[laugh] do you see this [hugo]BROTHER?[hugo] [redshake]FUCKING.[redhsake] [redshake]LIAR.[redhsake]", OSKAR_DIALOGUE, 5 };
@@ -155,7 +155,7 @@ TextDTO getTextInfo(TextType textType)
 		case C_3_1_B: return { "You're really pushing it now", CHOICE_DIALOGUE, 5, HIGH_TENSION };
 		case C_3_1_C: return { "You are going to leave now < AIM GUN >", CHOICE_DIALOGUE, 10, FATAL_TENSION };
 	case C_4: return { "And [redshake]WHAT?[redshake] I do what I [redshake]FUCKING[redshake] want, [laugh]ahAHaHaHah[laugh]", OSKAR_DIALOGUE, 5 };
-	case C_4_1: return { "Serve me another drink [darwin]DARWIN,[darwin] [yellow]now.[yellow] And if you keep talking [rostov]ROSTOV,[rostov] you might end up like your [lightpink]DAD[lightpink], peeing in a cup, [red]waiting to die,[red] and can barely take a step without tripping on himself. [laugh]AHahhahHAH[laugh]", OSKAR_DIALOGUE, 30};
+	case C_4_1: return { "Serve me another drink [darwin]DARWIN,[darwin] [yellow]now.[yellow] And if you keep talking [rostov]ROSTOV,[rostov] you might end up like your [lightpink]DAD[lightpink], peeing in a cup, [red]waiting to die,[red] and can barely take a step without tripping on himself. [laugh]AHahhahHAH[laugh]", OSKAR_DIALOGUE, 50};
 		case C_4_1_I: return { "You've gone too far < SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION, 100 };
 	case C_4_2: return { "...Actually, [yellow]forget it.[yellow] My patience is [redshake]over.[redshake] You have 5 seconds to get me [redshake]MY[redshake] money", OSKAR_DIALOGUE, 10 };
 	case C_4_3: return { "5... 4... 3... 2... 1...", OSKAR_DIALOGUE };
@@ -299,6 +299,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 27, 52, 45 };
 		s_currentDialogueEntityDTO.textColor = { 145, 210, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 22.f, 9.f };
+		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = k_playerEntityId;
 		break;
 	case DARWIN_DIALOGUE:
@@ -306,13 +307,15 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 106, 106, 106 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_darwinEntityId;
 		break;
 	case OSKAR_DIALOGUE:
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 61, 49, 63 };
 		s_currentDialogueEntityDTO.textColor = { 193, 138, 106 };
-		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = { 20.f, 8.f };
+		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_LEFT_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_oskarEntityId;
 		break;
 	case HUGO_DIALOGUE:
@@ -320,6 +323,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 60, 60, 60 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;
 	case BIG_DISEL_DIALOGUE:
@@ -327,6 +331,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 85, 38, 67 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;
 	default:

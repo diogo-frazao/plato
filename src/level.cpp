@@ -295,26 +295,29 @@ void setupInsideRestaurantScene()
         t->position = { 24, k_restaurantBaseY + 75.f };
     }
 
-    float oskarXPosition = 550.f;
-
     {
-        Entity& darwin = addEntity("darwin", { oskarXPosition + 57.f, 117.f });
-        addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, CHARACTERS_LAYER);
-        getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
+        Entity& darwin = addEntity("darwin", { 555.f, 110.f });
+
+        // Darwin starts at behind lights layer to be behind the table (which is on the same layer but in front since the entity is created later).
+        // After, he is manually changed to CHARACTERS_LAYER
+        addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, BEHIND_LIGHTS_LAYER);
+        getComponentFromEntity<SpriteComponent>(darwin)->flipX = false;
 
         addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
 
-        auto* darwinM = addComponentToEntity<MovementComponent>(darwin);
-        darwinM->maxHorizontalSpeed = 0.3f;
-
-        SpriteType darwinAnimations[] = { DARWIN_PLACEHOLDER_SPRITE };
-        darwinM->setupMovementAnimations(darwinAnimations);
+        // Darwin starts without movement component since he's "floating" behind the table and not touching the floor
 
         s_darwinEntityId = darwin.id;
     }
 
+    // Table fg to be in front of darwin
     {
-        Entity& hugo = addEntity("hugo", { oskarXPosition + 102.f, 106.f });
+        Entity& table = addEntity("restaurantTable", { 519.f, 115.f });
+        addComponentToEntity<SpriteComponent>(table)->setupSpriteForLayer(RESTAURANT_TABLE_FG_SPRITE, BEHIND_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& hugo = addEntity("hugo", { 652.f, 106.f });
         addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         getComponentFromEntity<SpriteComponent>(hugo)->flipX = true;
 
@@ -330,9 +333,9 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& oskar = addEntity("oskar", { oskarXPosition, 95.f });
+        Entity& oskar = addEntity("oskar", { 559.f, 95.f });
         addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
-        getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
+        getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
 
         addComponentToEntity<RectColliderComponent>(oskar)->collider = RectCollider({ 4, 4 }, { 9, 17 });
         addComponentToEntity<AttackingComponent>(oskar);
@@ -1791,15 +1794,10 @@ void Level::update()
 
             oskar.entityState = IDLE_STATE;
 
-            float oskarXPosition = 550.f;
-
+            float oskarXPosition = 559.f;
             getComponentFromEntity<TransformComponent>(oskar)->position.x = oskarXPosition;
-            getComponentFromEntity<TransformComponent>(darwin)->position.x = oskarXPosition + 57.f;
-            getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
-            getComponentFromEntity<SpriteComponent>(oskar)->flipX = false;
+            getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
             getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = false;
-
-            getComponentFromEntity<TransformComponent>(hugo)->position.x = oskarXPosition + 102.f;
 
             // Hide shadows when door is opened
             _hasOpenedRestaurantDoor = false;

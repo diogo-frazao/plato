@@ -167,13 +167,6 @@ public:
 	}
 };
 
-enum DialogueAlignmentType
-{
-	DIALOGUE_CENTER_ALIGNED,
-	DIALOGUE_LEFT_ALIGNED,
-	DIALOGUE_RIGHT_ALIGNED
-};
-
 class UISystem
 {
 public:

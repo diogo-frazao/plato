@@ -73,6 +73,11 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		size = { 681, 78 };
 		atlas = GAME_ATLAS;
 		break;
+	case RESTAURANT_TABLE_FG_SPRITE:
+		atlasOffset = { 681, 35 };
+		size = { 101, 20 };
+		atlas = GAME_ATLAS;
+		break;
 	case GOLF_WEAPON_SPRITE:
 		atlasOffset = { 355, 28 };
 		size = { 8, 11 };

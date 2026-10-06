@@ -3382,6 +3382,7 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 		positionToDrawText = screenSpacePosition;
 	}
 
+	alignmentType = s_currentDialogueEntityDTO.dialogueAlignment;
 	_currentDialogue.topLeftPosition = getPositionToStartDrawingText(textToShow, positionToDrawText, alignmentType, maxCharactersPerLine);
 	_currentDialogue.isScreenSpace = isScreenSpace;
 	_currentDialogue.alignmentType = alignmentType;

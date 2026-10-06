@@ -267,6 +267,13 @@ struct TextDTO
 
 TextDTO getTextInfo(TextType textTye);
 
+enum DialogueAlignmentType
+{
+	DIALOGUE_CENTER_ALIGNED,
+	DIALOGUE_LEFT_ALIGNED,
+	DIALOGUE_RIGHT_ALIGNED
+};
+
 struct DialogueEntityDTO
 {
 	SDL_Color dialogueBoxColor;
@@ -275,6 +282,7 @@ struct DialogueEntityDTO
 	int32_t entityId = k_invalidId;
 
 	Vec2 dialoguePositionOffset{ 0.f, 0.f };
+	DialogueAlignmentType dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 };
 
 inline DialogueEntityDTO s_currentDialogueEntityDTO{};
