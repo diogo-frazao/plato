@@ -1625,6 +1625,7 @@ void CombatSystem::update()
 				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
 				{
 					// If we're here it means a npc hit the player
+					D_LOG(LOG, "Player damaged");
 					player.entityState = DAMAGED_STATE;
 					playerA->isLimping = true;
 					startTimer(playerA->recoverFromLimpingTimer);

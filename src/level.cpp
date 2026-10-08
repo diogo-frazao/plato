@@ -958,9 +958,10 @@ void Level::update()
                 u.pushEntityDialogue(C_AIM_2);
             }
 
-            // If we aim but don't shoot, oskar will attack us
+            // If we aim but don't shoot, oskar will attack us. Only do it once
             bool willAttackRostov = u.hasDialogueFinihsed(C_AIM_2) || u.hasDialogueFinihsed(C_4_3);
-            if (willAttackRostov && !isEntityAlreadyDying(oskar.entityState))
+            bool isOskarEngagedInCombat = getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat;
+            if (willAttackRostov && !isEntityAlreadyDying(oskar.entityState) && !isOskarEngagedInCombat)
             {
                 player.entityState = IDLE_STATE;
                 u.popTensionBar();
