@@ -10,7 +10,7 @@ enum EntityState
 {
 	NO_STATE,
 
-	// Locomotion. Controller by Movement System
+	// Locomotion. Controller by Movement System. Some are only used by rostov, not by npcs
 	IDLE_STATE,
 	WALK_STATE, // Used during cutscenes
 	TAKE_OFF_STATE,
@@ -29,6 +29,37 @@ enum EntityState
 	WAITING_TO_DIE_STATE,
 	DEAD_STATE,
 };
+
+enum EntityType
+{
+	DEFAULT_ENTITY_TYPE,
+	ROSTOV_ENTITY,
+	DARWIN_ENTITY,
+	OSKAR_ENTITY,
+	HUGO_ENTITY,
+	PISTOL_BULLET_ENTITY,
+};
+
+inline const char* getEntityTypeAsString(EntityType type)
+{
+	switch (type)
+	{
+	case DEFAULT_ENTITY_TYPE:
+		return "DEFAULT_ENTITY_TYPE";
+	case ROSTOV_ENTITY:
+		return "ROSTOV_ENTITY";
+	case DARWIN_ENTITY:
+		return "DARWIN_ENTITY";
+	case OSKAR_ENTITY:
+		return "OSKAR_ENTITY";
+	case HUGO_ENTITY:
+		return "HUGO_ENTITY";
+	case PISTOL_BULLET_ENTITY:
+		return "PISTOL_BULLET_ENTITY";
+	}
+
+	return "NOT SUPPORTED";
+}
 
 inline bool isEntityInCombatState(EntityState state)
 {

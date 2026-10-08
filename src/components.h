@@ -162,16 +162,6 @@ struct RectColliderComponent
 
 struct MovementComponent
 {
-	SpriteType movementAnimations[k_maxNumberOfMovementAnimations];
-
-	void setupMovementAnimations(SpriteType animations[k_maxNumberOfMovementAnimations])
-	{
-		for (uint8_t i = 0; i < k_maxNumberOfMovementAnimations; ++i)
-		{
-			movementAnimations[i] = animations[i];
-		}
-	}
-
 	// Max horizontal speed while moving
 	float maxHorizontalSpeed = 1.5f;
 	// How fast the character reaches maxHorizontalSpeed while moving

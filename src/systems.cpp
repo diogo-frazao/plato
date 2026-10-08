@@ -1126,6 +1126,41 @@ void MovementSystem::processMainCharacterMovement()
 	}
 }
 
+SpriteType getMovementAnimationForEntityState(Entity* entity)
+{
+	switch (entity->entityState)
+	{
+	default:
+	case IDLE_STATE:
+		switch (entity->entityType)
+		{
+		case DARWIN_ENTITY:
+			return DARWIN_PLACEHOLDER_SPRITE;
+		case OSKAR_ENTITY:
+			return OSKAR_IDLE_SPRITE;
+		case HUGO_ENTITY:
+			return HUGO_IDLE_SPRITE;
+		case PISTOL_BULLET_ENTITY:
+			return PISTOL_BULLET_SPRITE;
+		}
+		break;
+	case RUNNING_STATE:
+		switch (entity->entityType)
+		{
+		case DARWIN_ENTITY:
+			return DARWIN_PLACEHOLDER_SPRITE;
+		case OSKAR_ENTITY:
+			return OSKAR_RUN_SPRITE;
+		case HUGO_ENTITY:
+			return HUGO_IDLE_SPRITE;
+		}
+		break;
+	}
+
+	D_ASSERT(false, "Couldn't get sprte for entity state");
+	return INVALID_SPRITE;
+}
+
 void MovementSystem::update()
 {
 	for (Entity& entity : getAllEntities())
@@ -1191,16 +1226,15 @@ void MovementSystem::update()
 			}
 		}
 
-		//TODO: Fix hardcoded sprites
-		// Handle NPC movement animations
 		auto* s = getComponentFromEntity<SpriteComponent>(entity);
+		SpriteType animation = getMovementAnimationForEntityState(&entity);
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
-			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[0], true, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(animation, true, 70, 70);
 			break;
 		case RUNNING_STATE:
-			s->setAnimationToPlayIfNotPlaying(movementComponent->movementAnimations[1], true, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(animation, true, 70, 70);
 			break;
 		}
 	}
@@ -1442,6 +1476,46 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 	}
 }
 
+SpriteType getCombatAnimationForEntityState(Entity* entity, AttackingComponent* a)
+{
+	switch (entity->entityState)
+	{
+	default:
+	case ATTACKING_STATE:
+		//TODO: Expand to also switch on weapon in hand
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			return OSKAR_ATTACK_SPRITE;
+		}
+		break;
+	case DAMAGED_STATE:
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			if (a->damageCounter >= a->numberOfHitsToDie)
+			{
+				return OSKAR_SHOT_FALL_SPRITE;
+			}
+			else
+			{
+				return OSKAR_SHOT_RECOVER_SPRITE;
+			}
+		}
+		break;
+	case DEAD_STATE:
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			return OSKAR_FALL_DEATH_SPRITE;
+		}
+		break;
+	}
+
+	D_ASSERT(false, "Couldn't get sprte for entity state");
+	return INVALID_SPRITE;
+}
+
 void CombatSystem::update()
 {
 	clearDebugCollisions();
@@ -1554,18 +1628,15 @@ void CombatSystem::update()
 				entity.entityState = IDLE_STATE;
 			}
 
-			s->setAnimationToPlayIfNotPlaying(OSKAR_ATTACK_SPRITE, false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, animationSpeed, 70);
 			break;
 		}
 		case DAMAGED_STATE:
 		{
 			uint32_t animationSpeed = 70;
-			SpriteType animationToPlay = OSKAR_SHOT_FALL_SPRITE;
 			
 			if (a->damageCounter >= a->numberOfHitsToDie)
 			{
-				animationToPlay = OSKAR_SHOT_FALL_SPRITE;
-
 				if (s->animationData.currentFrame == 0)
 				{
 					animationSpeed = 600;
@@ -1587,8 +1658,6 @@ void CombatSystem::update()
 			}
 			else
 			{
-				animationToPlay = OSKAR_SHOT_RECOVER_SPRITE;
-
 				if (s->animationData.currentFrame == 0)
 				{
 					animationSpeed = 600;
@@ -1601,11 +1670,11 @@ void CombatSystem::update()
 				}
 			}
 
-			s->setAnimationToPlayIfNotPlaying(animationToPlay, false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, animationSpeed, 70);
 			break;
 		}
 		case DEAD_STATE:
-			s->setAnimationToPlayIfNotPlaying(OSKAR_FALL_DEATH_SPRITE, false, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, 70, 70);
 			break;
 		}
 
@@ -1701,7 +1770,7 @@ void CombatSystem::mainCharacterAttackWithWeaponInHand(Entity* player, Attacking
 		// Create bullet
 	{
 		Vec2 bulletPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 15.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
-		Entity& bullet = addEntity("bullet", bulletPosition);
+		Entity& bullet = addEntity("bullet", bulletPosition, PISTOL_BULLET_ENTITY);
 
 		auto* bulletTransform = getComponentFromEntity<TransformComponent>(bullet);
 		bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;
@@ -1716,9 +1785,7 @@ void CombatSystem::mainCharacterAttackWithWeaponInHand(Entity* player, Attacking
 		auto* bulletCollider = addComponentToEntity<RectColliderComponent>(bullet);
 		bulletCollider->collider = { {0, 0}, bulletSprite->size };
 
-		SpriteType movementAnimations[] = { PISTOL_BULLET_SPRITE };
 		auto* bulletMovement = addComponentToEntity<MovementComponent>(bullet);
-		bulletMovement->setupMovementAnimations(movementAnimations);
 		bulletMovement->gravity = 0.f;
 		bulletMovement->airFriction = 0.f;
 		int8_t movementDirection = bulletSprite->flipX ? 1.f : -1.f;

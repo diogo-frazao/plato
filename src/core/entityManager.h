@@ -15,6 +15,7 @@ struct Entity
 	int32_t id = k_invalidId;
 	int32_t componentBitmask = 0;
 	EntityState entityState = NO_STATE;
+	EntityType entityType = DEFAULT_ENTITY_TYPE;
 };
 
 static Entity s_invalidEntity;

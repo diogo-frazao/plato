@@ -296,7 +296,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& darwin = addEntity("darwin", { 555.f, 110.f });
+        Entity& darwin = addEntity("darwin", { 555.f, 110.f }, DARWIN_ENTITY);
 
         // Darwin starts at behind lights layer to be behind the table (which is on the same layer but in front since the entity is created later).
         // After, he is manually changed to CHARACTERS_LAYER
@@ -317,7 +317,7 @@ void setupInsideRestaurantScene()
     }
 
     {
-        Entity& hugo = addEntity("hugo", { 652.f, 106.f });
+        Entity& hugo = addEntity("hugo", { 652.f, 106.f }, HUGO_ENTITY);
         addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(HUGO_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         getComponentFromEntity<SpriteComponent>(hugo)->flipX = true;
 
@@ -327,13 +327,10 @@ void setupInsideRestaurantScene()
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         s_hugoEntityId = hugo.id;
-
-        SpriteType hugoAnimations[] = { HUGO_IDLE_SPRITE };
-        hugoM->setupMovementAnimations(hugoAnimations);
     }
 
     {
-        Entity& oskar = addEntity("oskar", { 559.f, 95.f });
+        Entity& oskar = addEntity("oskar", { 559.f, 95.f }, OSKAR_ENTITY);
         addComponentToEntity<SpriteComponent>(oskar)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
 
@@ -343,9 +340,6 @@ void setupInsideRestaurantScene()
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
         oskarM->maxHorizontalSpeed = 0.3f;
         s_oskarEntityId = oskar.id;
-
-        SpriteType oskarAnimations[] = { OSKAR_IDLE_SPRITE, OSKAR_RUN_SPRITE };
-        oskarM->setupMovementAnimations(oskarAnimations);
     }
 
     // Darkened room shadow
@@ -397,7 +391,7 @@ void Level::start()
     s_renderingSystem.createInFrontOfEverythingBuffer();
     s_uiSystem.start();
 
-    Entity& player = addEntity("player", { 67.f, k_restaurantBaseY + 48.f });
+    Entity& player = addEntity("player", { 67.f, k_restaurantBaseY + 48.f }, ROSTOV_ENTITY);
     SpriteComponent* playerSprite = addComponentToEntity<SpriteComponent>(player);
     auto* movementComponent = addComponentToEntity<MovementComponent>(player);
     addComponentToEntity<AttackingComponent>(player);
@@ -2180,6 +2174,7 @@ void Level::imguiRender()
         {
             ImGui::Text("Entity: %s", selectedEntityToInspect->debugName);
             ImGui::Text("Entity State: %s", getEntityStateAsString(selectedEntityToInspect->entityState));
+            ImGui::Text("Entity Type: %s", getEntityTypeAsString(selectedEntityToInspect->entityType));
             ImGui::TextDisabled("Id: %i", selectedEntityToInspect->id);
 
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5 / 7.0f, 0.6f, 0.6f));

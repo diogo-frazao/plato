@@ -52,9 +52,10 @@ inline Entity& getLastAddedEntity()
 	return s_entityManager._entities[s_entityManager._lastValidEntityId];
 }
 
-inline Entity& addEntity(const char* debugName, Vec2 position = Vec2())
+inline Entity& addEntity(const char* debugName, Vec2 position = Vec2(), EntityType type = DEFAULT_ENTITY_TYPE)
 {
 	Entity& entity = s_entityManager.addEntity();
+	entity.entityType = type;
 
 	strncpy(entity.debugName, debugName, k_entityMaxNameCharacters);
 	auto* t = addComponentToEntity<TransformComponent>(entity);
