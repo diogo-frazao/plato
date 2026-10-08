@@ -1152,7 +1152,7 @@ SpriteType getMovementAnimationForEntityState(Entity* entity)
 		case OSKAR_ENTITY:
 			return OSKAR_RUN_SPRITE;
 		case HUGO_ENTITY:
-			return HUGO_IDLE_SPRITE;
+			return HUGO_RUN_SPRITE;
 		}
 		break;
 	}
@@ -1487,6 +1487,12 @@ SpriteType getCombatAnimationForEntityState(Entity* entity, AttackingComponent* 
 		{
 		case OSKAR_ENTITY:
 			return OSKAR_ATTACK_SPRITE;
+		case HUGO_ENTITY:
+			switch (a->weaponInHand)
+			{
+			case BOTTLE_THROWABLE_TYPE:
+				return HUGO_THROW_BOTTLE_SPRITE;
+			}
 		}
 		break;
 	case DAMAGED_STATE:
@@ -1512,7 +1518,7 @@ SpriteType getCombatAnimationForEntityState(Entity* entity, AttackingComponent* 
 		break;
 	}
 
-	D_ASSERT(false, "Couldn't get sprte for entity state");
+	D_ASSERT(false, "Couldn't get sprite for entity %s with state %s", getEntityTypeAsString(entity->entityType), getEntityStateAsString(entity->entityState));
 	return INVALID_SPRITE;
 }
 
@@ -1569,11 +1575,18 @@ void CombatSystem::update()
 		auto* s = getComponentFromEntity<SpriteComponent>(entity);
 		auto* t = getComponentFromEntity<TransformComponent>(entity);
 
+		// Add more seconds to attack again if has throwable in hand
+		float extraSecondsNeededToAttackAgain = 0.f;
+		if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+		{
+			extraSecondsNeededToAttackAgain = 1.f;
+		}
+
 		bool isWaitingToAttackAgain = false;
 		if (isTimerOngoing(a->secondsSinceLastAttackTimer))
 		{
 			a->secondsSinceLastAttackTimer += k_deltaTime;
-			if (a->secondsSinceLastAttackTimer < a->secondsNeededToAttackAgain)
+			if (a->secondsSinceLastAttackTimer < a->secondsNeededToAttackAgain + extraSecondsNeededToAttackAgain)
 			{
 				isWaitingToAttackAgain = true;
 			}
@@ -1586,28 +1599,33 @@ void CombatSystem::update()
 		bool canNPCAttack = m->isGrounded && a->isEngagedInCombat && !isEntityInCombatState(entity.entityState) && !isWaitingToAttackAgain;
 		if (canNPCAttack)
 		{
+			float targetMinDistanceToAttack = 0.f;
+
 			switch (a->weaponInHand)
 			{
 			case NO_WEAPON_TYPE:
 				// No weapon in hand means melee. Get close enough > Attack > Wait > repeat
-
-				invalidateTimer(a->secondsSinceLastAttackTimer);
-
-				float targetMinDistanceToAttack = 30.f;
-				float targetXPosition = playerT->position.x;
-
-				bool shouldMoveLeft = targetXPosition < t->position.x;
-				s->flipX = shouldMoveLeft;
-
-				if (abs(t->position.x - targetXPosition) < targetMinDistanceToAttack)
-				{
-					entity.entityState = ATTACKING_STATE;
-					break;
-				}
-
-				m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
+				targetMinDistanceToAttack = 30.f;
+				break;
+			case BOTTLE_THROWABLE_TYPE:
+				// Throwable weapon means the character runs until it's close to hit. Throws the thing (ex: bottle), and ends up with no weapon in hand.
+				targetMinDistanceToAttack = 150.f;
 				break;
 			}
+
+			invalidateTimer(a->secondsSinceLastAttackTimer);
+
+			float targetXPosition = playerT->position.x;
+			bool shouldMoveLeft = targetXPosition < t->position.x;
+			s->flipX = shouldMoveLeft;
+
+			if (abs(t->position.x - targetXPosition) < targetMinDistanceToAttack)
+			{
+				entity.entityState = ATTACKING_STATE;
+				break;
+			}
+
+			m->currentSpeed.x = shouldMoveLeft ? m->maxHorizontalSpeed * -1.f : m->maxHorizontalSpeed;
 		}
 
 		// Handle Combat related NPC animations
@@ -1618,13 +1636,34 @@ void CombatSystem::update()
 			uint32_t animationSpeed = 70;
 			if (s->animationData.currentFrame == 1)
 			{
-				animationSpeed = 140;
+				if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+				{
+					animationSpeed = 400;
+				}
+				else
+				{
+					animationSpeed = 140;
+				}
+			}
+
+			switch (a->weaponInHand)
+			{
+			case BOTTLE_THROWABLE_TYPE:
+				if (s->animationData.currentFrame == 3 && !a->didCurrentAttackThrowWeapon)
+				{
+					// Throw bottle
+					Entity& bottle = addEntity("bottle", t->position);
+					addComponentToEntity<SpriteComponent>(bottle)->setupSpriteForLayer(THROWABLE_BOTTLE_SPRITE, CHARACTERS_LAYER);
+					a->didCurrentAttackThrowWeapon = true;
+				}
+				break;
 			}
 
 			if (s->animationData.finishedPlayingAnimation)
 			{
 				startTimer(a->secondsSinceLastAttackTimer);
 				a->wasPlayerHitByCurrentAttack = false;
+				a->didCurrentAttackThrowWeapon = false;
 				entity.entityState = IDLE_STATE;
 			}
 

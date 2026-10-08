@@ -138,6 +138,7 @@ enum SpriteType
 
 	// Weapons
 	GOLF_WEAPON_SPRITE,
+	THROWABLE_BOTTLE_SPRITE,
 
 	// Main Character
 	CHARACTER_IDLE_SPRITE,
@@ -187,6 +188,8 @@ enum SpriteType
 
 	// Hugo
 	HUGO_IDLE_SPRITE,
+	HUGO_RUN_SPRITE,
+	HUGO_THROW_BOTTLE_SPRITE,
 
 	// Darwin
 	DARWIN_PLACEHOLDER_SPRITE,

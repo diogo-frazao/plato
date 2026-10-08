@@ -323,7 +323,10 @@ void setupInsideRestaurantScene()
 
         addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 10, 21 });
         // We can't attack hugo until oskar dies
-        addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
+        auto* hugoA = addComponentToEntity<AttackingComponent>(hugo);
+        hugoA->canBeAttacked = false;
+        hugoA->weaponInHand = BOTTLE_THROWABLE_TYPE;
+
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         s_hugoEntityId = hugo.id;
@@ -1732,7 +1735,7 @@ void Level::update()
                 a->damageCounter = 0;
                 a->numberOfHitsToDie = 2;
 
-                if (entity.id == s_oskarEntityId)
+                if (entity.id == s_hugoEntityId)
                 {
                     a->isEngagedInCombat = true;
                     getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 1.3f;

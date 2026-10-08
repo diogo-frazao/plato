@@ -203,6 +203,7 @@ enum WeaponType
 	NO_WEAPON_TYPE,
 	GOLF_WEAPON_TYPE,
 	ROSTOV_WEAPON_PISTOL_TYPE,
+	BOTTLE_THROWABLE_TYPE,
 	WEAPON_TYPE_COUNT,
 };
 
@@ -222,6 +223,7 @@ struct AttackingComponent
 
 	// Rostov and NPCS can enter limping state. the next hit kills them
 	bool isLimping = false;
+
 	// How many seconds it takes for the character to "auto heal" from the limping state
 	float secondsToRecoverFromLimping = 10.f;
 	float recoverFromLimpingTimer = k_invalidTime;
@@ -234,6 +236,9 @@ struct AttackingComponent
 	// This makes the NPCS's movements smoother since they have to hold the idle position for a fraction before attacking again
 	float secondsSinceLastAttackTimer = k_invalidTime;
 	float secondsNeededToAttackAgain = 0.3f;
+
+	// Set to true if we have the player or npc has a throwable weapon in hand and they throw it. Reset when another attack happens
+	bool didCurrentAttackThrowWeapon = false;
 
 	// Used to know if the player was already hit by the current attack or not (avoid applying damage twice)
 	bool wasPlayerHitByCurrentAttack = false;
