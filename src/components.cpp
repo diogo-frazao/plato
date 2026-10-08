@@ -278,6 +278,13 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 4;
 		collidertopLeftPointOffset = { 22, 10 };
 		break;
+	case HUGO_IDLE_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 1, 524 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 24, 6 };
+		break;
 	case DARWIN_PLACEHOLDER_SPRITE:
 		atlas = GAME_ATLAS;
 		atlasOffset = { 339, 2 };

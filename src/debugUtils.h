@@ -123,6 +123,24 @@ inline void inspectBoolProperty(char* name, bool* variable, Entity* entity)
     ImGui::PopID();
 }
 
+inline void inspectIntProperty(char* name, int* variable, Entity* entity)
+{
+    ImGui::TableNextRow();
+    ImGui::PushID(name);
+    ImGui::TableNextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted(name);
+    ImGui::TableNextColumn();
+
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::SliderInt("##Editor", variable, 0, 30))
+    {
+        registerEntityChangeAtRuntime(entity);
+    }
+
+    ImGui::PopID();
+}
+
 inline void inspectFloatProperty(char* name, float* variable, Entity* entity)
 {
     ImGui::TableNextRow();

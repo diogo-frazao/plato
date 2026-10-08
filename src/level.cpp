@@ -318,17 +318,17 @@ void setupInsideRestaurantScene()
 
     {
         Entity& hugo = addEntity("hugo", { 652.f, 106.f });
-        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(OSKAR_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
+        addComponentToEntity<SpriteComponent>(hugo)->setupAnimationForLayer(HUGO_IDLE_SPRITE, CHARACTERS_LAYER, true, 70, 900);
         getComponentFromEntity<SpriteComponent>(hugo)->flipX = true;
 
-        addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 9, 17 });
+        addComponentToEntity<RectColliderComponent>(hugo)->collider = RectCollider({ 4, 4 }, { 10, 21 });
         // We can't attack hugo until oskar dies
         addComponentToEntity<AttackingComponent>(hugo)->canBeAttacked = false;
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
         hugoM->maxHorizontalSpeed = 0.3f;
         s_hugoEntityId = hugo.id;
 
-        SpriteType hugoAnimations[] = { OSKAR_IDLE_SPRITE };
+        SpriteType hugoAnimations[] = { HUGO_IDLE_SPRITE };
         hugoM->setupMovementAnimations(hugoAnimations);
     }
 
@@ -991,6 +991,10 @@ void Level::update()
             {
                 u.pushEntityDialogue(C_SHOOT_1);
                 _confrontStageData.hasHugoReactedToDeath = true;
+
+                // Allow damaging hugo
+                Entity& hugo = getEntityById(s_hugoEntityId);
+                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
             }
 
             break;
@@ -1785,35 +1789,54 @@ void Level::update()
         // Recreate current dialogue
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_O))
         {
-            _currentLevelStage = FIRST_DAD_PHONE_STAGE;
-            s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_12);
+            //_currentLevelStage = FIRST_DAD_PHONE_STAGE;
+            //s_uiSystem.pushCellphoneDialogue(ONE_DAD_PHONE_12);
+
+            //Entity& oskar = getEntityById(s_oskarEntityId);
+            //Entity& darwin = getEntityById(s_darwinEntityId);
+            //Entity& hugo = getEntityById(s_hugoEntityId);
+
+            //oskar.entityState = IDLE_STATE;
+
+            //float oskarXPosition = 559.f;
+            //getComponentFromEntity<TransformComponent>(oskar)->position.x = oskarXPosition;
+            //getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
+            //getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = false;
+
+            //// Hide shadows when door is opened
+            //_hasOpenedRestaurantDoor = false;
+            //Entity& shadow1 = getEntityById(s_darkenedRoomShadowEntityId);
+            //auto* s1 = getComponentFromEntity<SpriteComponent>(shadow1);
+            //s1->color.a = 255;
+
+            //Entity& shadow2 = getEntityById(s_bigRoomShadowEntityId);
+            //auto* s2 = getComponentFromEntity<SpriteComponent>(shadow2);
+            //s2->color.a = 255;
+
+            //_confrontStageData.reset();
+
+            //playerTransform->position.x = 67.f;
+
+            //getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
+
+            _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
+            _confrontStageData.reset();
 
             Entity& oskar = getEntityById(s_oskarEntityId);
             Entity& darwin = getEntityById(s_darwinEntityId);
             Entity& hugo = getEntityById(s_hugoEntityId);
 
             oskar.entityState = IDLE_STATE;
+            hugo.entityState = IDLE_STATE;
 
-            float oskarXPosition = 559.f;
-            getComponentFromEntity<TransformComponent>(oskar)->position.x = oskarXPosition;
-            getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
-            getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = false;
+            getComponentFromEntity<TransformComponent>(oskar)->position.x = 559.f;
+            getComponentFromEntity<TransformComponent>(hugo)->position.x = 652.f;
+            getComponentFromEntity<TransformComponent>(hugo)->scale = { 1.f, 1.f };
 
-            // Hide shadows when door is opened
-            _hasOpenedRestaurantDoor = false;
-            Entity& shadow1 = getEntityById(s_darkenedRoomShadowEntityId);
-            auto* s1 = getComponentFromEntity<SpriteComponent>(shadow1);
-            s1->color.a = 255;
+            playerTransform->position.x = 509.f;
+            playerS->flipX = false;
 
-            Entity& shadow2 = getEntityById(s_bigRoomShadowEntityId);
-            auto* s2 = getComponentFromEntity<SpriteComponent>(shadow2);
-            s2->color.a = 255;
-
-            _confrontStageData.reset();
-
-            playerTransform->position.x = 67.f;
-
-            getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
+            playerA->weaponInHand = NO_WEAPON_TYPE;
 
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
@@ -2198,11 +2221,20 @@ void Level::imguiRender()
                 inspectSpriteProperty("sprite", s, selectedEntityToInspect);
                 inspectBoolProperty("flipX", &s->flipX, selectedEntityToInspect);
 
+                inspectIntProperty("collidertopLeftPointOffset.x", &s->collidertopLeftPointOffset.x, selectedEntityToInspect);
+                inspectIntProperty("collidertopLeftPointOffset.y", &s->collidertopLeftPointOffset.y, selectedEntityToInspect);
+
                 endInspectorComponentSection();
             }
 
             if (startInspectorComponentSection<RectColliderComponent>(selectedEntityToInspect))
             {
+                auto* c = getComponentFromEntity<RectColliderComponent>(*selectedEntityToInspect);
+
+                inspectIntProperty("size.x", &c->collider.size.x, selectedEntityToInspect);
+                inspectIntProperty("size.y", &c->collider.size.y, selectedEntityToInspect);
+                inspectBoolProperty("isLevelGeometry", &c->isLevelGeometry, selectedEntityToInspect);
+
                 endInspectorComponentSection();
             }
             

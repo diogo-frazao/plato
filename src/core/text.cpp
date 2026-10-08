@@ -136,7 +136,7 @@ TextDTO getTextInfo(TextType textType)
 	case ONE_DAD_PHONE_12: return "Go check what it is but call me later son";
 	}
 
-	// Starting confrontation with hugo and oskar
+	// Starting confrontation with oskar
 	{
 	case C_1: return { "Are you deaf? Where the [redshake]fuck[redshake] is my money? I'm losing my patience [darwin]DARWIN,[darwin] and me and [hugo]HUGO[hugo] are [redshake]not[redshake] in a good mood", OSKAR_DIALOGUE };
 		case C_1_I: return { "What is going on here", OSKAR_DIALOGUE, 5, HIGH_TENSION, 30 };
@@ -163,7 +163,7 @@ TextDTO getTextInfo(TextType textType)
 	case C_AIM_1: return { "Ohohoh wait wait let's all calm down...", OSKAR_DIALOGUE };
 	case C_AIM_2: return { "I get it, me and [hugo]HUGO[hugo] will leave, just give us a second and we'll be out in no time", OSKAR_DIALOGUE };
 	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redshake]fucking[redshake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
-	case C_SHOOT_1: return { "[redshake]WTF??[redshake] [hugo]OSKAR???[hugo] I'll [redshake]KILL YOU[redshake] [rostov]ROSTOV[rostov]", HUGO_DIALOGUE };
+	case C_SHOOT_1: return { "[redshake]WTF??[redshake] [hugo]BROTHER???[hugo] I'll [redshake]KILL YOU[redshake] [rostov]ROSTOV[rostov]", HUGO_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed
