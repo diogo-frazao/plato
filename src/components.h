@@ -253,4 +253,7 @@ struct ProjectileComponent
 
 	// Id of the entity that fired the projectile
 	int32_t ownerEntityId = k_invalidId;
+
+	// Used for bottles
+	bool shouldRotateOverTime = false;
 };

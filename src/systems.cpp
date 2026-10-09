@@ -1456,6 +1456,11 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		return;
 	}
 
+	if (projectile->shouldRotateOverTime)
+	{
+		sprite->rotation += k_deltaTime * -250.f;
+	}
+
 	for (Entity& targetEntity : getAllEntities())
 	{
 		if (targetEntity.id == k_invalidId ||
@@ -1800,7 +1805,7 @@ void CombatSystem::update()
 					// Throw bottle once
 					a->didCurrentAttackThrowWeapon = true;
 
-					Vec2 bottleThrowPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 8.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
+					Vec2 bottleThrowPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 9.f } : Vec2{ t->position.x + 46.f, t->position.y + 9.f };
 					Entity& bottle = addEntity("bottle", bottleThrowPosition);
 
 					auto* bottleS = addComponentToEntity<SpriteComponent>(bottle);
@@ -1814,9 +1819,10 @@ void CombatSystem::update()
 					bulletMovement->gravity = 1.f;
 					bulletMovement->airFriction = 0.f;
 					int8_t movementDirection = bottleS->flipX ? 1.f : -1.f;
-					bulletMovement->currentSpeed.x = 3.f * movementDirection;
+					bulletMovement->currentSpeed.x = 3.5f * movementDirection;
 
 					auto* projectile = addComponentToEntity<ProjectileComponent>(bottle);
+					projectile->shouldRotateOverTime = true;
 					projectile->ownerEntityId = entity.id;
 				}
 				break;
