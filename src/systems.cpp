@@ -1140,8 +1140,6 @@ SpriteType getMovementAnimationForEntityState(Entity* entity)
 			return OSKAR_IDLE_SPRITE;
 		case HUGO_ENTITY:
 			return HUGO_IDLE_SPRITE;
-		case PISTOL_BULLET_ENTITY:
-			return PISTOL_BULLET_SPRITE;
 		}
 		break;
 	case RUNNING_STATE:
@@ -1157,7 +1155,7 @@ SpriteType getMovementAnimationForEntityState(Entity* entity)
 		break;
 	}
 
-	D_ASSERT(false, "Couldn't get sprte for entity state");
+	D_ASSERT(false, "Couldn't get sprite for entity %s for state %s", getEntityTypeAsString(entity->entityType), getEntityStateAsString(entity->entityState));
 	return INVALID_SPRITE;
 }
 
@@ -1198,6 +1196,13 @@ void MovementSystem::update()
 
 		processHorizontalMovement(&entity);
 		processVerticalMovement(&entity);
+
+		// Projectiles shouldn't change their states like humanoid characters. 
+		// Continue before changing the state and sprite
+		if (entityHasComponent<ProjectileComponent>(entity))
+		{
+			continue;
+		}
 
 		if (!isEntityInCombatState(entity.entityState))
 		{
@@ -1276,6 +1281,7 @@ void MovementSystem::processVerticalMovement(Entity* self)
 			transformComponent->position.y += movementDirection;
 			pixelsToMove -= movementDirection;
 			movementComponent->isGrounded = false;
+			movementComponent->isCollidingWithLevelGeometry = false;
 		}
 		else
 		{
@@ -1286,6 +1292,7 @@ void MovementSystem::processVerticalMovement(Entity* self)
 			}
 
 			movementComponent->currentSpeed.y = 0;
+			movementComponent->isCollidingWithLevelGeometry = true;
 			return;
 		}
 	}
@@ -1316,10 +1323,12 @@ void MovementSystem::processHorizontalMovement(Entity* self)
 		{
 			transformComponent->position.x += movementDirection;
 			pixelsToMove -= movementDirection;
+			movementComponent->isCollidingWithLevelGeometry = false;
 		}
 		else
 		{
 			movementComponent->currentSpeed.x = 0;
+			movementComponent->isCollidingWithLevelGeometry = true;
 			return;
 		}
 	}
@@ -1387,16 +1396,64 @@ bool MovementSystem::willCollideWithLevelGeometryAtPosition(Entity* self, const 
 
 #pragma region Combat System
 
+void entityDamagePlayer(Entity* entityThatDidTheAttack, Entity* player)
+{
+	D_LOG(LOG, "Player damaged");
+
+	auto* playerA = getComponentFromEntity<AttackingComponent>(*player);
+	auto* playerM = getComponentFromEntity<MovementComponent>(*player);
+
+	auto* a = getComponentFromEntity<AttackingComponent>(*entityThatDidTheAttack);
+	auto* s = getComponentFromEntity<SpriteComponent>(*entityThatDidTheAttack);
+
+	player->entityState = DAMAGED_STATE;
+	playerA->isLimping = true;
+	startTimer(playerA->recoverFromLimpingTimer);
+
+	a->wasPlayerHitByCurrentAttack = true;
+
+	int8_t hitDirection = s->flipX ? -1 : 1;
+	playerM->currentSpeed.x = 4.f * hitDirection;
+
+	s_camera.doShake(STRONG_SHAKE, 0.f);
+	getComponentFromEntity<TransformComponent>(*player)->scale.x = 1.5f;
+}
+
+void CombatSystem::onProjectileCollision(Entity* projectileEntity, bool applyShake)
+{
+	auto* transform = getComponentFromEntity<TransformComponent>(*projectileEntity);
+	auto* collider = getComponentFromEntity<RectColliderComponent>(*projectileEntity);
+
+	// If we get here it's because the bullet hit a target
+	addColliderToDebugList(transform->position, collider->collider);
+
+	//TODO: PROPERLY DELETE THE projectile
+	clearEntityComponentsBitmask(*projectileEntity);
+
+	if (applyShake)
+	{
+		s_camera.doShake(MEDIUM_SHAKE, 0.f);
+	}
+}
+
 void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 {
 	auto* projectile = getComponentFromEntity<ProjectileComponent>(*projectileEntity);
 	auto* transform = getComponentFromEntity<TransformComponent>(*projectileEntity);
 	auto* collider = getComponentFromEntity<RectColliderComponent>(*projectileEntity);
 	auto* sprite = getComponentFromEntity<SpriteComponent>(*projectileEntity);
+	auto* movement = getComponentFromEntity<MovementComponent>(*projectileEntity);
 
 	// Scale projectile's collider with its scale
 	{
 		collider->collider.size.x = transform->scale.x;
+	}
+
+	// If the projectile is colliding with level geometry, destroy it.
+	if (movement->isCollidingWithLevelGeometry)
+	{
+		onProjectileCollision(projectileEntity, true);
+		return;
 	}
 
 	for (Entity& targetEntity : getAllEntities())
@@ -1408,7 +1465,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		}
 
 		// Right now bullets only hit other attacking components
-		// TODO: Maybe expand so we can stop bullets by firing ours against theirs.,
+		// TODO: Maybe expand so we can stop bullets by firing ours against theirs.
 		if (!entityHasComponent<AttackingComponent>(targetEntity))
 		{
 			continue;
@@ -1433,15 +1490,8 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			continue;
 		}
 
-		// If we get here it's because the bullet hit a target
-		addColliderToDebugList(transform->position, collider->collider);
-
-		//TODO: PROPERLY DELETE THE BULLET
-		clearEntityComponentsBitmask(*projectileEntity);
-
-		aTarget->damageCounter++;
-
-		int8_t hitDirection = sprite->flipX ? -1 : 1;
+		bool isTargetEntityPlayer = (targetEntity.id == k_playerEntityId);
+		onProjectileCollision(projectileEntity, !isTargetEntityPlayer);
 
 		// If someone is attacked, interrupt the current dialogue
 		if (s_uiSystem.canInterruptCurrentDialogue())
@@ -1449,30 +1499,43 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			s_uiSystem.interruptCurrentDialogue(true);
 		}
 
-		// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
-		if (targetEntity.entityState == DAMAGED_STATE)
+		if (isTargetEntityPlayer)
 		{
-			auto* targetSprite = getComponentFromEntity<SpriteComponent>(targetEntity);
-
-			// Jump directly to last frame
-			targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
-
-			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-			targetMovement->currentSpeed.x = -3.f * hitDirection;
+			// Damage player with projectiles
+			entityDamagePlayer(&getEntityById(projectile->ownerEntityId), &targetEntity);
 		}
 		else
 		{
-			targetEntity.entityState = DAMAGED_STATE;
+			// Damage npcs with projectiles
+			aTarget->damageCounter++;
+			int8_t hitDirection = sprite->flipX ? -1 : 1;
 
-			auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-			targetMovement->currentSpeed.x = -2.5f * hitDirection;
+			// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
+			if (targetEntity.entityState == DAMAGED_STATE)
+			{
+				auto* targetSprite = getComponentFromEntity<SpriteComponent>(targetEntity);
+
+				// Jump directly to last frame
+				targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
+
+				auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+				targetMovement->currentSpeed.x = -3.f * hitDirection;
+			}
+			else
+			{
+				targetEntity.entityState = DAMAGED_STATE;
+
+				auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+				targetMovement->currentSpeed.x = -2.5f * hitDirection;
+			}
+
+			auto* aTransform = getComponentFromEntity<TransformComponent>(targetEntity);
+			aTransform->scale.x = 1.25f;
+			aTransform->resetScaleLerp = 0.05f;
 		}
 
-		auto* aTransform = getComponentFromEntity<TransformComponent>(targetEntity);
-		aTransform->scale.x = 1.25f;
-		aTransform->resetScaleLerp = 0.05f;
-
-		s_camera.doShake(MEDIUM_SHAKE, 0.f);
+		// If we hit a target there's no need to keep iterating over entities, the projectile was already deleted
+		return;
 	}
 }
 
@@ -1563,7 +1626,6 @@ void CombatSystem::update()
 			}
 		}
 
-
 		if (entity.id == k_playerEntityId)
 		{
 			tryStartMainCharacterAttack(&player, playerA, playerM, playerT, playerS, playerC);
@@ -1609,7 +1671,7 @@ void CombatSystem::update()
 				break;
 			case BOTTLE_THROWABLE_TYPE:
 				// Throwable weapon means the character runs until it's close to hit. Throws the thing (ex: bottle), and ends up with no weapon in hand.
-				targetMinDistanceToAttack = 150.f;
+				targetMinDistanceToAttack = 120.f;
 				break;
 			}
 
@@ -1644,19 +1706,6 @@ void CombatSystem::update()
 				{
 					animationSpeed = 140;
 				}
-			}
-
-			switch (a->weaponInHand)
-			{
-			case BOTTLE_THROWABLE_TYPE:
-				if (s->animationData.currentFrame == 3 && !a->didCurrentAttackThrowWeapon)
-				{
-					// Throw bottle
-					Entity& bottle = addEntity("bottle", t->position);
-					addComponentToEntity<SpriteComponent>(bottle)->setupSpriteForLayer(THROWABLE_BOTTLE_SPRITE, CHARACTERS_LAYER);
-					a->didCurrentAttackThrowWeapon = true;
-				}
-				break;
 			}
 
 			if (s->animationData.finishedPlayingAnimation)
@@ -1717,35 +1766,60 @@ void CombatSystem::update()
 			break;
 		}
 
-		// Handle NPC Melee hit detection
+		// Handle NPC hit detection
 		if (entity.entityState == ATTACKING_STATE)
 		{
-			bool canAttackFromCurrentFrame = (s->animationData.currentFrame == 2) || (s->animationData.currentFrame == 3);
-			if (!a->wasPlayerHitByCurrentAttack && canAttackFromCurrentFrame)
+			switch (a->weaponInHand)
 			{
-				RectCollider attackCollider{ {34, 9}, {24, 18} };
-				if (s->flipX)
+			case NO_WEAPON_TYPE:
+			{
+				// NPC Melee hits
+				bool canAttackFromCurrentFrame = (s->animationData.currentFrame == 2) || (s->animationData.currentFrame == 3);
+				if (!a->wasPlayerHitByCurrentAttack && canAttackFromCurrentFrame)
 				{
-					attackCollider.topLeftPointOffset.x = -1;
+					RectCollider attackCollider{ {34, 9}, {24, 18} };
+					if (s->flipX)
+					{
+						attackCollider.topLeftPointOffset.x = -1;
+					}
+
+					addColliderToDebugList(t->position, attackCollider);
+					if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
+					{
+						// If we're here it means a npc hit the player
+						entityDamagePlayer(&entity, &player);
+					}
 				}
 
-				addColliderToDebugList(t->position, attackCollider);
-				if (aabb(t->position, playerT->position, attackCollider, playerC->collider))
+				break;
+			}
+			case BOTTLE_THROWABLE_TYPE:
+				// NPC Throws bottle
+				if (s->animationData.currentFrame == 2 && !a->didCurrentAttackThrowWeapon)
 				{
-					// If we're here it means a npc hit the player
-					D_LOG(LOG, "Player damaged");
-					player.entityState = DAMAGED_STATE;
-					playerA->isLimping = true;
-					startTimer(playerA->recoverFromLimpingTimer);
+					// Throw bottle once
+					a->didCurrentAttackThrowWeapon = true;
 
-					a->wasPlayerHitByCurrentAttack = true;
+					Vec2 bottleThrowPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 8.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
+					Entity& bottle = addEntity("bottle", bottleThrowPosition);
 
-					int8_t hitDirection = s->flipX ? -1 : 1;
-					playerM->currentSpeed.x = 4.f * hitDirection;
+					auto* bottleS = addComponentToEntity<SpriteComponent>(bottle);
+					bottleS->setupSpriteForLayer(THROWABLE_BOTTLE_SPRITE, CHARACTERS_LAYER);
+					bottleS->flipX = !s->flipX;
 
-					s_camera.doShake(MEDIUM_SHAKE, 0.f);
-					getComponentFromEntity<TransformComponent>(player)->scale.x = 1.5f;
+					auto* bottleC = addComponentToEntity<RectColliderComponent>(bottle);
+					bottleC->collider = { {0, 0}, bottleS->size };
+
+					auto* bulletMovement = addComponentToEntity<MovementComponent>(bottle);
+					bulletMovement->gravity = 1.f;
+					bulletMovement->airFriction = 0.f;
+					int8_t movementDirection = bottleS->flipX ? 1.f : -1.f;
+					bulletMovement->currentSpeed.x = 3.f * movementDirection;
+
+					auto* projectile = addComponentToEntity<ProjectileComponent>(bottle);
+					projectile->ownerEntityId = entity.id;
 				}
+				break;
 			}
 		}
 	}
@@ -1809,7 +1883,7 @@ void CombatSystem::mainCharacterAttackWithWeaponInHand(Entity* player, Attacking
 		// Create bullet
 	{
 		Vec2 bulletPosition = s->flipX ? Vec2{ t->position.x + 11.f, t->position.y + 15.f } : Vec2{ t->position.x + 46.f, t->position.y + 15.f };
-		Entity& bullet = addEntity("bullet", bulletPosition, PISTOL_BULLET_ENTITY);
+		Entity& bullet = addEntity("bullet", bulletPosition);
 
 		auto* bulletTransform = getComponentFromEntity<TransformComponent>(bullet);
 		bulletTransform->xScalePivot = LEFT_X_SCALE_PIVOT;

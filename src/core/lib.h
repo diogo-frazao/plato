@@ -37,7 +37,6 @@ enum EntityType
 	DARWIN_ENTITY,
 	OSKAR_ENTITY,
 	HUGO_ENTITY,
-	PISTOL_BULLET_ENTITY,
 };
 
 inline const char* getEntityTypeAsString(EntityType type)
@@ -54,8 +53,6 @@ inline const char* getEntityTypeAsString(EntityType type)
 		return "OSKAR_ENTITY";
 	case HUGO_ENTITY:
 		return "HUGO_ENTITY";
-	case PISTOL_BULLET_ENTITY:
-		return "PISTOL_BULLET_ENTITY";
 	}
 
 	return "NOT SUPPORTED";

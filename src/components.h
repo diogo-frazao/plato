@@ -196,6 +196,9 @@ struct MovementComponent
 
 	// Used to move NPCS or move rostov during cutscenes
 	bool isAutoMoving = false;
+
+	// Used to know if an entity is touching the level bounds
+	bool isCollidingWithLevelGeometry = false;
 };
 
 enum WeaponType

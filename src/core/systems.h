@@ -134,6 +134,7 @@ public:
 
 	// Projectiles
 	void handleProjectileHitDetection(Entity* projectileEntity);
+	void onProjectileCollision(Entity* projectileEntity, bool applyShake);
 
 	// Cleared at the beginning of each frame
 	// This is the only place where we use RectCollider.topLeftPointOffset as a world position
