@@ -1126,10 +1126,11 @@ void MovementSystem::processMainCharacterMovement()
 	}
 }
 
-SpriteType getMovementAnimationForEntityState(Entity* entity)
+SpriteType getAnimationForEntityState(Entity* entity, AttackingComponent* a)
 {
 	switch (entity->entityState)
 	{
+		// Movement
 	default:
 	case IDLE_STATE:
 		switch (entity->entityType)
@@ -1139,6 +1140,10 @@ SpriteType getMovementAnimationForEntityState(Entity* entity)
 		case OSKAR_ENTITY:
 			return OSKAR_IDLE_SPRITE;
 		case HUGO_ENTITY:
+			if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+			{
+				return HUGO_IDLE_BOTTLE_SPRITE;
+			}
 			return HUGO_IDLE_SPRITE;
 		}
 		break;
@@ -1150,12 +1155,53 @@ SpriteType getMovementAnimationForEntityState(Entity* entity)
 		case OSKAR_ENTITY:
 			return OSKAR_RUN_SPRITE;
 		case HUGO_ENTITY:
+			if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+			{
+				return HUGO_RUN_BOTTLE_SPRITE;
+			}
 			return HUGO_RUN_SPRITE;
+		}
+		break;
+		// Combat
+	case ATTACKING_STATE:
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			return OSKAR_ATTACK_SPRITE;
+		case HUGO_ENTITY:
+			if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+			{
+				return HUGO_THROW_BOTTLE_SPRITE;
+			}
+			return HUGO_PUNCH_SPRITE;
+		}
+		break;
+	case DAMAGED_STATE:
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			if (a->damageCounter >= a->numberOfHitsToDie)
+			{
+				return OSKAR_SHOT_FALL_SPRITE;
+			}
+			else
+			{
+				return OSKAR_SHOT_RECOVER_SPRITE;
+			}
+		case HUGO_ENTITY:
+			return HUGO_SHOT_FALL_SPRITE;
+		}
+		break;
+	case DEAD_STATE:
+		switch (entity->entityType)
+		{
+		case OSKAR_ENTITY:
+			return OSKAR_FALL_DEATH_SPRITE;
 		}
 		break;
 	}
 
-	D_ASSERT(false, "Couldn't get sprite for entity %s for state %s", getEntityTypeAsString(entity->entityType), getEntityStateAsString(entity->entityState));
+	D_ASSERT(false, "Couldn't get sprite for entity %s with state %s", getEntityTypeAsString(entity->entityType), getEntityStateAsString(entity->entityState));
 	return INVALID_SPRITE;
 }
 
@@ -1232,7 +1278,8 @@ void MovementSystem::update()
 		}
 
 		auto* s = getComponentFromEntity<SpriteComponent>(entity);
-		SpriteType animation = getMovementAnimationForEntityState(&entity);
+		auto* a = getComponentFromEntity<AttackingComponent>(entity);
+		SpriteType animation = getAnimationForEntityState(&entity, a);
 		switch (entity.entityState)
 		{
 		case IDLE_STATE:
@@ -1495,6 +1542,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			continue;
 		}
 
+		// If we get here it's because the projectile hit a target
 		bool isTargetEntityPlayer = (targetEntity.id == k_playerEntityId);
 		onProjectileCollision(projectileEntity, !isTargetEntityPlayer);
 
@@ -1542,52 +1590,6 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		// If we hit a target there's no need to keep iterating over entities, the projectile was already deleted
 		return;
 	}
-}
-
-SpriteType getCombatAnimationForEntityState(Entity* entity, AttackingComponent* a)
-{
-	switch (entity->entityState)
-	{
-	default:
-	case ATTACKING_STATE:
-		//TODO: Expand to also switch on weapon in hand
-		switch (entity->entityType)
-		{
-		case OSKAR_ENTITY:
-			return OSKAR_ATTACK_SPRITE;
-		case HUGO_ENTITY:
-			switch (a->weaponInHand)
-			{
-			case BOTTLE_THROWABLE_TYPE:
-				return HUGO_THROW_BOTTLE_SPRITE;
-			}
-		}
-		break;
-	case DAMAGED_STATE:
-		switch (entity->entityType)
-		{
-		case OSKAR_ENTITY:
-			if (a->damageCounter >= a->numberOfHitsToDie)
-			{
-				return OSKAR_SHOT_FALL_SPRITE;
-			}
-			else
-			{
-				return OSKAR_SHOT_RECOVER_SPRITE;
-			}
-		}
-		break;
-	case DEAD_STATE:
-		switch (entity->entityType)
-		{
-		case OSKAR_ENTITY:
-			return OSKAR_FALL_DEATH_SPRITE;
-		}
-		break;
-	}
-
-	D_ASSERT(false, "Couldn't get sprite for entity %s with state %s", getEntityTypeAsString(entity->entityType), getEntityStateAsString(entity->entityState));
-	return INVALID_SPRITE;
 }
 
 void CombatSystem::update()
@@ -1719,9 +1721,14 @@ void CombatSystem::update()
 				a->wasPlayerHitByCurrentAttack = false;
 				a->didCurrentAttackThrowWeapon = false;
 				entity.entityState = IDLE_STATE;
+
+				if (a->weaponInHand == BOTTLE_THROWABLE_TYPE)
+				{
+					a->weaponInHand = NO_WEAPON_TYPE;
+				}
 			}
 
-			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(getAnimationForEntityState(&entity, a), false, animationSpeed, 70);
 			break;
 		}
 		case DAMAGED_STATE:
@@ -1744,7 +1751,8 @@ void CombatSystem::update()
 					animationSpeed = 400;
 				}
 
-				if (s->animationData.finishedPlayingAnimation)
+				// If shouldWaitToDie, don't change the state
+				if (s->animationData.finishedPlayingAnimation && !a->shouldWaitToDie)
 				{
 					entity.entityState = DEAD_STATE;
 				}
@@ -1763,11 +1771,11 @@ void CombatSystem::update()
 				}
 			}
 
-			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, animationSpeed, 70);
+			s->setAnimationToPlayIfNotPlaying(getAnimationForEntityState(&entity, a), false, animationSpeed, 70);
 			break;
 		}
 		case DEAD_STATE:
-			s->setAnimationToPlayIfNotPlaying(getCombatAnimationForEntityState(&entity, a), false, 70, 70);
+			s->setAnimationToPlayIfNotPlaying(getAnimationForEntityState(&entity, a), false, 70, 70);
 			break;
 		}
 

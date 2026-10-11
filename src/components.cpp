@@ -290,9 +290,23 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		numberOfFrames = 1;
 		collidertopLeftPointOffset = { 24, 6 };
 		break;
+	case HUGO_IDLE_BOTTLE_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 1, 564 };
+		size = { 60, 36 };
+		numberOfFrames = 1;
+		collidertopLeftPointOffset = { 24, 6 };
+		break;
 	case HUGO_RUN_SPRITE:
 		atlas = GAME_ATLAS;
-		atlasOffset = { 64, 525 };
+		atlasOffset = { 850, 525 };
+		size = { 360, 36 };
+		numberOfFrames = 6;
+		collidertopLeftPointOffset = { 24, 6 };
+		break;
+	case HUGO_RUN_BOTTLE_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 850, 486 };
 		size = { 360, 36 };
 		numberOfFrames = 6;
 		collidertopLeftPointOffset = { 24, 6 };
@@ -302,6 +316,20 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 		atlasOffset = { 427, 525 };
 		size = { 420, 36 };
 		numberOfFrames = 7;
+		collidertopLeftPointOffset = { 24, 6 };
+		break;
+	case HUGO_PUNCH_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 1036, 567 };
+		size = { 420, 36 };
+		numberOfFrames = 7;
+		collidertopLeftPointOffset = { 24, 6 };
+		break;
+	case HUGO_SHOT_FALL_SPRITE:
+		atlas = GAME_ATLAS;
+		atlasOffset = { 247, 606 };
+		size = { 300, 36 };
+		numberOfFrames = 5;
 		collidertopLeftPointOffset = { 24, 6 };
 		break;
 	case DARWIN_PLACEHOLDER_SPRITE:

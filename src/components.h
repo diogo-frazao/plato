@@ -233,6 +233,9 @@ struct AttackingComponent
 
 	// NPC Only
 
+	// If true, when npcs receive the last hit, instead of dying, they remain on their knees
+	bool shouldWaitToDie = false;
+
 	// Used by npcs. They only engage in combat with player when state is engaged. Set via cutscenes, automatically when shot or notices player
 	bool isEngagedInCombat = false;
 

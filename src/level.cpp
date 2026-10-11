@@ -326,10 +326,13 @@ void setupInsideRestaurantScene()
         auto* hugoA = addComponentToEntity<AttackingComponent>(hugo);
         hugoA->canBeAttacked = false;
         hugoA->weaponInHand = BOTTLE_THROWABLE_TYPE;
+        hugoA->shouldWaitToDie = true;
 
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
-        hugoM->maxHorizontalSpeed = 0.3f;
+        hugoM->maxHorizontalSpeed = 1.f;
         s_hugoEntityId = hugo.id;
+
+        getComponentFromEntity<TransformComponent>(hugo)->useDynamicScale = true;
     }
 
     {
@@ -341,7 +344,7 @@ void setupInsideRestaurantScene()
         addComponentToEntity<AttackingComponent>(oskar);
         getComponentFromEntity<TransformComponent>(oskar)->useDynamicScale = true;
         auto* oskarM = addComponentToEntity<MovementComponent>(oskar);
-        oskarM->maxHorizontalSpeed = 0.3f;
+        oskarM->maxHorizontalSpeed = 1.f;
         s_oskarEntityId = oskar.id;
     }
 
@@ -828,6 +831,8 @@ void Level::update()
             float oskarPosition = getComponentFromEntity<TransformComponent>(oskar)->position.x;
             auto* oskarSprite = getComponentFromEntity<SpriteComponent>(oskar);
 
+            Entity& hugo = getEntityById(s_hugoEntityId);
+
             // Enter cutscene
             if (_confrontStageData.canEnterCutscene && (playerTransform->position.x >= (oskarPosition - distanceToOskarToStartCutscene)))
             {
@@ -964,7 +969,6 @@ void Level::update()
                 u.popTensionBar();
 
                 getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = true;
-                getComponentFromEntity<MovementComponent>(oskar)->maxHorizontalSpeed = 1.f;
 
                 // Since this acts as a tutorial, this npc will not attack right after the first hit
                 getComponentFromEntity<AttackingComponent>(oskar)->secondsNeededToAttackAgain = 99.f;
@@ -991,8 +995,13 @@ void Level::update()
                 _confrontStageData.hasHugoReactedToDeath = true;
 
                 // Allow damaging hugo
-                Entity& hugo = getEntityById(s_hugoEntityId);
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
+            }
+
+            bool isHugoEngagedInCombat = getComponentFromEntity<AttackingComponent>(hugo)->isEngagedInCombat;
+            if (u.isCurrentDialogue(C_SHOOT_1) && u._currentDialogue.timeSinceFinalCharacterWasDrawn > 1.f && !isHugoEngagedInCombat)
+            {
+                getComponentFromEntity<AttackingComponent>(hugo)->isEngagedInCombat = true;
             }
 
             break;
@@ -1738,6 +1747,7 @@ void Level::update()
                 if (entity.id == s_hugoEntityId)
                 {
                     a->isEngagedInCombat = true;
+                    a->canBeAttacked = true;
                     getComponentFromEntity<MovementComponent>(entity)->maxHorizontalSpeed = 1.3f;
                 }
             }
