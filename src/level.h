@@ -140,6 +140,7 @@ struct GangsterConfrontagionStageData
 	bool canDarwinTalk = true;
 	bool hasHugoReactedToDeath = false;
 	bool canOskarMockRostov = true;
+	bool canHugoTalkBeforeDeath = true;
 
 	void reset()
 	{
@@ -148,6 +149,7 @@ struct GangsterConfrontagionStageData
 		canDarwinTalk = true;
 		hasHugoReactedToDeath = false;
 		canOskarMockRostov = true;
+		canHugoTalkBeforeDeath = true;
 	}
 };
 
@@ -265,4 +267,9 @@ inline SDL_FRect convertWorldRectToCameraSpace(const SDL_FRect& worldRect)
 	Vec2 sizeInCameraSpace{ worldRect.w * camera.zoom, worldRect.h * camera.zoom };
 
 	return { posInCameraSpace.x, posInCameraSpace.y, sizeInCameraSpace.x, sizeInCameraSpace.y };
+}
+
+inline bool isCharacterWaitingToDie(Entity* entity)
+{
+	return entity->entityState == DAMAGED_STATE && getComponentFromEntity<SpriteComponent>(*entity)->animationData.finishedPlayingAnimation;
 }

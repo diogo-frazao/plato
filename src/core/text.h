@@ -113,6 +113,7 @@ enum TextType
 	C_AIM_2,
 	C_ROSTOV_HURT,
 	C_SHOOT_1,
+	C_SHOOT_2,
 	D_1,
 	D_2,
 	D_3,
@@ -309,6 +310,7 @@ enum TextEffectType
 	//Shake
 	INTERJECTION_EFFECT, // *cough* *ahem*, etc. Camera shake + show all characters at the same time + small delay at the end
 	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
+	ALMOST_DEAD_EFFECT, // Used when characters are in waiting to die state. Applied automatically on top of other effects if talking character is waiting to die
 	//No Wait
 	NO_WAIT_EFFECT, // If the last word didn't end ex: "Rostov your shift is o-". The wait time to move to the next dialogue is 0.5
 };

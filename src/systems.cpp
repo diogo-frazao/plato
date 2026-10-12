@@ -479,7 +479,6 @@ void RenderingSystem::computeLightsAtLayer(LayerType layer, bool isAffectedByAmb
 
 void DebugSystem::render()
 {
-
 #ifndef RELEASE_BUILD
 	if (s_debugGridEnabled)
 	{
@@ -2505,12 +2504,30 @@ void UISystem::update()
 			c.wasInitialized = true;
 		}
 
-		// Wave movement effect
+		// Dynamic character movement effects
 		bool canApplyDynamicEffects = (_currentDialogue.state != DIALOGUE_INTERRUPTED_STATE && _currentDialogue.state != DIALOGUE_FINISHED_INTERRUPTED);
-		bool isDynamicEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT) || (c.textEffectToApply == LAUGH_EFFECT);
+		bool canDynamicallyApplyAlmostDeadEffect = isCharacterWaitingToDie(_currentDialogue.entityTalking);
+		bool isDynamicEffect = (c.textEffectToApply == WAVE_EFFECT) || (c.textEffectToApply == PINK_WAVE_EFFECT) || (c.textEffectToApply == LAUGH_EFFECT) || (c.textEffectToApply == ALMOST_DEAD_EFFECT) || canDynamicallyApplyAlmostDeadEffect;
 		if (isDynamicEffect && canCharacterFadeIn && canApplyDynamicEffects)
 		{
-			if (c.textEffectToApply == LAUGH_EFFECT)
+			if (c.textEffectToApply == ALMOST_DEAD_EFFECT || canDynamicallyApplyAlmostDeadEffect)
+			{
+				float timeToFlickerForAlmostDead = 0.2f;
+				if (isTimerOngoing(c.periodEffectTimer) && c.periodEffectTimer >= timeToFlickerForAlmostDead)
+				{
+					float amount = randomFloatZeroToOne() * 0.5f;
+					c.position.y += amount;
+					c.position.y = clamp(c.position.y, c.startingPosition.y - 2.f, c.startingPosition.y + 2.f);
+					c.position.x += 0.1f;
+					c.periodEffectTimer = 0.f;
+				}
+
+				if (c.secondsToStartShowingCharacter > 0.f)
+				{
+					c.opacity = max(255 * (c.startingPosition.y + 1.f - c.position.y), 150);
+				}
+			}
+			else if (c.textEffectToApply == LAUGH_EFFECT)
 			{
 				float sinMovementOffset = cos(c.timeSinceCharacterAppeared * 8.f);
 				c.position.y = min(c.startingPosition.y + sinMovementOffset, c.startingPosition.y);
@@ -2552,7 +2569,6 @@ void UISystem::update()
 			else
 			{
 				// If the current text effect will change the position, snap directly without fade in animation
-				c.position.x = c.startingPosition.x;
 				c.size.x = k_characterSize.x;
 				c.size.y = k_characterSize.y;
 			}

@@ -326,6 +326,7 @@ void setupInsideRestaurantScene()
         auto* hugoA = addComponentToEntity<AttackingComponent>(hugo);
         hugoA->canBeAttacked = false;
         hugoA->weaponInHand = BOTTLE_THROWABLE_TYPE;
+        hugoA->numberOfHitsToDie = 1;
         hugoA->shouldWaitToDie = true;
 
         auto* hugoM = addComponentToEntity<MovementComponent>(hugo);
@@ -1002,6 +1003,12 @@ void Level::update()
             if (u.isCurrentDialogue(C_SHOOT_1) && u._currentDialogue.timeSinceFinalCharacterWasDrawn > 1.f && !isHugoEngagedInCombat)
             {
                 getComponentFromEntity<AttackingComponent>(hugo)->isEngagedInCombat = true;
+            }
+
+            if (isCharacterWaitingToDie(&hugo) && _confrontStageData.canHugoTalkBeforeDeath)
+            {
+                u.pushEntityDialogue(C_SHOOT_2);
+                _confrontStageData.canHugoTalkBeforeDeath = false;
             }
 
             break;
@@ -1852,14 +1859,14 @@ void Level::update()
 
         if (_wasKeyPressedThisFrame(SDL_SCANCODE_P))
         {
-            Entity& oskar = getEntityById(s_oskarEntityId);
+           /* Entity& oskar = getEntityById(s_oskarEntityId);
             oskar.entityState = IDLE_STATE;
             getComponentFromEntity<SpriteComponent>(oskar)->flipX = true;
 
             player.entityState = ON_CUTSCENE_STATE;
-            getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
+            getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;*/
 
-            u.pushEntityDialogue(C_3_1, { C_3_1_A, C_3_1_B, C_3_1_C });
+            u.pushEntityDialogue(C_SHOOT_2);
         }
 
         // Debug to not have to wait x seconds for things to happen

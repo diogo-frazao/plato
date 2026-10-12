@@ -164,6 +164,7 @@ TextDTO getTextInfo(TextType textType)
 	case C_AIM_2: return { "I get it, me and [hugo]HUGO[hugo] will leave, just give us a second and we'll be out in no time", OSKAR_DIALOGUE };
 	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redshake]fucking[redshake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
 	case C_SHOOT_1: return { "[redshake]WTF??[redshake] [hugo]BROTHER???[hugo] I'll [redshake]KILL YOU[redshake] [rostov]ROSTOV[rostov]", HUGO_DIALOGUE };
+	case C_SHOOT_2: return { "[interjection]*blurg-*[interjection] [interjection]*blurg-*[interjection] You mother-f-u-cker... I [red]dare[red] yo-u to shooot, you'll see wh.at wi-ll hapento you", HUGO_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed
@@ -417,6 +418,11 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 	if (strcmp(effectName, "redshake") == 0)
 	{
 		return RED_SHAKE_EFFECT;
+	}
+
+	if (strcmp(effectName, "almostdead") == 0)
+	{
+		return ALMOST_DEAD_EFFECT;
 	}
 
 	if (strcmp(effectName, "nowait") == 0)

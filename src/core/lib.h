@@ -312,6 +312,11 @@ inline float randomFloatZeroToOne()
 	return final;
 }
 
+inline int randomRange(int maxInclusive)
+{
+	return rand() % maxInclusive + 1;
+}
+
 inline float clamp(float value, float min, float max)
 {
 	if (value < min)
