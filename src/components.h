@@ -215,6 +215,9 @@ struct AttackingComponent
 	// Weapon the character is currently holding
 	enum WeaponType weaponInHand = NO_WEAPON_TYPE;
 
+	// Whether or not this character can attack. Only used for main character for now
+	bool canAttack = true;
+
 	// Whether or not this entity can be attacked/damaged
 	bool canBeAttacked = true;
 

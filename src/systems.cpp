@@ -1196,6 +1196,8 @@ SpriteType getAnimationForEntityState(Entity* entity, AttackingComponent* a)
 		{
 		case OSKAR_ENTITY:
 			return OSKAR_FALL_DEATH_SPRITE;
+		case HUGO_ENTITY:
+			return OSKAR_FALL_DEATH_SPRITE;
 		}
 		break;
 	}
@@ -1560,6 +1562,7 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 		{
 			// Damage npcs with projectiles
 			aTarget->damageCounter++;
+
 			int8_t hitDirection = sprite->flipX ? -1 : 1;
 
 			// If we're hiting an entity that was just shot, jump to the last frame of the shot animation
@@ -1567,11 +1570,26 @@ void CombatSystem::handleProjectileHitDetection(Entity* projectileEntity)
 			{
 				auto* targetSprite = getComponentFromEntity<SpriteComponent>(targetEntity);
 
-				// Jump directly to last frame
-				targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
+				// If target was waiting to die but is hit with a projectile, they will die
+				if (isCharacterWaitingToDie(&targetEntity))
+				{
+					// Allow the last frame of the damaged sprite to play again before dying
+					// Otherwise it looks weird to skip directly to death
+					aTarget->shouldWaitToDie = false;
+					targetSprite->animationData.finishedPlayingAnimation = false;
+					targetSprite->animationData.millisecondsSinceLastFrame = 0;
 
-				auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
-				targetMovement->currentSpeed.x = -3.f * hitDirection;
+					auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+					targetMovement->currentSpeed.x = -2.f * hitDirection;
+				}
+				else
+				{
+					// Jump directly to last frame
+					targetSprite->animationData.currentFrame = targetSprite->numberOfFrames - 1;
+
+					auto* targetMovement = getComponentFromEntity<MovementComponent>(targetEntity);
+					targetMovement->currentSpeed.x = -3.f * hitDirection;
+				}
 			}
 			else
 			{
@@ -1838,34 +1856,48 @@ void CombatSystem::update()
 	}
 }
 
-void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+bool CombatSystem::didMainCharacterTryAttackThisFrame(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s)
 {
 	// Prevent attacking while using the mouse for imgui related things
 	if (s_isImGuiOpen)
 	{
-		return;
+		return false;
 	}
 
 	if (a->weaponInHand == NO_WEAPON_TYPE)
 	{
-		return;
+		return false;
 	}
 
 	// Attack based on state
 	bool canInterruptRollingToShoot = player->entityState == ROLLING_STATE && s->animationData.currentFrame >= 4;
-	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE && player->entityState != DAMAGED_STATE && 
+	bool canAttackFromCurrentState = player->entityState != ATTACKING_STATE && player->entityState != ON_CUTSCENE_STATE && player->entityState != DAMAGED_STATE &&
 		(player->entityState != ROLLING_STATE || canInterruptRollingToShoot);
 	bool canAttack = canAttackFromCurrentState && m->isGrounded && wasAttackKeyPressedThisFrame();
 	if (!canAttack)
 	{
-		return;
+		return false;
 	}
 
-	mainCharacterAttackWithWeaponInHand(player, a, m, t, s, c);
+	return true;
+}
+
+void CombatSystem::tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
+{
+	if (didMainCharacterTryAttackThisFrame(player, a, m, s))
+	{
+		mainCharacterAttackWithWeaponInHand(player, a, m, t, s, c);
+	}
 }
 
 void CombatSystem::mainCharacterAttackWithWeaponInHand(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c)
 {
+	if (!a->canAttack)
+	{
+		D_LOG(MINI, "Main character attacked skip since a->canAttack is false");
+		return;
+	}
+
 	switch (a->weaponInHand)
 	{
 	case GOLF_WEAPON_TYPE:
@@ -2457,7 +2489,7 @@ void UISystem::update()
 		{
 			int lastValidCharacterIndex = max(i - 1, 0);
 			DialogueCharacter& lastValidCharacter = _currentDialogue.characters[lastValidCharacterIndex];
-			hasDialogueFinished = lastValidCharacter.opacity > 200;
+			hasDialogueFinished = lastValidCharacter.timeSinceCharacterAppeared > 0.5f;
 			numberOfCharactersOnCurrentDialogue = lastValidCharacterIndex + 1;
 			break;
 		}

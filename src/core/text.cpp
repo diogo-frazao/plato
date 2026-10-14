@@ -165,6 +165,10 @@ TextDTO getTextInfo(TextType textType)
 	case C_ROSTOV_HURT: return { "[laugh]ahAHAaHAhah[laugh] did you see that [hugo]BROTHER?[hugo] This old man's a [redshake]fucking[redshake] cunt, even with a gun he can't face me", OSKAR_DIALOGUE };
 	case C_SHOOT_1: return { "[redshake]WTF??[redshake] [hugo]BROTHER???[hugo] I'll [redshake]KILL YOU[redshake] [rostov]ROSTOV[rostov]", HUGO_DIALOGUE };
 	case C_SHOOT_2: return { "[interjection]*blurg-*[interjection] [interjection]*blurg-*[interjection] You mother-f-u-cker... I [red]dare[red] yo-u to shooot, you'll see wh.at wi-ll hapento you", HUGO_DIALOGUE };
+	case C_DARWIN_BEG: return { "[redshake]WAIT[redshake] [rostov]ROSTOV,[rostov] [red]don't do it![red] Don't kill him... yet. [yellow]I want to know who's behind this[yellow]", DARWIN_DIALOGUE };
+	case C_SHOOT_3: return { "AhAhHaAhAH, [interjection]*blurg-*[interjection] I tol.you, [red]donyou dar- shoot me[red]", HUGO_DIALOGUE, 15 };
+		case C_SHOOT_3_A: return { "< Lower the gun >", CHOICE_DIALOGUE, -20, LOW_TENSION };
+		case C_SHOOT_3_B: return { "< SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION };
 	}
 
 	// Hugo confrontation after oskar is killed

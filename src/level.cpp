@@ -940,7 +940,7 @@ void Level::update()
                 u.popTensionBar();
 
                 playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
-                s_attackingSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
+                s_combatSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
 
             // Aim gun at oskar
@@ -995,6 +995,10 @@ void Level::update()
                 u.pushEntityDialogue(C_SHOOT_1);
                 _confrontStageData.hasHugoReactedToDeath = true;
 
+                // Darwin hides
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position.y = 120.f;
+
                 // Allow damaging hugo
                 getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
             }
@@ -1005,10 +1009,68 @@ void Level::update()
                 getComponentFromEntity<AttackingComponent>(hugo)->isEngagedInCombat = true;
             }
 
+            // Prevent spamming to kill hugo
+            if (hugo.entityState == DAMAGED_STATE && _confrontStageData.canHugoTalkBeforeDeath)
+            {
+                // Disable main character attack since darwin will ask us to spare hugo
+                playerA->canAttack = false;
+            }
+
             if (isCharacterWaitingToDie(&hugo) && _confrontStageData.canHugoTalkBeforeDeath)
             {
                 u.pushEntityDialogue(C_SHOOT_2);
                 _confrontStageData.canHugoTalkBeforeDeath = false;
+
+                // Disable main character attack since darwin will ask us to spare hugo
+                playerA->canAttack = false;
+            }
+
+            // When we press the attack button and hugo is waiting to die, darwin ask us to spare hugo
+            if (isCharacterWaitingToDie(&hugo) && s_combatSystem.didMainCharacterTryAttackThisFrame(&player, playerA, playerM, playerS) && _confrontStageData.canDarwinInterrupt)
+            {
+                // Darwin gets up
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position.y = getComponentFromEntity<TransformComponent>(darwin)->startingPosition.y;
+
+                if (u._currentDialogue.dialogueType == C_SHOOT_2 && u.canInterruptCurrentDialogue())
+                {
+                    u.interruptCurrentDialogue(true);
+                    _confrontStageData.canDarwinInterrupt = false;
+                }
+                else
+                {
+                    u.pushEntityDialogue(C_DARWIN_BEG);
+                    playerA->canAttack = true;
+                    _confrontStageData.canDarwinInterrupt = false;
+                }
+
+                // Player enters cutscene state
+                player.entityState = ON_CUTSCENE_STATE;
+                u.pushTensionBar();
+            }
+
+            if (u.hasDialogueFinishedInterrupting(C_SHOOT_2))
+            {
+                u.pushEntityDialogue(C_DARWIN_BEG);
+                playerA->canAttack = true;
+            }
+
+            if (u.hasDialogueFinihsed(C_DARWIN_BEG))
+            {
+                u.pushEntityDialogue(C_SHOOT_3, { C_SHOOT_3_A, C_SHOOT_3_B });
+            }
+
+            if (u.hasChosenOption(C_SHOOT_3_A))
+            {
+                playerA->weaponInHand = NO_WEAPON_TYPE;
+            }
+            else if (u.didChooseDialogueOptionThisFrame(C_SHOOT_3_B))
+            {
+                player.entityState = IDLE_STATE;
+                u.popTensionBar();
+
+                playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+                s_combatSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
 
             break;
@@ -1672,7 +1734,7 @@ void Level::update()
     {
         overrideColliderOffsetsBasedOnCurrentSprite();
         s_characterMovementSystem.update();
-        s_attackingSystem.update();
+        s_combatSystem.update();
         s_animationSystem.update();
         s_crosshairSystem.update();
         s_uiSystem.update();
@@ -1844,6 +1906,10 @@ void Level::update()
             oskar.entityState = IDLE_STATE;
             hugo.entityState = IDLE_STATE;
 
+            getComponentFromEntity<AttackingComponent>(hugo)->isEngagedInCombat = false;
+            getComponentFromEntity<AttackingComponent>(hugo)->shouldWaitToDie = true;
+            getComponentFromEntity<AttackingComponent>(oskar)->isEngagedInCombat = false;
+
             getComponentFromEntity<TransformComponent>(oskar)->position.x = 559.f;
             getComponentFromEntity<TransformComponent>(hugo)->position.x = 652.f;
             getComponentFromEntity<TransformComponent>(hugo)->scale = { 1.f, 1.f };
@@ -1852,6 +1918,7 @@ void Level::update()
             playerS->flipX = false;
 
             playerA->weaponInHand = NO_WEAPON_TYPE;
+            playerA->canAttack = true;
 
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
@@ -1866,6 +1933,8 @@ void Level::update()
             player.entityState = ON_CUTSCENE_STATE;
             getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;*/
 
+            Entity& hugo = getEntityById(s_hugoEntityId);
+            getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
             u.pushEntityDialogue(C_SHOOT_2);
         }
 

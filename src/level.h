@@ -20,7 +20,7 @@ inline AnimationSystem s_animationSystem;
 inline MovementSystem s_characterMovementSystem;
 inline DebugSystem s_debugCollidersSystem;
 inline CrosshairSystem s_crosshairSystem;
-inline CombatSystem s_attackingSystem;
+inline CombatSystem s_combatSystem;
 inline UISystem s_uiSystem;
 
 template<typename T>
@@ -141,6 +141,7 @@ struct GangsterConfrontagionStageData
 	bool hasHugoReactedToDeath = false;
 	bool canOskarMockRostov = true;
 	bool canHugoTalkBeforeDeath = true;
+	bool canDarwinInterrupt = true;
 
 	void reset()
 	{
@@ -150,6 +151,7 @@ struct GangsterConfrontagionStageData
 		hasHugoReactedToDeath = false;
 		canOskarMockRostov = true;
 		canHugoTalkBeforeDeath = true;
+		canDarwinInterrupt = true;
 	}
 };
 

@@ -128,6 +128,7 @@ public:
 	void update();
 	
 	// Player attacks
+	bool didMainCharacterTryAttackThisFrame(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
 	void tryStartMainCharacterAttack(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
 	void mainCharacterAttackWithWeaponInHand(Entity* player, AttackingComponent* a, MovementComponent* m, TransformComponent* t, SpriteComponent* s, RectColliderComponent* c);
 	void handleMainCharacterAnimations(Entity* player, AttackingComponent* a, MovementComponent* m, SpriteComponent* s);
