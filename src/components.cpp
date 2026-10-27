@@ -5,6 +5,7 @@
 void SpriteComponent::setSpriteData(SpriteType sprite)
 {
 	collidertopLeftPointOffset = { 0, 0 };
+	bakedHighlightEntityId = k_invalidId;
 
 	switch (sprite)
 	{
@@ -76,6 +77,21 @@ void SpriteComponent::setSpriteData(SpriteType sprite)
 	case RESTAURANT_TABLE_FG_SPRITE:
 		atlasOffset = { 681, 35 };
 		size = { 101, 20 };
+		atlas = GAME_ATLAS;
+		break;
+	case PANTRY_TABLE_SPRITE:
+		atlasOffset = { 481, 19 };
+		size = { 18, 5 };
+		atlas = GAME_ATLAS;
+		break;
+	case PANTRY_CHAIR_SPRITE:
+		atlasOffset = { 482, 2 };
+		size = { 12, 14 };
+		atlas = GAME_ATLAS;
+		break;
+	case RESTAURANT_CHAIR_SPRITE:
+		atlasOffset = { 512, 2 };
+		size = { 12, 14 };
 		atlas = GAME_ATLAS;
 		break;
 	case GOLF_WEAPON_SPRITE:

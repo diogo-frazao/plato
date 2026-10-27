@@ -14,6 +14,7 @@ float k_restaurantBaseY = 60.f;
 
 static int32_t s_darkenedRoomShadowEntityId = k_invalidId;
 static int32_t s_bigRoomShadowEntityId = k_invalidId;
+static int32_t s_bakedHighlightsEntityId = k_invalidId;
 
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
@@ -56,6 +57,29 @@ void overrideColliderOffsetsBasedOnCurrentSprite()
 
         getComponentFromEntity<RectColliderComponent>(entity)->collider.topLeftPointOffset = getComponentFromEntity<SpriteComponent>(entity)->collidertopLeftPointOffset;
     }
+}
+
+void createAndAssignBakedHighlightForEntity(Entity* entity)
+{
+    if (!entityHasComponent<SpriteComponent>(*entity))
+    {
+        D_LOG(WARNING, "Trying to create highlight for entity %s without sprite, returning", entity->debugName);
+        return;
+    }
+
+    auto* t = getComponentFromEntity<TransformComponent>(*entity);
+    auto* s = getComponentFromEntity<SpriteComponent>(*entity);
+
+    IVec2 bakedHighlightOffsetOnAtlas = { s->atlasOffset.x + s->size.x + 3, s->atlasOffset.y };
+
+    Entity& bakedHighlightEntity = s->bakedHighlightEntityId > k_invalidId ? getEntityById(s->bakedHighlightEntityId) : addEntity("bakedHighlight", t->position);
+    auto* bakedHighlightS = entityHasComponent<SpriteComponent>(bakedHighlightEntity) ? getComponentFromEntity<SpriteComponent>(bakedHighlightEntity) : addComponentToEntity<SpriteComponent>(bakedHighlightEntity);
+    bakedHighlightS->setupManualSpriteForLayer(bakedHighlightOffsetOnAtlas, s->size, GAME_ATLAS, BAKED_HIGHLIGHTS_LAYER);
+    s->bakedHighlightEntityId = bakedHighlightEntity.id;
+
+    // Adjust baked highlight alpha do match the rest of the baked highlights
+    Entity& b = getEntityById(s_bakedHighlightsEntityId);
+    bakedHighlightS->color.a = getComponentFromEntity<SpriteComponent>(b)->color.a;
 }
 
 void setupOutsideRestaurantScene()
@@ -278,6 +302,7 @@ void setupInsideRestaurantScene()
 
     {
         Entity& bakedHighlights = addEntity("bakedHighlights");
+        s_bakedHighlightsEntityId = bakedHighlights.id;
         addComponentToEntity<SpriteComponent>(bakedHighlights);
         auto* t = getComponentFromEntity<TransformComponent>(bakedHighlights);
         t->position = { 35.00f, 65.00f };
@@ -314,6 +339,18 @@ void setupInsideRestaurantScene()
     {
         Entity& table = addEntity("restaurantTable", { 519.f, 115.f });
         addComponentToEntity<SpriteComponent>(table)->setupSpriteForLayer(RESTAURANT_TABLE_FG_SPRITE, BEHIND_LIGHTS_LAYER);
+    }
+
+    {
+        Entity& pantryTable = addEntity("pantryTable", { 111.f, 130.f });
+        addComponentToEntity<SpriteComponent>(pantryTable)->setupSpriteForLayer(PANTRY_TABLE_SPRITE, BEHIND_LIGHTS_LAYER);
+        createAndAssignBakedHighlightForEntity(&pantryTable);
+    }
+
+    {
+        Entity& restaurantChair = addEntity("restaurantChair", { 289.f, 121.f });
+        addComponentToEntity<SpriteComponent>(restaurantChair)->setupSpriteForLayer(RESTAURANT_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
+        createAndAssignBakedHighlightForEntity(&restaurantChair);
     }
 
     {
@@ -1957,8 +1994,9 @@ void Level::render(float renderAlpha)
 
 void iterateOnLastPlacedEntity()
 {
-    Entity& entity = addEntity("bigRoomShadow");
-    addComponentToEntity<SpriteComponent>(entity)->setupSpriteForLayer(WHITE_ONE_BY_ONE_SPRITE, DARKEN_ROOMS_LAYER);
+    Entity& pantryChair = addEntity("pantryChair");
+    addComponentToEntity<SpriteComponent>(pantryChair)->setupSpriteForLayer(PANTRY_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
+    createAndAssignBakedHighlightForEntity(&pantryChair);
 }
 
 void Level::imguiRender()

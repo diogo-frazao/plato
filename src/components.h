@@ -63,6 +63,17 @@ struct SpriteComponent
 		this->layer = layer;
 	}
 
+	void setupManualSpriteForLayer(IVec2 atlasOffset, IVec2 size, AtlasType atlasType, LayerType layer)
+	{
+		collidertopLeftPointOffset = { 0, 0 };
+		bakedHighlightEntityId = k_invalidId;
+		this->atlasOffset = atlasOffset;
+		this->size = size;
+		this->atlas = atlasType;
+		this->layer = layer;
+		this->sprite = MANUAL_SPRITE;
+	}
+
 	void setupSpriteForLayer(SpriteType sprite, LayerType layer)
 	{
 		setSpriteData(sprite);
@@ -138,6 +149,10 @@ struct SpriteComponent
 
 	// Point where the sprite rotates around
 	RotationPivot rotationPivotType = DEFAULT_CENTER_ROTATION;
+
+	// Entity id of the baked highlight. Used when sprites have a baked highlight. It's always right besides the sprite with the same size + 3 pixels between them
+	// Set automatically when we call createBakedHighlightForSprite
+	int32_t bakedHighlightEntityId = k_invalidId;
 
 	// Used for inspector debugging. Only needs to print the variables exposed to the inspector.
 	void writeComponentDataToBuffer(const char* entityName, char* buffer, size_t bufferSize, size_t* currentWriteByte)

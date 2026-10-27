@@ -275,6 +275,20 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 		SpriteComponent* spriteComponent = getComponentFromEntity<SpriteComponent>(entity);
 		TransformComponent* transformComponent = getComponentFromEntity<TransformComponent>(entity);
 
+		// Baked highlights follow parent entity
+		if (spriteComponent->bakedHighlightEntityId > k_invalidId)
+		{
+			Entity& bakedHighlight = getEntityById(spriteComponent->bakedHighlightEntityId);
+			getComponentFromEntity<SpriteComponent>(bakedHighlight)->flipX = spriteComponent->flipX;
+			getComponentFromEntity<TransformComponent>(bakedHighlight)->position = transformComponent->position;
+			getComponentFromEntity<TransformComponent>(bakedHighlight)->scale = transformComponent->scale;
+
+			if (spriteComponent->color.a < 1)
+			{
+				getComponentFromEntity<SpriteComponent>(bakedHighlight)->color.a = 0;
+			}
+		}
+
 		Vec2 interpolatedPosition = lerp(transformComponent->previousPosition, transformComponent->position, renderAlpha);
 
 		int32_t currentOffsetX = 0;
