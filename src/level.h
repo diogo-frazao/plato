@@ -126,12 +126,13 @@ enum LevelStages
     MARKETING_PHONE_STAGE,
     FIRST_DAD_PHONE_STAGE,
 	GANGSTER_CONFRONTATION_STAGE,
+	HUGO_INTERROGATION_STAGE,
 	PHONE_CONFRONTATION_STAGE,
 	FREE_STAGE,
     GANGSTER_CONFRONTATION_STAGE_OLD,
     LEVEL_STAGES_COUNT,
 };
-static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0GANGSTER_CONFRONTATION_SAGE\0PHONE_CONFRONTATION_STAGE\0FREE_STAGE\0" };
+static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0GANGSTER_CONFRONTATION_SAGE\0HUGO_INTERROGATION_STAGE\0PHONE_CONFRONTATION_STAGE\0FREE_STAGE\0" };
 
 struct GangsterConfrontagionStageData
 {
@@ -142,6 +143,7 @@ struct GangsterConfrontagionStageData
 	bool canOskarMockRostov = true;
 	bool canHugoTalkBeforeDeath = true;
 	bool canDarwinInterrupt = true;
+	float fadeOutToPantryTimer = k_invalidTime;
 
 	void reset()
 	{
@@ -152,6 +154,17 @@ struct GangsterConfrontagionStageData
 		canOskarMockRostov = true;
 		canHugoTalkBeforeDeath = true;
 		canDarwinInterrupt = true;
+		fadeOutToPantryTimer = k_invalidTime;
+	}
+};
+
+struct HugoInterrogationStageData
+{
+	float startDialogueTimer = k_invalidTime;
+
+	void reset()
+	{
+		startDialogueTimer = k_invalidTime;
 	}
 };
 
@@ -224,6 +237,7 @@ private:
 	LevelStages _currentLevelStage = MARKETING_PHONE_STAGE;
 	GangsterConfrontagionStageData _confrontStageData;
 	GangsterConfrontationStageDataOld _oldGangsterConfrontationStageData;
+	HugoInterrogationStageData _interrogationStageData;
 	PhoneConfrontationStage _phoneConfrontationStageData;
 
 	bool _hasOpenedRestaurantDoor = false;

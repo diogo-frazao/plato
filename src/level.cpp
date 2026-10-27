@@ -16,6 +16,9 @@ static int32_t s_darkenedRoomShadowEntityId = k_invalidId;
 static int32_t s_bigRoomShadowEntityId = k_invalidId;
 static int32_t s_bakedHighlightsEntityId = k_invalidId;
 
+static int32_t s_pantryTableEntityId = k_invalidId;
+static int32_t s_resturantChairEntityId = k_invalidId;
+
 void createBlockAtPositionWithSize(Vec2 pos, IVec2 size)
 {
     Entity& block = addEntity("colliderInvisibleBlock");
@@ -328,7 +331,7 @@ void setupInsideRestaurantScene()
         addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, BEHIND_LIGHTS_LAYER);
         getComponentFromEntity<SpriteComponent>(darwin)->flipX = false;
 
-        addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
+        addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 17 });
 
         // Darwin starts without movement component since he's "floating" behind the table and not touching the floor
 
@@ -345,12 +348,14 @@ void setupInsideRestaurantScene()
         Entity& pantryTable = addEntity("pantryTable", { 111.f, 130.f });
         addComponentToEntity<SpriteComponent>(pantryTable)->setupSpriteForLayer(PANTRY_TABLE_SPRITE, BEHIND_LIGHTS_LAYER);
         createAndAssignBakedHighlightForEntity(&pantryTable);
+        s_pantryTableEntityId = pantryTable.id;
     }
 
     {
         Entity& restaurantChair = addEntity("restaurantChair", { 289.f, 121.f });
         addComponentToEntity<SpriteComponent>(restaurantChair)->setupSpriteForLayer(RESTAURANT_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
         createAndAssignBakedHighlightForEntity(&restaurantChair);
+        s_resturantChairEntityId = restaurantChair.id;
     }
 
     {
@@ -1100,6 +1105,7 @@ void Level::update()
             if (u.hasChosenOption(C_SHOOT_3_A))
             {
                 playerA->weaponInHand = NO_WEAPON_TYPE;
+                startTimer(_confrontStageData.fadeOutToPantryTimer);
             }
             else if (u.didChooseDialogueOptionThisFrame(C_SHOOT_3_B))
             {
@@ -1110,6 +1116,34 @@ void Level::update()
                 s_combatSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
 
+            if (isTimerOngoing(_confrontStageData.fadeOutToPantryTimer))
+            {
+                _confrontStageData.fadeOutToPantryTimer += k_deltaTime;
+            }
+
+            if ( _confrontStageData.fadeOutToPantryTimer >= 2.f)
+            {
+                s_renderingSystem._inFrontOfEverythingColor.a = lerp(s_renderingSystem._inFrontOfEverythingColor.a, 255.f, 0.05f);
+                u.popTensionBar();
+
+                if (s_renderingSystem._inFrontOfEverythingColor.a > 254)
+                {
+                    _currentLevelStage = HUGO_INTERROGATION_STAGE;
+                }
+            }
+
+            break;
+        }
+
+        case HUGO_INTERROGATION_STAGE:
+        {
+            if (isTimerOngoing(_interrogationStageData.startDialogueTimer) && _interrogationStageData.startDialogueTimer >= 2.f)
+            {
+                // TODO: Play dialogue
+                invalidateTimer(_interrogationStageData.startDialogueTimer);
+            }
+
+            s_renderingSystem._inFrontOfEverythingColor.a = 0;
             break;
         }
 
@@ -1994,9 +2028,6 @@ void Level::render(float renderAlpha)
 
 void iterateOnLastPlacedEntity()
 {
-    Entity& pantryChair = addEntity("pantryChair");
-    addComponentToEntity<SpriteComponent>(pantryChair)->setupSpriteForLayer(PANTRY_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
-    createAndAssignBakedHighlightForEntity(&pantryChair);
 }
 
 void Level::imguiRender()
@@ -2146,6 +2177,41 @@ void Level::imguiRender()
                 _oldGangsterConfrontationStageData.reset();
 
                 break;
+            }
+            case HUGO_INTERROGATION_STAGE:
+            {
+                Entity& player = getEntityById(k_playerEntityId);
+                player.entityState = ON_CUTSCENE_STATE;
+
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position.x = 151.f;
+                auto* s = getComponentFromEntity<SpriteComponent>(darwin);
+                s->layer = CHARACTERS_LAYER;
+                s->flipX = true;
+                addComponentToEntity<MovementComponent>(darwin);
+                addComponentToEntity<AttackingComponent>(darwin);
+
+                Entity& hugo = getEntityById(s_hugoEntityId);
+                hugo.entityState = DAMAGED_STATE;
+                getComponentFromEntity<TransformComponent>(hugo)->position.x = 87.f;
+                getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
+                auto* hugoA = getComponentFromEntity<AttackingComponent>(hugo);
+                hugoA->shouldWaitToDie = true;
+                hugoA->damageCounter = hugoA->numberOfHitsToDie;
+
+                Entity& table = getEntityById(s_pantryTableEntityId);
+                getComponentFromEntity<SpriteComponent>(table)->color.a = 0;
+
+                Entity& restaurantChair = getEntityById(s_resturantChairEntityId);
+                getComponentFromEntity<SpriteComponent>(restaurantChair)->color.a = 0;
+
+                Entity& pantryChair = addEntity("pantryChair", { 150.f, 121.f });
+                auto* pantryChairS = addComponentToEntity<SpriteComponent>(pantryChair);
+                pantryChairS->setupSpriteForLayer(PANTRY_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
+                pantryChairS->flipX = true;
+                createAndAssignBakedHighlightForEntity(&pantryChair);
+
+                break;  
             }
             case PHONE_CONFRONTATION_STAGE:
             {
