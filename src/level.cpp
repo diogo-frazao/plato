@@ -62,7 +62,7 @@ void overrideColliderOffsetsBasedOnCurrentSprite()
     }
 }
 
-void createAndAssignBakedHighlightForEntity(Entity* entity)
+void createOrReplaceAndAssignBakedHighlightForEntity(Entity* entity)
 {
     if (!entityHasComponent<SpriteComponent>(*entity))
     {
@@ -331,7 +331,7 @@ void setupInsideRestaurantScene()
         addComponentToEntity<SpriteComponent>(darwin)->setupSpriteForLayer(DARWIN_PLACEHOLDER_SPRITE, BEHIND_LIGHTS_LAYER);
         getComponentFromEntity<SpriteComponent>(darwin)->flipX = false;
 
-        addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 17 });
+        addComponentToEntity<RectColliderComponent>(darwin)->collider = RectCollider({ 0,0 }, { 13, 18 });
 
         // Darwin starts without movement component since he's "floating" behind the table and not touching the floor
 
@@ -347,14 +347,14 @@ void setupInsideRestaurantScene()
     {
         Entity& pantryTable = addEntity("pantryTable", { 111.f, 130.f });
         addComponentToEntity<SpriteComponent>(pantryTable)->setupSpriteForLayer(PANTRY_TABLE_SPRITE, BEHIND_LIGHTS_LAYER);
-        createAndAssignBakedHighlightForEntity(&pantryTable);
+        createOrReplaceAndAssignBakedHighlightForEntity(&pantryTable);
         s_pantryTableEntityId = pantryTable.id;
     }
 
     {
         Entity& restaurantChair = addEntity("restaurantChair", { 289.f, 121.f });
         addComponentToEntity<SpriteComponent>(restaurantChair)->setupSpriteForLayer(RESTAURANT_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
-        createAndAssignBakedHighlightForEntity(&restaurantChair);
+        createOrReplaceAndAssignBakedHighlightForEntity(&restaurantChair);
         s_resturantChairEntityId = restaurantChair.id;
     }
 
@@ -1137,13 +1137,38 @@ void Level::update()
 
         case HUGO_INTERROGATION_STAGE:
         {
+            if (isTimerOngoing(_interrogationStageData.startDialogueTimer))
+            {
+                s_renderingSystem._inFrontOfEverythingColor.a = 255;
+                _interrogationStageData.startDialogueTimer += k_deltaTime;
+            }
+
             if (isTimerOngoing(_interrogationStageData.startDialogueTimer) && _interrogationStageData.startDialogueTimer >= 2.f)
             {
-                // TODO: Play dialogue
+                u.pushEntityDialogue(I_1);
                 invalidateTimer(_interrogationStageData.startDialogueTimer);
             }
 
-            s_renderingSystem._inFrontOfEverythingColor.a = 0;
+            if (u.hasDialogueFinihsed(I_1))
+            {
+                u.pushEntityDialogue(I_2);
+            }
+
+            if (u.hasDialogueFinihsed(I_2))
+            {
+                u.pushEntityDialogue(I_3);
+            }
+
+            if (u.hasDialogueFinihsed(I_3))
+            {
+                u.pushEntityDialogue(I_4);
+            }
+
+            if (u.hasDialogueFinihsed(I_4))
+            {
+                u.pushEntityDialogue(I_5);
+            }
+
             break;
         }
 
@@ -2182,6 +2207,7 @@ void Level::imguiRender()
             {
                 Entity& player = getEntityById(k_playerEntityId);
                 player.entityState = ON_CUTSCENE_STATE;
+                getComponentFromEntity<TransformComponent>(player)->position.x = 6.f;
 
                 Entity& darwin = getEntityById(s_darwinEntityId);
                 getComponentFromEntity<TransformComponent>(darwin)->position.x = 151.f;
@@ -2209,7 +2235,10 @@ void Level::imguiRender()
                 auto* pantryChairS = addComponentToEntity<SpriteComponent>(pantryChair);
                 pantryChairS->setupSpriteForLayer(PANTRY_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
                 pantryChairS->flipX = true;
-                createAndAssignBakedHighlightForEntity(&pantryChair);
+                createOrReplaceAndAssignBakedHighlightForEntity(&pantryChair);
+
+                _currentLevelStage = HUGO_INTERROGATION_STAGE;
+                _interrogationStageData.reset();
 
                 break;  
             }

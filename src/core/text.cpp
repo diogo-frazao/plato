@@ -171,6 +171,15 @@ TextDTO getTextInfo(TextType textType)
 		case C_SHOOT_3_B: return { "< SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION };
 	}
 
+	// Hugo interrogation
+	{
+		case I_1: return { "No one can stand you anymore, [hugo]you and your brother[hugo] had it coming. You think you're [wave]the rulers[wave] of this city and [red]disrespect[red] everything and everyone", DARWIN_DIALOGUE };
+		case I_2: return { "That ends now. I don't owe you [red]anything[red] and you know it... [redshake]WHO[redshake] sent you here?", DARWIN_DIALOGUE };
+		case I_3: return { "i caa--ta... lk pLles elp", HUGO_DIALOGUE };
+		case I_4: return { "Stop playing with me[wait][wait] [bigredshake]*hit*[bigredshake]", DARWIN_DIALOGUE };
+		case I_5: return { "Yo-u f uking cunt, [redshake]*blurgh*[redshake]", HUGO_DIALOGUE };
+	}
+
 	// Hugo confrontation after oskar is killed
 	{
 	case D_1: return { "WHAT. THE. FUCK.", HUGO_DIALOGUE };
@@ -424,9 +433,19 @@ TextEffectType getTextEffectTypeFromName(char* effectName)
 		return RED_SHAKE_EFFECT;
 	}
 
+	if (strcmp(effectName, "bigredshake") == 0)
+	{
+		return BIG_RED_SHAKE_EFFECT;
+	}
+
 	if (strcmp(effectName, "almostdead") == 0)
 	{
 		return ALMOST_DEAD_EFFECT;
+	}
+
+	if (strcmp(effectName, "wait") == 0)
+	{
+		return WAIT_EFFECT;
 	}
 
 	if (strcmp(effectName, "nowait") == 0)

@@ -160,11 +160,11 @@ struct GangsterConfrontagionStageData
 
 struct HugoInterrogationStageData
 {
-	float startDialogueTimer = k_invalidTime;
+	float startDialogueTimer = 0.f;
 
 	void reset()
 	{
-		startDialogueTimer = k_invalidTime;
+		startDialogueTimer = 0.f;
 	}
 };
 

@@ -118,6 +118,12 @@ enum TextType
 	C_SHOOT_3,
 	C_SHOOT_3_A,
 	C_SHOOT_3_B,
+	// Hugo interrogation
+	I_1,
+	I_2,
+	I_3,
+	I_4,
+	I_5,
 	D_1,
 	D_2,
 	D_3,
@@ -314,7 +320,9 @@ enum TextEffectType
 	//Shake
 	INTERJECTION_EFFECT, // *cough* *ahem*, etc. Camera shake + show all characters at the same time + small delay at the end
 	RED_SHAKE_EFFECT, // Camera shake + Mad / Objections
+	BIG_RED_SHAKE_EFFECT, // Same as above, but even more exxagerated
 	ALMOST_DEAD_EFFECT, // Used when characters are in waiting to die state. Applied automatically on top of other effects if talking character is waiting to die
+	WAIT_EFFECT, // When used, the next character will only play after 0.5 seconds
 	//No Wait
 	NO_WAIT_EFFECT, // If the last word didn't end ex: "Rostov your shift is o-". The wait time to move to the next dialogue is 0.5
 };

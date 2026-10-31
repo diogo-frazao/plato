@@ -2534,7 +2534,7 @@ void UISystem::update()
 			}
 
 			// Camera shake text effect
-			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == INTERJECTION_EFFECT);
+			bool isShakeEffect = (c.textEffectToApply == RED_SHAKE_EFFECT || c.textEffectToApply == INTERJECTION_EFFECT || c.textEffectToApply == BIG_RED_SHAKE_EFFECT);
 
 			// If dialogue was interrupted don't perform the shake for these characters, since it might override
 			// The shake from choosing the interruption option itself
@@ -2542,7 +2542,16 @@ void UISystem::update()
 
 			if (!_currentDialogue.hasAppliedShakeForCurrentWord && isShakeEffect && !wasDialogueInterrupted)
 			{
-				CameraShakeType shakeToPerform = (c.textEffectToApply == RED_SHAKE_EFFECT ? MEDIUM_SHAKE : LIGHT_SHAKE);
+				CameraShakeType shakeToPerform = LIGHT_SHAKE;
+				if (c.textEffectToApply == RED_SHAKE_EFFECT)
+				{
+					shakeToPerform = MEDIUM_SHAKE;
+				}
+				else if (c.textEffectToApply == BIG_RED_SHAKE_EFFECT)
+				{
+					shakeToPerform = STRONG_SHAKE;
+				}
+
 				s_camera.doShake(shakeToPerform, 0.05f);
 				_currentDialogue.hasAppliedShakeForCurrentWord = true;
 			}
@@ -3590,6 +3599,8 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	case RED_SHAKE_EFFECT:
 		dialogueCharacter.overrideColor = { 198, 35, 35 };
 		break;
+	case BIG_RED_SHAKE_EFFECT:
+		dialogueCharacter.overrideColor = { 255, 35, 35 };
 	case INTERJECTION_EFFECT:
 		dialogueCharacter.rotationAngle = 1.f;
 		break;
@@ -3693,6 +3704,11 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 				// Stop applying effet
 				if (textEffectApplying != INVALID_EFFECT)
 				{
+					if (textEffectApplying == WAIT_EFFECT)
+					{
+						extraSecondsToStartShowingCharacter = 1.f;
+					}
+
 					textEffectApplying = INVALID_EFFECT;
 					D_LOG(MINI, "Stopped applying text effect: %s", effectToApplyName);
 				}
@@ -3745,10 +3761,13 @@ void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptio
 			dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + k_secondsBetweenEachCharacter + extraSecondsToStartShowingCharacter;
 
 			// Some text effects show every character in a word at the same time
-			bool canShowAllCharacterAtSameTime = (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == INTERJECTION_EFFECT);
+			bool canShowAllCharacterAtSameTime = (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == INTERJECTION_EFFECT || 
+												 dialogueCharacter.textEffectToApply == BIG_RED_SHAKE_EFFECT);
 			if (canShowAllCharacterAtSameTime)
 			{
-				float extraTimeFromLastCharacter = dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT ? 0.01f : 0.f;
+				bool isRedShake = (dialogueCharacter.textEffectToApply == RED_SHAKE_EFFECT || dialogueCharacter.textEffectToApply == BIG_RED_SHAKE_EFFECT);
+				float extraTimeFromLastCharacter = isRedShake ? 0.01f : 0.f;
+
 				dialogueCharacter.secondsToStartShowingCharacter = secondsToShowPreviousCharacter + extraTimeFromLastCharacter;
 			}
 		}
