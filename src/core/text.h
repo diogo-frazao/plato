@@ -124,6 +124,8 @@ enum TextType
 	I_3,
 	I_4,
 	I_5,
+	I_6,
+	I_7,
 	D_1,
 	D_2,
 	D_3,

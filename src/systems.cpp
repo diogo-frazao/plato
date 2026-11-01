@@ -2162,6 +2162,18 @@ void UISystem::update()
 		_cellphone.entity = &getEntityById(k_cellphoneEntityId);
 	}
 
+	// Hndle delayed dialogues
+	if (isTimerOngoing(_delayedDialogueData.secondsToPlayDialogueTimer))
+	{
+		_delayedDialogueData.secondsToPlayDialogueTimer += k_deltaTime;
+		if (_delayedDialogueData.secondsToPlayDialogueTimer >= _delayedDialogueData.secondsToPlayDialogue)
+		{
+			_delayedDialogueData.invalidateTimer();
+			pushEntityDialogue(_delayedDialogueData.text, _delayedDialogueData.options);
+			_delayedDialogueData.invalidateData();
+		}
+	}
+
 	// Handle cellphone state
 	{
 		auto* t = getComponentFromEntity<TransformComponent>(*_cellphone.entity);
@@ -3601,6 +3613,7 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 		break;
 	case BIG_RED_SHAKE_EFFECT:
 		dialogueCharacter.overrideColor = { 255, 35, 35 };
+		break;
 	case INTERJECTION_EFFECT:
 		dialogueCharacter.rotationAngle = 1.f;
 		break;
@@ -3609,8 +3622,22 @@ void applyStaticTextEffect(UISystem::DialogueCharacter& dialogueCharacter)
 	}
 }
 
+void UISystem::delayNextDialogueFor(float seconds)
+{
+	startTimer(_delayedDialogueData.secondsToPlayDialogueTimer);
+	_delayedDialogueData.secondsToPlayDialogue = seconds;
+}
+
 void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, Vec2 screenSpacePosition, DialogueAlignmentType alignmentType)
 {
+	// Don't push the dialogue if if we have an ongoing delay.
+	if (isTimerOngoing(_delayedDialogueData.secondsToPlayDialogueTimer))
+	{
+		_delayedDialogueData.text = dialogueTextType;
+		_delayedDialogueData.options = dialogueOptions;
+		return;
+	}
+
 	TextDTO textInfo = getTextInfo(dialogueTextType);
 	const char* textToShow = textInfo.text;
 	uint16_t textLength = strlen(textToShow);

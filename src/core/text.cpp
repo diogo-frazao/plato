@@ -178,6 +178,8 @@ TextDTO getTextInfo(TextType textType)
 		case I_3: return { "i caa--ta... lk pLles elp", HUGO_DIALOGUE };
 		case I_4: return { "Stop playing with me[wait][wait] [bigredshake]*hit*[bigredshake]", DARWIN_DIALOGUE };
 		case I_5: return { "Yo-u f uking cunt, [redshake]*blurgh*[redshake]", HUGO_DIALOGUE };
+		case I_6: return { "Psst, [rostov]ROSTOV,[rostov] [yellow]I need your help.[yellow] I can't get anything out of him", DARWIN_DIALOGUE };
+		case I_7: return {  "[rostov]ROSTOV,[rostov] are you listening to me?[wait][wait] [redshake]ROSTOV![redshake]", DARWIN_DIALOGUE };
 	}
 
 	// Hugo confrontation after oskar is killed

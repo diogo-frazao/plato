@@ -378,6 +378,32 @@ public:
 		}
 	};
 
+	// Used when we want to delay playing a dialogue for x seconds
+	struct DelayedDialogueData
+	{
+		DialogueOptionsDTO options;
+		TextType text = INVALID_TEXT;
+		float secondsToPlayDialogue = k_invalidTime;
+		float secondsToPlayDialogueTimer = k_invalidTime;
+
+		bool isValid()
+		{
+			return text != INVALID_TEXT;
+		}
+
+		void invalidateTimer()
+		{
+			secondsToPlayDialogue = k_invalidTime;
+			secondsToPlayDialogueTimer = k_invalidTime;
+		}
+
+		void invalidateData()
+		{
+			text = INVALID_TEXT;
+			options = DialogueOptionsDTO();
+		}
+	};
+
 	void pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {},
 					  bool isScreenSpace = false, Vec2 screenSpacePosition = {0.f, 0.f}, DialogueAlignmentType alignmentType = DIALOGUE_CENTER_ALIGNED);
 	void pushCellphoneDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions = {});
@@ -408,6 +434,9 @@ public:
 	//TODO: Improve later
 	Dialogue _currentDialogue;
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
+
+	void delayNextDialogueFor(float seconds);
+	DelayedDialogueData _delayedDialogueData;
 
 	float _currentTensionSpriteXSize = 0.f;
 	TextType _lastDialogueType = INVALID_TEXT;
