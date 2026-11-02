@@ -22,10 +22,58 @@ void testResolutions(SDL_Window* window);
 
 static bool s_isWindowFullscreen = false;
 
+void setVSync(SDL_Window* window, bool enabled)
+{
+    s_vsyncEnabled = enabled;
+    SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
+
+    SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+
+    // IMMEDIATE (unlocked with tearing) MAILBOX (unlocked without tearing)
+    SDL_GPUDevice* gpuDevice = SDL_GetGPURendererDevice(s_renderer);
+
+    if (s_vsyncEnabled)
+    {
+        presentMode = SDL_GPU_PRESENTMODE_VSYNC;
+    }
+    else
+    {
+        if (SDL_WindowSupportsGPUPresentMode(gpuDevice, window, SDL_GPU_PRESENTMODE_IMMEDIATE))
+        {
+            presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+        }
+        else if (SDL_WindowSupportsGPUPresentMode(gpuDevice, window, SDL_GPU_PRESENTMODE_MAILBOX))
+        {
+            presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
+        }
+    }
+
+    SDL_SetGPUSwapchainParameters(gpuDevice, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+    D_LOG(LOG, "VSync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+}
+
+void toggleVSync(SDL_Window* window)
+{
+    setVSync(window, !s_vsyncEnabled);
+}
+
 void toggleFullscreen(SDL_Window* window)
 {
     s_isWindowFullscreen = !s_isWindowFullscreen;
     SDL_SetWindowFullscreen(window, s_isWindowFullscreen);
+}
+
+void debugRenderDriverInfo()
+{
+    D_LOG(MINI, "Available renderer drivers: ");
+    for (uint8_t i = 0; i < SDL_GetNumRenderDrivers(); ++i)
+    {
+        D_LOG(MINI, "%i. %s", i, SDL_GetRenderDriver(i));
+    }
+
+    SDL_PropertiesID properties = SDL_GetRendererProperties(s_renderer);
+    const char* renderName = SDL_GetStringProperty(properties, SDL_PROP_RENDERER_NAME_STRING, "No render driver found");
+    D_LOG(MINI, "Render driver used: %s", renderName);
 }
 
 void debugSupportedShaderFormats(SDL_GPUShaderFormat supportedShaderFormats)
@@ -190,7 +238,6 @@ void App::initSDL()
         return;
     }
 
-    // TODO: Investigate. For some reason having SDL_GPU_RENDERER as the flag makes io.FrameRate from imgui (average fps) always show 60 even if vsync is disabled
     s_renderer = SDL_CreateRenderer(_window, SDL_GPU_RENDERER);
     if (!s_renderer)
     {
@@ -205,7 +252,8 @@ void App::initSDL()
         return;
     }
 
-    D_LOG(MINI, "GPU Driver used: %s", SDL_GetGPUDeviceDriver(gpuDevice));
+    debugRenderDriverInfo();
+    D_LOG(LOG, "GPU Driver used: %s", SDL_GetGPUDeviceDriver(gpuDevice));
 
     SDL_GPUShaderFormat supportedShaderFormats = SDL_GetGPUShaderFormats(gpuDevice);
     debugSupportedShaderFormats(supportedShaderFormats);
@@ -216,7 +264,7 @@ void App::initSDL()
         return;
     }
 
-    SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
+    setVSync(_window, true);
 
     SDL_SetRenderLogicalPresentation(s_renderer, k_baseGameWidth, k_baseGameHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
     // Change window size after we set the render size to the original 320x180
@@ -287,9 +335,6 @@ void testResolutions(SDL_Window* window)
 
     if (_wasKeyPressedThisFrame(SDL_SCANCODE_5))
     {
-        s_vsyncEnabled = !s_vsyncEnabled;
-        SDL_SetRenderVSync(s_renderer, s_vsyncEnabled);
-
-        D_LOG(LOG, "VSync is %s", s_vsyncEnabled ? "enabled" : "disabled");
+        toggleVSync(window);
     }
 }
