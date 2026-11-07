@@ -1146,8 +1146,11 @@ void Level::update()
             if (isTimerOngoing(_interrogationStageData.startDialogueTimer) && _interrogationStageData.startDialogueTimer >= 2.f)
             {
                 s_darwinDialogueBoxPosittionOffset.x = 17.f;
-                u.pushEntityDialogue(I_1);
                 invalidateTimer(_interrogationStageData.startDialogueTimer);
+
+                Entity& hugo = getEntityById(s_hugoEntityId);
+                getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
+                u.pushEntityDialogue(I_1);
             }
 
             if (u.hasDialogueFinihsed(I_1))
@@ -1199,9 +1202,19 @@ void Level::update()
                 }
             }
 
+            if (u.hasChosenOption(I_8_B) || u.hasChosenOption(I_8_C))
+            {
+                _interrogationStageData.killHugoBeforeInterrogationCounter++;
+            }
+
             if (u.hasDialogueFinihsed(I_8))
             {
                 u.pushEntityDialogue(I_9, { I_9_I });
+            }
+
+            if (u.hasInterruptedMidSentence(I_9_I))
+            {
+                _interrogationStageData.killHugoBeforeInterrogationCounter++;
             }
 
             if (u.hasDialogueFinihsed(I_9) || u.hasInterruptedMidSentence(I_9_I))
@@ -1217,6 +1230,38 @@ void Level::update()
             if (u.hasDialogueFinihsed(I_11))
             {
                 u.pushEntityDialogue(I_12, { I_12_A, I_12_B });
+            }
+
+            if (u.hasChosenOption(I_12_B))
+            {
+                _interrogationStageData.killHugoBeforeInterrogationCounter++;
+            }
+
+            if (u.hasDialogueFinihsed(I_12))
+            {
+                _interrogationStageData.canRostovGetNearHugo = true;
+            }
+
+            // Auto move
+            if (_interrogationStageData.canRostovGetNearHugo)
+            {
+                if (moveEntityUntilXPosition(playerTransform, playerM, playerS, 114.f))
+                {
+                    _interrogationStageData.canRostovGetNearHugo = false;
+                    playerS->flipX = true;
+                    
+                    u.delayNextDialogueFor(0.2f);
+                    u.pushEntityDialogue(I_13, { I_13_A, _interrogationStageData.killHugoBeforeInterrogationCounter >= 2 ? I_13_B_HIGH_TENSION : I_13_B_LOW_TENSION });
+                }
+            }
+
+            if (u.didChooseDialogueOptionThisFrame(I_13_B_HIGH_TENSION))
+            {
+                player.entityState = IDLE_STATE;
+                u.popTensionBar();
+
+                playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+                s_combatSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
             }
 
             break;

@@ -163,11 +163,13 @@ struct HugoInterrogationStageData
 	float startDialogueTimer = 0.f;
 	// If it's 3+ we can do it
 	uint8_t killHugoBeforeInterrogationCounter = 0;
+	bool canRostovGetNearHugo = false;
 
 	void reset()
 	{
 		startDialogueTimer = 0.f;
 		killHugoBeforeInterrogationCounter = 0;
+		canRostovGetNearHugo = false;
 	}
 };
 

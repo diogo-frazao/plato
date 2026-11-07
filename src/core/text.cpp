@@ -185,12 +185,16 @@ TextDTO getTextInfo(TextType textType)
 			case I_8_B: return { "Fine, but I'll do it my way", CHOICE_DIALOGUE, 5, HIGH_TENSION };
 			case I_8_C: return { "You know he won't talk", CHOICE_DIALOGUE, 10, HIGH_TENSION };
 		case I_9: return { "WHat ar-u saying?? [interjection]*blurgh*[interjection] [wait][wwait] get mee the hopitalI [blue]need[blue] a doctr", HUGO_DIALOGUE };
-			case I_9_I: return { "Shut up", CHOICE_DIALOGUE, 5, HIGH_TENSION, 30 };
-		case I_10: return { "[rostov]ROSTOV,[rostov] before you do your thing... Please... Stay calm son.[wait][wait] I can't believe you just [red]killed[red] [hugo]OSKAR[hugo]", DARWIN_DIALOGUE };
-		case I_11: return { "I know you're a different person, [pink]don't let these emotions ruin[pink] you again", DARWIN_DIALOGUE };
+			case I_9_I: return { "Shut up", CHOICE_DIALOGUE, 5, HIGH_TENSION, 20 };
+		case I_10: return { "[rostov]ROSTOV,[rostov] before you go... Stay calm son.[wait][wait] [red]One dead body is already enough[red]", DARWIN_DIALOGUE };
+		case I_11: return { "We both know [hugo]OSKAR[hugo] deserved it, [pink]but don't let these emotions ruin you[pink]", DARWIN_DIALOGUE };
 		case I_12: return { "Whe-r is the doc [rostov]ROSTOV?[rostov] Can'- you se i'm dyiin-g?? [red]I-need adoctr NOW![red]", HUGO_DIALOGUE };
 			case I_12_A: return { "...", CHOICE_DIALOGUE };
 			case I_12_B: return { "SHUT UP", CHOICE_DIALOGUE, 5, HIGH_TENSION };
+		case I_13: return { "Fianlll–y [wait][wait] [redshake]*blurgh*[redshake]... Ned hi-spital", HUGO_DIALOGUE };
+			case I_13_A: return { "Talk and we'll get you to one", CHOICE_DIALOGUE, -10, LOW_TENSION };
+			case I_13_B_LOW_TENSION: return { "< Provoke him >", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+			case I_13_B_HIGH_TENSION: return { "Save your breath < SHOOT HIM >", CHOICE_DIALOGUE, 20, FATAL_TENSION };
 	}
 
 	// Hugo confrontation after oskar is killed
