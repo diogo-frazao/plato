@@ -180,6 +180,17 @@ TextDTO getTextInfo(TextType textType)
 		case I_5: return { "Yo-u f uking cunt, [redshake]*blurgh*[redshake]", HUGO_DIALOGUE };
 		case I_6: return { "Psst, [rostov]ROSTOV,[rostov] [yellow]I need your help.[yellow] I can't get anything out of him", DARWIN_DIALOGUE };
 		case I_7: return {  "[rostov]ROSTOV,[rostov] are you listening to me?[wait][wait] [redshake]ROSTOV![redshake]", DARWIN_DIALOGUE };
+		case I_8: return { "Were you asleep? I [pink]need your help[pink] to get to the bottom of this", DARWIN_DIALOGUE };
+			case I_8_A: return { "Don't worry I'll do it", CHOICE_DIALOGUE };
+			case I_8_B: return { "Fine, but I'll do it my way", CHOICE_DIALOGUE, 5, HIGH_TENSION };
+			case I_8_C: return { "You know he won't talk", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+		case I_9: return { "WHat ar-u saying?? [interjection]*blurgh*[interjection] [wait][wwait] get mee the hopitalI [blue]need[blue] a doctr", HUGO_DIALOGUE };
+			case I_9_I: return { "Shut up", CHOICE_DIALOGUE, 5, HIGH_TENSION, 30 };
+		case I_10: return { "[rostov]ROSTOV,[rostov] before you do your thing... Please... Stay calm son.[wait][wait] I can't believe you just [red]killed[red] [hugo]OSKAR[hugo]", DARWIN_DIALOGUE };
+		case I_11: return { "I know you're a different person, [pink]don't let these emotions ruin[pink] you again", DARWIN_DIALOGUE };
+		case I_12: return { "Whe-r is the doc [rostov]ROSTOV?[rostov] Can'- you se i'm dyiin-g?? [red]I-need adoctr NOW![red]", HUGO_DIALOGUE };
+			case I_12_A: return { "...", CHOICE_DIALOGUE };
+			case I_12_B: return { "SHUT UP", CHOICE_DIALOGUE, 5, HIGH_TENSION };
 	}
 
 	// Hugo confrontation after oskar is killed
@@ -315,6 +326,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 27, 52, 45 };
 		s_currentDialogueEntityDTO.textColor = { 145, 210, 104 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 22.f, 9.f };
+		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 0.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = k_playerEntityId;
 		break;
@@ -322,7 +334,8 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.dialogueBoxColor = { 25, 11, 13 };
 		s_currentDialogueEntityDTO.outlineColor = { 106, 106, 106 };
 		s_currentDialogueEntityDTO.textColor = { 210, 104, 104 };
-		s_currentDialogueEntityDTO.dialoguePositionOffset = { 6.f, 0.f };
+		s_currentDialogueEntityDTO.dialoguePositionOffset = s_darwinDialogueBoxPosittionOffset;
+		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 1.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_darwinEntityId;
 		break;
@@ -331,6 +344,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 61, 49, 63 };
 		s_currentDialogueEntityDTO.textColor = { 193, 138, 106 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 20.f, 8.f };
+		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 0.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_LEFT_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_oskarEntityId;
 		break;
@@ -339,6 +353,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 60, 60, 60 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 0.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;
@@ -347,6 +362,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.outlineColor = { 85, 38, 67 };
 		s_currentDialogueEntityDTO.textColor = { 251, 185, 84 };
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
+		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 0.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
 		break;

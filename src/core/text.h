@@ -126,6 +126,17 @@ enum TextType
 	I_5,
 	I_6,
 	I_7,
+	I_8,
+	I_8_A,
+	I_8_B,
+	I_8_C,
+	I_9,
+	I_9_I,
+	I_10,
+	I_11,
+	I_12,
+	I_12_A,
+	I_12_B,
 	D_1,
 	D_2,
 	D_3,
@@ -295,9 +306,12 @@ struct DialogueEntityDTO
 	int32_t entityId = k_invalidId;
 
 	Vec2 dialoguePositionOffset{ 0.f, 0.f };
+	float speechIndicatorXPositionOffset = 0.f;
 	DialogueAlignmentType dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
 };
 
+// Some characters need their dialogue boxes to have dynamic position and etc, so they're declared as inline and changed at runtime
+inline Vec2 s_darwinDialogueBoxPosittionOffset = { 6.f, 0.f };
 inline DialogueEntityDTO s_currentDialogueEntityDTO{};
 void updateDialogueColorsAndOffsetForEntity(DialogueEntityType entityTalking);
 

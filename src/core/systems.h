@@ -326,9 +326,6 @@ public:
 		TextType dialogueOptionPressedThisFrame = INVALID_TEXT;
 		// Used since text effects that cause a camera shake should only shake once on startup. Not once per character
 		bool hasAppliedShakeForCurrentWord = false;
-		// Needed to have frame rate independent lerp
-		float speechIndicatorCurrentXPosition = 0.f;
-		float speechIndicatorTargetXPosition = 0.f;
 		float secondsToAutoSkipDialogue = 1.f;
 
 		// Don't use directly, call destroyCurrentDialogue() instead
@@ -359,8 +356,6 @@ public:
 			this->speechIndicatorDynamicYSize = 0.f;
 			this->dialogueOutlineDynamicXSize = 0.f;
 			this->hasAppliedShakeForCurrentWord = false;
-			this->speechIndicatorCurrentXPosition = 0.f;
-			this->speechIndicatorTargetXPosition = 0.f;
 			this->secondsToAutoSkipDialogue = 1.f;
 			this->dialogueOptionPressedThisFrame = INVALID_TEXT;
 		}
@@ -435,6 +430,7 @@ public:
 	Dialogue _currentDialogue;
 	DialogueOption _dialogueOptions[k_maxDialogueOptions];
 
+	bool isDialogueDelayed(TextType dialogueType);
 	void delayNextDialogueFor(float seconds);
 	DelayedDialogueData _delayedDialogueData;
 

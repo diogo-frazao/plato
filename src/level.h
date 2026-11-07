@@ -161,10 +161,13 @@ struct GangsterConfrontagionStageData
 struct HugoInterrogationStageData
 {
 	float startDialogueTimer = 0.f;
+	// If it's 3+ we can do it
+	uint8_t killHugoBeforeInterrogationCounter = 0;
 
 	void reset()
 	{
 		startDialogueTimer = 0.f;
+		killHugoBeforeInterrogationCounter = 0;
 	}
 };
 

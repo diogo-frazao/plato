@@ -2493,13 +2493,6 @@ void UISystem::update()
 		}
 	}
 
-	// Move speech indicator x
-	bool shouldLerpSpeechIndicatorXPosition = (_currentDialogue.speechIndicatorTargetXPosition > 0.1f && _currentDialogue.speechIndicatorCurrentXPosition > 0.1f);
-	if (shouldLerpSpeechIndicatorXPosition)
-	{
-		_currentDialogue.speechIndicatorCurrentXPosition = lerp(_currentDialogue.speechIndicatorCurrentXPosition, _currentDialogue.speechIndicatorTargetXPosition, 0.1f);
-	}
-
 	// Main dialogue characters logic + animate
 	bool hasDialogueFinished = false;
 	// Overridden below. Only true when all characters are outside of the screen
@@ -3030,39 +3023,10 @@ void UISystem::render(RenderingSystem* renderingSystem)
 				break;
 		}
 
-		// Initialize for the first time
-		if (_currentDialogue.speechIndicatorCurrentXPosition < 0.1f)
-		{
-			_currentDialogue.speechIndicatorCurrentXPosition = xPositionToDrawSpeechIndicator;
-		}
-
-		// Calculate X Position for speech indicator.
-		// If needed, move move it (only neeed when the entity moved during the dialogue)
-		// On update, we take the current and target and just lerp.
-		if (!_currentDialogue.isScreenSpace)
+		if (s_currentDialogueEntityDTO.speechIndicatorXPositionOffset > 0.f)
 		{
 			Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*_currentDialogue.entityTalking)->position;
-			SDL_FRect positionWhereDialogueStartsDrawing;
-			positionWhereDialogueStartsDrawing.x = entityPosition.x + s_currentDialogueEntityDTO.dialoguePositionOffset.x;
-			positionWhereDialogueStartsDrawing.y = entityPosition.y + s_currentDialogueEntityDTO.dialoguePositionOffset.y;
-			positionWhereDialogueStartsDrawing.w = positionWhereDialogueStartsDrawing.h = 1.f;
-			SDL_FRect screenPositionWhereDialogueStartsDrawing = convertWorldRectToCameraSpace(positionWhereDialogueStartsDrawing);
-
-			if (screenPositionWhereDialogueStartsDrawing.x > xPositionToDrawSpeechIndicator)
-			{
-				// Only allow movement until 90% of the dialogue box
-				float dialogueBoxTargetXSize = _currentDialogue.dialogueBoxSize.x + (k_dialogueOuterPadding.x * 2.f);
-				float dialogueBoxEndPosition = dest.x + dialogueBoxTargetXSize;
-				float maxAllowedPositionForSpeechIndicator = dialogueBoxEndPosition * 0.9f;
-
-				_currentDialogue.speechIndicatorTargetXPosition = min(screenPositionWhereDialogueStartsDrawing.x, maxAllowedPositionForSpeechIndicator);
-				dest.x = _currentDialogue.speechIndicatorCurrentXPosition;
-
-			}
-			else
-			{
-				dest.x = xPositionToDrawSpeechIndicator;
-			}
+			dest.x = entityPosition.x + s_currentDialogueEntityDTO.speechIndicatorXPositionOffset;
 		}
 		else
 		{
@@ -3626,6 +3590,11 @@ void UISystem::delayNextDialogueFor(float seconds)
 {
 	startTimer(_delayedDialogueData.secondsToPlayDialogueTimer);
 	_delayedDialogueData.secondsToPlayDialogue = seconds;
+}
+
+bool UISystem::isDialogueDelayed(TextType dialogueType)
+{
+	return isTimerOngoing(_delayedDialogueData.secondsToPlayDialogueTimer) && _delayedDialogueData.text == dialogueType;
 }
 
 void UISystem::pushEntityDialogue(TextType dialogueTextType, const DialogueOptionsDTO dialogueOptions, bool isScreenSpace, Vec2 screenSpacePosition, DialogueAlignmentType alignmentType)

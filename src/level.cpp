@@ -1145,6 +1145,7 @@ void Level::update()
 
             if (isTimerOngoing(_interrogationStageData.startDialogueTimer) && _interrogationStageData.startDialogueTimer >= 2.f)
             {
+                s_darwinDialogueBoxPosittionOffset.x = 17.f;
                 u.pushEntityDialogue(I_1);
                 invalidateTimer(_interrogationStageData.startDialogueTimer);
             }
@@ -1167,6 +1168,55 @@ void Level::update()
             if (u.hasDialogueFinihsed(I_4))
             {
                 u.pushEntityDialogue(I_5);
+            }
+
+            if (u.hasDialogueFinihsed(I_5))
+            {
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                getComponentFromEntity<TransformComponent>(darwin)->position.x = 48.f;
+
+                u.delayNextDialogueFor(3.f);
+                u.pushEntityDialogue(I_6);
+            }
+
+            if (u.hasDialogueFinihsed(I_6))
+            {
+                u.pushEntityDialogue(I_7);
+            }
+
+            if (u.hasDialogueFinihsed(I_7))
+            {
+                u.delayNextDialogueFor(2.f);
+                u.pushEntityDialogue(I_8, { I_8_A, I_8_B, I_8_C });
+            }
+
+            if (u.isDialogueDelayed(I_8))
+            {
+                s_renderingSystem._inFrontOfEverythingColor.a = lerp(s_renderingSystem._inFrontOfEverythingColor.a, 0, 0.1f);
+                if (s_renderingSystem._inFrontOfEverythingColor.a < 50)
+                {
+                    u.pushTensionBar();
+                }
+            }
+
+            if (u.hasDialogueFinihsed(I_8))
+            {
+                u.pushEntityDialogue(I_9, { I_9_I });
+            }
+
+            if (u.hasDialogueFinihsed(I_9) || u.hasInterruptedMidSentence(I_9_I))
+            {
+                u.pushEntityDialogue(I_10);
+            }
+
+            if (u.hasDialogueFinihsed(I_10))
+            {
+                u.pushEntityDialogue(I_11);
+            }
+
+            if (u.hasDialogueFinihsed(I_11))
+            {
+                u.pushEntityDialogue(I_12, { I_12_A, I_12_B });
             }
 
             break;
@@ -2029,9 +2079,8 @@ void Level::update()
             player.entityState = ON_CUTSCENE_STATE;
             getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;*/
 
-            Entity& hugo = getEntityById(s_hugoEntityId);
-            getComponentFromEntity<AttackingComponent>(hugo)->canBeAttacked = true;
-            u.pushEntityDialogue(C_SHOOT_2);
+            _currentLevelStage = HUGO_INTERROGATION_STAGE;
+            u.pushEntityDialogue(I_5);
         }
 
         // Debug to not have to wait x seconds for things to happen
