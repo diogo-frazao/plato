@@ -191,10 +191,36 @@ TextDTO getTextInfo(TextType textType)
 		case I_12: return { "Whe-r is the doc [rostov]ROSTOV?[rostov] Can'- you se i'm dyiin-g?? [red]I-need adoctr NOW![red]", HUGO_DIALOGUE };
 			case I_12_A: return { "...", CHOICE_DIALOGUE };
 			case I_12_B: return { "SHUT UP", CHOICE_DIALOGUE, 5, HIGH_TENSION };
-		case I_13: return { "Fianlll–y [wait][wait] [redshake]*blurgh*[redshake]... Ned hi-spital", HUGO_DIALOGUE };
+		case I_13: return { "Fianlll–y[wait][wait] [redshake]*blurgh*[redshake]... Ned hi-spital", HUGO_DIALOGUE };
 			case I_13_A: return { "Talk and we'll get you to one", CHOICE_DIALOGUE, -10, LOW_TENSION };
+				case I_13_A_1: return { "Really?? [redshake]*cough*[redshake] [wait][wait]of cours– tell you everyth,g but quicc please i loosing a lot of blood", HUGO_DIALOGUE, -10 };
 			case I_13_B_LOW_TENSION: return { "< Provoke him >", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+				case I_13_B_LOW_TENSION_1: return { "What ar u doing?? Hel--me me I'l oozing a lot of blood", HUGO_DIALOGUE };
+				case I_13_B_LOW_TENSION_2: return { "Wait... i'l tell u everyth you wan-but [wait][wait] [redshake]*cough*[redshake] [wait][wait]quick pleas", HUGO_DIALOGUE, -10 };
 			case I_13_B_HIGH_TENSION: return { "Save your breath < SHOOT HIM >", CHOICE_DIALOGUE, 20, FATAL_TENSION };
+		case I_Q_A: return { "Who sent you?", CHOICE_DIALOGUE };
+		case I_Q_B: return { "What money were you talking about?", CHOICE_DIALOGUE };
+		case I_Q_C: return { "You talk. Tell me everything", CHOICE_DIALOGUE, 5, HIGH_TENSION };
+		case I_14: return { "I al-ready toldu... [darwin]Yourr boss[darwin] is in crazy scheme [red]and money's... gone missi[red]. An-no one sent us [wait][wait]we indenpndent", HUGO_DIALOGUE };
+		case I_15: return { "And that's the whol-e truth [redshake]*blurghh*[redshake] [wait][wait]i swerr for my life [rostov]ROSTOV[rostov]", HUGO_DIALOGUE, -10 };
+			case I_15_A: return { "I trust you", CHOICE_DIALOGUE, -10, LOW_TENSION };
+				case I_15_A_1: return { "Thannk u [rostov]Rostovv[rostov]", HUGO_DIALOGUE, -5 };
+			case I_15_B: return { "I think you're lying", CHOICE_DIALOGUE, 10, HIGH_TENSION };
+				case I_15_B_1: return { "I'm not i swearrr [rostov]Rostovv[rostov]", HUGO_DIALOGUE, -5 };
+		case I_16: return { "Now hel-me... I'm losing a lot of blood, the boss will not... lik- this. [redshake]*blurghh*[redshake] [wait][wait]I hav-to reprt back can't evn feel arms anmnor", HUGO_DIALOGUE, -10 };
+			case I_16_I: return { "The boss?", CHOICE_DIALOGUE, 15, HIGH_TENSION, 40 };
+				case I_16_I_1: return { "[laugh]AhAhhHahA[laugh], [wait][wait]oops [redshake]*cough*[redshake]", HUGO_DIALOGUE, 15 };
+			case I_16_NOT_I: return { "You' not relly to-help me... Are you?", HUGO_DIALOGUE };
+		case I_17: return { "[redshake]FUCK.[redshake] [redshake]YOU.[redshake] u relly-think I' tell somerjtng?? [red]Yu killed my brther[red] [wait][wait] 'd rather die blee.ding tha-elp you", HUGO_DIALOGUE, 10 };
+			case I_17_I: return { "Tell me who the boss is", CHOICE_DIALOGUE, 15, HIGH_TENSION, 10 };
+		case I_18: return { "An-there's sti-ll one thing i need to[wait][wait] [redshake]*blurghh*[redshake] [wait][wait]tell you... [red]I hope you father gets wors and dies, soyousee ho-it feels. You f-kj[red]", HUGO_DIALOGUE, 20 };
+			case I_18_I: return { "< AIM GUN >", CHOICE_DIALOGUE, 15, HIGH_TENSION, 70 };
+		case I_19: return { "Rostov don't do anything stupid. Let’s just let him go. We already did all we could and there's", DARWIN_DIALOGUE };
+		case I_20: return { "Rellaax, it's mine... It's pro-bly The Boss, [blue]he wants to knw if-the job is dne[blue]", HUGO_DIALOGUE };
+		case I_21: return { "Don't you [redshake]dare[redshake] pick it up, I know you'll call for help", DARWIN_DIALOGUE };
+		case I_22: return { "[laugh]AHhaahah,[laugh] on't you wan-to know 'who's behind this'? [blue]This-is ur. chance[blue]", HUGO_DIALOGUE };
+			case I_22_A: return { "Pick up the call now", CHOICE_DIALOGUE };
+			case I_22_B: return { "Don't you dare", CHOICE_DIALOGUE, 10, HIGH_TENSION };
 	}
 
 	// Hugo confrontation after oskar is killed

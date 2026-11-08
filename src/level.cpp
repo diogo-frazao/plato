@@ -1255,13 +1255,105 @@ void Level::update()
                 }
             }
 
-            if (u.didChooseDialogueOptionThisFrame(I_13_B_HIGH_TENSION))
+            if (u.hasChosenOption(I_13_A))
+            {
+                u.pushEntityDialogue(I_13_A_1, { I_Q_A, I_Q_B, I_Q_C });
+            }
+            else if (u.hasChosenOption(I_13_B_LOW_TENSION))
+            {
+                u.delayNextDialogueFor(1.f);
+                u.pushEntityDialogue(I_13_B_LOW_TENSION_1);
+            }
+            else if (u.didChooseDialogueOptionThisFrame(I_13_B_HIGH_TENSION))
             {
                 player.entityState = IDLE_STATE;
                 u.popTensionBar();
 
                 playerA->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
                 s_combatSystem.mainCharacterAttackWithWeaponInHand(&player, playerA, playerM, playerTransform, playerS, playerC);
+            }
+
+            if (u.hasDialogueFinihsed(I_13_B_LOW_TENSION_1))
+            {
+                u.delayNextDialogueFor(3.f);
+                u.pushEntityDialogue(I_13_B_LOW_TENSION_2, { I_Q_A, I_Q_B, I_Q_C });
+            }
+
+            if (u.hasChosenOption(I_Q_A) || u.hasChosenOption(I_Q_B) || u.hasChosenOption(I_Q_C))
+            {
+                u.pushEntityDialogue(I_14);
+            }
+
+            if (u.hasDialogueFinihsed(I_14))
+            {
+                u.pushEntityDialogue(I_15, {I_15_A, I_15_B });
+            }
+
+            if (u.hasChosenOption(I_15_A))
+            {
+                u.pushEntityDialogue(I_15_A_1);
+            }
+            else if (u.hasChosenOption(I_15_B))
+            {
+                u.pushEntityDialogue(I_15_B_1);
+            }
+
+            if (u.hasDialogueFinihsed(I_15_A_1) || u.hasDialogueFinihsed(I_15_B_1))
+            {
+                u.pushEntityDialogue(I_16, {I_16_I});
+            }
+
+            if (u.hasInterruptedMidSentence(I_16_I))
+            {
+                u.pushEntityDialogue(I_16_I_1);
+            }
+
+            if (u.hasDialogueFinihsed(I_16))
+            {
+                u.delayNextDialogueFor(2.f);
+                u.pushEntityDialogue(I_16_NOT_I);
+            }
+
+            if (u.hasDialogueFinihsed(I_16_I_1) || u.hasDialogueFinihsed(I_16_NOT_I))
+            {
+                u.pushEntityDialogue(I_17, {I_17_I});
+            }
+
+            if (u.hasDialogueFinihsed(I_17) || u.hasInterruptedMidSentence(I_17_I))
+            {
+                u.pushEntityDialogue(I_18, { I_18_I });
+            }
+
+            if (u.hasDialogueFinihsed(I_18) || u.hasInterruptedMidSentence(I_18_I))
+            {
+                u.pushEntityDialogue(I_19);
+            }
+            if (u.didChooseDialogueOptionThisFrame(I_18_I))
+            {
+                getComponentFromEntity<AttackingComponent>(player)->weaponInHand = ROSTOV_WEAPON_PISTOL_TYPE;
+            }
+
+            if (u.isCurrentDialogue(I_19) && u._currentDialogue.timeSinceDialogueStarted >= 4.f && u.canInterruptDialogue(I_19))
+            {
+                _interrogationStageData.canWaitDuringPhoneRing = true;
+                u.interruptCurrentDialogue(true);
+            }
+
+            if (_interrogationStageData.canWaitDuringPhoneRing && u.hasDialogueFinishedInterrupting(I_19))
+            {
+                u.delayNextDialogueFor(3.f);
+                u.pushEntityDialogue(I_20);
+                _interrogationStageData.canWaitDuringPhoneRing = false;
+            }
+
+            if (u.hasDialogueFinihsed(I_20))
+            {
+                u.pushEntityDialogue(I_21);
+            }
+
+            if (u.hasDialogueFinihsed(I_21))
+            {
+                u.pushEntityDialogue(I_22, {I_22_A, I_22_B });
             }
 
             break;
@@ -2087,7 +2179,7 @@ void Level::update()
 
             //getComponentFromEntity<AttackingComponent>(player)->weaponInHand = NO_WEAPON_TYPE;
 
-            _currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
+            /*_currentLevelStage = GANGSTER_CONFRONTATION_STAGE;
             _confrontStageData.reset();
 
             Entity& oskar = getEntityById(s_oskarEntityId);
@@ -2109,7 +2201,17 @@ void Level::update()
             playerS->flipX = false;
 
             playerA->weaponInHand = NO_WEAPON_TYPE;
-            playerA->canAttack = true;
+            playerA->canAttack = true;*/
+
+            _currentLevelStage = HUGO_INTERROGATION_STAGE;
+            s_uiSystem.pushEntityDialogue(I_19);
+            s_renderingSystem._inFrontOfEverythingColor.a = 0;
+
+            Entity& darwin = getEntityById(s_darwinEntityId);
+            getComponentFromEntity<TransformComponent>(darwin)->position.x = 48.f;
+
+            getComponentFromEntity<TransformComponent>(player)->position.x = 114.f;
+            playerS->flipX = true;
 
             //s_uiSystem.pushCellphoneDialogue(s_uiSystem._currentDialogue.dialogueType, { s_uiSystem._dialogueOptions[0].dialogueType,
             //    s_uiSystem._dialogueOptions[1].dialogueType, s_uiSystem._dialogueOptions[2].dialogueType });
