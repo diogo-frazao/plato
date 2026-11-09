@@ -215,7 +215,7 @@ TextDTO getTextInfo(TextType textType)
 			case I_17_I: return { "Tell me who the boss is", CHOICE_DIALOGUE, 15, HIGH_TENSION, 10 };
 		case I_18: return { "An-there's sti-ll one thing i need to[wait][wait] [redshake]*blurghh*[redshake] [wait][wait]tell you... [red]I hope you father gets wors and dies, soyousee ho-it feels. You f-kj[red]", HUGO_DIALOGUE, 20 };
 			case I_18_I: return { "< AIM GUN >", CHOICE_DIALOGUE, 15, HIGH_TENSION, 70 };
-		case I_19: return { "Rostov don't do anything stupid. Let’s just let him go. We already did all we could and there's", DARWIN_DIALOGUE };
+		case I_19: return { "Rostov don't do anything stupid. Let's just let him go. We already did all we could and there's", DARWIN_DIALOGUE };
 		case I_20: return { "Rellaax, it's mine... It's pro-bly The Boss, [blue]he wants to knw if-the job is dne[blue]", HUGO_DIALOGUE };
 		case I_21: return { "Don't you [redshake]dare[redshake] pick it up, I know you'll call for help", DARWIN_DIALOGUE };
 		case I_22: return { "[laugh]AHhaahah,[laugh] on't you wan-to know 'who's behind this'? [blue]This-is ur. chance[blue]", HUGO_DIALOGUE };

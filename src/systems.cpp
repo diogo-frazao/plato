@@ -3026,7 +3026,7 @@ void UISystem::render(RenderingSystem* renderingSystem)
 		if (s_currentDialogueEntityDTO.speechIndicatorXPositionOffset > 0.f)
 		{
 			Vec2 entityPosition = getComponentFromEntity<TransformComponent>(*_currentDialogue.entityTalking)->position;
-			dest.x = entityPosition.x + s_currentDialogueEntityDTO.speechIndicatorXPositionOffset;
+			dest.x = convertWorldPositionToCameraSpace(entityPosition.x + s_currentDialogueEntityDTO.speechIndicatorXPositionOffset);
 		}
 		else
 		{

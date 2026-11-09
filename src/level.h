@@ -164,6 +164,7 @@ struct HugoInterrogationStageData
 	// If it's 3+ we can do it
 	uint8_t killHugoBeforeInterrogationCounter = 0;
 	bool canRostovGetNearHugo = false;
+	bool canDarwinGetNearHugo = false;
 	bool canWaitDuringPhoneRing = false;
 
 	void reset()
@@ -171,6 +172,7 @@ struct HugoInterrogationStageData
 		startDialogueTimer = 0.f;
 		killHugoBeforeInterrogationCounter = 0;
 		canRostovGetNearHugo = false;
+		canDarwinGetNearHugo = false;
 		canWaitDuringPhoneRing = false;
 	}
 };
@@ -275,6 +277,13 @@ inline Vec2 convertScreenPositionToCameraSpace(Vec2 posInScreenSpace)
 	posInCameraSpace.x = posInCameraSpace.x * camera.zoom - camera.zoomFocusPoint.x;
 	posInCameraSpace.y = posInCameraSpace.y * camera.zoom - camera.zoomFocusPoint.y;
 	return posInCameraSpace;
+}
+
+inline float convertWorldPositionToCameraSpace(const float pos)
+{
+	float posInsideCamera = pos - s_camera.position.x;
+	float posWithZoom = posInsideCamera * s_camera.zoom + s_camera.zoomFocusPoint.x;
+	return posWithZoom;
 }
 
 // Expects a worldRect with x,y in world position and w,h as the desired draw size

@@ -1245,13 +1245,40 @@ void Level::update()
             // Auto move
             if (_interrogationStageData.canRostovGetNearHugo)
             {
-                if (moveEntityUntilXPosition(playerTransform, playerM, playerS, 114.f))
+                float targetRostovX = 116.f;
+                if (moveEntityUntilXPosition(playerTransform, playerM, playerS, targetRostovX))
                 {
                     _interrogationStageData.canRostovGetNearHugo = false;
                     playerS->flipX = true;
                     
                     u.delayNextDialogueFor(0.2f);
                     u.pushEntityDialogue(I_13, { I_13_A, _interrogationStageData.killHugoBeforeInterrogationCounter >= 2 ? I_13_B_HIGH_TENSION : I_13_B_LOW_TENSION });
+                }
+
+                if (playerTransform->position.x >= 46 && !_interrogationStageData.canDarwinGetNearHugo)
+                {
+                    Entity& darwin = getEntityById(s_darwinEntityId);
+                    auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
+                    darwinS->flipX = false;
+                }
+
+                if (abs(playerTransform->position.x - targetRostovX) <= 20.f && !_interrogationStageData.canDarwinGetNearHugo)
+                {
+                    _interrogationStageData.canDarwinGetNearHugo = true;
+                }
+            }
+
+            // Auto move darwin
+            if (_interrogationStageData.canDarwinGetNearHugo)
+            {
+                Entity& darwin = getEntityById(s_darwinEntityId);
+                auto* darwinT = getComponentFromEntity<TransformComponent>(darwin);
+                auto* darwinM = getComponentFromEntity<MovementComponent>(darwin);
+                darwinM->maxHorizontalSpeed = 0.5f;
+                auto* darwinS = getComponentFromEntity<SpriteComponent>(darwin);
+                if (moveEntityUntilXPosition(darwinT, darwinM, darwinS, 90.f))
+                {
+                    _interrogationStageData.canDarwinGetNearHugo = false;
                 }
             }
 
