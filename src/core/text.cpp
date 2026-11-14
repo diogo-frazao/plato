@@ -223,6 +223,28 @@ TextDTO getTextInfo(TextType textType)
 			case I_22_B: return { "Don't you dare", CHOICE_DIALOGUE, 10, HIGH_TENSION };
 	}
 
+	// Hugo interrogation - phone call with big diesel
+	{
+		case IC_1: return { "How?? U-tied m, fuckng hands", HUGO_DIALOGUE };
+		case IC_2: return { "That's your problem, pick up the call now", DARWIN_DIALOGUE };
+		case IC_3: return { "[wave]Yoooooo[wave] what's good G", BIG_DISEL_DIALOGUE, 10 };
+			case IC_3_A: return { "< Stay silent >", CHOICE_DIALOGUE };
+			case IC_3_B: return { "Yo", CHOICE_DIALOGUE };
+		case IC_4: return { "[hugo]Hugo?[hugo]", BIG_DISEL_DIALOGUE };
+		case IC_5: return { "I don't even need to ask, right?", BIG_DISEL_DIALOGUE };
+		case IC_6: return { "A [yellow]gangster[yellow] like you always gets the job done", BIG_DISEL_DIALOGUE };
+			case IC_6_A: return { "< Stay silent >", CHOICE_DIALOGUE };
+				case IC_6_A_1: return { "...", BIG_DISEL_DIALOGUE };
+				case IC_6_A_2: return { "Tsc. [wait][wait]I'll take that as a yes my boy", BIG_DISEL_DIALOGUE };
+			case IC_6_B: return { "Of course", CHOICE_DIALOGUE };
+			case IC_6_C: return { "< Signal [hugo]HUGO[hugo] to talk", CHOICE_DIALOGUE };
+				case IC_6_C_1: return { "Ye-s Diesel", HUGO_DIALOGUE };
+			case IC_6_BC_1: return { "...", BIG_DISEL_DIALOGUE };
+			case IC_6_BC_2: return { "[wave]That's what I'm talking about my boooy[wave]", BIG_DISEL_DIALOGUE };
+		case IC_7: return { "Those OG’s from the restaurant know [red]nothing[red] about how we operate man. [wait][wait]Tsc. [redshake]WE.[redshake] [redshake]THE.[redshake] [redshake]RULLERS.[redshake]", BIG_DISEL_DIALOGUE };
+		case IC_8: return { "We’re [yellow]here[yellow] at the place already, let’s celebrate [laugh]AHahahahaha[laugh], [wait][wait]meet us in 5", BIG_DISEL_DIALOGUE };
+	}
+
 	// Hugo confrontation after oskar is killed
 	{
 	case D_1: return { "WHAT. THE. FUCK.", HUGO_DIALOGUE };
@@ -394,7 +416,7 @@ void updateDialogueColorsAndOffsetForEntity(DialogueEntityType dialogueColorsTyp
 		s_currentDialogueEntityDTO.dialoguePositionOffset = { 29.f, 8.f };
 		s_currentDialogueEntityDTO.speechIndicatorXPositionOffset = 0.f;
 		s_currentDialogueEntityDTO.dialogueAlignment = DIALOGUE_CENTER_ALIGNED;
-		s_currentDialogueEntityDTO.entityId = s_hugoEntityId;
+		s_currentDialogueEntityDTO.entityId = s_hugoCellphoneEntityId;
 		break;
 	default:
 		D_ASSERT(false, "Unsupported dialogue entity type");

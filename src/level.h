@@ -130,6 +130,7 @@ enum LevelStages
 	PHONE_CONFRONTATION_STAGE,
 	FREE_STAGE,
     GANGSTER_CONFRONTATION_STAGE_OLD,
+	PHONE_CONFRONTATION_STAGE_OLD,
     LEVEL_STAGES_COUNT,
 };
 static const char* s_levelStagesString = { "MARKETING_PHONE_STAGE\0FIRST_DAD_PHONE_STAGE\0GANGSTER_CONFRONTATION_SAGE\0HUGO_INTERROGATION_STAGE\0PHONE_CONFRONTATION_STAGE\0FREE_STAGE\0" };
@@ -214,6 +215,16 @@ struct GangsterConfrontationStageDataOld
 
 struct PhoneConfrontationStage
 {
+	bool hasStarted = false;
+
+	void reset()
+	{
+		hasStarted = false;
+	}
+};
+
+struct PhoneConfrontationStageOld
+{
 	float waitForHugoCallTimer = 0.f;
 	bool hasHugoPhoneStartedRinging = false;
 	float lookAtDarwinTimer = k_invalidTime;
@@ -247,7 +258,8 @@ private:
 	GangsterConfrontagionStageData _confrontStageData;
 	GangsterConfrontationStageDataOld _oldGangsterConfrontationStageData;
 	HugoInterrogationStageData _interrogationStageData;
-	PhoneConfrontationStage _phoneConfrontationStageData;
+	PhoneConfrontationStage _phoneStageData;
+	PhoneConfrontationStageOld _oldphoneConfrontationStageData;
 
 	bool _hasOpenedRestaurantDoor = false;
 };

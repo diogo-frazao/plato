@@ -1383,6 +1383,90 @@ void Level::update()
                 u.pushEntityDialogue(I_22, {I_22_A, I_22_B });
             }
 
+            if (u.hasChosenOption(I_22_A))
+            {
+                _currentLevelStage = PHONE_CONFRONTATION_STAGE;
+            }
+
+            break;
+        }
+
+        case PHONE_CONFRONTATION_STAGE:
+        {
+            if (!_phoneStageData.hasStarted)
+            {
+                u.pushEntityDialogue(IC_1);
+
+                // Create hugo phone
+                {
+                    Entity& hugoPhone = addEntity("hugoPhone", {100.f, 100.f});
+                    s_hugoCellphoneEntityId = hugoPhone.id;
+                }
+
+                _phoneStageData.hasStarted = true;
+            }
+
+            if (u.hasDialogueFinihsed(IC_1))
+            {
+                u.pushEntityDialogue(IC_2);
+            }
+
+            if (u.hasDialogueFinihsed(IC_2))
+            {
+                u.delayNextDialogueFor(2.f);
+                u.pushEntityDialogue(IC_3, { IC_3_A, IC_3_B });
+            }
+
+            if (u.hasDialogueFinihsed(IC_3))
+            {
+                u.pushEntityDialogue(IC_4);
+            }
+
+            if (u.hasDialogueFinihsed(IC_4))
+            {
+                u.pushEntityDialogue(IC_5);
+            }
+
+            if (u.hasDialogueFinihsed(IC_5))
+            {
+                u.pushEntityDialogue(IC_6, { IC_6_A, IC_6_B, IC_6_C });
+            }
+
+            if (u.hasChosenOption(IC_6_A))
+            {
+                u.pushEntityDialogue(IC_6_A_1);
+            }
+
+            if (u.hasDialogueFinihsed(IC_6_A_1))
+            {
+                u.pushEntityDialogue(IC_6_A_2);
+            }
+
+            if (u.hasChosenOption(IC_6_C))
+            {
+                u.pushEntityDialogue(IC_6_C_1);
+            }
+
+            if (u.hasChosenOption(IC_6_B) || u.hasDialogueFinihsed(IC_6_C_1))
+            {
+                u.pushEntityDialogue(IC_6_BC_1);
+            }
+
+            if (u.hasDialogueFinihsed(IC_6_BC_1))
+            {
+                u.pushEntityDialogue(IC_6_BC_2);
+            }
+
+            if (u.hasDialogueFinihsed(IC_6_A_2) || u.hasDialogueFinihsed(IC_6_BC_2))
+            {
+                u.pushEntityDialogue(IC_7);
+            }
+
+            if (u.hasDialogueFinihsed(IC_7))
+            {
+                u.pushEntityDialogue(IC_8);
+            }
+
             break;
         }
 
@@ -1589,410 +1673,410 @@ void Level::update()
             break;
         }
 
-        case PHONE_CONFRONTATION_STAGE:
+        case PHONE_CONFRONTATION_STAGE_OLD:
         {
-            Entity& darwin = getEntityById(s_darwinEntityId);
-            Entity& hugo = getEntityById(s_hugoEntityId);
-
-            if (isTimerOngoing(_phoneConfrontationStageData.waitForHugoCallTimer) && !_phoneConfrontationStageData.hasHugoPhoneStartedRinging)
-            {
-                _phoneConfrontationStageData.waitForHugoCallTimer += k_deltaTime;
-                if (_phoneConfrontationStageData.waitForHugoCallTimer >= 3.f)
-                {
-                    _phoneConfrontationStageData.hasHugoPhoneStartedRinging = true;
-                    invalidateTimer(_phoneConfrontationStageData.waitForHugoCallTimer);
-                    startTimer(_phoneConfrontationStageData.lookAtDarwinTimer);
-                }
-            }
-
-            if (isTimerOngoing(_phoneConfrontationStageData.lookAtDarwinTimer))
-            {
-                _phoneConfrontationStageData.lookAtDarwinTimer += k_deltaTime;
-                if (_phoneConfrontationStageData.lookAtDarwinTimer >= 0.5f)
-                {
-                    entityLookAtAnother(&player, &darwin);
-                    
-                    if (_phoneConfrontationStageData.lookAtDarwinTimer >= 1.5f)
-                    {
-                        u.pushEntityDialogue(E_1);
-                        invalidateTimer(_phoneConfrontationStageData.lookAtDarwinTimer);
-                    }
-                }
-            }
-
-            if (u.hasDialogueFinihsed(E_1))
-            {
-                u.pushEntityDialogue(E_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_2))
-            {
-                entityLookAtAnother(&player, &hugo);
-                u.pushEntityDialogue(E_3);
-            }
-
-            if (u.hasDialogueFinihsed(E_3))
-            {
-                u.pushEntityDialogue(E_4);
-            }
-
-            if (u.hasDialogueFinihsed(E_4))
-            {
-                u.pushEntityDialogue(E_5);
-            }
-
-            if (u.hasDialogueFinihsed(E_5))
-            {
-                u.pushEntityDialogue(E_6);
-            }
-
-            if (u.hasDialogueFinihsed(E_6))
-            {
-                u.pushEntityDialogue(E_7, {E_7_A, E_7_B });
-            }
-
-            if (u.hasChosenOption(E_7_A))
-            {
-                u.pushEntityDialogue(E_7_A_1);
-            }
-            else if (u.hasChosenOption(E_7_B))
-            {
-                u.pushEntityDialogue(E_N_1);
-            }
-
-            // Picked up call
-            if (u.hasDialogueFinihsed(E_7_A_1))
-            {
-                u.pushEntityDialogue(E_7_A_2, {E_7_A_2_A, E_7_A_2_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_1);
-            }
-            else if (u.hasChosenOption(E_7_A_2_B))
-            {
-                u.pushEntityDialogue(E_7_A_2_B_1);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_1))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_2) || u.hasDialogueFinihsed(E_7_A_2_B_1))
-            {
-                startTimer(_phoneConfrontationStageData.askForDieselRepeatTimer);
-            }
-
-            if (isTimerOngoing(_phoneConfrontationStageData.askForDieselRepeatTimer))
-            {
-                _phoneConfrontationStageData.askForDieselRepeatTimer += k_deltaTime;
-                if (_phoneConfrontationStageData.askForDieselRepeatTimer >= 2.f)
-                {
-                    u.pushEntityDialogue(E_7_A_2_A_3, { E_7_A_2_A_3_A, E_7_A_2_A_3_B });
-                    invalidateTimer(_phoneConfrontationStageData.askForDieselRepeatTimer);
-                }
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_A))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_1);
-            }
-            else if (u.hasChosenOption(E_7_A_2_A_3_B))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_1);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_1))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_2))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_3);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_3))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_4, { E_7_A_2_A_3_B_4_A, E_7_A_2_A_3_B_4_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_B_4_A) || u.hasChosenOption(E_7_A_2_A_3_B_4_B))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_5);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_5))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_6);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_6))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_7);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_7))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_8, { E_7_A_2_A_3_B_8_A, E_7_A_2_A_3_B_8_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_B_8_A) || u.hasChosenOption(E_7_A_2_A_3_B_8_B))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_9);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_9))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_10);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_10))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_11);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_11))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_12);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_12))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_B_13, { E_7_A_2_A_3_B_13_A, E_7_A_2_A_3_B_13_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_B_13_A) || u.hasChosenOption(E_7_A_2_A_3_B_13_B))
-            {
-                u.interruptCurrentDialogue();
-            }
-
-            if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_B_13))
-            {
-                u.pushEntityDialogue(E_8);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_1))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_2))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_3);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_3))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_4);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_4))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5, { E_7_A_2_A_3_A_5_A, E_7_A_2_A_3_A_5_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_1);
-            }
-            else if (u.hasChosenOption(E_7_A_2_A_3_A_5_B))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_1);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_1))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_2))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_3);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_3))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_4);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_4))
-            {
-                u.pushEntityDialogue(E_7_1);
-                finishHugoConversation(u, player, hugo, _phoneConfrontationStageData.canHugoProvokeDarwin);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_1))
-            {
-                u.pushEntityDialogue(E_11);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_1))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_2);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_2))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_3, { E_7_A_2_A_3_A_5_A_3_A, E_7_A_2_A_3_A_5_A_3_B, E_7_A_2_A_3_A_5_A_3_C });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_B) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_C))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_4);
-            }
-
-            if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_4))
-            {
-                u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_5, { E_7_A_2_A_3_A_5_A_5_A, E_7_A_2_A_3_A_5_A_5_B });
-            }
-
-            if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_B))
-            {
-                u.interruptCurrentDialogue();
-            }
-
-            if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_A_5_A_5))
-            {
-                u.pushEntityDialogue(E_8);
-            }
-
-            // Not picked up call
-            if (u.hasDialogueFinihsed(E_N_1))
-            {
-                u.pushEntityDialogue(E_N_2, { E_N_2_A, E_N_2_B });
-            }
-
-            if (u.hasChosenOption(E_N_2_A))
-            {
-                u.pushEntityDialogue(E_N_2_A_1, { E_N_2_A_1_A, E_N_2_A_1_B });
-            }
-
-            if (u.hasChosenOption(E_N_2_B) || u.hasChosenOption(E_N_2_A_1_A) || u.hasChosenOption(E_N_2_A_1_B))
-            {
-                u.interruptCurrentDialogue();
-            }
-            
-            if (u.hasDialogueFinishedInterrupting(E_N_2) || u.hasDialogueFinishedInterrupting(E_N_2_A_1))
-            {
-                u.pushEntityDialogue(E_8);
-            }
-
-            if (u.hasDialogueFinihsed(E_8))
-            {
-                u.pushEntityDialogue(E_9);
-            }
-
-            if (u.hasDialogueFinihsed(E_9))
-            {
-                u.pushEntityDialogue(E_10);
-            }
-
-            if (u.hasDialogueFinihsed(E_10))
-            {
-                u.pushEntityDialogue(E_11);
-                finishHugoConversation(u, player, hugo, _phoneConfrontationStageData.canHugoProvokeDarwin);
-            }
-
-            if (_phoneConfrontationStageData.canHugoProvokeDarwin)
-            {
-                float doorXPos = 70.f;
-                auto* hugoTransform = getComponentFromEntity<TransformComponent>(hugo);
-                bool isRostovCloseToDoor = hugoTransform->position.x - playerTransform->position.x >= 70.f;
-
-                if (isRostovCloseToDoor)
-                {
-                    u.pushEntityDialogue(E_12);
-                    _phoneConfrontationStageData.canHugoProvokeDarwin = false;
-                }
-            }
-
-            if (u.hasDialogueFinihsed(E_12))
-            {
-                u.pushEntityDialogue(E_13);
-            }
-
-            if (u.hasDialogueFinihsed(E_13))
-            {
-                u.pushEntityDialogue(E_14);
-            }
-
-            if (u.hasDialogueFinihsed(E_14))
-            {
-                u.pushEntityDialogue(E_15);
-            }
-
-            if (u.hasDialogueFinihsed(E_15))
-            {
-                u.pushEntityDialogue(E_16);
-            }
-
-            if (u.hasDialogueFinihsed(E_16))
-            {
-                u.pushEntityDialogue(E_17);
-            }
-
-            if (u.hasDialogueFinihsed(E_17))
-            {
-                u.pushEntityDialogue(E_18);
-            }
-
-            if (u.hasDialogueFinihsed(E_18))
-            {
-                u.pushEntityDialogue(E_19);
-            }
-
-            if (u.hasDialogueFinihsed(E_19))
-            {
-                u.pushEntityDialogue(E_20);
-            }
-
-            if (u.hasDialogueFinihsed(E_20))
-            {
-                u.pushEntityDialogue(E_21);
-            }
-
-            bool isHugoDead = hugo.entityState == DEAD_STATE;
-            if (isHugoDead && !_phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo)
-            {
-                if (u.isCurrentDialogue(E_21))
-                {
-                    u.interruptCurrentDialogue();
-                }
-                else
-                {
-                    u.pushEntityDialogue(E_22);
-                    _phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
-                }
-
-                if (u.hasDialogueFinishedInterrupting(E_21))
-                {
-                    u.pushEntityDialogue(E_22);
-                    _phoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
-                }
-            }
-
-            if (u.hasDialogueFinihsed(E_22))
-            {
-                u.pushEntityDialogue(E_23);
-            }
-
-            if (u.hasDialogueFinihsed(E_23))
-            {
-                startTimer(_phoneConfrontationStageData.darwinFinalDialogueTimer);
-            }
-
-            if (isTimerOngoing(_phoneConfrontationStageData.darwinFinalDialogueTimer))
-            {
-                _phoneConfrontationStageData.darwinFinalDialogueTimer += k_deltaTime;
-                if (_phoneConfrontationStageData.darwinFinalDialogueTimer >= 3.f)
-                {
-                    u.pushEntityDialogue(E_24);
-                    invalidateTimer(_phoneConfrontationStageData.darwinFinalDialogueTimer);
-                }
-            }
+            //Entity& darwin = getEntityById(s_darwinEntityId);
+            //Entity& hugo = getEntityById(s_hugoEntityId);
+
+            //if (isTimerOngoing(_oldphoneConfrontationStageData.waitForHugoCallTimer) && !_oldphoneConfrontationStageData.hasHugoPhoneStartedRinging)
+            //{
+            //    _oldphoneConfrontationStageData.waitForHugoCallTimer += k_deltaTime;
+            //    if (_oldphoneConfrontationStageData.waitForHugoCallTimer >= 3.f)
+            //    {
+            //        _oldphoneConfrontationStageData.hasHugoPhoneStartedRinging = true;
+            //        invalidateTimer(_oldphoneConfrontationStageData.waitForHugoCallTimer);
+            //        startTimer(_oldphoneConfrontationStageData.lookAtDarwinTimer);
+            //    }
+            //}
+
+            //if (isTimerOngoing(_oldphoneConfrontationStageData.lookAtDarwinTimer))
+            //{
+            //    _oldphoneConfrontationStageData.lookAtDarwinTimer += k_deltaTime;
+            //    if (_oldphoneConfrontationStageData.lookAtDarwinTimer >= 0.5f)
+            //    {
+            //        entityLookAtAnother(&player, &darwin);
+            //        
+            //        if (_oldphoneConfrontationStageData.lookAtDarwinTimer >= 1.5f)
+            //        {
+            //            u.pushEntityDialogue(E_1);
+            //            invalidateTimer(_oldphoneConfrontationStageData.lookAtDarwinTimer);
+            //        }
+            //    }
+            //}
+
+            //if (u.hasDialogueFinihsed(E_1))
+            //{
+            //    u.pushEntityDialogue(E_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_2))
+            //{
+            //    entityLookAtAnother(&player, &hugo);
+            //    u.pushEntityDialogue(E_3);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_3))
+            //{
+            //    u.pushEntityDialogue(E_4);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_4))
+            //{
+            //    u.pushEntityDialogue(E_5);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_5))
+            //{
+            //    u.pushEntityDialogue(E_6);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_6))
+            //{
+            //    u.pushEntityDialogue(E_7, {E_7_A, E_7_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A))
+            //{
+            //    u.pushEntityDialogue(E_7_A_1);
+            //}
+            //else if (u.hasChosenOption(E_7_B))
+            //{
+            //    u.pushEntityDialogue(E_N_1);
+            //}
+
+            //// Picked up call
+            //if (u.hasDialogueFinihsed(E_7_A_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2, {E_7_A_2_A, E_7_A_2_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_1);
+            //}
+            //else if (u.hasChosenOption(E_7_A_2_B))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_B_1);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_2) || u.hasDialogueFinihsed(E_7_A_2_B_1))
+            //{
+            //    startTimer(_oldphoneConfrontationStageData.askForDieselRepeatTimer);
+            //}
+
+            //if (isTimerOngoing(_oldphoneConfrontationStageData.askForDieselRepeatTimer))
+            //{
+            //    _oldphoneConfrontationStageData.askForDieselRepeatTimer += k_deltaTime;
+            //    if (_oldphoneConfrontationStageData.askForDieselRepeatTimer >= 2.f)
+            //    {
+            //        u.pushEntityDialogue(E_7_A_2_A_3, { E_7_A_2_A_3_A, E_7_A_2_A_3_B });
+            //        invalidateTimer(_oldphoneConfrontationStageData.askForDieselRepeatTimer);
+            //    }
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_A))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_1);
+            //}
+            //else if (u.hasChosenOption(E_7_A_2_A_3_B))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_1);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_2))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_3);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_3))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_4, { E_7_A_2_A_3_B_4_A, E_7_A_2_A_3_B_4_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_B_4_A) || u.hasChosenOption(E_7_A_2_A_3_B_4_B))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_5);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_5))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_6);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_6))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_7);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_7))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_8, { E_7_A_2_A_3_B_8_A, E_7_A_2_A_3_B_8_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_B_8_A) || u.hasChosenOption(E_7_A_2_A_3_B_8_B))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_9);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_9))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_10);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_10))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_11);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_11))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_12);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_B_12))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_B_13, { E_7_A_2_A_3_B_13_A, E_7_A_2_A_3_B_13_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_B_13_A) || u.hasChosenOption(E_7_A_2_A_3_B_13_B))
+            //{
+            //    u.interruptCurrentDialogue();
+            //}
+
+            //if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_B_13))
+            //{
+            //    u.pushEntityDialogue(E_8);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_2))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_3);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_3))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_4);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_4))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5, { E_7_A_2_A_3_A_5_A, E_7_A_2_A_3_A_5_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_A_5_A))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_1);
+            //}
+            //else if (u.hasChosenOption(E_7_A_2_A_3_A_5_B))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_1);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_2))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_3);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_3))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_B_4);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_B_4))
+            //{
+            //    u.pushEntityDialogue(E_7_1);
+            //    finishHugoConversation(u, player, hugo, _oldphoneConfrontationStageData.canHugoProvokeDarwin);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_1))
+            //{
+            //    u.pushEntityDialogue(E_11);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_1))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_2);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_2))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_3, { E_7_A_2_A_3_A_5_A_3_A, E_7_A_2_A_3_A_5_A_3_B, E_7_A_2_A_3_A_5_A_3_C });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_B) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_3_C))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_4);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_7_A_2_A_3_A_5_A_4))
+            //{
+            //    u.pushEntityDialogue(E_7_A_2_A_3_A_5_A_5, { E_7_A_2_A_3_A_5_A_5_A, E_7_A_2_A_3_A_5_A_5_B });
+            //}
+
+            //if (u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_A) || u.hasChosenOption(E_7_A_2_A_3_A_5_A_5_B))
+            //{
+            //    u.interruptCurrentDialogue();
+            //}
+
+            //if (u.hasDialogueFinishedInterrupting(E_7_A_2_A_3_A_5_A_5))
+            //{
+            //    u.pushEntityDialogue(E_8);
+            //}
+
+            //// Not picked up call
+            //if (u.hasDialogueFinihsed(E_N_1))
+            //{
+            //    u.pushEntityDialogue(E_N_2, { E_N_2_A, E_N_2_B });
+            //}
+
+            //if (u.hasChosenOption(E_N_2_A))
+            //{
+            //    u.pushEntityDialogue(E_N_2_A_1, { E_N_2_A_1_A, E_N_2_A_1_B });
+            //}
+
+            //if (u.hasChosenOption(E_N_2_B) || u.hasChosenOption(E_N_2_A_1_A) || u.hasChosenOption(E_N_2_A_1_B))
+            //{
+            //    u.interruptCurrentDialogue();
+            //}
+            //
+            //if (u.hasDialogueFinishedInterrupting(E_N_2) || u.hasDialogueFinishedInterrupting(E_N_2_A_1))
+            //{
+            //    u.pushEntityDialogue(E_8);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_8))
+            //{
+            //    u.pushEntityDialogue(E_9);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_9))
+            //{
+            //    u.pushEntityDialogue(E_10);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_10))
+            //{
+            //    u.pushEntityDialogue(E_11);
+            //    finishHugoConversation(u, player, hugo, _oldphoneConfrontationStageData.canHugoProvokeDarwin);
+            //}
+
+            //if (_oldphoneConfrontationStageData.canHugoProvokeDarwin)
+            //{
+            //    float doorXPos = 70.f;
+            //    auto* hugoTransform = getComponentFromEntity<TransformComponent>(hugo);
+            //    bool isRostovCloseToDoor = hugoTransform->position.x - playerTransform->position.x >= 70.f;
+
+            //    if (isRostovCloseToDoor)
+            //    {
+            //        u.pushEntityDialogue(E_12);
+            //        _oldphoneConfrontationStageData.canHugoProvokeDarwin = false;
+            //    }
+            //}
+
+            //if (u.hasDialogueFinihsed(E_12))
+            //{
+            //    u.pushEntityDialogue(E_13);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_13))
+            //{
+            //    u.pushEntityDialogue(E_14);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_14))
+            //{
+            //    u.pushEntityDialogue(E_15);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_15))
+            //{
+            //    u.pushEntityDialogue(E_16);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_16))
+            //{
+            //    u.pushEntityDialogue(E_17);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_17))
+            //{
+            //    u.pushEntityDialogue(E_18);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_18))
+            //{
+            //    u.pushEntityDialogue(E_19);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_19))
+            //{
+            //    u.pushEntityDialogue(E_20);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_20))
+            //{
+            //    u.pushEntityDialogue(E_21);
+            //}
+
+            //bool isHugoDead = hugo.entityState == DEAD_STATE;
+            //if (isHugoDead && !_oldphoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo)
+            //{
+            //    if (u.isCurrentDialogue(E_21))
+            //    {
+            //        u.interruptCurrentDialogue();
+            //    }
+            //    else
+            //    {
+            //        u.pushEntityDialogue(E_22);
+            //        _oldphoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
+            //    }
+
+            //    if (u.hasDialogueFinishedInterrupting(E_21))
+            //    {
+            //        u.pushEntityDialogue(E_22);
+            //        _oldphoneConfrontationStageData.hasDarwinComplainedAboutKillingHugo = true;
+            //    }
+            //}
+
+            //if (u.hasDialogueFinihsed(E_22))
+            //{
+            //    u.pushEntityDialogue(E_23);
+            //}
+
+            //if (u.hasDialogueFinihsed(E_23))
+            //{
+            //    startTimer(_oldphoneConfrontationStageData.darwinFinalDialogueTimer);
+            //}
+
+            //if (isTimerOngoing(_oldphoneConfrontationStageData.darwinFinalDialogueTimer))
+            //{
+            //    _oldphoneConfrontationStageData.darwinFinalDialogueTimer += k_deltaTime;
+            //    if (_oldphoneConfrontationStageData.darwinFinalDialogueTimer >= 3.f)
+            //    {
+            //        u.pushEntityDialogue(E_24);
+            //        invalidateTimer(_oldphoneConfrontationStageData.darwinFinalDialogueTimer);
+            //    }
+            //}
 
             break;
         }
@@ -2473,24 +2557,39 @@ void Level::imguiRender()
                 s_uiSystem.pushTensionBar();
 
                 Entity& player = getEntityById(k_playerEntityId);
-                getComponentFromEntity<TransformComponent>(player)->position.x = 200.f;
-                getComponentFromEntity<SpriteComponent>(player)->flipX = true;
                 player.entityState = ON_CUTSCENE_STATE;
+                getComponentFromEntity<TransformComponent>(player)->position.x = 116.f;
+                getComponentFromEntity<SpriteComponent>(player)->flipX = true;
 
                 Entity& darwin = getEntityById(s_darwinEntityId);
-                getComponentFromEntity<TransformComponent>(darwin)->position = { 245.f, 117.f };
-                getComponentFromEntity<SpriteComponent>(darwin)->flipX = true;
-
-                Entity& oskar = getEntityById(s_oskarEntityId);
-                getComponentFromEntity<TransformComponent>(oskar)->position = getComponentFromEntity<TransformComponent>(oskar)->startingPosition;
-                oskar.entityState = DEAD_STATE;
+                getComponentFromEntity<TransformComponent>(darwin)->position.x = 90.f;
+                auto* s = getComponentFromEntity<SpriteComponent>(darwin);
+                s->layer = CHARACTERS_LAYER;
+                addComponentToEntity<MovementComponent>(darwin);
+                addComponentToEntity<AttackingComponent>(darwin);
 
                 Entity& hugo = getEntityById(s_hugoEntityId);
-                getComponentFromEntity<TransformComponent>(hugo)->position = getComponentFromEntity<TransformComponent>(hugo)->startingPosition;
+                hugo.entityState = DAMAGED_STATE;
+                getComponentFromEntity<TransformComponent>(hugo)->position.x = 87.f;
                 getComponentFromEntity<SpriteComponent>(hugo)->flipX = false;
-                hugo.entityState = IDLE_STATE;
+                auto* hugoA = getComponentFromEntity<AttackingComponent>(hugo);
+                hugoA->shouldWaitToDie = true;
+                hugoA->damageCounter = hugoA->numberOfHitsToDie;
 
-                _phoneConfrontationStageData.reset();
+                Entity& table = getEntityById(s_pantryTableEntityId);
+                getComponentFromEntity<SpriteComponent>(table)->color.a = 0;
+
+                Entity& restaurantChair = getEntityById(s_resturantChairEntityId);
+                getComponentFromEntity<SpriteComponent>(restaurantChair)->color.a = 0;
+
+                Entity& pantryChair = addEntity("pantryChair", { 150.f, 121.f });
+                auto* pantryChairS = addComponentToEntity<SpriteComponent>(pantryChair);
+                pantryChairS->setupSpriteForLayer(PANTRY_CHAIR_SPRITE, BEHIND_LIGHTS_LAYER);
+                pantryChairS->flipX = true;
+                createOrReplaceAndAssignBakedHighlightForEntity(&pantryChair);
+
+                _currentLevelStage = PHONE_CONFRONTATION_STAGE;
+                _phoneStageData.reset();
                 break;
             }
             case FREE_STAGE:

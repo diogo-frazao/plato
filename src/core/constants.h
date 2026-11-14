@@ -26,6 +26,7 @@ inline constexpr uint32_t k_playerEffectsEntityId = 3;
 inline int32_t s_darwinEntityId = k_invalidId;
 inline int32_t s_oskarEntityId = k_invalidId;
 inline int32_t s_hugoEntityId = k_invalidId;
+inline int32_t s_hugoCellphoneEntityId = k_invalidId;
 
 inline constexpr uint8_t k_maxNumberOfMovementAnimations = 2;
 
