@@ -8,9 +8,9 @@
 #include <SDL3/SDL_pixels.h>
 #include <string>
 
-#include "../resources/shaders/testgpurender_effects_grayscale.frag.dxil.h"
-#include "../resources/shaders/testgpurender_effects_grayscale.frag.msl.h"
-#include "../resources/shaders/testgpurender_effects_grayscale.frag.spv.h"
+#include "../resources/shaders/compiled/testgpurender_effects_grayscale.frag.dxil.h"
+#include "../resources/shaders/compiled/testgpurender_effects_grayscale.frag.spv.h"
+#include "../resources/shaders/compiled/testgpurender_effects_red.frag.dxil.h"
 
 SDL_GPURenderState* exampleCreateGrayScaleShader()
 {
@@ -33,14 +33,13 @@ SDL_GPURenderState* exampleCreateGrayScaleShader()
 	else if (formats & SDL_GPU_SHADERFORMAT_DXIL)
 	{
 		info.format = SDL_GPU_SHADERFORMAT_DXIL;
-		info.code = testgpurender_effects_grayscale_frag_dxil;
-		info.code_size = sizeof(testgpurender_effects_grayscale_frag_dxil);
+		info.code = testgpurender_effects_red_frag_dxil;
+		info.code_size = testgpurender_effects_red_frag_dxil_len;
 	}
 	else if (formats & SDL_GPU_SHADERFORMAT_MSL)
 	{
-		info.format = SDL_GPU_SHADERFORMAT_MSL;
-		info.code = testgpurender_effects_grayscale_frag_msl;
-		info.code_size = sizeof(testgpurender_effects_grayscale_frag_msl);
+		D_ASSERT(false, "Metal shader not compiled, aborting");
+		return nullptr;
 	}
 
 	info.num_samplers = 1;
@@ -382,7 +381,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			break;
 		}
 
-		bool testShader = false;
+		bool testShader = true;
 		if (entity.id == k_playerEntityId && testShader)
 		{
 			static SDL_GPURenderState* grayscaleRenderState = nullptr;
