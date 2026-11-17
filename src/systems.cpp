@@ -381,7 +381,7 @@ void RenderingSystem::renderSpritesAtLayer(LayerType layer, float renderAlpha)
 			break;
 		}
 
-		bool testShader = true;
+		bool testShader = false;
 		if (entity.id == k_playerEntityId && testShader)
 		{
 			static SDL_GPURenderState* grayscaleRenderState = nullptr;
