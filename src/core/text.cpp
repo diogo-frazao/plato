@@ -265,6 +265,25 @@ TextDTO getTextInfo(TextType textType)
 			case IC_19_I: return { "< SHOOT HIM >", CHOICE_DIALOGUE, 35, FATAL_TENSION, 10 };
 		case IC_20: return { "[red]Tsc.[red] [wait][wait]I see", BIG_DISEL_DIALOGUE };
 	}
+	// After call with big diesel
+	{
+		case AC_1: return { "[redshake]Fuck,[redshake] [wait][wait]I knew we [red]shouldn't[red] have trusted him", DARWIN_DIALOGUE };
+		case AC_2: return { "[laugh]AhAHaHAhAhahHAHhaAH[laugh]", HUGO_DIALOGUE };
+			case AC_2_A: return { "What was that at the end", CHOICE_DIALOGUE, 10 };
+			case AC_2_B: return { "I know that's some kind of code", CHOICE_DIALOGUE, 20, HIGH_TENSION };
+			case AC_2_C: return { "I'm done with you < SHOOT HIM >", CHOICE_DIALOGUE, 35, FATAL_TENSION };
+		case AC_3: return { "[laugh]AhAHHAHhaAH[laugh], [redshake]FUCK.[redshake] [redshake]YOU.[redshake]", HUGO_DIALOGUE };
+		case AC_4: return { "Let's just let him go [rostov]ROSTOV[rostov], he's not worth it", DARWIN_DIALOGUE };
+		case AC_5: return { "I'll drop him somewhere and call OLENA to take care of the mess.", DARWIN_DIALOGUE };
+		case AC_6: return { "[laugh]AhAHhaAH[laugh], that's right [rostov]ROSTOV,[rostov] [red]just leave[red]", HUGO_DIALOGUE };
+		case AC_7: return { "Didn't you hear [darwin]the boss?[darwin] [wait][wait]LEAVE. [laugh]AhAHhaAH[laugh]", HUGO_DIALOGUE };
+			case AC_7_A: return { "I'll make you stop laughing for all < SHOOT HIM >", CHOICE_DIALOGUE, 30, FATAL_TENSION };
+			case AC_7_B: return { "I'd rather see you suffer without your brother < Spare him >", CHOICE_DIALOGUE, 20, HIGH_TENSION };
+		case AC_8: return { "Thank you son, you made the right choice. [pink]I know I can always count on you[pink]", DARWIN_DIALOGUE };
+		case AC_9: return { "I'll call OLENA and [pink]everything will be taken care of[pink]", DARWIN_DIALOGUE };
+		case AC_KILL_1: return { "GOD DAMMIT [rostov]ROSTOV![rostov] [wait][wait][red]I can’t believe this...[red]" };
+		case AC_KILL_2: return { "Please leave, I'll get this sorted" };
+	}
 
 	// Hugo confrontation after oskar is killed
 	{
